@@ -1,0 +1,83 @@
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+THOUGHTS / QUESTIONS
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+GENERAL ----------------------------------------------------------------------------------------------------------------------------------------------------
+
+- Overall goal. Contribute to SA methodology with special focus on 
+  - Political actors
+  - Twitter
+  - Sentiments on specific policy issues
+  - Sentiments toward fellow politicians
+
+METHODOLOGY ------------------------------------------------------------------------------------------------------------------------------------------------
+
+- Basic method. ML vs dictionary-based
+  - ML requires labeled texts
+  - Dictionary-based requires dictionary
+
+  --> Both harder for German, probably
+
+- What kind of learner do we need?!
+  - Can we even perform supervised learning?!
+  - Do we need to label data by hand, then?
+  - We could use unsupervised, weakly supervised, or supervised methods
+
+- General appraoch to classification problem w/ SUPERVISED methods.
+  1. Pre-processing (tokenization, stop words removal, ...)
+  2. Feature extraction
+  3. Training of different learners
+  4. Evaluation (precision, recall, ...)
+
+- Response type
+  - Binary?
+  - Including neutral sentiment, or even more discrete, ordinary levels?
+  - Probabilistic between binary poles?
+  - Multi-class (different emotions, e.g., anger, sadness, satisfaction, ...)
+
+- Features
+  - Term frequencies
+  - tdf-idf (term frequency–inverse document frequency)
+  - Unigrams, bigrams, trigrams
+
+- Learners
+  - SVM
+  - Logistic regression
+  - Trees / forests
+  - Networks
+
+- Agarwal et al. (2011). Value of features that combine polarity of words w/ parts-of-speech tags
+
+- Approach toward specific issues
+  - Either aspect-based SA, i.e., evaluate sentiment toward multiple aspects within one tweet
+  - Or use topic analysis (project I?!) to assign topics to tweets and perform SA on entire tweet
+  - Or just use hashtags?!
+  - In any case, dictionaries (if used) may need to be adapted / appended (topic-specific vocabulary)
+  - If ABSA: identify words loading on an aspect (e.g., those in a sentence identified to be about the aspect), calculate word-level sentiment,
+    then aggregate to aspect-level sentiment
+
+- Sentiment toward peers
+  - Just use tweets where politicians have been tagged?
+  - Or do we need some more sophisticated approach, like a network analysis to identify interesting relationships?
+
+- Confounding / additional variables
+  - Do we need to control for factors like frequency of tweeting?
+  - Do SA models include typical controlling variables like sex?
+  - Does it make sense to include variables like party affiliation or ideological position?
+  - Are semantic characteristics (like use of capital letters or exclamation marks, sentence length) important?
+  
+  --> Additional variables might help both to avoid confounding and to support sentiment classification
+
+TWITTER-RELATED --------------------------------------------------------------------------------------------------------------------------------------------
+
+- What aspects will we use?
+  - Only tweets as plain text?
+  - Also emojis, hashtags, comments..? (emojis might require dictionary of their own)
+
+LANGUAGE ---------------------------------------------------------------------------------------------------------------------------------------------------
+
+- Tweets all in German?!
+- What about anglicisms?
+- How can we ensure that our training data include domain-specific vocabulary / acronyms?
+- How do we deal w/ spelling mistakes? 
+

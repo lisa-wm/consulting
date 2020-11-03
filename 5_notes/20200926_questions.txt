@@ -1,0 +1,39 @@
+Fragen Matthias: 
+
+- Netzwerkverbindung klappt nicht
+- Wie umgehen mit dem großen Datensatz -> Server? 
+- Welche Methoden der Sentimentanalyse sind geeignet? 
+- Multiclass oder Binäre Sentiment-Zuordnung?
+- Wollen wir auch Klassifikationen/Prädiktionen? Oder nur Sentimente herausarbeiten?
+- Welche Methode für Sentiment Extraction?
+- R oder Python?
+
+(Dringendste) Fragen zur Methode:
+
+3 zentrale Punkte:
+
+1. Welche Aspekte sind von Interesse?
+
+   - Geben wir uns eine Liste vor (wie in der Projektvereinbarung angedeutet, z. B. COVID-19, Immigration)?
+   - Extrahieren wir sie selbst (als latente Features der Gesamtzahl von Tweets)?
+
+2. Welche Tweets sind einem Aspekt zuzuordnen?
+
+   - Wie identifizieren wir Tweets oder Teile von Tweets, die einen Aspekt thematisieren?
+   - Sucht man Synonyme / Schlüsselbegriffe? Wie findet man die (Topic Analysis / Dirichlet-Modelle)?
+   - Hashtags?
+   - Welche Wörter werden dann untersucht? Alle aus einem Satz, der einen Aspekt erwähnt? Alle aus dem Tweet?
+
+3. Welche Art von Modell: supervised oder unsupervised?
+
+   - Für supervised learning brauchen wir gelabelte Daten
+   - Gibt öffentliche Datensätze, aber fraglich, wie geeignet die sind
+   - Müsste man vermutlich mit politik- / aspektspezifischen Begriffen anreichern - wie?
+   - Macht es Sinn, selber welche zu labeln? Wie groß müsste so ein Trainingsdatensatz sein?
+
+   - Wie kann unsupervised learning aussehen? 
+   - Clustering mit 2 Clustern, eins das negative, eins das positive, Sentiment-Score via Distanz zum Zentroiden
+   - Berechnung der semantic orientation anhand von Referenzwörtern (Turney-Paper)
+   - Conditional Random Fields
+   - Neuronale Netze
+

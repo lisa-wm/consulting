@@ -1,0 +1,28 @@
+SET UP TWITTER ACCOUNT FOR USING TWEEPY
+
+1. Create standard Twitter account
+
+2. Apply for developer account: https://developer.twitter.com
+
+Role: student
+
+Text for intention:
+
+I need the data in a project for my Master's degree in Statistics at Ludwig-Maximilians-Universität München, more precisely, for the course in 
+Statistical Consulting chaired by Prof. Dr. Helmut Küchenhoff. Together with a fellow student, we plan to analyze tweets by German MPs on specific 
+policy issues. The data shall be processed by means of sentiment analysis methods.
+
+I will analyze tweets by German MPs on specific policy issues with the goal of retrieving sentiment on each of these issues. Tweets shall be analzyed 
+by means of machine learning methods in order to classify them as positive or negative attitude towards the aforementioned issues (such as covid-19 or 
+environmental policy). All analyses are aimed at refining statistical methods of sentiment analysis and are carried out for a purely academical purpose, 
+with no monetary aspect whatsoever.
+
+I plan to use Tweet functionality only. Since the analysis focuses on sentiment expressed by text, original tweets are of interest, but inter-user 
+interactions, such as likes, are not.
+
+I will only use aggregate data in a processed form. For my analysis, only textual content is of interest, and text will not appear in its raw form.
+
+(Select No for question about government entities)
+
+3. Get keys (automatic redirection after submission of application)
+
