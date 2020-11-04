@@ -17,31 +17,97 @@ setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
 source("0_setup.R")
 
 # ------------------------------------------------------------------------------
-# XXXX 
+# SET-UP SELENIUM DRIVER
 # ------------------------------------------------------------------------------
 
-url <- paste0(
-  "https://web.archive.org/web/20190202054736/",
-  "https://www.boxofficemojo.com/movies/?id=ateam.htm"
-)
-ateam <- read_html(url)
-ateam %>% html_nodes("center")
+# Check for currently supported chrome versions and choose the one compatible 
+# with your browser (version browser >= version chromedriver)
 
-ateam$node
+supported_chromever = unlist(binman::list_versions("chromedriver"))
+my_chromever = supported_chromever[1]
+
+# startServer()
+
+# Kill any running sessions before firing up selenium
+
+system("taskkill /im java.exe /f", intern = FALSE, ignore.stdout = FALSE)
+
+# Instantiate driver
+
+driver = rsDriver(
+  browser = "chrome",
+  chromever = my_chromever
+)
+
+# Instantiate remote driver for actual browsing
+
+rem_driver = driver[["client"]]
+
+# ------------------------------------------------------------------------------
+# SCRAPING
+# ------------------------------------------------------------------------------
+
+# Define landing page
 
 url = "https://www.bundestag.de/abgeordnete"
-bt_html = read_html(url)
-bt_html$node
 
-sesh = html_session("https://www.bundestag.de/abgeordnete")
+# Direct remote driver to landing page
 
-sesh %>% 
-  jump_to()
+rem_driver$navigate(url)
 
+# Select list view and wait for list to load
 
+list_button = rem_driver$findElement(
+  using = "css selector", 
+  value = ".icon-list-bullet"
+)
 
+Sys.sleep(3)
 
+list_button$clickElement()
 
+# Iterate over MPs and get relevant information
+
+current_mp = rem_driver$findElement(
+  using = "css selector",
+  value = "li:nth-child(1) .bt-person-fraktion"
+)
+
+Sys.sleep(3)
+
+current_mp$clickElement()
+
+mp_name_partei = rem_driver$findElement(
+  using = "css selector",
+  value = ".bt-biografie-name"
+)$getElementText()
+
+mp_bundesland = rem_driver$findElement(
+  using = "css selector",
+  value = "#bt-landesliste-collapse h5"
+)$getElementText()
+
+mp_wahlkreis_wknr_ = rem_driver$findElement(
+  using = "css selector",
+  value = "#bt-landesliste-collapse .bt-link-intern"
+)$getElementText()
+
+mp_name = unlist(
+  strsplit(
+    unlist(mp_name_partei), 
+    ","
+    )
+  )[1]
+
+mp_partei = unlist(
+  strsplit(
+    unlist(
+      strsplit(unlist(mp_name_partei), ", "))[2],
+    "\\n"
+    )
+  )[1]
+
+rem_driver$close()
 
 
 

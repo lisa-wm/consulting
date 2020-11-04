@@ -17,8 +17,7 @@ my_type = ifelse(
 
 packages_required = c(
   "tidyverse",
-  "xml2",
-  "rvest"
+  "RSelenium"
 )
 
 not_installed = packages_required[!packages_required %in% 
