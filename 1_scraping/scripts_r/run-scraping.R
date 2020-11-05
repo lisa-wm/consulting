@@ -27,11 +27,16 @@ sapply(files_required, source, .GlobalEnv)
 set_up_packages(packages_required = c(
   "tidyverse",
   "RSelenium"
-  ))
+))
 
 # ------------------------------------------------------------------------------
 # STEP 1: GET METADATA 
 # ------------------------------------------------------------------------------
+
+# Fire up selenium driver
+
+remmi_demmi <- set_up_selenium()
+(testitest <- scrape_from_bt(rem_driver = remmi_demmi)) # list icon problem
 
 # ------------------------------------------------------------------------------
 # STEP 2: GET TWITTER ACCOUNTS 
