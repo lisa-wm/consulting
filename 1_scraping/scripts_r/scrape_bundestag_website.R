@@ -14,7 +14,12 @@ setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
 
 # Required files
 
-source("0_setup.R")
+source("fun-setup.R")
+
+packages_required = c(
+  "tidyverse",
+  "RSelenium"
+)
 
 # ------------------------------------------------------------------------------
 # SET-UP SELENIUM DRIVER
