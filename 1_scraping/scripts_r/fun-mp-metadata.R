@@ -12,15 +12,15 @@
 
 #' Get MP metadata from official Bundestag website
 #'
-#' @param chrome_version 
-#' @param port 
+#' @param chrome_version One of supported chrome versions to be used by
+#' selenium driver
+#' @param load_time Time in sec web driver will wait before clicking elements
+#' (should be set higher for slow internet connections)
+#' @param port Port to be used by selenium driver
 #'
-#' @return
-#' @export
-#'
-#' @examples
+#' @return Object of class data.frame, containing relevant data per MP
 #' 
-get_mp_metadata <- function(chrome_version, port = 4567L) {
+get_mp_metadata <- function(chrome_version, port = 4567L, load_time = 5) {
   
   # Perform input checks
   
@@ -35,24 +35,22 @@ get_mp_metadata <- function(chrome_version, port = 4567L) {
   
   # Set up selenium web driver
   
-  my_driver <- set_up_selenium(chrome_version, port)
+  driver <- set_up_selenium(chrome_version, port)
   
   # Scrape required data from website
   
-  scrape_from_bt(my_driver)
+  mp_df <- scrape_from_bt(driver, load_time)
+  
+  # Close down selenium driver
+  
+  driver$close()
   
 }
 
 # SUB-LEVEL FUNCTIONS ----------------------------------------------------------
 
-#' Set up selenium driver for web scraping
-#'
-#' @param chrome_version One of supported chrome versions to be used by
-#' selenium driver
-#' @param port Port to be used by selenium driver
-#'
-#' @return Starts a chrome browser for remote control
-#' 
+# Set up selenium driver for web scraping
+
 set_up_selenium <- function(chrome_version, port) {
   
   # Kill any running sessions before firing up selenium
@@ -73,81 +71,83 @@ set_up_selenium <- function(chrome_version, port) {
   
 }
 
+# Scrape required data from official Bundestag website
 
-#' Scrape required data from official Bundestag website
-#'
-#' @param driver Object of class RSelenium
-#'
-#' @return Object of class data.frame containing MPs' names and metadata
-#' 
-scrape_from_bt <- function(driver) {
+scrape_from_bt <- function(driver, load_time) {
   
-  # Define landing page
+  # Direct driver list of MPs
+  
+  jump_to_mp_list(driver, load_time)
+  
+  # Iterate over MPs and get relevant information
+  
+  mp_total <- 737
+  
+  mp_df <- data.frame(
+    name = character(), 
+    party = character(), 
+    bundesland = character())
+
+  for (mp in seq_len(737)) {
+    
+    mp_info <- NULL
+    try(mp_info <- get_mp_info(mp, load_time), silent = TRUE)
+    mp_df <- bind_rows(mp_df, mp_info)
+    
+  }  
+  
+  mp_df
+  
+}
+
+# Navigate to list view of MPs on official Bundestag website
+
+jump_to_mp_list <- function(driver, load_time) {
   
   url <- "https://www.bundestag.de/abgeordnete"
-  
-  # Direct remote driver to landing page
-  
   driver$navigate(url)
-  
-  Sys.sleep(5)
-  
-  # Select list view and wait for list to load
+  Sys.sleep(load_time)
+  driver$maxWindowSize()
   
   list_button <- driver$findElement(
     using = "css selector",
     value = ".icon-list-bullet"
   )
-  
-  Sys.sleep(5)
-  
+  Sys.sleep(load_time)
   list_button$clickElement()
-  
-  # Iterate over MPs and get relevant information
-  
-  # for (in MPs) collect info
   
 }
 
-get_mp_info <- function(i) {
+# Scrape data on MP level and convert to suitable format 
+
+get_mp_info <- function(mp, load_time) {
   
   current_mp <- driver$findElement(
     using = "css selector",
-    value = "li:nth-child(1) .bt-person-fraktion"
+    value = paste0("li:nth-child(", mp, ") .bt-person-fraktion")
   )
-  
   Sys.sleep(3)
-  
   current_mp$clickElement()
   
-  mp_name_party <- driver$findElement(
+  name_party <- driver$findElement(
     using = "css selector",
     value = ".bt-biografie-name"
   )$getElementText()
   
-  mp_bundesland <- driver$findElement(
+  bundesland <- driver$findElement(
     using = "css selector",
     value = "#bt-landesliste-collapse h5"
   )$getElementText()
   
-  mp_district_nr <- driver$findElement(
-    using = "css selector",
-    value = "#bt-landesliste-collapse .bt-link-intern"
-  )$getElementText()
+  name_party <- str_split(name_party, ", ", simplify = TRUE)
+  name <- name_party[1]
+  party <- str_split(name_party[2], "\\n", simplify = TRUE)[1]
+  bundesland <- unlist(bundesland)
   
-  mp_name_party <- str_split(mp_name_party, ", ", simplify = TRUE)
-  mp_name <- mp_name_party[1]
-  mp_party <- str_split(mp_name_party[2], "\\n", simplify = TRUE)[1]
+  jump_to_mp_list()
   
-  mp_district <- unlist(strsplit(unlist(mp_district_nr), " "))[2]
-  
-  driver$close()
-  
-  data.frame(
-    mp_name = mp_name_party[1],
-    mp_party,
-    mp_bundesland,
-    mp_electoral
-  )
+  data.frame(name, party, bundesland)
   
 }
+
+

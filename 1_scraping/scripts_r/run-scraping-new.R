@@ -55,7 +55,7 @@ source(here("1_scraping/scripts_r", "fun-setup.R"))
 
 # !!! AUTOMATE THIS !!!
 (supported_chrome_versions <- unlist(binman::list_versions("chromedriver")))
-my_chrome_version <- supported_chrome_versions[1]
+chrome_version <- supported_chrome_versions[1]
 
 mp_df <- get_mp_metadata(...)
 
