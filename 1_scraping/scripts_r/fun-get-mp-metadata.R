@@ -2,11 +2,12 @@
 # SCRAPING GERMAN MPs' METADATA
 # ------------------------------------------------------------------------------
 
-# Purpose: collect German MPs' metadata (name, party affiliation, electoral
-# district)
+# Purpose: collect German MPs' metadata (name, party affiliation, Bundesland)
 
 # Steps:
 # 1. Set up selenium web driver
+# 2. Navigate to MP list on official Bundestag website
+# 3. Iterate over all listed MPs and save name, party and Bundesland
 
 # TOP-LEVEL FUNCTION -----------------------------------------------------------
 
@@ -45,31 +46,13 @@ get_mp_metadata <- function(chrome_version, port = 4567L, load_time = 5) {
   
   driver$close()
   
+  # Return data
+  
+  mp_df
+  
 }
 
 # SUB-LEVEL FUNCTIONS ----------------------------------------------------------
-
-# Set up selenium driver for web scraping
-
-set_up_selenium <- function(chrome_version, port) {
-  
-  # Kill any running sessions before firing up selenium
-  
-  system("taskkill /im java.exe /f", intern = FALSE, ignore.stdout = FALSE)
-  
-  # Instantiate driver
-  
-  driver <- rsDriver(
-    port = port,
-    browser = "chrome",
-    chromever = chrome_version
-  )
-  
-  # Instantiate remote driver for actual browsing
-  
-  driver[["client"]]
-  
-}
 
 # Scrape required data from official Bundestag website
 
@@ -88,7 +71,7 @@ scrape_from_bt <- function(driver, load_time) {
     party = character(), 
     bundesland = character())
 
-  for (mp in seq_len(737)) {
+  for (mp in seq_len(mp_total)) {
     
     mp_info <- NULL
     try(mp_info <- get_mp_info(mp, load_time), silent = TRUE)
@@ -133,15 +116,14 @@ get_mp_info <- function(mp, load_time) {
     using = "css selector",
     value = ".bt-biografie-name"
   )$getElementText()
+  name_party <- str_split(name_party, ", ", simplify = TRUE)
+  name <- name_party[1]
+  party <- str_split(name_party[2], "\\n", simplify = TRUE)[1]
   
   bundesland <- driver$findElement(
     using = "css selector",
     value = "#bt-landesliste-collapse h5"
   )$getElementText()
-  
-  name_party <- str_split(name_party, ", ", simplify = TRUE)
-  name <- name_party[1]
-  party <- str_split(name_party[2], "\\n", simplify = TRUE)[1]
   bundesland <- unlist(bundesland)
   
   jump_to_mp_list()

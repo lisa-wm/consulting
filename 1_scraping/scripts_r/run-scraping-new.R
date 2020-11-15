@@ -45,15 +45,20 @@ set_up_packages <- function(pkg) {
   lapply(packages_required, library, character.only = TRUE, quietly = TRUE)
 }
 
-set_up_packages(packages_required)
+invisible(set_up_packages(packages_required))
 
 # Source required files containing sub-level functions
 
-source(here("1_scraping/scripts_r", "fun-setup.R"))
+files_required <- list(
+  here("1_scraping/scripts_r", "fun-set-up-selenium.R"),
+  here("1_scraping/scripts_r", "fun-get-mp-metadata.R")
+)
+invisible(sapply(files_required, source, .GlobalEnv))
 
 # STEP 1: GET METADATA ---------------------------------------------------------
 
 # !!! AUTOMATE THIS !!!
+# maybe using system2()
 (supported_chrome_versions <- unlist(binman::list_versions("chromedriver")))
 chrome_version <- supported_chrome_versions[1]
 
