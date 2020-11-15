@@ -13,21 +13,43 @@
 # PREREQUISITES 
 # ------------------------------------------------------------------------------
 
-# Working directory
+# PACKAGES ---------------------------------------------------------------------
 
-setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
-
-# Required files
-
-files_required <- list.files(pattern = "^fun-.*\\.R$")
-sapply(files_required, source, .GlobalEnv)
-
-# Packages
-
-set_up_packages(packages_required = c(
+packages_required <-  c(
+  "here",
   "tidyverse",
   "RSelenium"
-))
+)
+
+my_type <- ifelse(
+  Sys.info()[["sysname"]] == "Linux", 
+  "source", 
+  "binary"
+)
+
+not_installed <- 
+  packages_required[!packages_required %in% installed.packages()[, "Package"]]
+
+if (length(not_installed) > 0) {
+  
+  lapply(
+    not_installed,
+    install.packages,
+    repos = "http://cran.us.r-project.org",
+    dependencies = TRUE,
+    type = my_type
+  )
+  
+}
+
+lapply(packages_required, library, character.only = TRUE, quietly = TRUE)
+
+# SOURCE FILES -----------------------------------------------------------------
+
+# files_required <- list.files(pattern = "^fun-.*\\.R$")
+# sapply(files_required, source, .GlobalEnv)
+
+source(here("1_scraping/scripts_r", "fun-setup.R"))
 
 # ------------------------------------------------------------------------------
 # STEP 1: GET METADATA 
