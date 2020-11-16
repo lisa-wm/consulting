@@ -9,7 +9,7 @@
 
 # Set up selenium driver for web scraping
 
-set_up_selenium <- function(chrome_version, port) {
+set_up_selenium <- function(chrome_version, port = 4567L) {
   
   # Kill any running sessions before firing up selenium
   

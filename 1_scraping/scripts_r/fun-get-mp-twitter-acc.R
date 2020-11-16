@@ -54,7 +54,7 @@ get_party_twitter_accounts <- function(party) {
   for (mp in seq_along(mp_list)) {
     try({
       name <- get_party_names(party, mp_list, mp)
-      link <- get_party_twitter_links(party, mp)
+      link <- get_party_twitter_links(party, mp_list, mp)
       mp_df <- bind_rows(mp_df, data.frame(name, link))
     })
   }
@@ -76,21 +76,35 @@ get_party_list <- function(party) {
     spd = "https://www.spdfraktion.de/abgeordnete/alle?wp=19&view=list&old=19"
   )
   page_content <- read_html(url)
-  
-  page_content %>% html_nodes("ul > li:nth-child(1) > div > div.person-data-more > ul > li:nth-child(3) > a")
-  
+
   switch(
     party,
     cdu_csu = page_content %>% 
       html_nodes("div.delegates-list > div > div > div"),
-    fdp = "foo",
-    gruene = "foo",
+    fdp = "foo", 
+    
+# links are hidden (only visible at tooltip, only way seems to be brute force:
+# getting page source, problem is handling that gigantic peace of string with
+# tons of escape characters)
+# 
+# driver <- set_up_selenium(chrome_version)
+# driver$navigate("https://www.fdpbt.de/koepfe")
+# Sys.sleep(3)
+# accept_button <- driver$findElement(
+#   using = "css selector",
+#   value = "#edit-submit"
+# )
+# accept_button$clickElement()
+# page_source <- driver$getPageSource()
+
+    gruene = page_content %>%
+      html_nodes("article.abgeordneteTeaser"),
     linke = "foo",
     spd = "foo"
   )
 }
 
-get_party_names <- function(party, page_content, mp) {
+get_party_names <- function(party, mp_list, mp) {
   
   switch(
     party,
@@ -98,14 +112,16 @@ get_party_names <- function(party, page_content, mp) {
       html_node("h2 > span") %>% 
       html_text(),
     fdp = "foo",
-    gruene = "foo",
+    gruene = str_trim(mp_list[[mp]] %>% 
+      html_nodes("h3 > span") %>% 
+      html_text()),
     linke = "foo",
     spd = "foo"
   )
 
 }
 
-get_party_twitter_links <- function(party, mp) {
+get_party_twitter_links <- function(party, mp_list, mp) {
   
   switch(
     party,
@@ -113,10 +129,22 @@ get_party_twitter_links <- function(party, mp) {
       html_node("li.twitter > a") %>% 
       html_attr("href"),
     fdp = "foo",
-    gruene = "foo",
+    gruene = ifelse(
+      str_detect(get_twitter_links_gruene(mp_list, mp), "twitter"),
+      get_twitter_links_gruene(mp_list, mp),
+      NA
+    ),
     linke = "foo",
     spd = "foo"
   )
 
+  # get_twitter_links_gruene <- function(mp_list, mp) {
+  #   html_session(paste0(
+  #     "https://www.gruene-bundestag.de",
+  #     mp_list[[mp]] %>% html_nodes("a") %>% html_attr("href"))) %>%
+  #     html_nodes("div.co__main > div > div:nth-child(3) > div > a") %>% 
+  #     html_attr("href")
+  # }
+  #!!! not working
+  
 }
-
