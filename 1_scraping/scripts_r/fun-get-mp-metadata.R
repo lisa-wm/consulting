@@ -64,7 +64,12 @@ scrape_from_bt <- function(driver, load_time) {
   
   # Iterate over MPs and get relevant information
   
-  mp_total <- 737
+  a <- driver$findElements(
+    using = "css selector",
+    value = " .bt-person-fraktion"
+  )
+  
+  mp_total <- 7
   
   mp_df <- data.frame(
     name = character(), 
@@ -131,5 +136,4 @@ get_mp_info <- function(mp, load_time) {
   data.frame(name, party, bundesland)
   
 }
-
 

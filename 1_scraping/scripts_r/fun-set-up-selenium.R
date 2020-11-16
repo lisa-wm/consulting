@@ -13,18 +13,23 @@ set_up_selenium <- function(chrome_version, port) {
   
   # Kill any running sessions before firing up selenium
   
-  system("taskkill /im java.exe /f", intern = FALSE, ignore.stdout = FALSE)
+  invisible(system(
+    "taskkill /im java.exe /f", 
+    intern = FALSE, 
+    ignore.stdout = FALSE,
+    show.output.on.console = FALSE))
   
   # Instantiate driver
-  
-  driver <- rsDriver(
-    port = port,
-    browser = "chrome",
-    chromever = chrome_version
+
+  tryCatch(
+      rsDriver(
+      port = port,
+      browser = "chrome",
+      chromever = chrome_version,
+      verbose = FALSE
+      )[["client"]],
+    error = function(e) stop("Set-up of selenium driver failed")
   )
-  
-  # Instantiate remote driver for actual browsing
-  
-  driver[["client"]]
-  
+
 }
+

@@ -16,7 +16,8 @@
 packages_required <-  c(
   "here",
   "tidyverse",
-  "RSelenium"
+  "RSelenium",
+  "rvest"
 )
 
 set_up_packages <- function(pkg) {
@@ -59,10 +60,10 @@ invisible(sapply(files_required, source, .GlobalEnv))
 
 # !!! AUTOMATE THIS !!!
 # maybe using system2()
-(supported_chrome_versions <- unlist(binman::list_versions("chromedriver")))
-chrome_version <- supported_chrome_versions[1]
+supported_chrome_versions <- unlist(binman::list_versions("chromedriver"))
+chrome_version <- supported_chrome_versions[2]
 
-mp_df <- get_mp_metadata(...)
+mp_df <- get_mp_metadata(chrome_version = chrome_version)
 
 # STEP 2: GET TWITTER ACCOUNTS -------------------------------------------------
 
