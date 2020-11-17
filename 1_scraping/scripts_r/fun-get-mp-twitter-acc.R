@@ -144,17 +144,19 @@ get_twitter_links_gruene <- function(mp_list, mp) {
   
   # !!! make length dynamic !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   
+  link <- NA
+  
   for (i in 1:5) {
     
-    link <- detail_page %>%
+    media <- detail_page %>%
       html_nodes(paste0(
         "div.co__main > div > div:nth-child(", i, ") > div > a")) %>%
       html_attr("href")
     
-    if (length(link) > 0 && str_detect(link, "twitter")) media <<- link
+    if (length(media) > 0 && str_detect(media, "twitter")) link <- media
     
   }
   
-  media[1]
+  link[1]
 
 }
