@@ -129,22 +129,32 @@ get_party_twitter_links <- function(party, mp_list, mp) {
       html_node("li.twitter > a") %>% 
       html_attr("href"),
     fdp = "foo",
-    gruene = ifelse(
-      str_detect(get_twitter_links_gruene(mp_list, mp), "twitter"),
-      get_twitter_links_gruene(mp_list, mp),
-      NA
-    ),
+    gruene = get_twitter_links_gruene(mp_list, mp),
     linke = "foo",
     spd = "foo"
   )
 
-  # get_twitter_links_gruene <- function(mp_list, mp) {
-  #   html_session(paste0(
-  #     "https://www.gruene-bundestag.de",
-  #     mp_list[[mp]] %>% html_nodes("a") %>% html_attr("href"))) %>%
-  #     html_nodes("div.co__main > div > div:nth-child(3) > div > a") %>% 
-  #     html_attr("href")
-  # }
-  #!!! not working
+}
+
+get_twitter_links_gruene <- function(mp_list, mp) {
   
+  detail_page <- html_session(paste0(
+    "https://www.gruene-bundestag.de",
+    mp_list[[mp]] %>% html_nodes("a") %>% html_attr("href")))
+  
+  # !!! make length dynamic !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  
+  for (i in 1:5) {
+    
+    link <- detail_page %>%
+      html_nodes(paste0(
+        "div.co__main > div > div:nth-child(", i, ") > div > a")) %>%
+      html_attr("href")
+    
+    if (length(link) > 0 && str_detect(link, "twitter")) media <<- link
+    
+  }
+  
+  media[1]
+
 }

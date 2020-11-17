@@ -64,12 +64,15 @@ scrape_from_bt <- function(driver, load_time) {
   
   # Iterate over MPs and get relevant information
   
+  # !!! GET LENGTH OF LIST !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   a <- driver$findElements(
     using = "css selector",
     value = " .bt-person-fraktion"
   )
+  mp_total <- 10
+  # !!! GET LENGTH OF LIST !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   
-  mp_total <- 3
+  mp_range <- seq_len(mp_total)
   
   mp_df <- data.frame(
     name = character(), 
@@ -77,11 +80,12 @@ scrape_from_bt <- function(driver, load_time) {
     bundesland = character(),
     twitter = character())
 
-  for (mp in seq_len(mp_total)) {
+  for (mp in mp_range) {
     
     mp_info <- NULL
     try(mp_info <- get_mp_info(mp, load_time), silent = TRUE)
     mp_df <- bind_rows(mp_df, mp_info)
+    mp_range <- c(nrow(mp_df), mp_total) # start over if failed
     
   }  
   
