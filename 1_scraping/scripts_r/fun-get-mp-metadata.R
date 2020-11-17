@@ -69,12 +69,13 @@ scrape_from_bt <- function(driver, load_time) {
     value = " .bt-person-fraktion"
   )
   
-  mp_total <- 7
+  mp_total <- 3
   
   mp_df <- data.frame(
     name = character(), 
     party = character(), 
-    bundesland = character())
+    bundesland = character(),
+    twitter = character())
 
   for (mp in seq_len(mp_total)) {
     
@@ -131,9 +132,19 @@ get_mp_info <- function(mp, load_time) {
   )$getElementText()
   bundesland <- unlist(bundesland)
   
-  jump_to_mp_list()
+  twitter <- NA
+  try(
+    {twitter <- driver$findElement(
+      using = "css selector",
+      value = "li~ li+ li .bt-link-extern"
+    )$getElementAttribute("href")
+    twitter <- unlist(twitter)},
+    silent = TRUE
+  )
   
-  data.frame(name, party, bundesland)
+  jump_to_mp_list(driver, load_time)
+  
+  data.frame(name, party, bundesland, twitter)
   
 }
 
