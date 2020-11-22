@@ -18,6 +18,7 @@
 packages_required <-  c(
   "here",
   "tidyverse",
+  "data.table",
   "quanteda"
 )
 
@@ -52,30 +53,30 @@ invisible(set_up_packages(packages_required))
 # Source required files containing sub-level functions
 
 files_required <- list(
-  here("1_scraping/scripts_r", "fun-set-up-selenium.R"),
-  here("1_scraping/scripts_r", "fun-get-mp-metadata.R")
+  here("2_code/1_basic_unigram_dict", "fun-preprocess-tweets.R"),
+  here("2_code/1_basic_unigram_dict", "fun-get-mp-metadata.R")
 )
 invisible(sapply(files_required, source, .GlobalEnv))
 
 # STEP 1: PRE-PROCESS DATA -----------------------------------------------------
 
-my_text <- c("Alice loves ice cream",
-             "Bob hates pickles",
-             "Colin is furious")
-my_tokens <- tokens(my_text, remove_punct = TRUE)
+data <- fread(
+  here("1_scraping/output", "tweepy_df_subset.csv"), 
+  encoding = "UTF-8")
+
+data_processed <- preprocess_tweets(data)
 
 # STEP 2: CREATE DOCUMENT-FEATURE MATRIX ---------------------------------------
 
-df_mat <- dfm(my_tokens)
-
-cooccurrence_mat <- fcm(my_tokens)
-matrix(cooccurrence_mat, ncol = sqrt(length(cooccurrence_mat)))
+dfm_tweets <- create_dfm(data_processed)
 
 # STEP 3: CREATE DICTIONARY ----------------------------------------------------
 
-data(sentiments, package = "tidytext")
-my_dict <- as.dictionary(sentiments)
+global_dictionary <- create_dict()
 
 # STEP 4: CLASSIFY SENTIMENTS --------------------------------------------------
 
-dfm_lookup(df_mat, my_dict)
+sentiments_basic_dict <- get_sentiments_basic_dict(
+  dfm_tweets,
+  global_dictionary
+)
