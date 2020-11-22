@@ -1,0 +1,43 @@
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+THOUGHTS - BASIC DATA STRUCTURE
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+DATA STRUCTURE ---------------------------------------------------------------------------------------------------------------------------------------------
+
+- Working hypothesis: for both topic assignment and sentiment analysis, it makes sense to interpret one tweet as one entity
+  - It is reasonable to expect each tweet to be about a specific topic
+    --> No need to decompose text into aspects - tweets should automatically be an expression of sentiment about one topic
+  - Aggregating multiple tweets will probably lead to multiple, possibly unrelated, topics being mixed up, making it hard to identify single topics and
+    corresponding sentiments
+  - Further decomposing tweets into topics/aspects will probably be hard due to their shortness (and, for the same reason, unnecessary)
+
+- Proposed interpretation:
+  - One document = one tweet 
+    --> Document-level sentiment analysis
+  - Corpus = all tweets
+    --> Probably not reasonable to build corpora per MP bc topics should be found globally, not on a per-person level
+
+IMPACT FOR TOPICS & SENTIMENT ANALYSIS ---------------------------------------------------------------------------------------------------------------------
+
+- Impact of this hypothesis: topic assignment and sentiment analysis can be performed sequentially
+
+- Process:
+  0. Data pre-processing
+  1. Topic assignment: for each tweet, what topic is it about?
+     - Decision might be 
+       - Keyword-based (e.g., using hashtags) --> requires pre-specification of topics 
+       - Based on a topic extraction model (Simon/Patrick) --> allows for topics to be found in unsupervised manner
+     - Assignment might be carried out as
+       - Exactly one topic per tweet (topic with the highest topic proportion) --> probably easiest to handle afterwards
+       - Topic distribution per tweet
+  2. Sentiment analysis: for each tweet (already connected to a topic), which sentiment does it carry?
+     - Super basic approach: existing dictionary
+       - Use one global dictionary, regardless of identified topic
+       - No or only little modifications
+       - Should be easy & quick to implement and applicable to tweets in general
+       - Will probably yield shitty results
+     - Improved dictionary approach
+       - Enrich basic dictionary with expressions relevant to political context --> how? tbd
+       - Either still use one global dictionary, or build one per topic
+         --> Words used for model-based topic extraction might be helpful here
+       - Once dictionaries are constructed, implementation should again be rather easy
