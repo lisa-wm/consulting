@@ -53,8 +53,7 @@ invisible(set_up_packages(packages_required))
 # Source required files containing sub-level functions
 
 files_required <- list(
-  here("2_code/1_basic_unigram_dict", "fun-preprocess-tweets.R"),
-  here("2_code/1_basic_unigram_dict", "fun-get-mp-metadata.R")
+  here("2_code/1_preprocessing", "fun-preprocess-tweets.R")
 )
 invisible(sapply(files_required, source, .GlobalEnv))
 
