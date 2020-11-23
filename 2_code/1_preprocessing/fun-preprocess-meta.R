@@ -8,18 +8,23 @@
 
 preprocess_meta <- function(data) {
   
-  head(data) %>%
+  mdb_on_twitter <- unique(data$username)
+  
+  data %>%
     mutate_if(
       str_detect(., "\\[.*?\\]"), 
       ~ lapply(., convert_array_to_list)) %>% 
-    mutate(created_at = as.POSIXct(
-      created_at, 
-      format = "%Y-%m-%d %H:%M:%S", tz = "UTC"))
-  # mutate(
-  # mentions_is_mdb = lapply(
-  #   mentions,
-  #   function(x) ifelse(x %in% unique(data$username), 1, 0)),
-      
+    mutate(
+      created_at = as.POSIXct(
+        created_at,
+        format = "%Y-%m-%d %H:%M:%S", 
+        tz = "UTC")
+      # ,
+      # mentions_is_mdb = list(sapply(
+      #   unlist(mentions),
+      #   function(x) ifelse(x %in% mdb_on_twitter, 1, 0)))
+      )
+  
 }
 
 # HELPER FUNCTIONS -------------------------------------------------------------

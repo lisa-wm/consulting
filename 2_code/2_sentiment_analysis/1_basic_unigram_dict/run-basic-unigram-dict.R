@@ -55,7 +55,8 @@ invisible(set_up_packages(packages_required))
 
 files_required <- list(
   here("2_code/1_preprocessing", "fun-preprocess-tweets.R"),
-  here("2_code/1_preprocessing", "fun-preprocess-meta.R")
+  here("2_code/1_preprocessing", "fun-preprocess-meta.R"),
+  here("2_code/1_preprocessing", "fun-create-dfm.R")
 )
 invisible(sapply(files_required, source, .GlobalEnv))
 
@@ -97,12 +98,24 @@ tweets_metadata <- data %>%
 
 # Process tweets such that NLP analyses can be carried out
 
+tweets_corpus <- corpus(
+  tweets_processed,
+  docid_field = "doc_id",
+  text_field = "full_text"
+)
+
 tweets_processed_intermediary <- preprocess_basic(tweets_raw)
 tweets_processed <- preprocess_advanced(tweets_processed_intermediary)
 
+# Process metadata
+
+tweets_metadata_processed <- preprocess_meta(tweets_metadata)
+
 # STEP 2: CREATE DOCUMENT-FEATURE MATRIX ---------------------------------------
 
-dfm_tweets <- create_dfm(data_processed)
+# Create corpus out of processed tweets
+
+dfm_tweets <- create_dfm(tweets_processed)
 
 # STEP 3: CREATE DICTIONARY ----------------------------------------------------
 
