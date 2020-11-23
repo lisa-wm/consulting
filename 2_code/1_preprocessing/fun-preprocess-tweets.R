@@ -6,22 +6,16 @@
 
 # TOP-LEVEL FUNCTION -----------------------------------------------------------
 
-preprocess_tweets <- function(data) {
+preprocess_basic <- function(data) {
   
-  a <- data %>%
+  text %>% 
     mutate_if(is.character, remove_umlauts) %>% 
     mutate_if(is.character, remove_symbols) %>% 
-    mutate(
-      hashtags = lapply(hashtags, convert_array_to_list),
-      mentions = lapply(mentions, convert_array_to_list),
-      # mentions_is_mdb = lapply(
-      #   mentions, 
-      #   function(x) ifelse(x %in% unique(data$username), 1, 0)),
-      created_at = as.POSIXct(
-        created_at, 
-        format = "%Y-%m-%d %H:%M:%S", 
-        tz = "UTC")
-    )
+    mutate_if(is.character, .funs = list(emojis = ~ extract_emojis(.)))
+  
+}
+
+preprocess_advanced <- function(text) {
   
 }
 
@@ -32,7 +26,7 @@ my_tokens <- tokens(my_text, remove_punct = TRUE)
 
 # HELPER FUNCTIONS -------------------------------------------------------------
 
-# Remove umlauts, symbols etc.
+# Remove umlauts
 
 remove_umlauts <- function(text) {
   
@@ -49,30 +43,44 @@ remove_umlauts <- function(text) {
   
 }
 
+# Remove unwanted symbols that would hamper sentiment analysis
+
 remove_symbols <- function(text) {
   
   text %>% 
     str_replace_all(c(
       "\\n" = " ",
       "%" = " Prozent"
-      # ,
-      # "U+20AC" = " Euro",
-      # "U+0024" = " Dollar"
       )) %>% 
-    str_remove_all("&amp;|&lt;|&gt;") %>% 
-    str_remove_all(" https([^ ]*)")
+    str_remove_all(str_c(c(
+      "\U0022", 
+      "\U0027", 
+      "\U2018", 
+      "\U2019", 
+      "\U201C", 
+      "\U201D", 
+      "\U201E", 
+      "\U201F"), 
+      collapse = "|")) %>% # all kinds of quotes
+    str_remove_all("&amp;|&lt;|&gt;") %>% # ampersands etc.
+    str_remove_all(" http([^ ]*)") %>% # hyperlinks
+    str_remove_all("#") %>% # hashtag symbols
+    str_remove_all("@") # targets in mentions
   
 }
 
-# Convert Python arrays to R lists
+# Extract emojis
+# !!!! not optimal !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-convert_array_to_list <- function(x) {
+extract_emojis <- function(text) {
   
-   x %>% 
-    str_match("(?<=\\[).*?(?=\\])") %>% 
-    str_replace_all("'", "") %>% 
-    str_split(", ")
-  
+  str_extract_all(
+    text, 
+    str_c(c(
+      "[^\001-\177]", # unicode emojis
+      "(\\:(\\-)?\\))", # simple happy smiley w/ or w/o nose
+      "(\\:(\\-)?\\()"), # simple sad smiley w/ or w/o nose
+    collapse = "|"))
 }
 
 # TESTS ------------------------------------------------------------------------

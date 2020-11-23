@@ -54,7 +54,8 @@ invisible(set_up_packages(packages_required))
 # Source required files containing sub-level functions
 
 files_required <- list(
-  here("2_code/1_preprocessing", "fun-preprocess-tweets.R")
+  here("2_code/1_preprocessing", "fun-preprocess-tweets.R"),
+  here("2_code/1_preprocessing", "fun-preprocess-meta.R")
 )
 invisible(sapply(files_required, source, .GlobalEnv))
 
@@ -65,6 +66,7 @@ invisible(sapply(files_required, source, .GlobalEnv))
 data <- fread(
   here("1_scraping/output", "tweepy_df_subset.csv"), 
   encoding = "UTF-8",
+  sep = ",",
   drop = "quoted_status")
 
 # Substitute "full_text" by "retweet_full_text" for retweets
@@ -93,9 +95,10 @@ tweets_raw <- data %>%
 tweets_metadata <- data %>% 
   select(-full_text)
 
-# Process data such that NLP analyses can be carried out
+# Process tweets such that NLP analyses can be carried out
 
-tweets_processed <- preprocess_tweets(tweets_raw)
+tweets_processed_intermediary <- preprocess_basic(tweets_raw)
+tweets_processed <- preprocess_advanced(tweets_processed_intermediary)
 
 # STEP 2: CREATE DOCUMENT-FEATURE MATRIX ---------------------------------------
 
