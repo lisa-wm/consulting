@@ -20,7 +20,9 @@ packages_required <-  c(
   "tidyverse",
   "data.table",
   "quanteda",
-  "cld3"
+  "cld3",
+  "checkmate",
+  "testthat"
 )
 
 set_up_packages <- function(pkg) {
@@ -56,7 +58,7 @@ invisible(set_up_packages(packages_required))
 files_required <- list(
   here("2_code/1_preprocessing", "fun-preprocess-tweets.R"),
   here("2_code/1_preprocessing", "fun-preprocess-meta.R"),
-  here("2_code/1_preprocessing", "fun-create-dfm.R")
+  here("2_code/2_sentiment_analysis/1_basic_unigram_dict", "fun-create-dfm.R")
 )
 invisible(sapply(files_required, source, .GlobalEnv))
 
@@ -98,14 +100,14 @@ tweets_metadata <- data %>%
 
 # Process tweets such that NLP analyses can be carried out
 
+tweets_processed_intermediary <- preprocess_basic(tweets_raw)
+tweets_processed <- preprocess_advanced(tweets_processed_intermediary)
+
 tweets_corpus <- corpus(
   tweets_processed,
   docid_field = "doc_id",
   text_field = "full_text"
 )
-
-tweets_processed_intermediary <- preprocess_basic(tweets_raw)
-tweets_processed <- preprocess_advanced(tweets_processed_intermediary)
 
 # Process metadata
 
@@ -115,15 +117,18 @@ tweets_metadata_processed <- preprocess_meta(tweets_metadata)
 
 # Create corpus out of processed tweets
 
-dfm_tweets <- create_dfm(tweets_processed)
+stop_words <- remove_umlauts(stopwords("de"))
+dfm_tweets <- create_dfm(tweets_corpus, stop_words)
+
+topfeatures(dfm_tweets, 200)
 
 # STEP 3: CREATE DICTIONARY ----------------------------------------------------
 
-global_dictionary <- create_dict()
+# global_dictionary <- create_dict()
 
 # STEP 4: CLASSIFY SENTIMENTS --------------------------------------------------
 
-sentiments_basic_dict <- get_sentiments_basic_dict(
-  dfm_tweets,
-  global_dictionary
-)
+# sentiments_basic_dict <- get_sentiments_basic_dict(
+#   dfm_tweets,
+#   global_dictionary
+# )

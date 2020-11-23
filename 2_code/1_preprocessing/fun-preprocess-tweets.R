@@ -4,34 +4,6 @@
 
 # Purpose: pre-process data for NLP analyses
 
-# TOP-LEVEL FUNCTIONS ----------------------------------------------------------
-
-# Remove all umlauts and symbols irrelevant to sentiment analysis
-
-preprocess_basic <- function(data) {
-  
-  data %>% 
-    mutate_if(is.character, remove_umlauts) %>%
-    mutate_if(is.character, remove_symbols)
-  
-}
-
-# Extract emojis, then remove them from text; remove mentions
-
-preprocess_advanced <- function(data) {
-  
-  data %>% 
-    mutate_if(
-      is.character, 
-      .funs = list(
-        emojis = ~ do.call(extract_emojis, list(., pattern_emoji)))) %>% 
-    mutate_if(
-      is.character,
-      ~ do.call(remove_emojis, list(., pattern_emoji))) %>% 
-    mutate_if(is.character, remove_mentions)
- 
-}
-
 # HELPER FUNCTIONS -------------------------------------------------------------
 
 # Remove umlauts
@@ -59,7 +31,7 @@ remove_symbols <- function(text) {
     str_replace_all(c(
       "\\n" = " ",
       "%" = " Prozent"
-      )) %>% 
+    )) %>% 
     str_remove_all(str_c(c(
       "\U0022", 
       "\U0027", 
@@ -73,7 +45,7 @@ remove_symbols <- function(text) {
     str_remove_all("&amp;|&lt;|&gt;") %>% # ampersands etc.
     str_remove_all(" http([^ ]*)") %>% # hyperlinks
     str_remove_all("#") # hashtag symbols
-
+  
 }
 
 # Extract emojis
@@ -103,16 +75,34 @@ remove_mentions <- function(text) {
   str_remove_all(text, "^@(.*?)+(?=\\s)")
 }
 
+# TOP-LEVEL FUNCTIONS ----------------------------------------------------------
+
+# Remove all umlauts and symbols irrelevant to sentiment analysis
+
+preprocess_basic <- function(data) {
+  
+  data %>% 
+    mutate_if(is.character, remove_umlauts) %>%
+    mutate_if(is.character, remove_symbols)
+  
+}
+
+# Extract emojis, then remove them from text; remove mentions
+
+preprocess_advanced <- function(data) {
+  
+  data %>% 
+    mutate_if(
+      is.character, 
+      .funs = list(
+        emojis = ~ do.call(extract_emojis, list(., pattern_emoji)))) %>% 
+    mutate_if(
+      is.character,
+      ~ do.call(remove_emojis, list(., pattern_emoji))) %>% 
+    mutate_if(is.character, remove_mentions)
+ 
+}
+
 # TESTS ------------------------------------------------------------------------
 
-test_data <- data[1:20, ]
-
-tweepy_df = tweepy_df %>% 
-  mutate(
-    mentions_is_mdb = lapply(
-      mentions, 
-      function(x) ifelse(x %in% mdb_on_twitter, 1, 0)
-    )
-  )
-
-test_file(here("2_code/1_basic_unigram_dict", "test-preprocess-tweets.R"))
+# test_file(here("2_code/1_preprocessing", "test-preprocess-tweets.R"))

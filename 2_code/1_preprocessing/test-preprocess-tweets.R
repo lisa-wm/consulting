@@ -1,6 +1,3 @@
-library(testthat)
-library(checkmate)
-
 context("pre-process tweets")
 
 test_that("symbols are removed from text without distortion", {

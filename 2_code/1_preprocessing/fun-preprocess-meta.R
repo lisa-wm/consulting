@@ -4,6 +4,19 @@
 
 # Purpose: pre-process metadata
 
+# HELPER FUNCTIONS -------------------------------------------------------------
+
+# Convert Python arrays to lists
+
+convert_array_to_list <- function(x) {
+  
+  x %>% 
+    str_match("(?<=\\[).*?(?=\\])") %>% 
+    str_replace_all("'", "") %>% 
+    str_split(", ")
+  
+}
+
 # TOP-LEVEL FUNCTION -----------------------------------------------------------
 
 preprocess_meta <- function(data) {
@@ -27,15 +40,3 @@ preprocess_meta <- function(data) {
   
 }
 
-# HELPER FUNCTIONS -------------------------------------------------------------
-
-# Convert Python arrays to lists
-
-convert_array_to_list <- function(x) {
-  
-  x %>% 
-    str_match("(?<=\\[).*?(?=\\])") %>% 
-    str_replace_all("'", "") %>% 
-    str_split(", ")
-  
-}
