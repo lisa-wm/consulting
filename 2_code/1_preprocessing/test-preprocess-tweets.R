@@ -8,12 +8,18 @@ test_that("symbols are removed from text without distortion", {
   expect_identical(remove_umlauts("Österreich"), "Oesterreich")
   expect_identical(remove_umlauts("Straße"), "Strasse")
   expect_identical(remove_symbols("Wort\nWort"), "Wort Wort")
-  expect_identical(remove_symbols("&amp; Co."), "und Co.")
+  expect_identical(remove_symbols("&amp; Co."), " Co.")
   expect_identical(remove_symbols(
     "Text https://www.google.de Text"), 
     "Text Text")
   expect_identical(remove_symbols("99%"), "99 Prozent")
-  expect_identical(remove_symbols("5$"), "5 Dollar")
+  expect_identical(remove_symbols("\"hallo\""), "hallo")
+})
+
+test_that("emojis are extracted correctly", {
+  expect_identical(unlist(extract_emojis("Hello world :-)")), ":-)")
+  expect_identical(unlist(extract_emojis("Oh no:(")), ":(")
+  expect_identical(unlist(extract_emojis("WTF \U00123")), "\U00123")
 })
 
 test_that("Python lists are converted fine", {

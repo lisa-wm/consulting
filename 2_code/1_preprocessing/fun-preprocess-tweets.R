@@ -8,14 +8,16 @@
 
 preprocess_basic <- function(data) {
   
-  text %>% 
+  data %>% 
     mutate_if(is.character, remove_umlauts) %>% 
-    mutate_if(is.character, remove_symbols) %>% 
-    mutate_if(is.character, .funs = list(emojis = ~ extract_emojis(.)))
+    mutate_if(is.character, remove_symbols)
   
 }
 
-preprocess_advanced <- function(text) {
+preprocess_advanced <- function(data) {
+  
+  data %>% 
+    mutate_if(is.character, .funs = list(emojis = ~ extract_emojis(.)))
   
 }
 
@@ -79,7 +81,8 @@ extract_emojis <- function(text) {
     str_c(c(
       "[^\001-\177]", # unicode emojis
       "(\\:(\\-)?\\))", # simple happy smiley w/ or w/o nose
-      "(\\:(\\-)?\\()"), # simple sad smiley w/ or w/o nose
+      "(\\:(\\-)?\\()", # simple sad smiley w/ or w/o nose
+      "(\\;(\\-)?\\))"), # simple winking smiley w/ or w/o nose
     collapse = "|"))
 }
 
@@ -94,7 +97,5 @@ tweepy_df = tweepy_df %>%
       function(x) ifelse(x %in% mdb_on_twitter, 1, 0)
     )
   )
-
-
 
 test_file(here("2_code/1_basic_unigram_dict", "test-preprocess-tweets.R"))
