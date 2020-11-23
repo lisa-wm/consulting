@@ -19,7 +19,8 @@ packages_required <-  c(
   "here",
   "tidyverse",
   "data.table",
-  "quanteda"
+  "quanteda",
+  "cld3"
 )
 
 set_up_packages <- function(pkg) {
@@ -59,11 +60,42 @@ invisible(sapply(files_required, source, .GlobalEnv))
 
 # STEP 1: PRE-PROCESS DATA -----------------------------------------------------
 
+# Read data
+
 data <- fread(
   here("1_scraping/output", "tweepy_df_subset.csv"), 
-  encoding = "UTF-8")
+  encoding = "UTF-8",
+  drop = "quoted_status")
 
-data_processed <- preprocess_tweets(data)
+# Substitute "full_text" by "retweet_full_text" for retweets
+# !!!!!!!! fix that in scraping process, we don't need both columns !!!!!!!!!!!!
+
+data <- data %>% 
+  mutate(full_text = ifelse(is_retweet == 1, retweet_full_text, full_text)) %>% 
+  select(-retweet_full_text)
+
+# Keep only tweets in German language
+# !!!!!!! Language detection is not perfect, maybe fine-tune this !!!!!!!!!!!!!!
+# But seems to have trouble with short tweets primarily - not too well suited
+# for SA either, presumably
+
+data <- data %>% 
+  filter(detect_language(full_text) == "de")
+
+# Split data into metadata and tweet texts, assigning each tweet a unique ID
+
+data <- data %>% 
+  mutate(doc_id = row_number())
+
+tweets_raw <- data %>% 
+  select(doc_id, full_text)
+
+tweets_metadata <- data %>% 
+  select(-full_text)
+
+# Process data such that NLP analyses can be carried out
+
+tweets_processed <- preprocess_tweets(tweets_raw)
 
 # STEP 2: CREATE DOCUMENT-FEATURE MATRIX ---------------------------------------
 

@@ -66,7 +66,7 @@ def download_tweets_tweepy(username):
     colnames = [
         'created_at', 
         'full_text', 
-        'quoted_status',
+        # 'quoted_status',
         'retweet_count', 
         'favorite_count', 
         'is_retweet',
