@@ -103,15 +103,28 @@ tweets_metadata <- data %>%
 tweets_processed_intermediary <- preprocess_basic(tweets_raw)
 tweets_processed <- preprocess_advanced(tweets_processed_intermediary)
 
+# Process metadata
+
+tweets_metadata_processed <- preprocess_meta(tweets_metadata)
+
+# Save for further analysis
+
+tweepy_df_subset_processed <- left_join(
+  tweets_metadata_processed, 
+  tweets_processed, 
+  by = "doc_id"
+)
+save(
+  tweepy_df_subset_processed, 
+  file = here("2_code", "tweepy_df_subset_processed.RData"))
+
+# Create quanteda corpus
+
 tweets_corpus <- corpus(
   tweets_processed,
   docid_field = "doc_id",
   text_field = "full_text"
 )
-
-# Process metadata
-
-tweets_metadata_processed <- preprocess_meta(tweets_metadata)
 
 # STEP 2: CREATE DOCUMENT-FEATURE MATRIX ---------------------------------------
 

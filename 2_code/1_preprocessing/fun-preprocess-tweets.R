@@ -98,8 +98,9 @@ preprocess_advanced <- function(data) {
         emojis = ~ do.call(extract_emojis, list(., pattern_emoji)))) %>% 
     mutate_if(
       is.character,
-      ~ do.call(remove_emojis, list(., pattern_emoji))) %>% 
-    mutate_if(is.character, remove_mentions)
+      ~ do.call(remove_emojis, list(., pattern_emoji))) 
+  # %>% 
+  #   mutate_if(is.character, remove_mentions)
  
 }
 
