@@ -1,0 +1,144 @@
+% ------------------------------------------------------------------------------
+% SLIDES FOR NLP COLLOQUIUM ON 2020-11-27
+% ------------------------------------------------------------------------------ 
+
+% SETUP ------------------------------------------------------------------------
+
+\documentclass[t]{beamer}
+\usepackage[utf8]{inputenc}
+
+\setbeamercolor{palette primary}{bg = gray!90,fg = white}
+\setbeamercolor{structure}{fg = gray!90} % itemize, enumerate, etc
+\setbeamercolor{alerted text}{fg = gray!90}
+\newcommand{\highlight}[1]{\colorbox{gray!20}{#1}}
+\setbeamertemplate{itemize items}[circle]
+\newcommand{\arrowitem}{\item[\textcolor{gray!90}{$\rightarrow$}]}
+
+\title{Topic-Specific Sentiment Analysis for Twitter Data of German MPs}
+\author{Asmik Nalmpatian, Lisa Wimmer}
+\institute{Statistical Consulting}
+\date{2020}
+
+\usepackage{Sweave}
+\begin{document}
+\input{20201127_nlp_colloqium-concordance}
+
+\frame{\titlepage}
+
+\footnotesize
+
+% ------------------------------------------------------------------------------
+
+\begin{frame}
+\frametitle{Project Outline}
+
+\textbf{Goal:} \highlight{topic-specific sentiment analysis} on
+tweets by German MPs \\
+\smallskip
+$\rightarrow$ What sentiments are expressed toward particular topics? \\
+  
+\begin{figure}
+  \raggedright
+  \includegraphics[width = 0.8\textwidth]{figures/screenshot_tweet.PNG}
+\end{figure}
+
+\textbf{Two-pronged approach:}
+\begin{enumerate}
+  \footnotesize
+  \item Comprehensive \highlight{pipeline}: \\
+  data extraction > data processing > sentiment analysis
+  \begin{itemize}
+    \footnotesize
+    \item Robust framework with rather basic methodology
+    \item To be implemented in \texttt{R}
+  \end{itemize}
+  \item \highlight{Advanced} sentiment analysis
+  \begin{itemize}
+    \footnotesize
+    \item Exploration of more complex methods
+    \item Most probably in \texttt{Python}
+  \end{itemize}
+\end{enumerate}
+
+\end{frame}
+
+% ------------------------------------------------------------------------------
+
+\begin{frame}
+\frametitle{Key Challenges}
+
+\begin{itemize}
+  \footnotesize
+  \item \textbf{Large data base of unstructured text}
+  \begin{itemize}
+    \footnotesize
+    \arrowitem High dimensionality
+    \arrowitem Run time, memory
+  \end{itemize}
+  \item \textbf{German language}
+  \begin{itemize}
+    \footnotesize
+    \arrowitem Syntactic complexities
+    \arrowitem Less existing research than for English
+  \end{itemize}
+  \item \textbf{Twitter idiosyncrasies}
+  \begin{itemize}
+    \footnotesize
+    \arrowitem Short document length (140 characters)
+    \arrowitem Informal language (plus spelling mistakes)
+    \arrowitem Special features (hashtags, emojis, ...)
+  \end{itemize}
+  \item \textbf{Topic extraction}
+  \begin{itemize}
+    \footnotesize
+    \arrowitem Upstream task where same challenges are present
+  \end{itemize}
+  \item \textbf{No labels}
+  \begin{itemize}
+    \footnotesize  
+    \arrowitem No means of evaluation with data as-is
+  \end{itemize}
+\end{itemize}
+
+\end{frame}
+
+% ------------------------------------------------------------------------------
+
+\begin{frame}
+\frametitle{Ideas}
+
+\begin{itemize}
+  \item \textbf{First \& foremost:} \highlight{labels}
+  \item \textbf{Then:} \highlight{classification} in three levels of complexity
+  \begin{enumerate}
+    \footnotesize
+    \item \textbf{Dictionary approach}
+    \begin{itemize}
+      \item Baseline model
+      \item n-grams, bag-of-words assumption
+      \item Probably low accuracy
+    \end{itemize}
+    \item \textbf{Classic ML models} 
+    \begin{itemize}
+      \item Focus on feature extraction
+      \item Tried-and-tested classifiers (RF, SVM, ...)
+    \end{itemize}
+    \item \textbf{BERT and friends} 
+    \begin{itemize}
+      \item Black-box, high-complexity approaches
+      \item Hope: data in, magic out
+    \end{itemize}
+  \end{enumerate}
+  \item \textbf{Eventually:} we know more about...
+  \begin{itemize}
+    \footnotesize
+    \item ... how far we can get with basic to medium approaches
+    \item ... by how much we can boost accuracy with adding complexity
+  \end{itemize}
+\end{itemize}
+
+\end{frame}
+
+% ------------------------------------------------------------------------------
+
+\end{document}
