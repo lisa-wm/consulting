@@ -4,3 +4,7 @@
 .Ruserdata
 *.log
 tweepy_df*
+*.nav
+*.snm
+*.gz
+*.toc
