@@ -80,6 +80,12 @@ $\rightarrow$ What sentiments are expressed toward particular topics? \\
     \arrowitem Syntactic complexities
     \arrowitem Less existing research than for English
   \end{itemize}
+  \item \textbf{Political context}
+  \begin{itemize}
+    \footnotesize
+    \arrowitem Specific issues/vocabulary
+    \arrowitem Semantic vehicles such as sarcasm, rhetorical questions
+  \end{itemize}
   \item \textbf{Twitter idiosyncrasies}
   \begin{itemize}
     \footnotesize
