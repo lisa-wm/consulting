@@ -22,6 +22,14 @@ get_stopwords <- function() {
   
 }
 
+get_noise_tokens <- function() {
+  
+  c("@*",
+    "*innen"
+    )
+  
+}
+
 sentence <- "John Doe is a dumbass whose significance I never got. Full stop."
 
 tokens(sentence, remove_punct = TRUE)
@@ -30,19 +38,23 @@ tokens(sentence, remove_punct = TRUE)
 
 # TOP-LEVEL FUNCTIONS ----------------------------------------------------------
 
-make_dfm <- function(corpus) {
+make_tokens <- function(corpus) {
   
-  dfm(
-    corpus, 
-    remove = c(
-      get_stopwords(),
-      "@*"), 
+  toks <- tokens(
+    corpus,
     remove_punct = TRUE, 
     remove_numbers = TRUE,
-    stem = TRUE,
-    verbose = FALSE)
+    verbose = FALSE) 
   
+  tokens_tolower(toks) %>%
+    tokens_select(min_nchar = 4, ) %>% 
+    tokens_remove(c(
+      get_stopwords(), 
+      "@*", 
+      "*innen",
+      "^(polit|bundesregier|bundestag|deutsch|land|jaehrig)"
+      ))
+    
 }
 
-dfm_tweets <- make_dfm(tweets_corpus[1:10])
-topfeatures(dfm_tweets, 200)
+make_tokens(tweets_corpus[1:10])

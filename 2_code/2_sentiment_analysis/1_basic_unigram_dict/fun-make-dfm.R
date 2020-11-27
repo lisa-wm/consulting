@@ -6,34 +6,14 @@
 
 # HELPER FUNCTIONS -------------------------------------------------------------
 
-# TODO Make good stopword list
 
-get_stopwords <- function() {
-  
-  remove_umlauts(stopwords("de"))
-  
-  file_stopwords <- here(
-    "2_code/2_sentiment_analysis/1_basic_unigram_dict/dicts", 
-    "german_stopwords.xml")
-  german_stopwords <- 
-    xmlToDataFrame(xmlParse(file_stopwords, encoding = "UTF-8"))
-  
-  remove_umlauts(german_stopwords$text)
-  
-}
-
-sentence <- "John Doe is a dumbass whose significance I never got. Full stop."
-
-tokens(sentence, remove_punct = TRUE)
-
-# TODO Set up stemming and lemmatization
 
 # TOP-LEVEL FUNCTIONS ----------------------------------------------------------
 
-make_dfm <- function(corpus) {
+make_dfm <- function(tokens) {
   
   dfm(
-    corpus, 
+    tokens, 
     remove = c(
       get_stopwords(),
       "@*"), 
