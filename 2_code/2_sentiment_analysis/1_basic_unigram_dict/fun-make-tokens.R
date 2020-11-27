@@ -10,29 +10,45 @@
 
 get_stopwords <- function() {
   
-  remove_umlauts(stopwords("de"))
+  # Collect stopwords from various sources
   
-  file_stopwords <- here(
+  sw_1 <- stopwords("de")
+  
+  sw_2 <- xmlToDataFrame(xmlParse(here(
+      "2_code/2_sentiment_analysis/1_basic_unigram_dict/dicts", 
+      "german_stopwords.xml"), 
+    encoding = "UTF-8"))
+
+  sw_3 <- read.delim(here(
     "2_code/2_sentiment_analysis/1_basic_unigram_dict/dicts", 
-    "german_stopwords.xml")
-  german_stopwords <- 
-    xmlToDataFrame(xmlParse(file_stopwords, encoding = "UTF-8"))
+    "stopwords-iso.txt"), encoding = "UTF-8")
+
+  # Collect all and remove duplicates as well as umlauts
+    
+  stopwords <- unique(
+    remove_umlauts(
+      unlist(mget(apropos("^sw_[1-99]")))))
+
+  # Remove words deemed important for sentiment
   
-  remove_umlauts(german_stopwords$text)
-  
+  stringr::str_remove_all(stopwords, pattern = stringr::str_c(c(
+    "gegen", 
+    "^kein",
+    "^nicht",
+    "sehr",
+    "^besser",
+    "^beste",
+    "^gut",
+    "^gern",
+    "kaum",
+    "nein",
+    "nie",
+    "^niemand",
+    "^richtig",
+    "^schlecht"),
+    collapse = "|"))
+
 }
-
-get_noise_tokens <- function() {
-  
-  c("@*",
-    "*innen"
-    )
-  
-}
-
-sentence <- "John Doe is a dumbass whose significance I never got. Full stop."
-
-tokens(sentence, remove_punct = TRUE)
 
 # TODO Set up stemming and lemmatization
 
@@ -57,4 +73,4 @@ make_tokens <- function(corpus) {
     
 }
 
-make_tokens(tweets_corpus[1:10])
+make_tokens(tweets_corpus[1:100])
