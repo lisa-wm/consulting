@@ -108,13 +108,15 @@ save(
 # Create quanteda corpus (non-text columns are preserved and can be accessed
 # via docvars())
 
+# load(here("2_code", "tweepy_df_subset_processed.RData"))
+
 tweets_corpus <- quanteda::corpus(
   tweepy_df_subset_processed,
   docid_field = "doc_id",
   text_field = "full_text"
 )
 
-# STEP 3: CREATE TOKENS -------------------------------------------------------
+# STEP 3: CREATE TOKENS --------------------------------------------------------
 
 tweets_tokens <- make_tokens(tweets_corpus)
 
@@ -122,7 +124,8 @@ tweets_tokens <- make_tokens(tweets_corpus)
 
 # Create dfm out of processed tweets
 
-tweets_dfm <- make_dfm(tweets_corpus)
+tweets_dfm <- make_dfm(tweets_tokens)
+topfeatures(tweets_dfm, 100)
 
 # STEP 5: CREATE DICTIONARY ----------------------------------------------------
 

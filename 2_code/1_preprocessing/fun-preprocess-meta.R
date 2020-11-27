@@ -20,6 +20,7 @@ convert_array_to_list <- function(x) {
 # TOP-LEVEL FUNCTION -----------------------------------------------------------
 
 # FIXME Suppress warning that is displayed every time
+# FIXME Function is super slow - remove str_detect part, could be slow?
 
 preprocess_meta <- function(data) {
   

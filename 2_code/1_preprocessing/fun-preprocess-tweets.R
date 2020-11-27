@@ -29,10 +29,7 @@ remove_umlauts <- function(text) {
 remove_symbols <- function(text) {
   
   text %>% 
-    stringr::str_replace_all(c(
-      "\\n" = " ",
-      "%" = " Prozent"
-    )) %>% 
+    stringr::str_replace_all(c("\\n" = " ")) %>% 
     stringr::str_remove_all(str_c(c(
       "\U0022", 
       "\U0027", 
@@ -45,7 +42,8 @@ remove_symbols <- function(text) {
       collapse = "|")) %>% # all kinds of quotes
     stringr::str_remove_all("&amp;|&lt;|&gt;") %>% # ampersands etc.
     stringr::str_remove_all(" http([^ ]*)") %>% # hyperlinks
-    stringr::str_remove_all("#") # hashtag symbols
+    stringr::str_remove_all("#") %>% # hashtag symbols
+    stringr::str_remove_all("%") # percent signs
   
 }
 

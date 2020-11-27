@@ -10,19 +10,11 @@
 
 # TOP-LEVEL FUNCTIONS ----------------------------------------------------------
 
-make_dfm <- function(tokens) {
+make_dfm <- function(tokens, min_termfreq = 10) {
   
-  dfm(
-    tokens, 
-    remove = c(
-      get_stopwords(),
-      "@*"), 
-    remove_punct = TRUE, 
-    remove_numbers = TRUE,
-    stem = TRUE,
-    verbose = FALSE)
+  quanteda::dfm(tokens, verbose = FALSE) %>% 
+    quanteda::dfm_wordstem(language = "german") %>%
+    quanteda::dfm_trim(min_termfreq = min_termfreq)
   
 }
 
-dfm_tweets <- make_dfm(tweets_corpus[1:10])
-topfeatures(dfm_tweets, 200)
