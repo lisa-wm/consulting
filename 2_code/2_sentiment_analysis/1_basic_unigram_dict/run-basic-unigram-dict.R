@@ -7,9 +7,11 @@
 
 # Steps:
 # 1. Pre-process data (primitively)
-# 2. Create document-feature matrix
-# 3. Create dictionary
-# 4. Classify sentiments
+# 2. Create corpus
+# 3. Create tokens
+# 4. Create document-feature matrix
+# 5. Create dictionary
+# 6. Classify sentiments
 
 # PREREQUISITES ----------------------------------------------------------------
 
@@ -73,21 +75,19 @@ invisible(sapply(files_required, source, .GlobalEnv))
 tweepy_df_subset <- 
   get_data(path = here("1_scraping/output", "tweepy_df_subset.csv"))
 
-tweets_raw <- tweepy_df_subset %>% 
-  select(doc_id, full_text)
+# Process tweets in a very basic way - remove umlauts, symbols etc. but keep
+# text original otherwise
+# Feature extraction is carried out in step 2
 
-tweets_metadata <- tweepy_df_subset %>% 
-  select(-full_text)
-
-# Process tweets such that NLP analyses can be carried out
-
-tweets_processed <- tweets_raw %>% 
+tweets_processed <- tweepy_df_subset %>% 
+  select(doc_id, full_text) %>% 
   preprocess_basic() %>% 
-  mutate(word_count = ntoken(full_text, remove_punct = TRUE))
+  mutate(word_count = quanteda::ntoken(full_text, remove_punct = TRUE))
 
 # Process metadata
 
-tweets_metadata_processed <- tweets_metadata %>% 
+tweets_metadata_processed <- tweepy_df_subset %>% 
+  select(-full_text) %>% 
   preprocess_meta()
 
 # Save for further analysis
@@ -100,27 +100,35 @@ tweepy_df_subset_processed <- left_join(
 
 save(
   tweepy_df_subset_processed, 
-  file = here("2_code", "tweepy_df_subset_processed.RData"))
+  file = here("2_code", "tweepy_df_subset_processed.RData")
+)
 
-# STEP 2: CREATE DOCUMENT-FEATURE MATRIX ---------------------------------------
+# STEP 2: CREATE CORPUS --------------------------------------------------------
 
-# Create quanteda corpus
+# Create quanteda corpus (non-text columns are preserved and can be accessed
+# via docvars())
 
-tweets_corpus <- corpus(
-  tweets_processed,
+tweets_corpus <- quanteda::corpus(
+  tweepy_df_subset_processed,
   docid_field = "doc_id",
   text_field = "full_text"
 )
 
+# STEP 3: CREATE TOKENS -------------------------------------------------------
+
+tweets_tokens <- make_tokens(tweets_corpus)
+
+# STEP 4: CREATE DOCUMENT-FEATURE MATRIX ---------------------------------------
+
 # Create dfm out of processed tweets
 
-dfm_tweets <- create_dfm(tweets_corpus)
+tweets_dfm <- make_dfm(tweets_corpus)
 
-# STEP 3: CREATE DICTIONARY ----------------------------------------------------
+# STEP 5: CREATE DICTIONARY ----------------------------------------------------
 
 # global_dictionary <- create_dict()
 
-# STEP 4: CLASSIFY SENTIMENTS --------------------------------------------------
+# STEP 6: CLASSIFY SENTIMENTS --------------------------------------------------
 
 # sentiments_basic_dict <- get_sentiments_basic_dict(
 #   dfm_tweets,

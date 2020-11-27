@@ -11,7 +11,7 @@
 remove_umlauts <- function(text) {
   
   text %>% 
-    str_replace_all(c(
+    stringr::str_replace_all(c(
       "Ä" = "Ae",
       "ä" = "ae",
       "Ö" = "Oe",
@@ -24,15 +24,16 @@ remove_umlauts <- function(text) {
 }
 
 # Remove unwanted symbols that would hamper sentiment analysis
+# TODO Check if everything is covered, then cut redundancies
 
 remove_symbols <- function(text) {
   
   text %>% 
-    str_replace_all(c(
+    stringr::str_replace_all(c(
       "\\n" = " ",
       "%" = " Prozent"
     )) %>% 
-    str_remove_all(str_c(c(
+    stringr::str_remove_all(str_c(c(
       "\U0022", 
       "\U0027", 
       "\U2018", 
@@ -42,9 +43,9 @@ remove_symbols <- function(text) {
       "\U201E", 
       "\U201F"), 
       collapse = "|")) %>% # all kinds of quotes
-    str_remove_all("&amp;|&lt;|&gt;") %>% # ampersands etc.
-    str_remove_all(" http([^ ]*)") %>% # hyperlinks
-    str_remove_all("#") # hashtag symbols
+    stringr::str_remove_all("&amp;|&lt;|&gt;") %>% # ampersands etc.
+    stringr::str_remove_all(" http([^ ]*)") %>% # hyperlinks
+    stringr::str_remove_all("#") # hashtag symbols
   
 }
 
@@ -53,7 +54,7 @@ remove_symbols <- function(text) {
 
 remove_mentions <- function(text) {
   
-  str_remove_all(text, "^@(.*?)+(?=\\s)")
+  stringr::str_remove_all(text, "^@(.*?)+(?=\\s)")
   
 }
 
@@ -64,7 +65,7 @@ remove_mentions <- function(text) {
 
 # FIXME Make emoji extraction better
 
-pattern_emoji <- str_c(c(
+pattern_emoji <- stringr::str_c(c(
   "[^\001-\177]", # unicode emojis
   "(\\:(\\-)?\\))", # simple happy smiley w/ or w/o nose
   "(\\:(\\-)?\\()", # simple sad smiley w/ or w/o nose
@@ -79,10 +80,12 @@ preprocess_basic <- function(data) {
     mutate_if(
       is.character, 
       .funs = list(
-        emojis = ~ do.call(str_extract_all, list(., pattern_emoji)))) %>% 
+        emojis = ~ do.call(
+          stringr::str_extract_all, 
+          list(., pattern_emoji)))) %>% 
     mutate_if(
       is.character,
-      ~ do.call(str_remove_all, list(., pattern_emoji))) 
+      ~ do.call(stringr::str_remove_all, list(., pattern_emoji))) 
 }
 
 # TESTS ------------------------------------------------------------------------

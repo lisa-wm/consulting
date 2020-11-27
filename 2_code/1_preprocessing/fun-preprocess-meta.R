@@ -11,13 +11,15 @@
 convert_array_to_list <- function(x) {
   
   x %>% 
-    str_match("(?<=\\[).*?(?=\\])") %>% 
-    str_replace_all("'", "") %>% 
-    str_split(", ")
+    stringr::str_match("(?<=\\[).*?(?=\\])") %>% 
+    stringr::str_replace_all("'", "") %>% 
+    stringr::str_split(", ")
   
 }
 
 # TOP-LEVEL FUNCTION -----------------------------------------------------------
+
+# FIXME Suppress warning that is displayed every time
 
 preprocess_meta <- function(data) {
   
@@ -25,7 +27,7 @@ preprocess_meta <- function(data) {
   
   data %>%
     mutate_if(
-      str_detect(., "\\[.*?\\]"), 
+      stringr::str_detect(., "\\[.*?\\]"), 
       ~ lapply(., convert_array_to_list)) %>% 
     mutate(
       created_at = as.POSIXct(

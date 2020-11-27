@@ -6,7 +6,7 @@
 
 get_data <- function(path) {
   
-  data <- fread(
+  data <- data.table::fread(
     path, 
     encoding = "UTF-8",
     sep = ",",
@@ -24,7 +24,7 @@ get_data <- function(path) {
   # FIXME Make language detection better
   
   data <- data %>% 
-    filter(detect_language(full_text) == "de")
+    filter(cld3::detect_language(full_text) == "de")
   
   data <- data %>% 
     mutate(doc_id = row_number())

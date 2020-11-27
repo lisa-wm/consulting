@@ -1,8 +1,8 @@
 # ------------------------------------------------------------------------------
-# CREATION OF A DOCUMENT-FEATURE MATRIX
+# TOKENIZATION OF CORPUS
 # ------------------------------------------------------------------------------
 
-# Purpose: create a document-feature matrix for sentiment analysis
+# Purpose: create tokens out of basic corpus
 
 # HELPER FUNCTIONS -------------------------------------------------------------
 
@@ -22,9 +22,15 @@ get_stopwords <- function() {
   
 }
 
+sentence <- "John Doe is a dumbass whose significance I never got. Full stop."
+
+tokens(sentence, remove_punct = TRUE)
+
+# TODO Set up stemming and lemmatization
+
 # TOP-LEVEL FUNCTIONS ----------------------------------------------------------
 
-create_dfm <- function(corpus) {
+make_dfm <- function(corpus) {
   
   dfm(
     corpus, 
@@ -38,5 +44,5 @@ create_dfm <- function(corpus) {
   
 }
 
-dfm_tweets <- create_dfm(tweets_corpus[1:10])
+dfm_tweets <- make_dfm(tweets_corpus[1:10])
 topfeatures(dfm_tweets, 200)
