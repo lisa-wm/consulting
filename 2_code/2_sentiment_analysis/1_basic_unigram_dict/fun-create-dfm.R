@@ -4,20 +4,39 @@
 
 # Purpose: create a document-feature matrix for sentiment analysis
 
+# HELPER FUNCTIONS -------------------------------------------------------------
+
+# TODO Make good stopword list
+
+get_stopwords <- function() {
+  
+  remove_umlauts(stopwords("de"))
+  
+  file_stopwords <- here(
+    "2_code/2_sentiment_analysis/1_basic_unigram_dict/dicts", 
+    "german_stopwords.xml")
+  german_stopwords <- 
+    xmlToDataFrame(xmlParse(file_stopwords, encoding = "UTF-8"))
+  
+  remove_umlauts(german_stopwords$text)
+  
+}
+
 # TOP-LEVEL FUNCTIONS ----------------------------------------------------------
 
-create_dfm <- function(corpus, stop_words) {
+create_dfm <- function(corpus) {
   
   dfm(
     corpus, 
-    remove = stop_words, 
+    remove = c(
+      get_stopwords(),
+      "@*"), 
     remove_punct = TRUE, 
     remove_numbers = TRUE,
+    stem = TRUE,
     verbose = FALSE)
   
 }
 
-# df_mat <- dfm(my_tokens)
-# 
-# cooccurrence_mat <- fcm(my_tokens)
-# matrix(cooccurrence_mat, ncol = sqrt(length(cooccurrence_mat)))
+dfm_tweets <- create_dfm(tweets_corpus[1:10])
+topfeatures(dfm_tweets, 200)

@@ -6,7 +6,7 @@
 # assumption, global existing dictionary)
 
 # Steps:
-# 1. Pre-process data
+# 1. Pre-process data (primitively)
 # 2. Create document-feature matrix
 # 3. Create dictionary
 # 4. Classify sentiments
@@ -22,7 +22,8 @@ packages_required <-  c(
   "quanteda",
   "cld3",
   "checkmate",
-  "testthat"
+  "testthat",
+  "XML"
 )
 
 set_up_packages <- function(pkg) {
@@ -54,58 +55,40 @@ set_up_packages <- function(pkg) {
 invisible(set_up_packages(packages_required))
 
 # Source required files containing sub-level functions
+# FIXME Check sourcing  
+# Why does sourcing preprocess-tweets not work, only if functions are
+# assigned manually?
 
 files_required <- list(
+  here("2_code/1_preprocessing", "fun-get-data.R"),
   here("2_code/1_preprocessing", "fun-preprocess-tweets.R"),
-  here("2_code/1_preprocessing", "fun-preprocess-meta.R"),
-  here("2_code/2_sentiment_analysis/1_basic_unigram_dict", "fun-create-dfm.R")
+  here("2_code/1_preprocessing", "fun-preprocess-meta.R")
 )
 invisible(sapply(files_required, source, .GlobalEnv))
 
-# STEP 1: PRE-PROCESS DATA -----------------------------------------------------
+# STEP 1: PRE-PROCESS DATA (PRIMITIVELY) ---------------------------------------
 
-# Read data
+# Read data and split into text and meta data
 
-data <- fread(
-  here("1_scraping/output", "tweepy_df_subset.csv"), 
-  encoding = "UTF-8",
-  sep = ",",
-  drop = "quoted_status")
+tweepy_df_subset <- 
+  get_data(path = here("1_scraping/output", "tweepy_df_subset.csv"))
 
-# Substitute "full_text" by "retweet_full_text" for retweets
-# !!!!!!!! fix that in scraping process, we don't need both columns !!!!!!!!!!!!
-
-data <- data %>% 
-  mutate(full_text = ifelse(is_retweet == 1, retweet_full_text, full_text)) %>% 
-  select(-retweet_full_text)
-
-# Keep only tweets in German language
-# !!!!!!! Language detection is not perfect, maybe fine-tune this !!!!!!!!!!!!!!
-# But seems to have trouble with short tweets primarily - not too well suited
-# for SA either, presumably
-
-data <- data %>% 
-  filter(detect_language(full_text) == "de")
-
-# Split data into metadata and tweet texts, assigning each tweet a unique ID
-
-data <- data %>% 
-  mutate(doc_id = row_number())
-
-tweets_raw <- data %>% 
+tweets_raw <- tweepy_df_subset %>% 
   select(doc_id, full_text)
 
-tweets_metadata <- data %>% 
+tweets_metadata <- tweepy_df_subset %>% 
   select(-full_text)
 
 # Process tweets such that NLP analyses can be carried out
 
-tweets_processed_intermediary <- preprocess_basic(tweets_raw)
-tweets_processed <- preprocess_advanced(tweets_processed_intermediary)
+tweets_processed <- tweets_raw %>% 
+  preprocess_basic() %>% 
+  mutate(word_count = ntoken(full_text, remove_punct = TRUE))
 
 # Process metadata
 
-tweets_metadata_processed <- preprocess_meta(tweets_metadata)
+tweets_metadata_processed <- tweets_metadata %>% 
+  preprocess_meta()
 
 # Save for further analysis
 
@@ -114,9 +97,12 @@ tweepy_df_subset_processed <- left_join(
   tweets_processed, 
   by = "doc_id"
 )
+
 save(
   tweepy_df_subset_processed, 
   file = here("2_code", "tweepy_df_subset_processed.RData"))
+
+# STEP 2: CREATE DOCUMENT-FEATURE MATRIX ---------------------------------------
 
 # Create quanteda corpus
 
@@ -126,14 +112,9 @@ tweets_corpus <- corpus(
   text_field = "full_text"
 )
 
-# STEP 2: CREATE DOCUMENT-FEATURE MATRIX ---------------------------------------
+# Create dfm out of processed tweets
 
-# Create corpus out of processed tweets
-
-stop_words <- remove_umlauts(stopwords("de"))
-dfm_tweets <- create_dfm(tweets_corpus, stop_words)
-
-topfeatures(dfm_tweets, 200)
+dfm_tweets <- create_dfm(tweets_corpus)
 
 # STEP 3: CREATE DICTIONARY ----------------------------------------------------
 

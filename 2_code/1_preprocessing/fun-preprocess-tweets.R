@@ -48,8 +48,21 @@ remove_symbols <- function(text) {
   
 }
 
-# Extract emojis
-# !!!! not optimal !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+# FIXME Extracting mentions works only for first tag
+
+remove_mentions <- function(text) {
+  
+  str_remove_all(text, "^@(.*?)+(?=\\s)")
+  
+}
+
+# TOP-LEVEL FUNCTION -----------------------------------------------------------
+
+# Remove all umlauts and symbols irrelevant to sentiment analysis,
+# extract emojis
+
+# FIXME Make emoji extraction better
 
 pattern_emoji <- str_c(c(
   "[^\001-\177]", # unicode emojis
@@ -58,52 +71,22 @@ pattern_emoji <- str_c(c(
   "(\\;(\\-)?\\))"), # simple winking smiley w/ or w/o nose
   collapse = "|")
 
-extract_emojis <- function(text, pattern) {
-  str_extract_all(text, pattern)
-}
-
-# Remove emojis from text
-
-remove_emojis <- function(text, pattern) {
-  str_remove_all(text, pattern)
-}
-
-# Remove mentions from text
-# !!!! does not work, extracts only first match !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
-remove_mentions <- function(text) {
-  str_remove_all(text, "^@(.*?)+(?=\\s)")
-}
-
-# TOP-LEVEL FUNCTIONS ----------------------------------------------------------
-
-# Remove all umlauts and symbols irrelevant to sentiment analysis
-
 preprocess_basic <- function(data) {
   
   data %>% 
     mutate_if(is.character, remove_umlauts) %>%
-    mutate_if(is.character, remove_symbols)
-  
-}
-
-# Extract emojis, then remove them from text; remove mentions
-
-preprocess_advanced <- function(data) {
-  
-  data %>% 
+    mutate_if(is.character, remove_symbols) %>% 
     mutate_if(
       is.character, 
       .funs = list(
-        emojis = ~ do.call(extract_emojis, list(., pattern_emoji)))) %>% 
+        emojis = ~ do.call(str_extract_all, list(., pattern_emoji)))) %>% 
     mutate_if(
       is.character,
-      ~ do.call(remove_emojis, list(., pattern_emoji))) 
-  # %>% 
-  #   mutate_if(is.character, remove_mentions)
- 
+      ~ do.call(str_remove_all, list(., pattern_emoji))) 
 }
 
 # TESTS ------------------------------------------------------------------------
+
+# TODO Write decent tests
 
 # test_file(here("2_code/1_preprocessing", "test-preprocess-tweets.R"))
