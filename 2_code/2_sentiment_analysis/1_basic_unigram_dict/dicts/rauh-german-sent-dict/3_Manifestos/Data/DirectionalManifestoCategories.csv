@@ -1,0 +1,21 @@
+cmp_code;descr;issue;direction
+101;Foreign Special Relationships: Positive;Foreign Special Relationships;positive
+102;Foreign Special Relationships: Negative;Foreign Special Relationships;negative
+104;Military: Positive;Military;positive
+105;Military: Negative;Military;negative
+107;Internationalism: Positive;Internationalism;positive
+109;Internationalism: Negative;Internationalism;negative
+108;European Community/Union: Positive;European Community/Union;positive
+110;European Community/Union: Negative;European Community/Union;negative
+203;Constitutionalism: Positive;Constitutionalism;positive
+204;Constitutionalism: Negative;Constitutionalism;negative
+406;Protectionism: Positive;Protectionism;positive
+407;Protectionism: Negative;Protectionism;negative
+603;Traditional Morality: Positive;Traditional Morality;positive
+604;Traditional Morality: Negative;Traditional Morality;negative
+701;Labour Groups: Positive;Labour Groups;positive
+702;Labour Groups: Negative;Labour Groups;negative
+607;Multiculturalism: Positive;Multiculturalism;positive
+608;Multiculturalism: Negative;Multiculturalism;negative
+601;National Way of Life: Positive;National Way of Life;positive
+602;National Way of Life: Negative;National Way of Life;negative

@@ -1,0 +1,101 @@
+pub_date;newspaper;id;file;Code
+20.02.2012;Idsteiner Zeitung;ID-60;FILE-1;Sehr negativ
+22.12.2011;Berliner Zeitung;ID-72;FILE-2;Eher negativ
+19.02.2012;Agence France;ID-37;FILE-3;Eher negativ
+06.01.2012;NA;ID-50;FILE-4;Eher negativ
+08.02.2012;NA;ID-98;FILE-5;Eher positiv
+12.01.2012;Rheinische Post;ID-40;FILE-6;Eher negativ
+24.02.2012;Der Tagesspiegel;ID-2;FILE-7;Eher negativ
+11.01.2012;Agence France;ID-97;FILE-8;Eher positiv
+08.03.2012;Agence France;ID-95;FILE-9;Sehr negativ
+21.02.2012;NA;ID-9;FILE-10;Eher negativ
+06.01.2012;NA;ID-51;FILE-11;Eher negativ
+22.01.2012;Agence France;ID-53;FILE-12;Eher negativ
+13.01.2012;Wormser Zeitung;ID-6;FILE-13;Eher negativ
+18.02.2012;NA;ID-5;FILE-14;Eher positiv
+02.02.2012;Spiegel Online;ID-14;FILE-15;Eher negativ
+19.02.2012;Berliner Kurier;ID-38;FILE-16;Sehr negativ
+26.12.2011;Agence France;ID-15;FILE-17;Eher negativ
+09.03.2012;Idsteiner Zeitung;ID-81;FILE-18;Sehr positiv
+14.02.2012;Agence France;ID-26;FILE-19;Eher positiv
+25.01.2012;NA;ID-93;FILE-20;Eher negativ
+05.03.2012;Berliner Kurier;ID-35;FILE-21;Sehr negativ
+12.01.2012;Aachener Nachrichten;ID-23;FILE-22;Eher negativ
+22.01.2012;Agence France;ID-27;FILE-23;Eher negativ
+26.11.2011;WELT ONLINE;ID-30;FILE-24;Eher negativ
+14.02.2012;Rheinische Post;ID-74;FILE-25;Eher negativ
+01.02.2012;NA;ID-25;FILE-26;Sehr negativ
+24.02.2012;NA;ID-49;FILE-27;Sehr negativ
+07.12.2011;Agence France;ID-21;FILE-28;Eher positiv
+26.03.2012;NA;ID-57;FILE-29;Eher positiv
+21.02.2012;Wiesbadener Kurier;ID-43;FILE-30;Eher negativ
+15.01.2012;NA;ID-87;FILE-31;Eher negativ
+25.02.2012;WELT ONLINE;ID-36;FILE-32;Eher positiv
+04.10.2011;Original text;ID-32;FILE-33;Eher positiv
+03.02.2012;Welt Aktuell;ID-68;FILE-34;Sehr negativ
+20.12.2011;NA;ID-24;FILE-35;Eher negativ
+06.03.2012;Agence France;ID-47;FILE-36;Eher negativ
+28.01.2012;Frankfurter Rundschau;ID-8;FILE-37;Eher negativ
+05.01.2012;Wiesbadener Kurier;ID-83;FILE-38;Sehr negativ
+03.03.2012;Usinger Anzeiger;ID-92;FILE-39;Eher negativ
+09.03.2012;Aachener Nachrichten;ID-63;FILE-40;Sehr negativ
+04.01.2012;Wiesbadener Tagblatt;ID-39;FILE-41;Eher positiv
+05.01.2012;NA;ID-20;FILE-42;Eher negativ
+27.01.2012;Die Welt;ID-96;FILE-43;Eher positiv
+28.12.2011;NA;ID-89;FILE-44;Eher negativ
+13.01.2012;Aachener Nachrichten;ID-33;FILE-45;Eher positiv
+15.02.2012;Allgemeine Zeitung;ID-73;FILE-46;Eher negativ
+22.12.2011;Wiesbadener Kurier;ID-66;FILE-47;Eher negativ
+20.01.2012;Giessener Anzeiger;ID-46;FILE-48;Eher negativ
+04.01.2012;NA;ID-56;FILE-49;Sehr negativ
+22.12.2011;Die Presse;ID-41;FILE-50;Eher negativ
+20.02.2012;NA;ID-58;FILE-51;Sehr positiv
+22.12.2011;NA;ID-29;FILE-52;Eher positiv
+19.01.2012;Berliner Zeitung;ID-94;FILE-53;Eher negativ
+21.01.2012;Berliner Zeitung;ID-16;FILE-54;Eher negativ
+07.03.2012;Allgemeine Zeitung;ID-99;FILE-55;Eher negativ
+23.12.2011;Rheinische Post;ID-75;FILE-56;Eher negativ
+21.02.2012;NA;ID-82;FILE-57;Eher negativ
+30.01.2012;NA;ID-59;FILE-58;Eher negativ
+03.02.2012;WELT ONLINE;ID-70;FILE-59;Eher negativ
+17.02.2012;Agence France;ID-34;FILE-60;Eher negativ
+07.03.2012;Berliner Zeitung;ID-1;FILE-61;Eher positiv
+05.01.2012;Die Presse;ID-19;FILE-62;Eher negativ
+26.11.2011;Aachener Zeitung;ID-7;FILE-63;Eher positiv
+02.02.2012;NA;ID-10;FILE-64;Eher negativ
+18.04.2012;NA;ID-90;FILE-65;Eher negativ
+16.12.2011;Die Welt;ID-91;FILE-66;Eher negativ
+01.03.2012;NA;ID-48;FILE-67;Eher negativ
+09.01.2012;Frankfurter Rundschau;ID-11;FILE-68;Eher negativ
+17.12.2011;NA;ID-62;FILE-69;Eher negativ
+03.02.2012;Rheinische Post;ID-61;FILE-70;Eher negativ
+10.01.2012;Spiegel Online;ID-78;FILE-71;Eher negativ
+18.02.2012;NA;ID-71;FILE-72;Eher negativ
+18.12.2011;NA;ID-13;FILE-73;Eher negativ
+12.01.2012;Berliner Zeitung;ID-69;FILE-74;Eher negativ
+21.03.2012;NA;ID-17;FILE-75;Eher negativ
+17.12.2011;Wiesbadener Tagblatt;ID-12;FILE-76;Sehr negativ
+05.03.2012;Aachener Nachrichten;ID-85;FILE-77;Eher negativ
+15.02.2012;Agence France;ID-79;FILE-78;Eher negativ
+04.01.2012;Spiegel Online;ID-3;FILE-79;Eher negativ
+10.01.2012;NA;ID-44;FILE-80;Eher negativ
+03.02.2012;Frankfurter Rundschau;ID-22;FILE-81;Eher negativ
+19.12.2011;Aachener Zeitung;ID-55;FILE-82;Eher negativ
+20.02.2012;Aachener Zeitung;ID-76;FILE-83;Eher negativ
+20.01.2012;NA;ID-54;FILE-84;Sehr positiv
+06.01.2012;Idsteiner Zeitung;ID-77;FILE-85;Eher negativ
+29.01.2012;Berliner Kurier;ID-88;FILE-86;Eher negativ
+07.01.2012;NA;ID-31;FILE-87;Eher negativ
+12.01.2012;NA;ID-86;FILE-88;Eher negativ
+07.03.2012;Stuttgarter Zeitung;ID-28;FILE-89;Eher negativ
+17.10.2011;Agence France;ID-100;FILE-90;Eher positiv
+01.03.2012;Giessener Anzeiger;ID-84;FILE-91;Eher positiv
+05.01.2012;Welt Aktuell;ID-64;FILE-92;Eher negativ
+17.11.2011;Wiesbadener Tagblatt;ID-45;FILE-93;Sehr positiv
+09.01.2012;Frankfurter Rundschau;ID-42;FILE-94;Eher negativ
+21.01.2012;Der Tagesspiegel;ID-52;FILE-95;Eher negativ
+06.01.2012;Usinger Anzeiger;ID-65;FILE-96;Eher negativ
+15.11.2011;Agence France;ID-4;FILE-97;Eher negativ
+16.04.2012;NA;ID-80;FILE-98;Sehr negativ
+09.02.2012;Frankfurter Rundschau;ID-18;FILE-99;Sehr negativ
+11.02.2012;Der Tagesspiegel;ID-67;FILE-100;Eher negativ
