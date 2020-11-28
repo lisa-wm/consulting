@@ -124,7 +124,7 @@ tweets_tokens <- make_tokens(tweets_corpus)
 
 # Create dfm out of processed tweets
 
-tweets_dfm <- make_dfm(tweets_tokens)
+tweets_dfm <- make_dfm(tweets_tokens, stemming = FALSE)
 topfeatures(tweets_dfm, 100)
 
 # STEP 5: CREATE DICTIONARY ----------------------------------------------------

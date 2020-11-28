@@ -26,16 +26,15 @@ get_stopwords <- function() {
     unlist()
 
   # Collect all and remove duplicates as well as umlauts
-  # FIXME Make this dynamic (suspected problem: mget or apropos look in the
-  # wrong environment)
-    
-  # stopwords <- unique(
-  #   remove_umlauts(
-  #     unlist(mget(apropos("^sw_[1-99]")))))
 
-  stopwords <- unique(
-    remove_umlauts(c(sw_1, sw_2, sw_3)))
+  find_this <- apropos("^sw_[1-99]")
+  look_here <- sys.frame(sys.parent(0))
   
+  stop_words <- unique(
+    remove_umlauts(
+      unlist(mget(find_this, envir = look_here)))
+  )
+    
   # Remove words deemed important for sentiment
   
   stringr::str_remove_all(stopwords, pattern = stringr::str_c(c(
