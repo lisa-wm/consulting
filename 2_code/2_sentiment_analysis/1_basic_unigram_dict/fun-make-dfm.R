@@ -10,14 +10,21 @@
 
 # TOP-LEVEL FUNCTIONS ----------------------------------------------------------
 
-make_dfm <- function(tokens, min_termfreq = 10, stemming = TRUE) {
+make_dfm <- function(tokens, 
+                     min_termfreq, 
+                     stemming = FALSE,
+                     tfidf = TRUE) {
   
-  dfm <- quanteda::dfm(tokens, verbose = FALSE)
+  dfmat <- quanteda::dfm(tokens, verbose = FALSE)
   
-  if (stemming) dfm <- dfm %>% quanteda::dfm_wordstem(language = "german") 
+  if (stemming) dfmat <- dfmat %>% quanteda::dfm_wordstem(language = "german") 
   
-  dfm %>%
-    quanteda::dfm_trim(min_termfreq = min_termfreq)
+  dfmat <- dfmat %>%
+    quanteda::dfm_trim(min_termfreq = min_termfreq) 
+  
+  if (tfidf == TRUE) dfmat <- dfmat %>% quanteda::dfm_tfidf()
+  
+  dfmat
   
 }
 

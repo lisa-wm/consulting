@@ -119,13 +119,25 @@ tweets_corpus <- quanteda::corpus(
 
 # STEP 3: CREATE TOKENS --------------------------------------------------------
 
-tweets_tokens <- make_tokens(tweets_corpus)
+stopwords_custom <- get_stopwords()
+save(
+  stopwords_custom, 
+  file = here(
+    "2_code/2_sentiment_analysis/1_basic_unigram_dict/dicts",
+    "stopwords_custom.RData"))
+
+tweets_tokens <- make_tokens(tweets_corpus, stopwords_custom)
 
 # STEP 4: CREATE DOCUMENT-FEATURE MATRIX ---------------------------------------
 
 # Create dfm out of processed tweets
 
-tweets_dfm <- make_dfm(tweets_tokens, stemming = FALSE)
+tweets_dfm <- make_dfm(
+  tweets_tokens,
+  min_termfreq = 10,
+  stemming = FALSE,
+  tfidf = TRUE)
+
 topfeatures(tweets_dfm, 100)
 
 # STEP 5: CREATE DICTIONARY ----------------------------------------------------
@@ -148,7 +160,32 @@ save(
 
 # STEP 6: CLASSIFY SENTIMENTS --------------------------------------------------
 
-# sentiments_basic_dict <- get_sentiments_basic_dict(
-#   dfm_tweets,
-#   global_dictionary
-# )
+# Get sentiments based on unigrams dictionary
+
+sentiments_basic_unigram_dict <- get_sentiments_basic_unigram_dict(
+  tweets_dfm,
+  global_unigram_dictionary
+)
+
+# Determine confidence via difference in detected positive and negative labels,
+# weighted by number of found sentiments
+
+median_sentiments_found <- 
+  median(sentiments_basic_unigram_dict$sentiments_found)
+
+sentiments_basic_unigram_dict <- sentiments_basic_unigram_dict %>% 
+  mutate(
+    doc_id = as.numeric(doc_id),
+    confidence = sentiments_found / median_sentiments_found * abs(diff_pos)
+  )
+
+table(sentiments_basic_unigram_dict$label)
+
+# Append labels to data and save
+
+tweepy_df_subset_labeled <- tweepy_df_subset_processed %>% 
+  left_join(sentiments_basic_unigram_dict, by = "doc_id")
+
+save(
+  tweepy_df_subset_labeled,
+  file = here("2_code", "tweepy_df_subset_labeled.RData"))

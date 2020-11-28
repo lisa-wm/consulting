@@ -61,7 +61,7 @@ remove_mentions <- function(text) {
 # Remove all umlauts and symbols irrelevant to sentiment analysis,
 # extract emojis
 
-# FIXME Make emoji extraction better
+# TODO Make emoji extraction better
 
 pattern_emoji <- stringr::str_c(c(
   "[^\001-\177]", # unicode emojis

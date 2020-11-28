@@ -15,8 +15,8 @@ make_dict_germanpolarityclues <- function(file) {
     col.names = c(
       "word", "lemma", "pos_tag", "polarity", "score_pos_neg_neut")) %>% 
     mutate(
-      lemma = remove_umlauts(lemma),
-      word = remove_umlauts(word)
+      lemma = remove_umlauts(tolower(lemma)),
+      word = remove_umlauts(tolower(word))
     )
   
   # TODO Make this better, horribly inefficient
@@ -46,23 +46,28 @@ make_dict_germanpolarityclues <- function(file) {
     end_col <- ncol(this_df)
     
     this_df <- this_df %>% 
-      unite(start_col:end_col, col = "derivatives", sep = ",")
+      unite(all_of(start_col):all_of(end_col), col = "derivatives", sep = ",")
     dict_compact <- bind_rows(dict_compact, this_df)
     
   }
 
-  dict_compact
+  dict_compact %>% 
+    mutate(derivatives = stringr::str_split(derivatives, ","))
   
 }
 
 # TOP-LEVEL FUNCTIONS ----------------------------------------------------------
 
+# Creates only very basic dictionary, omitting scores, POS tags etc.
+
 create_unigram_dict <- function(source_positive, source_negative) {
   
   dict_pos <- make_dict_germanpolarityclues(source_positive)
   dict_neg <- make_dict_germanpolarityclues(source_negative)
-  bind_rows(dict_pos, dict_neg)
+ 
+  quanteda::dictionary(list(
+    positive = unlist(dict_pos$derivatives),
+    negative = unlist(dict_neg$derivatives)))
   
 }
-
 

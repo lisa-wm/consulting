@@ -30,29 +30,33 @@ get_stopwords <- function() {
   find_this <- apropos("^sw_[1-99]")
   look_here <- sys.frame(sys.parent(0))
   
-  stop_words <- unique(
+  stopwords <- unique(
     remove_umlauts(
       unlist(mget(find_this, envir = look_here)))
   )
     
   # Remove words deemed important for sentiment
   
-  stringr::str_remove_all(stopwords, pattern = stringr::str_c(c(
-    "gegen", 
-    "^kein",
-    "^nicht",
-    "sehr",
-    "^besser",
-    "^beste",
-    "^gut",
-    "^gern",
-    "kaum",
-    "nein",
-    "nie",
-    "^niemand",
-    "^richtig",
-    "^schlecht"),
+  stopwords <- stringr::str_remove_all(
+    stopwords, 
+    pattern = stringr::str_c(c(
+      "gegen", 
+      "^kein",
+      "^nicht",
+      "sehr",
+      "^besser",
+      "^beste",
+      "^gut",
+      "^gern",
+      "kaum",
+      "nein",
+      "nie",
+      "^niemand",
+      "^richtig",
+      "^schlecht"),
     collapse = "|"))
+  
+  sort(stopwords)
 
 }
 
@@ -60,22 +64,29 @@ get_stopwords <- function() {
 
 # TOP-LEVEL FUNCTIONS ----------------------------------------------------------
 
-make_tokens <- function(corpus) {
+make_tokens <- function(corpus, stopwords) {
   
-  toks <- tokens(
+  toks <- quanteda::tokens(
     corpus,
     remove_punct = TRUE, 
     remove_numbers = TRUE,
     verbose = FALSE) 
   
-  tokens_tolower(toks) %>%
-    tokens_select(min_nchar = 4) %>% 
-    tokens_remove(c(
-      get_stopwords(), 
+  quanteda::tokens_tolower(toks) %>%
+    quanteda::tokens_select(min_nchar = 4) %>% 
+    quanteda::tokens_remove(c( # general noise
+      stopwords, 
       "@*", 
       "*innen")) %>% 
-    tokens_remove(
-      "^(polit|bundesregier|bundestag|deutsch|land|berlin|prozent)",
+    quanteda::tokens_remove( # context-specific noise
+      stringr::str_c(c(
+        "^(polit",
+        "bundesregier",
+        "bundestag",
+        "deutsch",
+        "berlin",
+        "prozent)"), 
+        collapse = "|"), 
       valuetype = "regex")
     
 }
