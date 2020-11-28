@@ -52,6 +52,7 @@ set_up_packages <- function(pkg) {
   }
   
   lapply(packages_required, library, character.only = TRUE, quietly = TRUE)
+  
 }
 
 invisible(set_up_packages(packages_required))
@@ -129,7 +130,21 @@ topfeatures(tweets_dfm, 100)
 
 # STEP 5: CREATE DICTIONARY ----------------------------------------------------
 
-# global_dictionary <- create_dict()
+global_unigram_dictionary <- create_unigram_dict(
+  source_positive = here(
+    "2_code/2_sentiment_analysis/1_basic_unigram_dict/dicts", 
+    "GermanPolarityClues-Positive-21042012.tsv"),
+  source_negative = here(
+    "2_code/2_sentiment_analysis/1_basic_unigram_dict/dicts", 
+    "GermanPolarityClues-Negative-21042012.tsv")
+)
+
+save(
+  global_unigram_dictionary,
+  file = here(
+    "2_code/2_sentiment_analysis/1_basic_unigram_dict/dicts",
+    "global_unigram_dictionary.RData")
+)
 
 # STEP 6: CLASSIFY SENTIMENTS --------------------------------------------------
 
