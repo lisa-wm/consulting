@@ -58,7 +58,7 @@ def get_mentions(x):
     
 # Function to download tweets for a specific user with Tweepy
 
-def download_tweets_tweepy(username):
+def download_tweets_tweepy_mod(username):
     
     # Initialize a list to hold all the tweepy Tweets
     alltweets = []

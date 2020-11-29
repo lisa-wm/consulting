@@ -4,31 +4,38 @@
 
 # Purpose: read data with correct encoding, relevant columns etc.
 
-get_data <- function(path) {
+# TODO: Remove old part when not needed anymore
+
+get_data <- function(path, is_old_version = FALSE) {
   
-  data <- data.table::fread(
-    path, 
-    encoding = "UTF-8",
-    sep = ",",
-    drop = "quoted_status")
+  if (is_old_version) {
+    
+    data <- data.table::fread(
+      path, 
+      encoding = "UTF-8",
+      sep = ",",
+      drop = "quoted_status") %>%
+      mutate(full_text = ifelse(
+        is_retweet == 1, 
+        retweet_full_text, 
+        full_text)) %>% 
+      select(-retweet_full_text)
+    
+  } else {
+    
+    data <- data.table::fread(
+      path, 
+      encoding = "UTF-8",
+      sep = ",")
+    
+  }
   
-  # TODO Substitute "full_text" by "retweet_full_text" for retweets
+  # TODO Make language detection better
   
-  data <- data %>% 
-    mutate(full_text = ifelse(
-      is_retweet == 1, 
-      retweet_full_text, 
-      full_text)) %>% 
-    select(-retweet_full_text)
-  
-  # FIXME Make language detection better
-  
-  data <- data %>% 
-    filter(cld3::detect_language(full_text) == "de")
-  
-  data <- data %>% 
-    mutate(doc_id = row_number())
-  
+  data <- data[
+    cld3::detect_language(full_text) == "de"
+    ][, doc_id := .I]
+
 }
 
 

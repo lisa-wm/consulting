@@ -43,16 +43,8 @@ remove_symbols <- function(text) {
     stringr::str_remove_all("&amp;|&lt;|&gt;") %>% # ampersands etc.
     stringr::str_remove_all(" http([^ ]*)") %>% # hyperlinks
     stringr::str_remove_all("#") %>% # hashtag symbols
+    stringr::str_remove_all("(?=@).*?(?=\\s)") %>% # targets
     stringr::str_remove_all("%") # percent signs
-  
-}
-
-
-# FIXME Extracting mentions works only for first tag
-
-remove_mentions <- function(text) {
-  
-  stringr::str_remove_all(text, "^@(.*?)+(?=\\s)")
   
 }
 
@@ -61,30 +53,36 @@ remove_mentions <- function(text) {
 # Remove all umlauts and symbols irrelevant to sentiment analysis,
 # extract emojis
 
-# TODO Make emoji extraction better
-
-pattern_emoji <- stringr::str_c(c(
-  "[^\001-\177]", # unicode emojis
-  "(\\:(\\-)?\\))", # simple happy smiley w/ or w/o nose
-  "(\\:(\\-)?\\()", # simple sad smiley w/ or w/o nose
-  "(\\;(\\-)?\\))"), # simple winking smiley w/ or w/o nose
-  collapse = "|")
-
-preprocess_basic <- function(data) {
+preprocess_basic <- function(data, column) {
   
-  data %>% 
-    mutate_if(is.character, remove_umlauts) %>%
-    mutate_if(is.character, remove_symbols) %>% 
-    mutate_if(
-      is.character, 
-      .funs = list(
-        emojis = ~ do.call(
-          stringr::str_extract_all, 
-          list(., pattern_emoji)))) %>% 
-    mutate_if(
-      is.character,
-      ~ do.call(stringr::str_remove_all, list(., pattern_emoji))) 
+  # Input checks & copy of data to avoid modification by reference
+  
+  assert_data_table(data)
+  assert_string(column)
+
+  # TODO Make emoji extraction better
+  
+  pattern_emoji <- stringr::str_c(c(
+    "[^\001-\177]", # unicode emojis
+    "(\\:(\\-)?\\))", # simple happy smiley w/ or w/o nose
+    "(\\:(\\-)?\\()", # simple sad smiley w/ or w/o nose
+    "(\\;(\\-)?\\))"), # simple winking smiley w/ or w/o nose
+    collapse = "|")
+  
+  dt <- copy(data)
+  
+  # Perform preprocessing
+
+  # (c around column is needed bc it is supplied as character; otherwise
+  # data.table will just create a new column named "column")
+
+  dt[, c(column) := remove_umlauts(get(column))
+     ][, c(column) := remove_symbols(get(column))
+       ][, emojis := stringr::str_extract_all(get(column), pattern_emoji)
+         ][, c(column) := stringr::str_remove_all(get(column), pattern_emoji)]
+  
 }
+
 
 # TESTS ------------------------------------------------------------------------
 

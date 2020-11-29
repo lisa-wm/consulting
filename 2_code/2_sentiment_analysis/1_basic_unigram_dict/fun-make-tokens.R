@@ -27,17 +27,21 @@ get_stopwords <- function() {
 
   # Collect all and remove duplicates as well as umlauts
 
-  find_this <- apropos("^sw_[1-99]")
-  look_here <- sys.frame(sys.parent(0))
+  # FIXME Does not work for some reason
   
-  stopwords <- unique(
-    remove_umlauts(
-      unlist(mget(find_this, envir = look_here)))
-  )
+  # find_this <- apropos("^sw_[1-99]")
+  # look_here <- sys.frame(sys.parent(0))
+  # 
+  # stopwords <- unique(
+  #   remove_umlauts(
+  #     unlist(mget(find_this, envir = look_here)))
+  # )
+  
+  stopwords <- sort(unique(remove_umlauts(c(sw_1, sw_2, sw_3))))
     
   # Remove words deemed important for sentiment
   
-  stopwords <- stringr::str_remove_all(
+  stringr::str_remove_all(
     stopwords, 
     pattern = stringr::str_c(c(
       "gegen", 
@@ -55,8 +59,6 @@ get_stopwords <- function() {
       "^richtig",
       "^schlecht"),
     collapse = "|"))
-  
-  sort(stopwords)
 
 }
 
@@ -74,10 +76,7 @@ make_tokens <- function(corpus, stopwords) {
   
   quanteda::tokens_tolower(toks) %>%
     quanteda::tokens_select(min_nchar = 4) %>% 
-    quanteda::tokens_remove(c( # general noise
-      stopwords, 
-      "@*", 
-      "*innen")) %>% 
+    quanteda::tokens_remove(c(stopwords, "*innen")) %>% # general noise
     quanteda::tokens_remove( # context-specific noise
       stringr::str_c(c(
         "^(polit",

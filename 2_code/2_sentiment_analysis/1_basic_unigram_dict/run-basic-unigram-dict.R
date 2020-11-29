@@ -62,42 +62,35 @@ invisible(set_up_packages(packages_required))
 # Why does sourcing preprocess-tweets not work, only if functions are
 # assigned manually?
 
-files_required <- list(
-  here("2_code/1_preprocessing", "fun-get-data.R"),
-  here("2_code/1_preprocessing", "fun-preprocess-tweets.R"),
-  here("2_code/1_preprocessing", "fun-preprocess-meta.R")
-)
-invisible(sapply(files_required, source, .GlobalEnv))
+# files_required <- list(
+#   here("2_code/1_preprocessing", "fun-get-data.R"),
+#   here("2_code/1_preprocessing", "fun-preprocess-tweets.R"),
+#   here("2_code/1_preprocessing", "fun-preprocess-meta.R")
+# )
+# invisible(sapply(files_required, source, .GlobalEnv))
 
 # STEP 1: PRE-PROCESS DATA (PRIMITIVELY) ---------------------------------------
 
-# Read data and split into text and meta data
+# Read data (if retweets are still included, set option to TRUE)
 
-tweepy_df_subset <- 
-  get_data(path = here("1_scraping/output", "tweepy_df_subset.csv"))
+tweepy_df_subset <- get_data(
+  path = here("1_scraping/output", "tweepy_df_subset.csv"),
+  is_old_version = TRUE)
 
 # Process tweets in a very basic way - remove umlauts, symbols etc. but keep
-# text original otherwise
-# Feature extraction is carried out in step 2
+# text original otherwise (feature extraction is carried out in step 2);
+# convert list and date columns into suitable formats
 
-tweets_processed <- tweepy_df_subset %>% 
-  select(doc_id, full_text) %>% 
-  preprocess_basic() %>% 
-  mutate(word_count = quanteda::ntoken(full_text, remove_punct = TRUE))
+tweepy_df_subset_processed <- tweepy_df_subset %>% 
+  preprocess_basic(column = "full_text") %>% 
+  preprocess_meta(
+    list_columns = list("hashtags", "mentions"), 
+    date_columns = list("created_at"))
 
-# Process metadata
-
-tweets_metadata_processed <- tweepy_df_subset %>% 
-  select(-full_text) %>% 
-  preprocess_meta()
+tweepy_df_subset_processed[
+  , word_count := quanteda::ntoken(full_text, remove_punct = TRUE)]
 
 # Save for further analysis
-
-tweepy_df_subset_processed <- left_join(
-  tweets_metadata_processed, 
-  tweets_processed, 
-  by = "doc_id"
-)
 
 save(
   tweepy_df_subset_processed, 
@@ -142,7 +135,7 @@ topfeatures(tweets_dfm, 100)
 
 # STEP 5: CREATE DICTIONARY ----------------------------------------------------
 
-global_unigram_dictionary <- create_unigram_dict(
+global_unigram_dictionary <- make_unigram_dict(
   source_positive = here(
     "2_code/2_sentiment_analysis/1_basic_unigram_dict/dicts", 
     "GermanPolarityClues-Positive-21042012.tsv"),
@@ -167,24 +160,14 @@ sentiments_basic_unigram_dict <- get_sentiments_basic_unigram_dict(
   global_unigram_dictionary
 )
 
-# Determine confidence via difference in detected positive and negative labels,
-# weighted by number of found sentiments
-
-median_sentiments_found <- 
-  median(sentiments_basic_unigram_dict$sentiments_found)
-
-sentiments_basic_unigram_dict <- sentiments_basic_unigram_dict %>% 
-  mutate(
-    doc_id = as.numeric(doc_id),
-    confidence = sentiments_found / median_sentiments_found * abs(diff_pos)
-  )
-
-table(sentiments_basic_unigram_dict$label)
-
 # Append labels to data and save
 
-tweepy_df_subset_labeled <- tweepy_df_subset_processed %>% 
-  left_join(sentiments_basic_unigram_dict, by = "doc_id")
+if (nrow(tweepy_df_subset_processed) != nrow(sentiments_basic_unigram_dict)) {
+  stop("some rows appear to be missing, join will cause loss of data")
+}
+
+tweepy_df_subset_labeled <- tweepy_df_subset_processed[
+  sentiments_basic_unigram_dict, on = "doc_id"]
 
 save(
   tweepy_df_subset_labeled,

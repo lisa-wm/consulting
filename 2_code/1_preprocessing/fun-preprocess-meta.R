@@ -19,27 +19,27 @@ convert_array_to_list <- function(x) {
 
 # TOP-LEVEL FUNCTION -----------------------------------------------------------
 
-# FIXME Suppress warning that is displayed every time
-# FIXME Function is super slow - remove str_detect part, could be slow?
+preprocess_meta <- function(data, list_columns, date_columns) {
 
-preprocess_meta <- function(data) {
+  # Input checks & copy of data to avoid modification by reference
   
-  mdb_on_twitter <- unique(data$username)
+  assert_data_table(data)
+  assert_list(list_columns)
+  assert_list(date_columns)
   
-  data %>%
-    mutate_if(
-      stringr::str_detect(., "\\[.*?\\]"), 
-      ~ lapply(., convert_array_to_list)) %>% 
-    mutate(
-      created_at = as.POSIXct(
-        created_at,
-        format = "%Y-%m-%d %H:%M:%S", 
-        tz = "UTC")
-      # ,
-      # mentions_is_mdb = list(sapply(
-      #   unlist(mentions),
-      #   function(x) ifelse(x %in% mdb_on_twitter, 1, 0)))
-      )
+  if (any(!(unlist(c(list_columns, date_columns)) %in% names(data)))) {
+    stop("columns could not be found in data")
+  }
   
+  dt <- copy(data)
+  
+  # Converting Python arrays to list, date columns to POSIXct
+  
+  dt[, unlist(list_columns) := lapply(.SD, convert_array_to_list),
+     .SDcols = unlist(list_columns)
+     ][, unlist(date_columns) := lapply(.SD, as.POSIXct, tz = "UTC"),
+       .SDcols = unlist(date_columns)]
+
 }
+
 
