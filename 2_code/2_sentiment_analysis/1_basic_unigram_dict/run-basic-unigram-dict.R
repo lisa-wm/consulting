@@ -74,8 +74,8 @@ invisible(set_up_packages(packages_required))
 # Read data (if retweets are still included, set option to TRUE)
 
 tweepy_df_subset <- get_data(
-  path = here("1_scraping/output", "tweepy_df_subset.csv"),
-  is_old_version = TRUE)
+  path = here("1_scraping/output", "tweepy_df_subset_no_retweets.csv"),
+  is_old_version = FALSE)
 
 # Process tweets in a very basic way - remove umlauts, symbols etc. but keep
 # text original otherwise (feature extraction is carried out in step 2);
@@ -134,6 +134,8 @@ tweets_dfm <- make_dfm(
 topfeatures(tweets_dfm, 100)
 
 # STEP 5: CREATE DICTIONARY ----------------------------------------------------
+
+# Might take a couple of minutes
 
 global_unigram_dictionary <- make_unigram_dict(
   source_positive = here(
