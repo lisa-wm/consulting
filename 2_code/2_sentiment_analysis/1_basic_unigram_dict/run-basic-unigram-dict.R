@@ -114,6 +114,9 @@ tweets_corpus <- quanteda::corpus(
 
 # TODO Find good solution for stopwords
 # Perhaps consider negations only for bigrams?
+# TODO Find solution for negations
+# TODO Perform text normalization (i.e., from gooood to good, remove hyphens,
+# etc.)
 
 stopwords_custom <- get_stopwords()
 save(

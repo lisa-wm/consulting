@@ -61,6 +61,7 @@ preprocess_basic <- function(data, column) {
   assert_string(column)
 
   # TODO Make emoji extraction better
+  # TODO Classify emojis into positive and negative
   
   pattern_emoji <- stringr::str_c(c(
     "[^\001-\177]", # unicode emojis
