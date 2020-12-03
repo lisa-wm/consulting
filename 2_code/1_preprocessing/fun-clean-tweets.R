@@ -1,5 +1,5 @@
 # ------------------------------------------------------------------------------
-# PRE-PROCESSING TWEETS
+# TEXT CLEANING FOR TWEETS
 # ------------------------------------------------------------------------------
 
 # Purpose: pre-process data for NLP analyses
@@ -53,7 +53,7 @@ remove_symbols <- function(text) {
 # Remove all umlauts and symbols irrelevant to sentiment analysis,
 # extract emojis
 
-preprocess_basic <- function(data, column) {
+clean_tweets <- function(data, column) {
   
   # Input checks & copy of data to avoid modification by reference
   

@@ -10,7 +10,7 @@
 
 # TOP-LEVEL FUNCTIONS ----------------------------------------------------------
 
-make_tokens <- function(corpus, stopwords) {
+make_tokens_unigram <- function(corpus, stopwords) {
   
   toks <- quanteda::tokens(
     corpus,

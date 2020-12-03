@@ -10,7 +10,7 @@
 
 # TOP-LEVEL FUNCTIONS ----------------------------------------------------------
 
-make_dfm <- function(tokens, 
+make_dfm_unigram <- function(tokens, 
                      min_termfreq, 
                      stemming = FALSE,
                      tfidf = TRUE) {

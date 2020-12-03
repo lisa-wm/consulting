@@ -19,7 +19,7 @@ convert_array_to_list <- function(x) {
 
 # TOP-LEVEL FUNCTION -----------------------------------------------------------
 
-preprocess_meta <- function(data, list_columns, date_columns) {
+clean_meta <- function(data, list_columns, date_columns) {
 
   # Input checks & copy of data to avoid modification by reference
   

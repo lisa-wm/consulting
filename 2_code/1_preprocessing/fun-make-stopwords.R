@@ -8,20 +8,20 @@
 
 # TODO Make good stopword list
 
-get_stopwords <- function() {
+make_stopwords <- function() {
   
   # Collect stopwords from various sources
   
-  sw_1 <- stopwords("de")
+  sw_1 <- quanteda::stopwords("de")
   
   sw_2 <- xmlToDataFrame(xmlParse(here(
-    "2_code/2_sentiment_analysis/1_basic_unigram_dict/dicts", 
+    "2_code/2_sentiment_analysis/1_dict_based/dicts", 
     "german_stopwords.xml"), 
     encoding = "UTF-8")) %>% 
     unlist()
   
   sw_3 <- read.delim(here(
-    "2_code/2_sentiment_analysis/1_basic_unigram_dict/dicts", 
+    "2_code/2_sentiment_analysis/1_dict_based/dicts", 
     "stopwords-iso.txt"), encoding = "UTF-8") %>% 
     unlist()
   

@@ -6,7 +6,7 @@
 
 # HELPER FUNCTIONS -------------------------------------------------------------
 
-make_dict_germanpolarityclues <- function(file) {
+get_germanpolarityclues <- function(file) {
   
   dict <- data.table::fread(
     file,
@@ -36,10 +36,10 @@ make_dict_germanpolarityclues <- function(file) {
 
 # TODO Make this faster
 
-make_unigram_dict <- function(source_positive, source_negative) {
+make_dict_unigram <- function(source_positive, source_negative) {
   
-  dict_pos <- make_dict_germanpolarityclues(source_positive)
-  dict_neg <- make_dict_germanpolarityclues(source_negative)
+  dict_pos <- get_germanpolarityclues(source_positive)
+  dict_neg <- get_germanpolarityclues(source_negative)
  
   quanteda::dictionary(list(
     positive = unlist(dict_pos$derivatives),
