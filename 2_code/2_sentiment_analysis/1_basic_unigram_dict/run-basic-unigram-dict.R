@@ -112,6 +112,9 @@ tweets_corpus <- quanteda::corpus(
 
 # STEP 3: CREATE TOKENS --------------------------------------------------------
 
+# TODO Find good solution for stopwords
+# Perhaps consider negations only for bigrams?
+
 stopwords_custom <- get_stopwords()
 save(
   stopwords_custom, 
@@ -152,6 +155,10 @@ save(
     "2_code/2_sentiment_analysis/1_basic_unigram_dict/dicts",
     "global_unigram_dictionary.RData")
 )
+
+# load(here(
+#   "2_code/2_sentiment_analysis/1_basic_unigram_dict/dicts",
+#   "global_unigram_dictionary.RData"))
 
 # STEP 6: CLASSIFY SENTIMENTS --------------------------------------------------
 
