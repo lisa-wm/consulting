@@ -14,7 +14,9 @@ packages_required <-  c(
   "cld3",
   "checkmate",
   "testthat",
-  "XML"
+  "XML",
+  "mlr3",
+  "mlr3learners"
 )
 
 set_up_packages <- function(pkg) {

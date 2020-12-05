@@ -59,13 +59,20 @@ tweets_corpus <- quanteda::corpus(
 # etc.)
 
 stopwords_custom <- make_stopwords()
+
 save(
   stopwords_custom, 
-  file = here(
-    "2_code/2_sentiment_analysis/1_basic_unigram_dict/dicts",
-    "stopwords_custom.RData"))
+  file = here("2_code/1_preprocessing", "stopwords_custom.RData"))
+
+# load(here("2_code/1_preprocessing", "stopwords_custom.RData"))
 
 tweets_tokens_unigram <- make_tokens_unigram(tweets_corpus, stopwords_custom)
+
+save(
+  tweets_tokens_unigram,
+  file = here("2_code/1_preprocessing", "tweets_tokens_unigram.RData"))
+
+# load(here("2_code/1_preprocessing", "tweets_tokens_unigram.RData"))
 
 # STEP 4: CREATE DOCUMENT-FEATURE MATRICES -------------------------------------
 
@@ -76,5 +83,11 @@ tweets_dfm_unigram <- make_dfm_unigram(
   min_termfreq = 10,
   stemming = FALSE,
   tfidf = TRUE)
+
+save(
+  tweets_dfm_unigram,
+  file = here("2_code/1_preprocessing", "tweets_dfm_unigram.RData"))
+
+# load(here("2_code/1_preprocessing", "tweets_dfm_unigram.RData"))
 
 topfeatures(tweets_dfm_unigram, 100)
