@@ -29,7 +29,9 @@ model_list <- list(
     id = "rf")
 )
 
-graph_learners <- list(length(model_list))
+# TODO: Set up resampling
+
+graph_learners <- list()
 
 for (m in seq_along(model_list)) {
   
@@ -40,17 +42,12 @@ for (m in seq_along(model_list)) {
   
 }
 
-graph_learners[["random_classifier"]]$train(task)
-pred <- graph_learners[["random_classifier"]]$predict(task)
-pred$confusion
+confusion_matrices <- list()
 
-# Define inner loss and resampling procedure
-
-inner_loss <- list(
-  msr("classif.ce", id = "mmce_train", predict_sets = "train"),
-  msr("classif.ce", id = "mmce_test")
-)
-
-inner_resampling <- rsmp("cv", folds = 5)
-
-# Define outer loss and resampling procedure
+for (m in seq_along(graph_learners)) {
+  
+  graph_learners[[m]]$train(task)
+  pred <- graph_learners[[m]]$predict(task)
+  confusion_matrices[[model_list[[m]]$id]] <- pred$confusion
+  
+}
