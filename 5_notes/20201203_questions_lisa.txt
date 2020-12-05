@@ -1,0 +1,28 @@
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+CURRENT QUESTIONS
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+- Problem of missing labels
+  --> Our 200 something are not much considering we need train and test data for training PLUS untouched test set for tuning
+  --> We could use GermEval2017 data (tweets!)
+  --> Similar enough to our task?!
+  --> Maybe use them for pre-training somehow
+
+- What are we going to do about large number of non-sentiment-bearing tweets?
+  --> Find some rule to filter?
+  --> Introduce neutral class?
+
+- Topics: how helpful are S & P topics, really?
+  --> Can we leverage hashtags to find topics?
+  --> Check how usage of hashtags is distributed, maybe we can run a topic model on these (e.g., this expansion approach used for dictionaries)
+
+- Will we need aspects?
+  --> If so, how do we find them?
+  --> Maybe only for advanced techniques, i.e., BERT?
+  --> If so, could make sense to have Elisabeth & Naiwen's concept of entities (probably corresponding to our topics)
+
+- How do we proceed with lemmatization/stemming?
+
+- What about dictionaries? Rather spend time refining the unigram approach, or trying to set up n-gram classifications?
+
+- Data appears to be unbalanced (in favor of negative sentiment) - what are we going to do about this?
