@@ -64,39 +64,28 @@ task <- make_classification_task(
   target_column = "label"
 )
 
-# Create mlr3 pipe operator for textual preprocessing
-
-po_preprocessing <- mlr3pipelines::po(
-  "textvectorizer",
-  id = "textpreprocessing",
-  param_vals = list(
-    extra_stopwords = make_stopwords(),
-    tolower = TRUE,
-    stem = TRUE,
-    what = "word",
-    remove_punct = TRUE,
-    remove_numbers = TRUE,
-    min_termfreq = 1,
-    scheme_df = "inverse"))
+save(task, file = here("2_code/1_preprocessing", "task.RData"))
 
 # Create mlr3 graph, where one branch takes care of preprocessing the text
 # column while the other just passes the remaining features on
 
-to_process <- mlr3pipelines::selector_grep("full_text")
-rest <- mlr3pipelines::selector_invert(to_process)
+preprocessing_pipeline <- make_preprocessing_pipeline(
+  text_column = "full_text",
+  ngram = 1L
+)
 
-preprocessing_ppl <- mlr3pipelines::gunion(list(
-  mlr3pipelines::po("select", selector = to_process, id = "tweets") %>>% 
-    po_preprocessing,
-  mlr3pipelines::po("select", selector = rest, id = "rest"))) %>>%
-  mlr3pipelines::po("featureunion")
+preprocessing_pipeline$plot(html = FALSE)
 
-preprocessing_ppl$plot(html = FALSE)
+# Save pipeline to be used for machine learning classifiers
 
-# Save output as document-feature-matrix, to be used for both dictionary-based
-# and machine learning classifiers
+save(
+  preprocessing_pipeline,
+  file = here("2_code/1_preprocessing", "preprocessing_pipeline.RData"))
 
-tweets_dfm_unigram <- preprocessing_ppl$train(task)[[1]]$data()
+# Save output as document-feature-matrix to be used for dictionary-based
+# classifier
+
+tweets_dfm_unigram <- preprocessing_pipeline$train(task)[[1]]$data()
 
 save(
   tweets_dfm_unigram,

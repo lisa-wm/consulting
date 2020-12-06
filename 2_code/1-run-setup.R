@@ -16,6 +16,7 @@ packages_required <-  c(
   "mlr3learners", # machine learning learners
   "mlr3pipelines", # machine learning pipelining
   "mlr3tuning", # machine learning tuning
+  "paradox", # handling parameter spaces
   "quanteda", # natural language processing
   "spacyr", # lemmatization
   "testthat", # code testing
