@@ -1,120 +1,19 @@
 # ------------------------------------------------------------------------------
-# TRAINING (AND TUNING) GRAPH LEARNERS
+# TRAINING GRAPH LEARNERS
 # ------------------------------------------------------------------------------
 
-# Purpose: train and tune graph learners on training data (as of now, grid
-# search with a resolution of 10 values per parameter)
-
-# HELPER FUNCTIONS -------------------------------------------------------------
-
-# FIXME Ensure factor params are handled correctly
-
-get_hyperparameter_set <- function(graph_learner, hyperparameter_ranges) {
-  
-  # Get tunable hyperparameters of specified learner 
-  
-  learner <- graph_learner$graph$ids()[
-    which(stringr::str_detect(graph_learner$graph$ids(), "^classif."))]
-  
-  hp_set <- as.data.table(lrn(learner)$param_set)
-  
-  # Create paradox parameter objects for parameter set
-  
-  params_list <- list()
-  
-  for (hp in seq_along(hyperparameter_ranges)) {
-    
-    this_id <- hyperparameter_ranges[[hp]][[1]]
-    this_value <- hyperparameter_ranges[[hp]]$value
-    
-    # Check whether specified hyperparameters exist
-    
-    if (!(this_id %in% hp_set[, id])) {
-      stop(sprintf("%s is not a hyperparameter of %s", this_id, learner))
-    }
-    
-    # Find correct parameter class
-    
-    this_hp_set <- hp_set[id == this_id]
-    this_hp_class <- switch(
-      this_hp_set$storage_type,
-      character = "Fct",
-      numeric = "Dbl",
-      integer = "Int",
-      logical = "Lgl",
-      list = "Uty")
-    
-    # Instantiate new parameter (we need to prefix its ID with the learner ID
-    # as the parameters of the graph learner are prefixed with the corresponding
-    # pipeop)
-    
-    param <- do.call(
-      eval(parse(text = paste0("Param", this_hp_class, "$new"))),
-      append(
-        paste0(learner, ".", this_id),
-        this_value))
-    
-    params_list[[this_id]] <- param
-
-  }
-  
-  # Create paradox parameter set
-
-  param_set <- ps()
-  
-  for (hp in seq_along(hyperparameter_ranges)) {
-    param_set$add(params_list[[hp]])
-  }
-  
-  param_set
-  
-}
-
+# Purpose: set hyperparameters according to tuning results and train on training
+# data
 
 # TOP-LEVEL FUNCTIONS ----------------------------------------------------------
 
-train_graph_learner <- function(graph_learner,
-                                task,
-                                outer_resampling,
-                                outer_loss = mlr3::msr("classif.ce"),
-                                inner_resampling,
-                                inner_loss = mlr3::msr("classif.ce"),
-                                hyperparameter_ranges,
-                                tuning_iterations) {
+train_graph_learner <- function(graph_learner, tuning_result, training_data) {
   
-  # Define hyperparameter search space
+  set.seed(1)
   
-  hyperparameter_set <- get_hyperparameter_set(
-    graph_learner,
-    hyperparameter_ranges
-  )
-  
-  # Terminate tuning after fixed number of iterations
-  
-  terminator <- trm("evals", n_evals = tuning_iterations)
-  
-  # Set tuning algorithm to grid search
-  
-  tuner <- tnr("grid_search", resolution = 10)
-  
-  # Create autotuner object
-  
-  auto_tuner <- AutoTuner$new(
-    learner = graph_learner, 
-    resampling = inner_resampling, 
-    measure = inner_loss,
-    search_space = hyperparameter_set, 
-    terminator = terminator, 
-    tuner = tuner)
-
-  # Wrap in outer resampling loop
-  
-  resample(
-    task = task,
-    learner = auto_tuner,
-    resampling = outer_resampling,
-    store_models = TRUE)
+  graph_learner$param_set$values <- 
+    tuning_result$learners[[1]]$model$tuning_instance$result_learner_param_vals
+  graph_learner$train(training_data)
+  graph_learner
   
 }
-
-
