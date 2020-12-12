@@ -16,19 +16,43 @@
 load(here("2_code/1_preprocessing", "task.RData"))
 load(here("2_code/1_preprocessing", "preprocessing_pipeline.RData"))
 
-ml_models <- list(
-  svm = make_graph_learner(
-    learner_type = "svm",
-    learner_params = list(
-      kernel = "radial",
-      type = "C-classification"),
-    learner_name = "support_vector_machine",
-    preprocessing_pipeline = preprocessing_pipeline),
-  rf = make_graph_learner(
-    learner_type = "ranger",
-    learner_params = list(),
-    learner_name = "random_forest",
-    preprocessing_pipeline = preprocessing_pipeline))
+# Set up data.table with all models to be trained, including the hyperparameter
+# search spaces for tuning
+
+# id: character(1)
+# graph_learner: list containing graph learner from make_graph_learner()
+# tuning_search_space: list of hyperparameter ranges
+
+# TODO Check whether complicated list structure for tuning grid is really 
+# necessary - list of vectors caused error!
+
+ml_models <- rbindlist(list(
+  
+  data.table(
+    id = "svm",
+    graph_learner = list(learner = make_graph_learner(
+      learner_type = "svm",
+      learner_params = list(
+        kernel = "radial",
+        type = "C-classification"),
+      learner_name = "support_vector_machine",
+      preprocessing_pipeline = preprocessing_pipeline)$learner),
+    tuning_search_space = list(
+      list(id = "tolerance", value = list(0.001, 0.003)),
+      list(id = "type", value = list("C-classification", "nu-classification")))
+  ),
+
+  data.table(
+    id = "rf",
+    graph_learner = list(learner = make_graph_learner(
+      learner_type = "ranger",
+      learner_params = list(),
+      learner_name = "random_forest",
+      preprocessing_pipeline = preprocessing_pipeline)$learner),
+    tuning_search_space = list(
+      list(id = "num.trees", value = list(1L, 10L))))
+      
+))
 
 # STEP 2: TRAIN LEARNERS -------------------------------------------------------
 
@@ -40,20 +64,24 @@ test_data <- split$test
 
 # TODO Set seed (some models might be stochastic)
 
-# Define grid for hyperparameters
-
-# TODO Check whether different input format is better than nested lists
-
-hyperparameter_ranges <- list(
-  svm = list(
-    list("tolerance", value = list(0.001, 0.003)),
-    list("type", value = list("C-classification", "nu-classification"))),
-  rf = list(
-    list("num.trees", value = list(1L, 10L)),
-    list("min.node.size", value = list(1L, 2L)))
-)
-
 # Perform tuning
+
+ml_models[, tuning_results := lapply(
+  
+  seq_along(ml_models$id),
+  function(m) {
+    list(tune_graph_learner(
+      graph_learner = ml_models$graph_learner[[m]],
+      task = training_data,
+      outer_resampling = mlr3::rsmp("cv", folds = 2L),
+      inner_resampling = mlr3::rsmp("holdout"),
+      outer_loss = mlr3::msr("classif.ce"),
+      inner_loss = mlr3::msr("classif.ce"),
+      hyperparameter_ranges = ml_models$tuning_search_space[m],
+      tuning_iterations = 1L))
+    
+  })
+]
 
 tuning_results <- lapply(
   seq_along(ml_models), 
