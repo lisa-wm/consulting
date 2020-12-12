@@ -54,11 +54,11 @@ ml_models <- rbindlist(list(
       list(id = "num.trees", value = list(1L, 10L))))),
   
   data.table(
-    id = "log_reg",
+    id = "naive_bayes",
     graph_learner = list(learner = make_graph_learner(
-      learner_type = "log_reg",
+      learner_type = "naive_bayes",
       learner_params = list(),
-      learner_name = "logistic_regression",
+      learner_name = "naive_bayes",
       preprocessing_pipeline = preprocessing_pipeline)$learner),
     tuning_search_space = NA)
       
@@ -115,34 +115,30 @@ ml_models[, `:=` (
 
 # STEP 4: CLASSIFY SENTIMENTS --------------------------------------------------
 
-data_unlabeled <- copy(data_processed)[
-  , fake_label := factor(
-    sample(
-      c("negative", "positive"), 
-      size = nrow(data_processed),
-      replace = TRUE))]
+load(here("2_code", "data_processed.RData"))
 
-task_unlabeled <- make_classification_task(
-  task_name = "tweets_unlabeled",
-  data = data_unlabeled,
-  feature_columns = list(
-    "full_text", 
-    "retweet_count", 
-    "favorite_count",
-    "followers_count"),
-  target_column = "fake_label"
-)
-
-my_sample <- sample(task_unlabeled$nrow, 100)
-test_task <- task_unlabeled$clone()$filter(my_sample)
-
-data_classified_ml_based <- copy(data_unlabeled)
+data_classified_ml_based <- copy(data_processed)[
+  , sapply(
+    seq_along(ml_models$id), 
+    function(m) {
+      paste0("prob_pos_", ml_models$id[[m]])
+    }) :=
+    lapply(
+      seq_along(ml_models$id), 
+      function(m) {
+        ml_models$graph_learner_tuned[[m]]$predict_newdata(data_processed)$
+          prob[, "positive"]})]
 
 data_classified_ml_based[
-  , sapply(seq_along(ml_models_tuned_trained), function(m) {
-    paste0("label_", tail(
-        unlist(stringr::str_split(ml_models_tuned_trained[[m]]$id, "\\.")),
-        1))
-    }) := lapply(seq_along(ml_models_tuned_trained), function(m) {
-            ml_models_tuned_trained[[m]]$predict(task_unlabeled)$response
-          })]
+  , sapply(
+    seq_along(ml_models$id), 
+    function(m) {
+      paste0("label_", ml_models$id[[m]])
+    }) := lapply(.SD, function(i) ifelse(i >= 0.5, 1, 0)), 
+  .SDcols = names(data_classified_ml_based)[
+    grep("prob", names(data_classified_ml_based))]
+]
+
+save(
+  data_classified_ml_based,
+  file = here("2_code", "data_processed_labeled_ml.RData"))

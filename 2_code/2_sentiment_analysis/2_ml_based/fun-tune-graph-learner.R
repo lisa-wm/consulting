@@ -7,8 +7,6 @@
 
 # HELPER FUNCTIONS -------------------------------------------------------------
 
-# FIXME Ensure factor params are handled correctly
-
 get_hyperparameter_set <- function(graph_learner, hyperparameter_ranges) {
   
   # Get tunable hyperparameters of specified learner 
