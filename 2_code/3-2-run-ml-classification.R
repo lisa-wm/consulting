@@ -51,7 +51,16 @@ ml_models <- rbindlist(list(
       learner_name = "random_forest",
       preprocessing_pipeline = preprocessing_pipeline)$learner),
     tuning_search_space = list(list(
-      list(id = "num.trees", value = list(1L, 10L)))))
+      list(id = "num.trees", value = list(1L, 10L))))),
+  
+  data.table(
+    id = "log_reg",
+    graph_learner = list(learner = make_graph_learner(
+      learner_type = "log_reg",
+      learner_params = list(),
+      learner_name = "logistic_regression",
+      preprocessing_pipeline = preprocessing_pipeline)$learner),
+    tuning_search_space = NA)
       
 ))
 
@@ -70,15 +79,14 @@ test_data <- split$test
 ml_models[, tuning_results := lapply(
   .I,
   function(m) {list(tuning_result = tune_graph_learner(
-      graph_learner = ml_models$graph_learner[[m]],
+      graph_learner = graph_learner[[m]],
       task = training_data,
       outer_resampling = mlr3::rsmp("cv", folds = 2L),
       inner_resampling = mlr3::rsmp("holdout"),
       outer_loss = mlr3::msr("classif.ce"),
       inner_loss = mlr3::msr("classif.ce"),
-      hyperparameter_ranges = ml_models$tuning_search_space[[m]],
-      tuning_iterations = 1L))}
-)]
+      hyperparameter_ranges = tuning_search_space[[m]],
+      tuning_iterations = 1L))})]
 
 # Set model hyperparameters according to tuning results and train on training 
 # data
@@ -86,25 +94,24 @@ ml_models[, tuning_results := lapply(
 ml_models[, graph_learner_tuned := lapply(
   .I,
   function(m) {train_final_graph_learner(
-      graph_learner = ml_models$graph_learner[[m]],
-      tuning_result = ml_models$tuning_results[[m]]$tuning_result,
+      graph_learner = graph_learner[[m]],
+      tuning_result = tuning_results[[m]]$tuning_result,
       training_data
-    )}
-)]
+    )})]
 
 # STEP 3: EVALUATE LEARNERS ----------------------------------------------------
 
-predictions <- lapply(
-  seq_along(ml_models_tuned_trained),
-  function(m) ml_models_tuned_trained[[m]]$predict(test_data)
-)
+ml_models[, predictions_test_data := lapply(
+  .I,
+  function(m) graph_learner_tuned[[m]]$predict(test_data))]
 
-for (m in seq_along(predictions)) {
-  
-  print(predictions[[m]]$confusion)
-  print(predictions[[m]]$score())
-  
-} 
+ml_models[, `:=` (
+  score_test_data = lapply(
+    .I,
+    function(m) predictions_test_data[[m]]$score()),
+  confusion_test_data = lapply(
+    .I,
+    function(m) predictions_test_data[[m]]$confusion))]
 
 # STEP 4: CLASSIFY SENTIMENTS --------------------------------------------------
 

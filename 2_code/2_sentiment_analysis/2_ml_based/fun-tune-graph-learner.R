@@ -110,6 +110,8 @@ tune_graph_learner <- function(graph_learner,
                                hyperparameter_ranges,
                                tuning_iterations) {
   
+  if (any(is.na(hyperparameter_ranges))) return(NA)
+  
   set.seed(1)
   
   # Define hyperparameter search space
