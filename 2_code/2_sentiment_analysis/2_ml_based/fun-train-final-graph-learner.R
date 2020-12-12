@@ -7,7 +7,9 @@
 
 # TOP-LEVEL FUNCTIONS ----------------------------------------------------------
 
-train_graph_learner <- function(graph_learner, tuning_result, training_data) {
+train_final_graph_learner <- function(graph_learner, 
+                                      tuning_result, 
+                                      training_data) {
   
   set.seed(1)
   
