@@ -48,6 +48,18 @@ get_hyperparameter_set <- function(graph_learner, hyperparameter_ranges) {
     # as the parameters of the graph learner are prefixed with the corresponding
     # pipeop)
     
+    # As opposed to other parameter classes, for factor parameters the levels
+    # are specified as a single character vector parameter (e.g., for double,
+    # lower and upper are separate arguments so do.call can handle them as a
+    # list)
+    
+    # TODO Check whether this works for logical and utility parameters also 
+    
+    if (this_hp_class == "Fct") this_value <- list(unlist(this_value))
+    
+    # This looks so ugly because do.call calls a method here, not a function
+    # (and as such on an object that does not yet exist)
+    
     param <- do.call(
       eval(parse(text = paste0("Param", this_hp_class, "$new"))),
       append(

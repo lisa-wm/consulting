@@ -29,7 +29,9 @@ make_graph_learner <- function(preprocessing_pipeline,
   learner_id <- paste0("classif.", learner_type)
   
   if (!mlr3::mlr_learners$has(learner_id)) {
-    stop(sprintf("%s is not a learner supported by mlr3", learner_type))
+    stop(paste0(
+      sprintf("%s is not a learner supported by mlr3. ", learner_type),
+      "For a dictionary of supported learners, call mlr3::mlr_learners"))
   }
   
   # Make graph and graph learner

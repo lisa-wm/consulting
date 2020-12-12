@@ -51,6 +51,7 @@ make_preprocessing_pipeline <- function(text_column, ngram = 1L) {
     mlr3pipelines::po("select", selector = to_process, id = "tweets") %>>% 
       po_preprocessing,
     mlr3pipelines::po("select", selector = rest, id = "rest"))) %>>%
+    
     mlr3pipelines::po("featureunion")
   
 }

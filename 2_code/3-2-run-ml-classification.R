@@ -42,9 +42,12 @@ test_data <- split$test
 
 # Define grid for hyperparameters
 
+# TODO Check whether different input format is better than nested lists
+
 hyperparameter_ranges <- list(
   svm = list(
-    list("cost", value = list(1L, 2L))),
+    list("tolerance", value = list(0.001, 0.003)),
+    list("type", value = list("C-classification", "nu-classification"))),
   rf = list(
     list("num.trees", value = list(1L, 10L)),
     list("min.node.size", value = list(1L, 2L)))
