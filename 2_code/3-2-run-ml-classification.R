@@ -23,8 +23,9 @@ load(here("2_code/1_preprocessing", "preprocessing_pipeline.RData"))
 # graph_learner: list containing graph learner from make_graph_learner()
 # tuning_search_space: list of hyperparameter ranges
 
-# TODO Check whether complicated list structure for tuning grid is really 
-# necessary - list of vectors caused error!
+# TODO Fix that gruesome structure of umpteen nested lists
+# (as.list covers only first element, list of vectors for ranges caused some
+# weird error in resample)
 
 ml_models <- rbindlist(list(
   
@@ -67,10 +68,8 @@ test_data <- split$test
 # Perform tuning
 
 ml_models[, tuning_results := lapply(
-  
-  seq_along(ml_models$id),
-  function(m) {
-    list(tune_graph_learner(
+  .I,
+  function(m) {list(tuning_result = tune_graph_learner(
       graph_learner = ml_models$graph_learner[[m]],
       task = training_data,
       outer_resampling = mlr3::rsmp("cv", folds = 2L),
@@ -78,36 +77,20 @@ ml_models[, tuning_results := lapply(
       outer_loss = mlr3::msr("classif.ce"),
       inner_loss = mlr3::msr("classif.ce"),
       hyperparameter_ranges = ml_models$tuning_search_space[[m]],
-      tuning_iterations = 1L))
-    
-  })
-]
-
-tuning_results <- lapply(
-  seq_along(ml_models), 
-  function(m) {
-    tune_graph_learner(
-      graph_learner = ml_models[[m]]$learner,
-      task = training_data,
-      outer_resampling = mlr3::rsmp("cv", folds = 5L),
-      inner_resampling = mlr3::rsmp("holdout"),
-      outer_loss = mlr3::msr("classif.ce"),
-      inner_loss = mlr3::msr("classif.ce"),
-      hyperparameter_ranges = hyperparameter_ranges[[m]],
-      tuning_iterations = 1L)
-  })
+      tuning_iterations = 1L))}
+)]
 
 # Set model hyperparameters according to tuning results and train on training 
 # data
 
-ml_models_tuned_trained <- lapply(
-  seq_along(ml_models),
-  function(m) {
-    train_final_graph_learner(
-      ml_models[[m]]$learner, 
-      tuning_results[[m]], 
-      training_data)
-  })
+ml_models[, graph_learner_tuned := lapply(
+  .I,
+  function(m) {train_final_graph_learner(
+      graph_learner = ml_models$graph_learner[[m]],
+      tuning_result = ml_models$tuning_results[[m]]$tuning_result,
+      training_data
+    )}
+)]
 
 # STEP 3: EVALUATE LEARNERS ----------------------------------------------------
 
