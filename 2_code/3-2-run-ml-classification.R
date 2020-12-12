@@ -16,19 +16,53 @@
 load(here("2_code/1_preprocessing", "task.RData"))
 load(here("2_code/1_preprocessing", "preprocessing_pipeline.RData"))
 
-ml_models <- list(
-  svm = make_graph_learner(
-    learner_type = "svm",
-    learner_params = list(
-      kernel = "radial",
-      type = "C-classification"),
-    learner_name = "support_vector_machine",
-    preprocessing_pipeline = preprocessing_pipeline),
-  rf = make_graph_learner(
-    learner_type = "ranger",
-    learner_params = list(),
-    learner_name = "random_forest",
-    preprocessing_pipeline = preprocessing_pipeline))
+# Set up data.table with all models to be trained, including the hyperparameter
+# search spaces for tuning
+
+# id: character(1)
+# graph_learner: list containing graph learner from make_graph_learner()
+# tuning_search_space: list of hyperparameter ranges
+
+# TODO Fix that gruesome structure of umpteen nested lists
+# (as.list covers only first element, list of vectors for ranges caused some
+# weird error in resample)
+
+ml_models <- rbindlist(list(
+  
+  data.table(
+    id = "svm",
+    graph_learner = list(learner = make_graph_learner(
+      learner_type = "svm",
+      learner_params = list(
+        kernel = "radial",
+        type = "C-classification"),
+      learner_name = "support_vector_machine",
+      preprocessing_pipeline = preprocessing_pipeline)$learner),
+    tuning_search_space = list(list(
+      list(id = "tolerance", value = list(0.001, 0.003)),
+      list(id = "type", value = list("C-classification", "nu-classification"))))
+  ),
+
+  data.table(
+    id = "rf",
+    graph_learner = list(learner = make_graph_learner(
+      learner_type = "ranger",
+      learner_params = list(),
+      learner_name = "random_forest",
+      preprocessing_pipeline = preprocessing_pipeline)$learner),
+    tuning_search_space = list(list(
+      list(id = "num.trees", value = list(1L, 10L))))),
+  
+  data.table(
+    id = "naive_bayes",
+    graph_learner = list(learner = make_graph_learner(
+      learner_type = "naive_bayes",
+      learner_params = list(),
+      learner_name = "naive_bayes",
+      preprocessing_pipeline = preprocessing_pipeline)$learner),
+    tuning_search_space = NA)
+      
+))
 
 # STEP 2: TRAIN LEARNERS -------------------------------------------------------
 
@@ -40,91 +74,71 @@ test_data <- split$test
 
 # TODO Set seed (some models might be stochastic)
 
-# Define grid for hyperparameters
-
-# TODO Check whether different input format is better than nested lists
-
-hyperparameter_ranges <- list(
-  svm = list(
-    list("tolerance", value = list(0.001, 0.003)),
-    list("type", value = list("C-classification", "nu-classification"))),
-  rf = list(
-    list("num.trees", value = list(1L, 10L)),
-    list("min.node.size", value = list(1L, 2L)))
-)
-
 # Perform tuning
 
-tuning_results <- lapply(
-  seq_along(ml_models), 
-  function(m) {
-    tune_graph_learner(
-      graph_learner = ml_models[[m]]$learner,
+ml_models[, tuning_results := lapply(
+  .I,
+  function(m) {list(tuning_result = tune_graph_learner(
+      graph_learner = graph_learner[[m]],
       task = training_data,
-      outer_resampling = mlr3::rsmp("cv", folds = 5L),
+      outer_resampling = mlr3::rsmp("cv", folds = 2L),
       inner_resampling = mlr3::rsmp("holdout"),
       outer_loss = mlr3::msr("classif.ce"),
       inner_loss = mlr3::msr("classif.ce"),
-      hyperparameter_ranges = hyperparameter_ranges[[m]],
-      tuning_iterations = 1L)
-  })
+      hyperparameter_ranges = tuning_search_space[[m]],
+      tuning_iterations = 1L))})]
 
 # Set model hyperparameters according to tuning results and train on training 
 # data
 
-ml_models_tuned_trained <- lapply(
-  seq_along(ml_models),
-  function(m) {
-    train_final_graph_learner(
-      ml_models[[m]]$learner, 
-      tuning_results[[m]], 
-      training_data)
-  })
+ml_models[, graph_learner_tuned := lapply(
+  .I,
+  function(m) {train_final_graph_learner(
+      graph_learner = graph_learner[[m]],
+      tuning_result = tuning_results[[m]]$tuning_result,
+      training_data
+    )})]
 
 # STEP 3: EVALUATE LEARNERS ----------------------------------------------------
 
-predictions <- lapply(
-  seq_along(ml_models_tuned_trained),
-  function(m) ml_models_tuned_trained[[m]]$predict(test_data)
-)
+ml_models[, predictions_test_data := lapply(
+  .I,
+  function(m) graph_learner_tuned[[m]]$predict(test_data))]
 
-for (m in seq_along(predictions)) {
-  
-  print(predictions[[m]]$confusion)
-  print(predictions[[m]]$score())
-  
-} 
+ml_models[, `:=` (
+  score_test_data = lapply(
+    .I,
+    function(m) predictions_test_data[[m]]$score()),
+  confusion_test_data = lapply(
+    .I,
+    function(m) predictions_test_data[[m]]$confusion))]
 
 # STEP 4: CLASSIFY SENTIMENTS --------------------------------------------------
 
-data_unlabeled <- copy(data_processed)[
-  , fake_label := factor(
-    sample(
-      c("negative", "positive"), 
-      size = nrow(data_processed),
-      replace = TRUE))]
+load(here("2_code", "data_processed.RData"))
 
-task_unlabeled <- make_classification_task(
-  task_name = "tweets_unlabeled",
-  data = data_unlabeled,
-  feature_columns = list(
-    "full_text", 
-    "retweet_count", 
-    "favorite_count",
-    "followers_count"),
-  target_column = "fake_label"
-)
-
-my_sample <- sample(task_unlabeled$nrow, 100)
-test_task <- task_unlabeled$clone()$filter(my_sample)
-
-data_classified_ml_based <- copy(data_unlabeled)
+data_classified_ml_based <- copy(data_processed)[
+  , sapply(
+    seq_along(ml_models$id), 
+    function(m) {
+      paste0("prob_pos_", ml_models$id[[m]])
+    }) :=
+    lapply(
+      seq_along(ml_models$id), 
+      function(m) {
+        ml_models$graph_learner_tuned[[m]]$predict_newdata(data_processed)$
+          prob[, "positive"]})]
 
 data_classified_ml_based[
-  , sapply(seq_along(ml_models_tuned_trained), function(m) {
-    paste0("label_", tail(
-        unlist(stringr::str_split(ml_models_tuned_trained[[m]]$id, "\\.")),
-        1))
-    }) := lapply(seq_along(ml_models_tuned_trained), function(m) {
-            ml_models_tuned_trained[[m]]$predict(task_unlabeled)$response
-          })]
+  , sapply(
+    seq_along(ml_models$id), 
+    function(m) {
+      paste0("label_", ml_models$id[[m]])
+    }) := lapply(.SD, function(i) ifelse(i >= 0.5, 1, 0)), 
+  .SDcols = names(data_classified_ml_based)[
+    grep("prob", names(data_classified_ml_based))]
+]
+
+save(
+  data_classified_ml_based,
+  file = here("2_code", "data_processed_labeled_ml.RData"))

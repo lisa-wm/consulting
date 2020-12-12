@@ -7,8 +7,6 @@
 
 # HELPER FUNCTIONS -------------------------------------------------------------
 
-# FIXME Ensure factor params are handled correctly
-
 get_hyperparameter_set <- function(graph_learner, hyperparameter_ranges) {
   
   # Get tunable hyperparameters of specified learner 
@@ -24,6 +22,9 @@ get_hyperparameter_set <- function(graph_learner, hyperparameter_ranges) {
   
   for (hp in seq_along(hyperparameter_ranges)) {
     
+    # this_id <- names(hyperparameter_ranges)[hp]
+    # this_value <- hyperparameter_ranges[[this_id]]
+    
     this_id <- hyperparameter_ranges[[hp]][[1]]
     this_value <- hyperparameter_ranges[[hp]]$value
     
@@ -32,6 +33,13 @@ get_hyperparameter_set <- function(graph_learner, hyperparameter_ranges) {
     if (!(this_id %in% hp_set[, id])) {
       stop(sprintf("%s is not a hyperparameter of %s", this_id, learner))
     }
+    
+    # Make sure hyperparameters are not specified as a list (would crash do.call
+    # below)
+    
+    # if (test_list(this_value)) {
+    #   stop(sprintf("Values for %s must be specified as a vector", this_id))
+    # }
     
     # Find correct parameter class
     
@@ -54,6 +62,12 @@ get_hyperparameter_set <- function(graph_learner, hyperparameter_ranges) {
     # list)
     
     # TODO Check whether this works for logical and utility parameters also 
+    
+    # this_value <- ifelse(
+    #   this_hp_class == "Fct",
+    #   list(this_value), # one element per element of this_value
+    #   as.list(this_value) # single element with vector this_value
+    # )
     
     if (this_hp_class == "Fct") this_value <- list(unlist(this_value))
     
@@ -94,6 +108,8 @@ tune_graph_learner <- function(graph_learner,
                                hyperparameter_ranges,
                                tuning_iterations) {
   
+  if (any(is.na(hyperparameter_ranges))) return(NA)
+  
   set.seed(1)
   
   # Define hyperparameter search space
@@ -109,7 +125,7 @@ tune_graph_learner <- function(graph_learner,
   
   # Set tuning algorithm to grid search
   
-  tuner <- tnr("grid_search", resolution = 10)
+  tuner <- tnr("grid_search", resolution = 1L)
   
   # Create autotuner object
   
