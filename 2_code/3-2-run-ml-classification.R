@@ -63,7 +63,7 @@ tuning_results <- lapply(
       task = training_data,
       outer_resampling = mlr3::rsmp("cv", folds = 5L),
       inner_resampling = mlr3::rsmp("holdout"),
-      outer_loss = mlr3::msr("classif.auc"),
+      outer_loss = mlr3::msr("classif.ce"),
       inner_loss = mlr3::msr("classif.ce"),
       hyperparameter_ranges = hyperparameter_ranges[[m]],
       tuning_iterations = 1L)
@@ -75,7 +75,7 @@ tuning_results <- lapply(
 ml_models_tuned_trained <- lapply(
   seq_along(ml_models),
   function(m) {
-    train_graph_learner(
+    train_final_graph_learner(
       ml_models[[m]]$learner, 
       tuning_results[[m]], 
       training_data)
@@ -88,7 +88,12 @@ predictions <- lapply(
   function(m) ml_models_tuned_trained[[m]]$predict(test_data)
 )
 
-for (m in seq_along(predictions)) print(predictions[[m]]$confusion)
+for (m in seq_along(predictions)) {
+  
+  print(predictions[[m]]$confusion)
+  print(predictions[[m]]$score())
+  
+} 
 
 # STEP 4: CLASSIFY SENTIMENTS --------------------------------------------------
 
