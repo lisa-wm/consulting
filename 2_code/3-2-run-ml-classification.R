@@ -38,7 +38,6 @@ split <- make_train_test_split(task, ratio = 0.8)
 training_data <- split$train
 test_data <- split$test
 
-# TODO Outsource in function
 # TODO Set seed (some models might be stochastic)
 
 # Define grid for hyperparameters
@@ -55,43 +54,69 @@ hyperparameter_ranges <- list(
 
 tuning_results <- lapply(
   seq_along(ml_models), 
-  function(m) {train_graph_learner(
-    graph_learner = ml_models[[m]]$learner,
-    task = training_data,
-    outer_resampling = mlr3::rsmp("cv", folds = 5L),
-    inner_resampling = mlr3::rsmp("holdout"),
-    outer_loss = mlr3::msr("classif.auc"),
-    inner_loss = mlr3::msr("classif.ce"),
-    hyperparameter_ranges = hyperparameter_ranges[[m]],
-    tuning_iterations = 1L)}
-)
+  function(m) {
+    tune_graph_learner(
+      graph_learner = ml_models[[m]]$learner,
+      task = training_data,
+      outer_resampling = mlr3::rsmp("cv", folds = 5L),
+      inner_resampling = mlr3::rsmp("holdout"),
+      outer_loss = mlr3::msr("classif.auc"),
+      inner_loss = mlr3::msr("classif.ce"),
+      hyperparameter_ranges = hyperparameter_ranges[[m]],
+      tuning_iterations = 1L)
+  })
 
-# Set model hyperparameters according to tuning results
+# Set model hyperparameters according to tuning results and train on training 
+# data
 
-ml_models_tuned <- ml_models
-
-for (m in seq_along(ml_models_tuned)) {
-  
-  ml_models_tuned[[m]]$learner$param_set$values <- 
-    tuning_results[[m]]$learners[[1]]$model$tuning_instance$
-    result_learner_param_vals
-  
-}
-
-# Train models on training data
-
-lapply(
-  seq_along(ml_models_tuned),
-  function(m) ml_models_tuned[[m]]$learner$train(training_data))
+ml_models_tuned_trained <- lapply(
+  seq_along(ml_models),
+  function(m) {
+    train_graph_learner(
+      ml_models[[m]]$learner, 
+      tuning_results[[m]], 
+      training_data)
+  })
 
 # STEP 3: EVALUATE LEARNERS ----------------------------------------------------
 
 predictions <- lapply(
-  seq_along(ml_models_tuned),
-  function(m) ml_models_tuned[[m]]$learner$predict(test_data)
+  seq_along(ml_models_tuned_trained),
+  function(m) ml_models_tuned_trained[[m]]$predict(test_data)
 )
 
 for (m in seq_along(predictions)) print(predictions[[m]]$confusion)
 
 # STEP 4: CLASSIFY SENTIMENTS --------------------------------------------------
 
+data_unlabeled <- copy(data_processed)[
+  , fake_label := factor(
+    sample(
+      c("negative", "positive"), 
+      size = nrow(data_processed),
+      replace = TRUE))]
+
+task_unlabeled <- make_classification_task(
+  task_name = "tweets_unlabeled",
+  data = data_unlabeled,
+  feature_columns = list(
+    "full_text", 
+    "retweet_count", 
+    "favorite_count",
+    "followers_count"),
+  target_column = "fake_label"
+)
+
+my_sample <- sample(task_unlabeled$nrow, 100)
+test_task <- task_unlabeled$clone()$filter(my_sample)
+
+data_classified_ml_based <- copy(data_unlabeled)
+
+data_classified_ml_based[
+  , sapply(seq_along(ml_models_tuned_trained), function(m) {
+    paste0("label_", tail(
+        unlist(stringr::str_split(ml_models_tuned_trained[[m]]$id, "\\.")),
+        1))
+    }) := lapply(seq_along(ml_models_tuned_trained), function(m) {
+            ml_models_tuned_trained[[m]]$predict(task_unlabeled)$response
+          })]
