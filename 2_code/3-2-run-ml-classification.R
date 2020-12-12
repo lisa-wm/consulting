@@ -37,9 +37,9 @@ ml_models <- rbindlist(list(
         type = "C-classification"),
       learner_name = "support_vector_machine",
       preprocessing_pipeline = preprocessing_pipeline)$learner),
-    tuning_search_space = list(
+    tuning_search_space = list(list(
       list(id = "tolerance", value = list(0.001, 0.003)),
-      list(id = "type", value = list("C-classification", "nu-classification")))
+      list(id = "type", value = list("C-classification", "nu-classification"))))
   ),
 
   data.table(
@@ -49,8 +49,8 @@ ml_models <- rbindlist(list(
       learner_params = list(),
       learner_name = "random_forest",
       preprocessing_pipeline = preprocessing_pipeline)$learner),
-    tuning_search_space = list(
-      list(id = "num.trees", value = list(1L, 10L))))
+    tuning_search_space = list(list(
+      list(id = "num.trees", value = list(1L, 10L)))))
       
 ))
 
@@ -77,7 +77,7 @@ ml_models[, tuning_results := lapply(
       inner_resampling = mlr3::rsmp("holdout"),
       outer_loss = mlr3::msr("classif.ce"),
       inner_loss = mlr3::msr("classif.ce"),
-      hyperparameter_ranges = ml_models$tuning_search_space[m],
+      hyperparameter_ranges = ml_models$tuning_search_space[[m]],
       tuning_iterations = 1L))
     
   })
