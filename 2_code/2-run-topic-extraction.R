@@ -16,24 +16,53 @@ load(here("2_code", "rdata-tweets-processed.RData"))
 
 # Group on per-user, per-month level
 
-data_processed_user_monthly <- copy(data_processed)[
-  , .(username, created_at, full_text)
-  ][, `:=` (created_year = year(created_at), created_month = month(created_at))]
+# Append electoral and socioeconomic data
 
-tweets_concatenated <- data_processed_user_monthly[
-  , paste(full_text, collapse = " "), 
-  by = .(username, created_year, created_month)]
-setnames(tweets_concatenated, "V1", "full_text_user_month")
+data_user_monthly <- make_monthly_user_data(data_processed)
 
-data_processed_user_monthly <- unique(data_processed_user_monthly[
-  , .(username, created_year, created_month)
-  ])[tweets_concatenated, on = list(username, created_year, created_month)
-     ][, doc_id := .I]
+data_mp_level <- data.table::fread(
+  here("1_scraping/output", "abg_twitter_df.csv"),
+  encoding = "UTF-8",
+  sep = ",",
+  drop = "twitter")
+
+data_socio_electoral <- data.table::fread(
+  here("1_scraping/output", "socioeconomics_zweitstimmen_df.csv"),
+  encoding = "UTF-8",
+  sep = ",",
+  drop = c("district", "wahlkreis"))
+
+# FIXME Contains multiple (non-duplicate) rows per wahlkreis_nr
+
+data_socio_electoral <- data_socio_electoral[
+  , head(.SD, 1), by = wahlkreis_nr]
+
+data_user_monthly_covariates <- data_socio_electoral[
+  data_mp_level[data_user_monthly, on = "name_matching"],
+  on = "wahlkreis_nr"]
+
+# FIXME Change the following in Jupyter
+
+data_user_monthly_covariates[, i.bundesland := NULL]
+
+parties <- c("total", "spd", "linke", "gruene", "fdp", "afd", "cdu_csu")
+
+setnames(data_user_monthly_covariates, parties, paste0("vote_", parties))
+
+# FIXME Find out whether asterisks are really resigned MPs
+
+data_user_monthly_covariates <- data_user_monthly_covariates[
+  !stringr::str_detect(party, "\\*")
+  ][, `:=` (bundesland = as.factor(bundesland), party = as.factor(party))]
+
+levels(data_user_monthly_covariates$party) <- c(
+  "afd", "gruene", "cdu_csu", "linke", "fdp", "fraktionslos", "spd"
+)
 
 # Create corpus object
 
 tweets_corpus_user_monthly <- quanteda::corpus(
-  x = data_processed_user_monthly,
+  x = data_user_monthly_covariates,
   docid_field = "doc_id",
   text_field = "full_text_user_month")
 

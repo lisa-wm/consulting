@@ -46,13 +46,11 @@ sentiments_dict_unigrams <- make_sentiments_dict(
 )
 
 # Append labels to data and save
+# This may look the wrong way round but is actually data.table's way to perform
+# a left join
 
-if (nrow(data_processed) != nrow(sentiments_dict_unigrams)) {
-  stop("some rows appear to be missing, join will cause loss of data")
-}
-
-data_labeled_dict_unigrams <- data_processed[
-  sentiments_dict_unigrams, on = "doc_id"]
+data_labeled_dict_unigrams <- sentiments_dict_unigrams[
+  data_processed, on = "doc_id"]
 
 save(
   data_labeled_dict_unigrams,
