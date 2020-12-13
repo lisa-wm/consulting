@@ -58,7 +58,13 @@ make_stopwords <- function() {
       "nie",
       "^niemand",
       "^richtig",
-      "^schlecht"),
+      "^schlecht",
+      "^(polit",
+      "^bundesregier",
+      "^bundestag",
+      "^deutsch",
+      "berlin",
+      "prozent)"),
       collapse = "|"))
   
 }
