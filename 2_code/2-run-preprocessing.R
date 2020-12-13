@@ -44,6 +44,40 @@ save(
 
 # STEP 3: CREATE DOCUMENT-FEATURE-MATRIX ---------------------------------------
 
+# First, create corpus object
+
+tweets_corpus <- quanteda::corpus(
+  x = data_processed,
+  docid_field = "doc_id",
+  text_field = "full_text")
+
+# Tokenize corpus with custom stopwords
+
+tweets_tokens <- make_tokens(
+  corpus = tweets_corpus, 
+  stopwords = make_stopwords())
+
+# If desired, create n-grams (n = 1L this returns the original tokens)
+# The skip argument can be used to create n-grams from tokens that are not
+# immediate neighbors but further apart, which could be useful for German
+# (e.g., for a phrase like "Ich mag das nicht" it could be desirable to have a 
+# token "mag_nicht").
+
+tweets_unigrams <- quanteda::tokens_ngrams(tweets_tokens, n = 1L)
+tweets_bigrams <- quanteda::tokens_ngrams(tweets_tokens, n = 2L)
+
+# Create dfm
+
+tweets_dfm_unigrams <- make_dfm(
+  tokens_ngrams = tweets_unigrams,
+  min_termfreq = 1L
+)
+
+save(
+  tweets_dfm_unigrams,
+  file = here("2_code/1_preprocessing", "rdata-tweets-dfm-unigrams.RData")
+)
+
 # Conveniently, mlr3 works with quanteda for preprocessing texts, so this step
 # can be performed within a pipe operator which can afterwards be fed into a
 # graph learner. Simultaneously, the dfm can be extracted for further use in the
