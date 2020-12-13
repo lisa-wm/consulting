@@ -8,7 +8,7 @@
 
 # TOP-LEVEL FUNCTIONS ----------------------------------------------------------
 
-get_sentiments_dict_unigram <- function(dfm, dictionary) {
+make_sentiments_dict <- function(dfm, dictionary) {
   
   sentiments_df <- convert(
     dfm_lookup(dfm, dictionary),
