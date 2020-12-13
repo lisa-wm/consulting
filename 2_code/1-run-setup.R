@@ -7,16 +7,22 @@
 # Install, if necessary, and load required packages
 
 packages_required <-  c(
-  "here",
-  "tidyverse",
-  "data.table",
-  "quanteda",
-  "cld3",
-  "checkmate",
-  "testthat",
-  "XML",
-  "mlr3",
-  "mlr3learners"
+  
+  "checkmate", # input checking
+  "cld3", # language detection
+  "data.table", # data wrangling
+  "here", # path management
+  "mlr3", # machine learning basics
+  "mlr3learners", # machine learning learners
+  "mlr3pipelines", # machine learning pipelining
+  "mlr3tuning", # machine learning tuning
+  "paradox", # handling parameter spaces
+  "quanteda", # natural language processing
+  "spacyr", # lemmatization
+  "testthat", # code testing
+  "tidyverse", # data wrangling
+  "XML" # xml parsing
+  
 )
 
 set_up_packages <- function(pkg) {

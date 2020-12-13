@@ -6,9 +6,8 @@
 
 # Steps:
 # 1. Perform basic text cleaning
-# 2. Create corpus
-# 3. Create tokens
-# 4. Create document-feature matrices
+# 2. Perform lemmatization
+# 2. Create document-feature-matrix using mlr3's text pipeop
 
 # STEP 1: PERFORM BASIC TEXT CLEANING ------------------------------------------
 
@@ -23,8 +22,8 @@ data_raw <- get_data(
 # convert list and date columns into suitable formats
 
 data_processed <- data_raw %>% 
-  clean_tweets(column = "full_text") %>% 
-  clean_meta(
+  make_clean_tweets(column = "full_text") %>% 
+  make_clean_meta(
     list_columns = list("hashtags", "mentions"), 
     date_columns = list("created_at"))
 
@@ -34,60 +33,62 @@ data_processed[, word_count := quanteda::ntoken(full_text, remove_punct = TRUE)]
 
 save(
   data_processed, 
-  file = here("2_code", "tweepy_df_subset_processed.RData")
+  file = here("2_code", "data_processed.RData")
 )
 
-# STEP 2: CREATE CORPUS --------------------------------------------------------
+# load(here("2_code", "data_processed.RData"))
 
-# Create quanteda corpus (non-text columns are preserved and can be accessed
-# via docvars())
+# STEP 2: PERFORM LEMMATIZATION ------------------------------------------------
 
-# load(here("2_code", "tweepy_df_subset_processed.RData"))
+# TODO Implement lemmatization (if necessary)
 
-tweets_corpus <- quanteda::corpus(
-  data_processed,
-  docid_field = "doc_id",
-  text_field = "full_text"
+# STEP 3: CREATE DOCUMENT-FEATURE-MATRIX ---------------------------------------
+
+# Conveniently, mlr3 works with quanteda for preprocessing texts, so this step
+# can be performed within a pipe operator which can afterwards be fed into a
+# graph learner. Simultaneously, the dfm can be extracted for further use in the
+# dictionary-based approach.
+
+# Create mlr3 task
+
+# load(here("2_code/0_training_data", "training_data_annotated.RData"))
+
+task <- make_classification_task(
+  task_name = "tweets",
+  data = training_data_annotated,
+  feature_columns = list(
+    "full_text", 
+    "retweet_count", 
+    "favorite_count",
+    "followers_count"),
+  target_column = "label"
 )
 
-# STEP 3: CREATE TOKENS --------------------------------------------------------
+save(task, file = here("2_code/1_preprocessing", "task.RData"))
 
-# TODO Find good solution for stopwords
-# Perhaps consider negations only for bigrams?
-# TODO Find solution for negations
-# TODO Perform text normalization (i.e., from gooood to good, remove hyphens,
-# etc.)
+# Create mlr3 graph, where one branch takes care of preprocessing the text
+# column while the other just passes the remaining features on
 
-stopwords_custom <- make_stopwords()
+preprocessing_pipeline <- make_preprocessing_pipeline(
+  text_column = "full_text",
+  ngram = 1L
+)
 
-save(
-  stopwords_custom, 
-  file = here("2_code/1_preprocessing", "stopwords_custom.RData"))
+preprocessing_pipeline$plot(html = FALSE)
 
-# load(here("2_code/1_preprocessing", "stopwords_custom.RData"))
-
-tweets_tokens_unigram <- make_tokens_unigram(tweets_corpus, stopwords_custom)
+# Save pipeline to be used for machine learning classifiers
 
 save(
-  tweets_tokens_unigram,
-  file = here("2_code/1_preprocessing", "tweets_tokens_unigram.RData"))
+  preprocessing_pipeline,
+  file = here("2_code/1_preprocessing", "preprocessing_pipeline.RData"))
 
-# load(here("2_code/1_preprocessing", "tweets_tokens_unigram.RData"))
+# Save output as document-feature-matrix to be used for dictionary-based
+# classifier
 
-# STEP 4: CREATE DOCUMENT-FEATURE MATRICES -------------------------------------
-
-# Create dfm out of processed tweets
-
-tweets_dfm_unigram <- make_dfm_unigram(
-  tweets_tokens_unigram,
-  min_termfreq = 10,
-  stemming = FALSE,
-  tfidf = TRUE)
+tweets_dfm_unigram <- preprocessing_pipeline$train(task)[[1]]$data()
 
 save(
   tweets_dfm_unigram,
-  file = here("2_code/1_preprocessing", "tweets_dfm_unigram.RData"))
+  file = here("2_code/1_preprocessing", "tweets_dfm_unigram.RData")
+)
 
-# load(here("2_code/1_preprocessing", "tweets_dfm_unigram.RData"))
-
-topfeatures(tweets_dfm_unigram, 100)
