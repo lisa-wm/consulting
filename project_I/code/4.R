@@ -34,92 +34,92 @@ data_corpus <- readRDS("./output/prep_monthly.rds") # data containing raw tweets
 # # ---------------------------------------- Hyperparameter Search -------------------------------
 # # ----------------------------------------------------------------------------------------------
 # 
-# # specify model for use of searchK function
-# covar <- "Partei+ Bundesland + s(t, df = 5) + s(Struktur_4, df = 5) + 
-#   s(Struktur_22, df = 5) + s(Struktur_42, df = 5) + s(Struktur_54, df = 5)"
-# content_var <- "Partei"
-# outcome <- ""
-# prevalence <- as.formula(paste(outcome, covar, sep = "~")) 
-# 
-# # search hyperparameter space for optimal K using searchK function
-# hyperparameter_search <- stm::searchK(
-#   documents = data$documents,
-#   vocab = data$vocab,
-#   data = data$meta,
-#   K = c(5,10,15,20,25,30,35,40),
-#   prevalence = prevalence,
-#   heldout.seed = 123,
-#   max.em.its = 200,
-#   init.type = "Spectral"
-# )
-# saveRDS(hyperparameter_search, "./output/searchK_data.rds")
-# 
-# # load searchK results
-# searchK_data <- readRDS("./output/searchK_data.rds")
-# 
-# # plot four metrics used for hyperparameter search 
-# plot_heldout <- ggplot(data = searchK_data$results, aes(x = K, y = heldout)) +
-#   geom_line() +
-#   geom_point() +
-#   labs(y = "held-out likelihood") +
-#   theme_minimal() +
-#   theme(axis.text.x = element_text(vjust = 1, size = 12, hjust = 1),
-#         axis.title.x = element_text(size = 12, face = "bold"),
-#         axis.title.y = element_text(size = 12, face = "bold"))
-# 
-# plot_semcoh <- ggplot(data = searchK_data$results, aes(x = K, y = semcoh)) + 
-#   geom_line() +
-#   geom_point() +
-#   labs(y = "semantic coherence") +
-#   theme_minimal() +
-#   theme(axis.text.x = element_text(vjust = 1, size = 12, hjust = 1),
-#         axis.title.x = element_text(size = 12, face = "bold"),
-#         axis.title.y = element_text(size = 12, face = "bold"))
-# 
-# plot_exclus <- ggplot(data = searchK_data$results, aes(x = K, y = exclus)) +
-#   geom_line() +
-#   geom_point() +
-#   labs(y = "exclusivity") +
-#   theme_minimal() +
-#   theme(axis.text.x = element_text(vjust = 1, size = 12, hjust = 1),
-#         axis.title.x = element_text(size = 12, face = "bold"),
-#         axis.title.y = element_text(size = 12, face = "bold"))
-# 
-# plot_residual <- ggplot(data = searchK_data$results, aes(x = K, y = residual)) + 
-#   geom_line() +
-#   geom_point() +
-#   labs(y = "residuals") +
-#   theme_minimal() +
-#   theme(axis.text.x = element_text(vjust = 1, size = 12, hjust = 1),
-#         axis.title.x = element_text(size = 12, face = "bold"),
-#         axis.title.y = element_text(size = 12, face = "bold"))
-# 
-# gridExtra::grid.arrange(plot_heldout, plot_semcoh, plot_exclus, plot_residual, ncol=2)
+# specify model for use of searchK function
+covar <- "Partei+ Bundesland + s(t, df = 5) + s(Struktur_4, df = 5) +
+  s(Struktur_22, df = 5) + s(Struktur_42, df = 5) + s(Struktur_54, df = 5)"
+content_var <- "Partei"
+outcome <- ""
+prevalence <- as.formula(paste(outcome, covar, sep = "~"))
+
+# search hyperparameter space for optimal K using searchK function
+hyperparameter_search <- stm::searchK(
+  documents = data$documents,
+  vocab = data$vocab,
+  data = data$meta,
+  K = c(3, 4, 5, 6, 7, 8, 9),
+  prevalence = prevalence,
+  heldout.seed = 123,
+  max.em.its = 200,
+  init.type = "Spectral"
+)
+saveRDS(hyperparameter_search, "./output/searchK_data.rds")
+
+# load searchK results
+searchK_data <- readRDS("./output/searchK_data.rds")
+
+# plot four metrics used for hyperparameter search
+plot_heldout <- ggplot(data = searchK_data$results, aes(x = K, y = heldout)) +
+  geom_line() +
+  geom_point() +
+  labs(y = "held-out likelihood") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(vjust = 1, size = 12, hjust = 1),
+        axis.title.x = element_text(size = 12, face = "bold"),
+        axis.title.y = element_text(size = 12, face = "bold"))
+
+plot_semcoh <- ggplot(data = searchK_data$results, aes(x = K, y = semcoh)) +
+  geom_line() +
+  geom_point() +
+  labs(y = "semantic coherence") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(vjust = 1, size = 12, hjust = 1),
+        axis.title.x = element_text(size = 12, face = "bold"),
+        axis.title.y = element_text(size = 12, face = "bold"))
+
+plot_exclus <- ggplot(data = searchK_data$results, aes(x = K, y = exclus)) +
+  geom_line() +
+  geom_point() +
+  labs(y = "exclusivity") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(vjust = 1, size = 12, hjust = 1),
+        axis.title.x = element_text(size = 12, face = "bold"),
+        axis.title.y = element_text(size = 12, face = "bold"))
+
+plot_residual <- ggplot(data = searchK_data$results, aes(x = K, y = residual)) +
+  geom_line() +
+  geom_point() +
+  labs(y = "residuals") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(vjust = 1, size = 12, hjust = 1),
+        axis.title.x = element_text(size = 12, face = "bold"),
+        axis.title.y = element_text(size = 12, face = "bold"))
+
+gridExtra::grid.arrange(plot_heldout, plot_semcoh, plot_exclus, plot_residual, ncol=2)
 # 
 # # ----------------------------------------------------------------------------------------------
 # # ---------------------------------------- Model Fitting ---------------------------------------
 # # ----------------------------------------------------------------------------------------------
 # 
-# # choose covariates and number of topics
-# covar <- "Partei+ Bundesland + s(t, df = 5) + s(Struktur_4, df = 5) +
-#   s(Struktur_22, df = 5) + s(Struktur_42, df = 5) + s(Struktur_54, df = 5)"
-# content_var <- "Partei"
-# outcome <- ""
-# prevalence <- as.formula(paste(outcome, covar, sep = "~"))
-# K <- 15
-# 
-# # fit model
-# mod_prev <- stm::stm(
-#   documents = data$documents,
-#   vocab = data$vocab,
-#   data = data$meta,
-#   K = K,
-#   prevalence = prevalence,
-#   gamma.prior = 'L1',
-#   seed = 123,
-#   max.em.its = 200,
-#   init.type = "Spectral")
-# saveRDS(mod_prev, "./output/mod_prev_monthly.rds")
+# choose covariates and number of topics
+covar <- "Partei+ Bundesland + s(t, df = 5) + s(Struktur_4, df = 5) +
+  s(Struktur_22, df = 5) + s(Struktur_42, df = 5) + s(Struktur_54, df = 5)"
+content_var <- "Partei"
+outcome <- ""
+prevalence <- as.formula(paste(outcome, covar, sep = "~"))
+K <- 8
+
+# fit model
+mod_prev <- stm::stm(
+  documents = data$documents,
+  vocab = data$vocab,
+  data = data$meta,
+  K = K,
+  prevalence = prevalence,
+  gamma.prior = 'L1',
+  seed = 123,
+  max.em.its = 200,
+  init.type = "Spectral")
+saveRDS(mod_prev, "./output/mod_prev_monthly.rds")
 
 # load fitted model
 mod_prev <- readRDS("./output/mod_prev_monthly.rds")
@@ -177,23 +177,23 @@ topic_labels <- list(
 topic_words
 
 ## word cloud for selected topic
-stm::cloud(mod_prev, topic = topic_number, scale = c(2.0, 0.25))
+stm::cloud(mod_prev, topic = 8, scale = c(2.0, 0.25))
 
 # (2)
 ## create variable 'docname' used for matching of raw tweets
 data_corpus$docname <- paste0(data_corpus$Twitter_Username, "_", data_corpus$Jahr, "_", data_corpus$Monat)
 
-# ## match raw tweets with main data
-# repr_docs <-  topic_props %>%
-#   arrange(desc(!!as.symbol(topic_number_long))) %>% # order by topic proportion of selected topic, in decreasing order
-#   .[1:docs_number, c("Name", "docname", "Datum", "Partei", "Bundesland", "Topic1")] %>% # select variables from main data to be included in output table
-#   left_join(data_corpus[,c("Tweets_Dokument", "docname")], # select variables from data_corpus to be included
-#             by = "docname") # specify matching variable
-# 
-# ## most representative documents for selected topic
-# substr(repr_docs$Tweets_Dokument[1], 0, 256) # view most representative document
-# substr(repr_docs$Tweets_Dokument[2], 0, 254) # view second most representative document
-# 
+## match raw tweets with main data
+repr_docs <-  topic_props %>%
+  arrange(desc(!!as.symbol("Topic8"))) %>% # order by topic proportion of selected topic, in decreasing order
+  .[1:docs_number, c("Name", "docname", "Datum", "Partei", "Bundesland", "Topic1")] %>% # select variables from main data to be included in output table
+  left_join(data_corpus[,c("Tweets_Dokument", "docname")], # select variables from data_corpus to be included
+            by = "docname") # specify matching variable
+
+## most representative documents for selected topic
+substr(repr_docs$Tweets_Dokument[1], 0, 256) # view most representative document
+substr(repr_docs$Tweets_Dokument[2], 0, 254) # view second most representative document
+
 # # (3)
 # topic_labels[[topic_number]] <- "right/nationalist"
 # 
