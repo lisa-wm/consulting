@@ -1,0 +1,101 @@
+\documentclass[12pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage{ragged2e}
+\usepackage[hang,flushmargin]{footmisc} 
+\setlength{\headheight}{14.5pt}
+\setlength{\parindent}{0pt}
+\interfootnotelinepenalty = 10000
+\renewcommand{\labelitemi}{$\circ$}
+\renewcommand{\labelitemii}{$\circ$}
+\renewcommand{\labelitemiii}{$\circ$}
+\renewcommand{\labelitemiv}{$\circ$}
+
+\usepackage{Sweave}
+\begin{document}
+\input{20201213_status-quo_lisa-concordance}
+
+\section*{What is there}
+
+\begin{itemize}
+  \item Scraping
+  \begin{itemize}
+    \item Python script
+  \end{itemize}
+  \item Topic extraction
+  \begin{itemize}
+    \item STM model (Simon \& Patrick)
+  \end{itemize}
+  \item Sentiment Analysis
+  \begin{itemize}
+    \item Training data
+    \begin{itemize}
+      \item Manually annotated tweets ($\sim 200$)
+    \end{itemize}
+    \item Feature extraction
+    \begin{itemize}
+      \item DFM of n-grams (clean of umlauts, symbols, stopwords; stemmed)
+      \item Hashtags, emojis
+    \end{itemize}
+    \item Models
+    \begin{itemize}
+      \item Dictionary-based
+      \begin{itemize}
+        \item Unigram-based model with third-party dictionaries
+      \end{itemize}
+      \item ML-based
+      \begin{itemize}
+        \item Full \texttt{mlr3} pipeline that performs preprocessing, training,
+        tuning and evaluation in a nested resampling framework
+        \item Models and metrics easily customized
+      \end{itemize}
+    \end{itemize}
+  \end{itemize}
+  
+\end{itemize}
+
+\newpage
+
+\section*{What remains open}
+
+\begin{itemize}
+  \item Scraping
+  \begin{itemize}
+    \item R script - already implemented in parts but suspended for the time
+    being
+  \end{itemize}
+  \item Topic extraction
+  \begin{itemize}
+    \item Alternative topic models
+    \item Incorporation of hashtags
+  \end{itemize}
+  \item Sentiment Analysis
+  \begin{itemize}
+    \item Training data
+    \begin{itemize}
+      \item Probably a lot more required -- worth the effort?
+      \item Third-party data for pre-training (e.g., GermEval2017)?
+    \end{itemize}
+    \item Feature extraction
+    \begin{itemize}
+      \item Lemmatization -- no good \texttt{R} option for German found yet;
+      even worth it?
+      \item POS tagging
+      \item Incorporation of emojis
+      \item Comparison of different weighting schemes
+    \end{itemize}
+    \item Models
+    \begin{itemize}
+      \item Dictionary-based
+      \begin{itemize}
+        \item n-gram models
+        \item Custom dictionaries (e.g., by expansion)
+      \end{itemize}
+      \item ML-based
+      \begin{itemize}
+        \item Definition of evaluation metric (inner + outer)
+        \item Model selection
+      \end{itemize}
+    \end{itemize}
+  \end{itemize}
+
+\end{document}
