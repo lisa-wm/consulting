@@ -15,17 +15,17 @@
 
 global_dict_unigrams <- make_dict_unigram(
   source_positive = here(
-    "2_code/2_sentiment_analysis/1_dict_based/dicts", 
+    "2_code/3_sentiment_analysis/1_dict_based/dicts", 
     "GermanPolarityClues-Positive-21042012.tsv"),
   source_negative = here(
-    "2_code/2_sentiment_analysis/1_dict_based/dicts", 
+    "2_code/3_sentiment_analysis/1_dict_based/dicts", 
     "GermanPolarityClues-Negative-21042012.tsv")
 )
 
 save(
   global_dict_unigrams,
   file = here(
-    "2_code/2_sentiment_analysis/1_dict_based",
+    "2_code/3_sentiment_analysis/1_dict_based",
     "rdata-global-dict-unigrams.RData")
 )
 

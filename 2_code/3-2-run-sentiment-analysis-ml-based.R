@@ -38,7 +38,7 @@ task <- make_classification_task(
 
 save(
   task, 
-  file = here("2_code/2_sentiment_analysis/2_ml_based", "rdata-ml-task.RData"))
+  file = here("2_code/3_sentiment_analysis/2_ml_based", "rdata-ml-task.RData"))
 
 # Create mlr3 graph, where one branch takes care of preprocessing the text
 # column while the other just passes the remaining features on
@@ -57,7 +57,7 @@ preprocessing_pipeline$plot(html = FALSE)
 save(
   preprocessing_pipeline,
   file = here(
-    "2_code/2_sentiment_analysis/2_ml_based", 
+    "2_code/3_sentiment_analysis/2_ml_based", 
     "rdata-preprocessing-pipeline.RData"))
 
 # STEP 2: CREATE LEARNERS ------------------------------------------------------
