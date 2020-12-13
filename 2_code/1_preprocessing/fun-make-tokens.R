@@ -12,7 +12,7 @@
 
 make_tokens <- function(corpus, stopwords) {
   
-  toks <- quanteda::token(
+  toks <- quanteda::tokens(
     corpus,
     remove_punct = TRUE, 
     remove_numbers = TRUE,

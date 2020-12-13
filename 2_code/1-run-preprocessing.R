@@ -29,6 +29,8 @@ data_processed <- data_raw %>%
 
 data_processed[, word_count := quanteda::ntoken(full_text, remove_punct = TRUE)]
 
+# TODO Remove resigned MP
+
 # Save for further analysis
 
 save(
