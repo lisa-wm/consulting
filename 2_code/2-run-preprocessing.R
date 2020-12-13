@@ -33,10 +33,10 @@ data_processed[, word_count := quanteda::ntoken(full_text, remove_punct = TRUE)]
 
 save(
   data_processed, 
-  file = here("2_code", "data_processed.RData")
+  file = here("2_code", "rdata-tweets-processed.RData")
 )
 
-# load(here("2_code", "data_processed.RData"))
+# load(here("2_code", "rdata-tweets-processed.RData"))
 
 # STEP 2: PERFORM LEMMATIZATION ------------------------------------------------
 
@@ -51,7 +51,7 @@ save(
 
 # Create mlr3 task
 
-# load(here("2_code/0_training_data", "training_data_annotated.RData"))
+load(here("2_code/0_training_data", "rdata-training-data-annotated.RData"))
 
 task <- make_classification_task(
   task_name = "tweets",
@@ -64,7 +64,7 @@ task <- make_classification_task(
   target_column = "label"
 )
 
-save(task, file = here("2_code/1_preprocessing", "task.RData"))
+save(task, file = here("2_code/1_preprocessing", "rdata-ml-task.RData"))
 
 # Create mlr3 graph, where one branch takes care of preprocessing the text
 # column while the other just passes the remaining features on
@@ -80,15 +80,17 @@ preprocessing_pipeline$plot(html = FALSE)
 
 save(
   preprocessing_pipeline,
-  file = here("2_code/1_preprocessing", "preprocessing_pipeline.RData"))
+  file = here("2_code/1_preprocessing", "rdata-preprocessing-pipeline.RData"))
 
 # Save output as document-feature-matrix to be used for dictionary-based
 # classifier
 
 tweets_dfm_unigram <- preprocessing_pipeline$train(task)[[1]]$data()
 
+dfm(data.frame(tweets_dfm_unigram[1:10, 1:5]))
+
 save(
   tweets_dfm_unigram,
-  file = here("2_code/1_preprocessing", "tweets_dfm_unigram.RData")
+  file = here("2_code/1_preprocessing", "rdata-tweets-dfm-unigram.RData")
 )
 

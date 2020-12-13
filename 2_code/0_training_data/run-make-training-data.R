@@ -5,11 +5,11 @@
 # Purpose: append manual annotations to tweets subset
 
 load(here(
-  "2_code", "tweepy_df_subset_processed.RData"
+  "2_code/attic", "tweepy_df_subset_processed.RData"
 ))
 
 tweets_annotated <- fread(
-  here("2_code/0_training_data", "tweepy_df_subset_labeled_manually.csv"),
+  here("2_code/0_training_data", "data-tweepy-df-subset-labeled-manually.csv"),
   encoding = "UTF-8",
   sep = ";")
 
@@ -19,4 +19,4 @@ training_data_annotated <- tweepy_df_subset_processed[
 
 save(
   training_data_annotated,
-  file = here("2_code/0_training_data", "training_data_annotated.RData"))
+  file = here("2_code/0_training_data", "rdata-training-data-annotated.RData"))

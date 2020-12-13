@@ -13,7 +13,7 @@
 
 # STEP 1: CREATE LEARNERS ------------------------------------------------------
 
-load(here("2_code/1_preprocessing", "task.RData"))
+load(here("2_code/1_preprocessing", "rdata-ml-task.RData"))
 load(here("2_code/1_preprocessing", "preprocessing_pipeline.RData"))
 
 # Set up data.table with all models to be trained, including the hyperparameter

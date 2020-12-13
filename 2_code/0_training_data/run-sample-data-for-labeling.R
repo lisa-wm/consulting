@@ -4,7 +4,7 @@
 
 library(here)
 
-load(here("2_code", "tweepy_df_subset_processed.RData"))
+load(here("2_code/attic", "tweepy_df_subset_processed.RData"))
 
 set.seed(123)
 
@@ -20,7 +20,13 @@ tweepy_subset_labeling_lisa <- tweepy_df_subset_processed[!labels_asmik]
   tweepy_subset_labeling_asmik$doc_id, 
   tweepy_subset_labeling_lisa$doc_id)))
 
-save(tweepy_subset_labeling_asmik, 
-     file = here("2_code", "tweepy_subset_labeling_asmik.RData"))
-save(tweepy_subset_labeling_lisa, 
-     file = here("2_code", "tweepy_subset_labeling_lisa.RData"))
+save(
+  tweepy_subset_labeling_asmik, 
+    file = here(
+      "2_code/0_training_data", 
+      "rdata-tweepy-subset-labeling-asmik.RData"))
+save(
+  tweepy_subset_labeling_lisa, 
+  file = here(
+    "2_code/0_training_data", 
+    "rdata-tweepy-subset-labeling-lisa.RData"))

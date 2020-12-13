@@ -25,13 +25,13 @@ global_dict_unigram <- make_dict_unigram(
 save(
   global_dict_unigram,
   file = here(
-    "2_code/2_sentiment_analysis/1_dict_based/dicts",
-    "global_dict_unigram.RData")
+    "2_code/2_sentiment_analysis/1_dict_based",
+    "rdata-global-dict-unigram.RData")
 )
 
 # load(here(
-#   "2_code/2_sentiment_analysis/1_dict_based/dicts",
-#   "global_dict_unigram.RData"))
+#   "2_code/2_sentiment_analysis/1_dict_based",
+#   "rdata-global-dict-unigram.RData"))
 
 # STEP 2: CLASSIFY SENTIMENTS --------------------------------------------------
 
