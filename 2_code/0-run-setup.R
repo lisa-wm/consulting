@@ -19,6 +19,7 @@ packages_required <-  c(
   "paradox", # handling parameter spaces
   "quanteda", # natural language processing
   "spacyr", # lemmatization
+  "stm", # structural topic modeling
   "testthat", # code testing
   "tidyverse", # data wrangling
   "XML" # xml parsing
@@ -60,9 +61,19 @@ invisible(set_up_packages(packages_required))
 # assigned manually?
 # Should source ALL functions
 
-# files_required <- list(
-#   here("2_code/1_preprocessing", "fun-get-data.R"),
-#   here("2_code/1_preprocessing", "fun-preprocess-tweets.R"),
-#   here("2_code/1_preprocessing", "fun-preprocess-meta.R")
-# )
-# invisible(sapply(files_required, source, .GlobalEnv))
+files_required <- list.files(pattern = "2_code/1_preprocessing/fun-.*\\.R$") 
+
+files_required <- list.files(
+  here("2_code", "1_preprocessing"), 
+  pattern = "^fun-.*\\.R$",
+  full.names = TRUE)
+
+
+sapply(files_required, source, .GlobalEnv)
+
+files_required <- list(
+  here("2_code/1_preprocessing", "fun-get-data.R"),
+  here("2_code/1_preprocessing", "fun-preprocess-tweets.R"),
+  here("2_code/1_preprocessing", "fun-preprocess-meta.R")
+)
+invisible(sapply(files_required, source, .GlobalEnv))

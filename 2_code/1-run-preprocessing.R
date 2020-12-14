@@ -27,6 +27,12 @@ data_processed <- data_raw %>%
     list_columns = list("hashtags", "mentions"), 
     date_columns = list("created_at"))
 
+# Remove data created prior to 2017-09-24, the date of the federal election
+
+data_processed <- data_processed[created_at >= "2017-09-24"]
+
+# Measure length of tweets as number of words
+
 data_processed[, word_count := quanteda::ntoken(full_text, remove_punct = TRUE)]
 
 # TODO Remove resigned MP

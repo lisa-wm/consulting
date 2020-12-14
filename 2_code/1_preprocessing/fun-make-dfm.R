@@ -8,14 +8,17 @@
 
 # TOP-LEVEL FUNCTIONS ----------------------------------------------------------
 
-make_dfm <- function(tokens_ngrams, min_termfreq = 1) {
+make_dfm <- function(tokens_ngrams, min_termfreq = 1, tfidf = TRUE) {
   
-  quanteda::dfm(
+  this_dfm <- quanteda::dfm(
     tokens_ngrams, 
     stem = TRUE,
     verbose = FALSE) %>% 
     # quanteda::dfm_wordstem(language = "german") %>% 
-    quanteda::dfm_trim(min_termfreq = min_termfreq) %>% 
-    quanteda::dfm_tfidf()
+    quanteda::dfm_trim(min_termfreq = min_termfreq)
+  
+  if (tfidf) this_dfm <- this_dfm %>% quanteda::dfm_tfidf()
+  
+  this_dfm
 
 }

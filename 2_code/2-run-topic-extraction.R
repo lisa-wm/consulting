@@ -45,10 +45,6 @@ data_user_monthly_covariates <- data_socio_electoral[
 
 data_user_monthly_covariates[, i.bundesland := NULL]
 
-parties <- c("total", "spd", "linke", "gruene", "fdp", "afd", "cdu_csu")
-
-setnames(data_user_monthly_covariates, parties, paste0("vote_", parties))
-
 # FIXME Find out whether asterisks are really resigned MPs
 
 data_user_monthly_covariates <- data_user_monthly_covariates[
@@ -58,6 +54,20 @@ data_user_monthly_covariates <- data_user_monthly_covariates[
 levels(data_user_monthly_covariates$party) <- c(
   "afd", "gruene", "cdu_csu", "linke", "fdp", "fraktionslos", "spd"
 )
+
+electoral_result <- na.omit(unique(data_user_monthly_covariates[
+  , .(wahlkreis_nr, spd, linke, gruene, fdp, afd, cdu_csu)])) %>% 
+  gather("party", "vote_share_own_party", -wahlkreis_nr)
+
+data_user_monthly_covariates <- merge(
+  data_user_monthly_covariates, 
+  electoral_result, 
+  by = c("wahlkreis_nr", "party"),
+  all.x = TRUE)
+
+data_user_monthly_covariates[
+  , time_index := frank(list(year, month), ties.method = "min")
+]
 
 # Create corpus object
 
@@ -72,9 +82,44 @@ tweets_tokens_user_monthly <- make_tokens(
   corpus = tweets_corpus_user_monthly, 
   stopwords = make_stopwords())
 
-# Create dfm
+# Create dfm (no weighting, this is not appropriate for stm objects)
 
 tweets_dfm_user_monthly <- make_dfm(
   tokens_ngrams = tweets_tokens_user_monthly,
-  min_termfreq = 1L
+  min_termfreq = 3L,
+  tfidf = FALSE
+)
+
+# Create stm object
+
+tweets_stm_user_monthly <- quanteda::convert(
+  tweets_dfm_user_monthly, 
+  to = "stm")
+
+# STEP 2: DEFINE TOPICAL PREVALENCE VARIABLES ----------------------------------
+
+# Simon and Patrick use: party, state, smooth effect for date, share of 
+# immigrant population, GDP, unemployment rate, 2017 electoral result of MPs'
+# respective party
+
+# TODO Check whether the model formula is okay for our purposes
+# TODO Check whether other covariates, such as covid-19 incidence, should be
+# included
+
+prevalence_covariates <- 
+  "party + bundesland + s(time_index, df = 5) + 
+  s(1 - pop_german_k / pop_k, df = 5) +
+  s(bip_per_capita, df = 5) + s(vote_share_own_party, df = 5) + s(afd, df = 5)"
+
+prevalence_formula <- as.formula(paste("", prevalence_covariates, sep = "~"))
+
+hyperparameter_search <- stm::searchK(
+  documents = tweets_stm_user_monthly$documents,
+  vocab = tweets_stm_user_monthly$vocab,
+  data = tweets_stm_user_monthly$meta,
+  K = c(3, 4, 5, 6, 7, 8, 9),
+  prevalence = prevalence_formula,
+  heldout.seed = 123,
+  max.em.its = 200,
+  init.type = "Spectral"
 )
