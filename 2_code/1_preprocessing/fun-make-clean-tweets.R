@@ -68,7 +68,7 @@ make_clean_tweets <- function(data, column) {
   
   checkmate::assert_data_table(data)
   checkmate::assert_string(column)
-
+  
   # TODO Make emoji extraction better
   # TODO Classify emojis into positive and negative
   
@@ -82,10 +82,10 @@ make_clean_tweets <- function(data, column) {
   dt <- data.table::copy(data)
   
   # Perform preprocessing
-
+  
   # (c around column is needed bc it is supplied as character; otherwise
   # data.table will just create a new column named "column")
-
+  
   dt[, c(column) := remove_umlauts(get(column))
      ][, c(column) := remove_symbols(get(column))
        ][, c(column) := remove_repeated_chars(get(column))
