@@ -56,24 +56,18 @@ set_up_packages <- function(pkg) {
 invisible(set_up_packages(packages_required))
 
 # Source required files containing sub-level functions
-# FIXME Check sourcing  
-# Why does sourcing preprocess-tweets not work, only if functions are
-# assigned manually?
-# Should source ALL functions
-
-files_required <- list.files(pattern = "2_code/1_preprocessing/fun-.*\\.R$") 
+# Attention: if a function 1 is needed in the global environment AND within 
+# another function, it must be in a separate file that a function 2 must source
+# if it uses function 1. 
+# Otherwise, the following call will only source function 1 into the global 
+# environment but not into the # function environment of function 2.
 
 files_required <- list.files(
-  here("2_code", "1_preprocessing"), 
-  pattern = "^fun-.*\\.R$",
+  here("2_code"), 
+  pattern = "^fun-.*\\.R$", 
+  recursive = TRUE,
   full.names = TRUE)
 
-
-sapply(files_required, source, .GlobalEnv)
-
-files_required <- list(
-  here("2_code/1_preprocessing", "fun-get-data.R"),
-  here("2_code/1_preprocessing", "fun-preprocess-tweets.R"),
-  here("2_code/1_preprocessing", "fun-preprocess-meta.R")
-)
 invisible(sapply(files_required, source, .GlobalEnv))
+
+# FIXME STILL DOES NOT WORK!

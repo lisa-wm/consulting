@@ -30,44 +30,14 @@ data_socio_electoral <- data.table::fread(
   here("1_scraping/output", "socioeconomics_zweitstimmen_df.csv"),
   encoding = "UTF-8",
   sep = ",",
-  drop = c("district", "wahlkreis"))
-
-# FIXME Contains multiple (non-duplicate) rows per wahlkreis_nr
-
-data_socio_electoral <- data_socio_electoral[
-  , head(.SD, 1), by = wahlkreis_nr]
-
-data_user_monthly_covariates <- data_socio_electoral[
-  data_mp_level[data_user_monthly, on = "name_matching"],
-  on = "wahlkreis_nr"]
-
-# FIXME Change the following in Jupyter
-
-data_user_monthly_covariates[, i.bundesland := NULL]
-
-# FIXME Find out whether asterisks are really resigned MPs
-
-data_user_monthly_covariates <- data_user_monthly_covariates[
-  !stringr::str_detect(party, "\\*")
-  ][, `:=` (bundesland = as.factor(bundesland), party = as.factor(party))]
-
-levels(data_user_monthly_covariates$party) <- c(
-  "afd", "gruene", "cdu_csu", "linke", "fdp", "fraktionslos", "spd"
+  drop = c("district", "wahlkreis")
 )
 
-electoral_result <- na.omit(unique(data_user_monthly_covariates[
-  , .(wahlkreis_nr, spd, linke, gruene, fdp, afd, cdu_csu)])) %>% 
-  gather("party", "vote_share_own_party", -wahlkreis_nr)
-
-data_user_monthly_covariates <- merge(
-  data_user_monthly_covariates, 
-  electoral_result, 
-  by = c("wahlkreis_nr", "party"),
-  all.x = TRUE)
-
-data_user_monthly_covariates[
-  , time_index := frank(list(year, month), ties.method = "min")
-]
+data_user_monthly_covariates <- make_covariates(
+  tweets_data = data_user_monthly,
+  mp_data = data_mp_level,
+  se_data = data_socio_electoral
+)
 
 # Create corpus object
 
@@ -106,6 +76,8 @@ tweets_stm_user_monthly <- quanteda::convert(
 # TODO Check whether other covariates, such as covid-19 incidence, should be
 # included
 
+# For this, none of the covariates may contain NAs!
+
 prevalence_covariates <- 
   "party + bundesland + s(time_index, df = 5) + 
   s(1 - pop_german_k / pop_k, df = 5) +
@@ -123,3 +95,7 @@ hyperparameter_search <- stm::searchK(
   max.em.its = 200,
   init.type = "Spectral"
 )
+
+save(
+  hyperparameter_search,
+  file = here("2_code/2_topic_extraction", "rdata-hyperparameter-search.RData"))
