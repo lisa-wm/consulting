@@ -62,15 +62,21 @@ tweets_dfm_user_monthly <- make_dfm(
 
 # Create stm object
 
-tweets_stm_user_monthly <- quanteda::convert(
+tweets_stm <- quanteda::convert(
   tweets_dfm_user_monthly, 
   to = "stm")
+
+save(
+  tweets_stm,
+  file = here("2_code/2_topic_extraction", "rdata-tweets_stm.RData"))
 
 # STEP 2: DEFINE TOPICAL PREVALENCE VARIABLES ----------------------------------
 
 # Simon and Patrick use: party, state, smooth effect for date, share of 
 # immigrant population, GDP, unemployment rate, 2017 electoral result of MPs'
 # respective party
+
+load(here("2_code/2_topic_extraction", "rdata-tweets_stm.RData"))
 
 # TODO Check whether the model formula is okay for our purposes
 # TODO Check whether other covariates, such as covid-19 incidence, should be
@@ -99,3 +105,5 @@ hyperparameter_search <- stm::searchK(
 save(
   hyperparameter_search,
   file = here("2_code/2_topic_extraction", "rdata-hyperparameter-search.RData"))
+
+load(here("2_code/2_topic_extraction", "rdata-hyperparameter-search.RData"))

@@ -71,3 +71,9 @@ files_required <- list.files(
 invisible(sapply(files_required, source, .GlobalEnv))
 
 # FIXME STILL DOES NOT WORK!
+
+data <- as.data.table(iris)
+data$Species <- as.character(data$Species)
+data$Species[1:3] <- "Döner@Night"
+data_clean <- make_clean_tweets(data, "Species")
+head(data_clean)
