@@ -1,0 +1,5 @@
+-> Connect to google colab 
+-> Upload Notebook 
+-> Find the current path
+-> Load data 
+-> Run the steps
