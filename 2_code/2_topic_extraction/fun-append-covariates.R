@@ -4,11 +4,7 @@
 
 # Purpose: aggregate raw tweets per user and month
 
-# HELPER FUNCTIONS -------------------------------------------------------------
-
-# TOP-LEVEL FUNCTIONS ----------------------------------------------------------
-
-make_covariates <- function(tweets_data, mp_data, se_data) {
+append_covariates <- function(tweets_data, mp_data, se_data) {
   
   # FIXME Contains multiple (non-duplicate) rows per wahlkreis_nr
   
@@ -52,8 +48,8 @@ make_covariates <- function(tweets_data, mp_data, se_data) {
   # Create time index to be included as smooth effect
   
   tweets_data_mp_se_er[
-    , time_index := frank(list(year, month), ties.method = "min")
-  ]
+    , `:=` (year = year(created_at), month = month(created_at))
+    ][, time_index := frank(list(year, month), ties.method = "min")]
   
   # Strange by-product of join
   
