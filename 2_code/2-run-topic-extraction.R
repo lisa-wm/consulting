@@ -16,13 +16,10 @@ load(here("2_code", "rdata-tweets-dfm-unigrams.RData"))
 
 # Create stm object from sample of dfm (too large otherwise)
 
-tweets_dfm_sampled <- quanteda::dfm_sample(
-  tweets_dfm_unigrams,
-  size = 
-)
+tweets_dfm <- tweets_dfm_unigrams
 
 tweets_stm <- quanteda::convert(
-  tweets_dfm_unigrams,
+  tweets_dfm,
   to = "stm")
 
 save(
@@ -40,11 +37,6 @@ save(
 # included
 
 # For this, none of the covariates may contain NAs (and may not be of type list)
-
-prevalence_covariates <- 
-  "party + bundesland + s(time_index, df = 5) + 
-  s(1 - pop_german_k / pop_k, df = 5) +
-  s(bip_per_capita, df = 5) + s(vote_share_own_party, df = 5)"
 
 prevalence_covariates <- 
   "party + bundesland + s(time_index, df = 5) + 
@@ -81,8 +73,7 @@ load(here("2_code/2_topic_extraction", "rdata-hyperparameter-search.RData"))
 hyperparameter_search_results <- as.data.table(hyperparameter_search$results)
 
 n_topics <- as.numeric(hyperparameter_search_results[
-  which.min(hyperparameter_search_results[, heldout]), K
-])
+  which.min(hyperparameter_search_results[, heldout]), K])
 
 n_topics <- 8L
 
@@ -92,7 +83,7 @@ topic_model <- stm::stm(
   documents = tweets_stm$documents,
   vocab = tweets_stm$vocab,
   data = tweets_stm$meta,
-  K = n_topics,
+  K = 3,
   prevalence = prevalence_formula,
   gamma.prior = 'L1',
   seed = 1L,
