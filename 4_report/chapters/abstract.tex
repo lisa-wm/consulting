@@ -1,0 +1,80 @@
+\textbf{Project outline}
+
+\begin{itemize}
+  \item \textbf{Problem description.} For Twitter data of German MPs concerning 
+  specific topics, perform sentiment analysis
+  \item \textbf{Key assumptions.} Sentiment analysis is much stronger if topical 
+  context is taken into account (while some words, such as "excellent", carry a
+  globally applicable sentiment, others may convey quite different meanings in 
+  varying context). We will assume that one tweet refers to one (principal) 
+  topic and carries a distinct sentiment towards this topic.
+  \item \textbf{Relation to other problems of NLP.} Topic-specific sentiment 
+  analysis (TSSA) overlaps with different well-known NLP problems:
+  \begin{itemize}
+    \item \textbf{Sentiment analysis (SA).} TSSA may be interpreted as an 
+    improved variant of SA, taking into account topical context that is lost on 
+    standard SA.
+    \item \textbf{Topic extraction (TE).} TE retrieves topics without sentiment 
+    classification and is thus subsumed under TSSA.
+    \item \textbf{Aspect-based sentiment analysis (ABSA).} TSSA is closely 
+    related to ABSA or may indeed be viewed as ABSA under specific assumptions, 
+    identifying entities with topics (aspects result as the text features that 
+    led to topic assignment in the first place) and taking each tweet to be 
+    associated with exactly one aspect (and therefore, one topic).
+    Nonetheless, we make this distinction to emphasize the different intuitions  
+    that lead to different foci, and sometimes, different methods\footnote{
+    ABSA often has a strong focus on aspect detection. It is frequently applied 
+    in the context of reviews, where the overall target of sentiment 
+    (i.e., a certain kind of product, or a movie) is known a priori and where 
+    even an overall sentiment might be available (e.g., through star ratings). 
+    The goal is a more fine-grained analysis as to which product aspects were 
+    judged positively or negatively. To this end, documents are broken down 
+    in very fine fragments (on sub-clause level), all of which might exhibit
+    different polarities. Aspects are then typically aggregated to larger 
+    entities toward one or more entities (e.g., starring Ben Affleck as an 
+    aspect of the movie entity "cast"). 
+    Entities and aspects will frequently be pre-defined, and document-level 
+    sentiment shall be attributed to different aspect-level polarity.
+    However, once the aspect-associated fragments are found, some methods apply 
+    standard SA that does not account for topical context anymore (i.e., aspect 
+    detection is used for reshaping the corpus, shifting the target of SA from 
+    original documents to document parts treating a certain aspect, and these 
+    are fed into a standard classifier). 
+    In our setting, we do not know in the first place what a document is about, 
+    much less its polarity -- many documents will not even convey sentiment. 
+    When they do, they can be expected to narrowly focus on one aspect 
+    (politicians will mostly tweet very ad-hoc in response to a certain event, 
+    not as an overall statement of their stance toward, say, environmental 
+    policies). 
+    Our focus therefore lies rather on grouping entire documents by treated 
+    topic (found in an unsupervised manner or pre-defined via keywords) and 
+    leveraging this topical context for sentiment classification.
+    Aspects serve a rather secondary purpose of indicating association to a
+    certain entity. 
+    Ideally, topics and aspects will be clear-cut and interpretable. 
+    However, even if they are not or sentiments are only relevant in a global 
+    sense (e.g., how many tweets of parties x and y, respectively, are of 
+    positive polarity?), the latent representation they yield should still aid 
+    SA by framing context.}
+  \end{itemize}
+  \item \textbf{Solutions.} We offer two different approaches to tackle this 
+  problem:
+  \begin{enumerate}
+    \item Methods of standard machine learning, more precisely, a combination of 
+    lexicon-based techniques and off-the-shelf classifiers \\
+    $\rightarrow$ Accessible to researchers without strong data science 
+    background and/or large computational resources
+    \item Methods of deep learning, more precisely, a variant of BERT \\
+    $\rightarrow$ Powerful tool for more advanced researchers
+  \end{enumerate}
+  \end{itemize}
+\end{itemize}
+
+\textbf{Part I: proposed pipeline}
+
+\begin{itemize}
+  \item Deep learning methods, BERT in particular, are capable of learning the 
+  intrinsic structures constituting language (grammatical patterns, inter-term 
+  relations), and can draw from this knowledge to perform downstream tasks such 
+  as sentiment analysis.
+\end{itemize}

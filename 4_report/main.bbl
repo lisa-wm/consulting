@@ -1,0 +1,61 @@
+\begin{thebibliography}{xx}
+
+\harvarditem[Choi et~al.]{Choi, Kim \harvardand\ Myaeng}{2009}{choietal2009}
+Choi, Y., Kim, Y. \harvardand\ Myaeng, S.-H.  \harvardyearleft
+  2009\harvardyearright .
+\newblock Domain-specific sentiment analysis using contextual feature
+  generation, {\em Proceedings of the 1st International CIKM Workshop on
+  Topic-Sentiment Analysis for Mass Opinion}.
+
+\harvarditem{Ficamos \harvardand\ Liu}{2016}{ficamosliu2016}
+Ficamos, P. \harvardand\ Liu, Y.  \harvardyearleft 2016\harvardyearright .
+\newblock A topic based approach for sentiment analysis on twitter data, {\em
+  International Journal of Advanced Computer Science and Applications} {\bf 7}.
+
+\harvarditem{Jebbara \harvardand\ Cimiano}{2016}{jebbaracimiano2016}
+Jebbara, S. \harvardand\ Cimiano, P.  \harvardyearleft 2016\harvardyearright .
+\newblock Aspect-based sentiment analysis using a two-step neural network
+  architecture, {\em Proceedings of the Third SemWebEval Challenge},
+  pp.~153--167.
+
+\harvarditem[Naskar et~al.]{Naskar, Mokaddem, Rebollo \harvardand\
+  Onaindia}{2016}{naskaretal2016}
+Naskar, D., Mokaddem, S., Rebollo, M. \harvardand\ Onaindia, E.
+  \harvardyearleft 2016\harvardyearright .
+\newblock Sentiment analysis in social networks through topic modeling, {\em
+  Proceedings of the Tenth Language Resources and Evaluation Conference}.
+
+\harvarditem[Pontiki et~al.]{Pontiki, Galanis \harvardand\
+  Papageorgiou}{2016}{pontikietal2016}
+Pontiki, M., Galanis, D. \harvardand\ Papageorgiou, H.  \harvardyearleft
+  2016\harvardyearright .
+\newblock Semeval-2016 task 5: Aspect based sentiment analysis, {\em
+  Proceedings of the Tenth International Workshop on Semantic Evaluation}.
+
+\harvarditem{Sivakumar \harvardand\ Reddy}{2017}{sivakumarreddy2017}
+Sivakumar, M. \harvardand\ Reddy, U.~S.  \harvardyearleft 2017\harvardyearright
+  .
+\newblock Aspect based sentiment analysis of students opinion using machine
+  learning techniques, {\em Proceedings of the International Conference on
+  Inventive Computing and Informatics (ICICI)}.
+
+\harvarditem{Thelwall \harvardand\ Buckley}{2013}{thelwallbuckley2013}
+Thelwall, M. \harvardand\ Buckley, K.  \harvardyearleft 2013\harvardyearright .
+\newblock Topic-based sentiment analysis for the social web: the role of mood
+  and issue-related words, {\em Journal of the American Society for Information
+  Science and Technology} {\bf 64}(8):~1608--1617.
+
+\harvarditem[Zhao et~al.]{Zhao, Qin, Liu \harvardand\ Tang}{2016}{zhaoetal2016}
+Zhao, Y., Qin, B., Liu, T. \harvardand\ Tang, D.  \harvardyearleft
+  2016\harvardyearright .
+\newblock Social sentiment sensor: a visualization system for topic detection
+  and topic sentiment analysis on microblog, {\em Multimedia Tools and
+  Applications} {\bf 75}:~8843--8860.
+
+\harvarditem[Zhao et~al.]{Zhao, Qin, Liu \harvardand\ Tang}{2017}{renhong2017}
+Zhao, Y., Qin, B., Liu, T. \harvardand\ Tang, D.  \harvardyearleft
+  2017\harvardyearright .
+\newblock Social sentiment sensor: a visualization system for topic detection
+  and topic sentiment analysis on microblog, {\em Sustainability} {\bf 9}(10).
+
+\end{thebibliography}
