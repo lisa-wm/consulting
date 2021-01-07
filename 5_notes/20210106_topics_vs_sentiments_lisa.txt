@@ -1,0 +1,13 @@
+
+
+joint sentiment-topic modeling
+- ngyuen & shirai (2015): topic modeling based sentiment analysis on social media for stock market prediction
+  https://www.aclweb.org/anthology/P15-1131.pdf
+  --> proposition, but no explicit argument why s & t are modeled jointly
+- mei et al. (2007) topi sentiment mixture
+  --> rather for topics within one document (absa style)
+
+two-step modeling
+- bansal & srivastava (2018): predicting election with hybrid topic based sentiment analysis of tweets
+  --> improvement of lexicon-based approaches: do not use simple avg of sentiment scores but weighted by sentiment-labeled topic proportions
+  --> no argumentation why two-step approach

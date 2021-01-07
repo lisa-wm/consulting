@@ -94,7 +94,6 @@ make_clean_tweets <- function(data, column) {
   
 }
 
-
 # TESTS ------------------------------------------------------------------------
 
 # TODO Write decent tests
