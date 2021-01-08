@@ -68,10 +68,12 @@ def download_tweets_tweepy_mod(username):
         'full_text', 
         'retweet_count', 
         'favorite_count', 
+        'reply_count',
         'followers_count', 
-        'location', 
-        'hashtags',
-        'mentions'
+        'location'
+        #, 
+        #'hashtags',
+        #'mentions'
     ]
     
     try:
@@ -104,8 +106,8 @@ def download_tweets_tweepy_mod(username):
         # Retrieve other metrics
         outtweets['followers_count'] = [x.followers_count for x in outtweets['author']]
         outtweets['location'] = [x.location for x in outtweets['author']]
-        outtweets['hashtags'] = outtweets['entities'].apply(get_hashtags)
-        outtweets['mentions'] = outtweets['entities'].apply(get_mentions)
+        # outtweets['hashtags'] = outtweets['entities'].apply(get_hashtags)
+        # outtweets['mentions'] = outtweets['entities'].apply(get_mentions)
         outtweets = outtweets[~ outtweets['is_retweet']]
         outtweets = outtweets[colnames]
         

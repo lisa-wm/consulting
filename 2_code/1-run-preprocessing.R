@@ -2,119 +2,101 @@
 # PRE-PROCESSING TWEETS
 # ------------------------------------------------------------------------------
 
-# Purpose: prepare tweets for SA by creating document-feature-matrices
+# IN: raw twitter data + meta data
+# OUT: single data file with solely German, cleaned tweets
 
-# Steps:
-# 1. Perform basic text cleaning
-# 2. Append socio-electoral data (used for topic extraction)
-# 2. Create document-feature-matrix using mlr3's text pipeop
+# READ AND MERGE DATA ----------------------------------------------------------
 
-# STEP 1: PERFORM BASIC TEXT CLEANING ------------------------------------------
+# Read tweets
 
-# Read data (if retweets are still included, set option to TRUE)
+tweets_raw <- data.table::fread(
+  here("1_scraping/output", "tweepy_df_subset_no_retweets.csv"), 
+  encoding = "UTF-8",
+  sep = ",")
 
-tweets_raw <- get_data(
-  path = here("1_scraping/output", "tweepy_df_subset_no_retweets.csv"),
-  is_old_version = FALSE)
+# Discard non-German tweets and add unique document ID
+# TODO Make language detection better
 
-# Process tweets in a very basic way - remove umlauts, symbols etc. but keep
-# text original otherwise (feature extraction is carried out in step 2);
-# convert list and date columns into suitable formats
+tweets_raw <- tweets_raw[
+  cld3::detect_language(full_text) == "de"
+  ][, doc_id := .I]
 
-tweets_processed <- tweets_raw %>% 
-  make_clean_tweets(column = "full_text") %>% 
-  make_clean_meta(
-    list_columns = list("hashtags", "mentions"), 
-    date_columns = list("created_at"))
+# Read meta data
 
-# Remove data created prior to 2017-09-24, the date of the federal election
-
-tweets_processed <- tweets_processed[created_at >= "2017-09-24"]
-
-# Measure length of tweets as number of words
-
-tweets_processed[
-  , word_count := quanteda::ntoken(full_text, remove_punct = TRUE)]
-
-# TODO Remove resigned MP
-
-# Save for further analysis
-
-save(
-  tweets_processed, 
-  file = here("2_code", "rdata-tweets-processed.RData")
-)
-
-# load(here("2_code", "rdata-tweets-processed.RData"))
-
-# TODO Implement lemmatization (if necessary)
-
-# STEP 2: APPEND SOCIO-ELECTORAL DATA ------------------------------------------
-
-data_mp_level <- data.table::fread(
+meta_mp_level <- data.table::fread(
   here("1_scraping/output", "abg_twitter_df.csv"),
   encoding = "UTF-8",
   sep = ",",
   drop = "twitter")
 
-data_socio_electoral <- data.table::fread(
+meta_socio_electoral <- data.table::fread(
   here("1_scraping/output", "socioeconomics_zweitstimmen_df.csv"),
   encoding = "UTF-8",
   sep = ",",
   drop = c("district", "wahlkreis")
 )
 
-# This takes a few seconds
+# Merge tweets and meta data
 
-tweets_processed_with_covariates <- append_covariates(
-  tweets_data = tweets_processed,
-  mp_data = data_mp_level,
-  se_data = data_socio_electoral
+data_raw <- merge_tweets_meta(
+  tweets_data = tweets_raw,
+  mp_data = meta_mp_level,
+  se_data = meta_socio_electoral
 )
 
-# STEP 3: CREATE DOCUMENT-FEATURE-MATRIX ---------------------------------------
+# REMOVE UMLAUTS AND NON-INFORMATIVE SYMBOLS -----------------------------------
 
-# First, create corpus object
+data_clean <- copy(data_raw)[
+  , full_text := remove_umlauts(full_text)
+  ][, full_text := remove_noisy_symbols(full_text)]
 
-tweets_corpus <- quanteda::corpus(
-  x = tweets_processed_with_covariates,
-  docid_field = "doc_id",
-  text_field = "full_text")
+# EXTRACT TWITTER-SPECIFIC ELEMENTS --------------------------------------------
 
-# Tokenize corpus with custom stopwords
+# String pattern of emojis, hashtags and tags
+# TODO remove mentions and hashtags from jupyter
 
-tweets_tokens <- make_tokens(
-  corpus = tweets_corpus, 
-  stopwords = make_stopwords())
+# emoji_lexicon <- data.table::fread(
+#   here(
+#     "2_code/3_sentiment_analysis/1_dict_based/dicts", 
+#     "emojis-sentiment-ranking.csv"), 
+#   encoding = "UTF-8",
+#   sep = ",")
 
-# If desired, create n-grams (n = 1L this returns the original tokens)
-# The skip argument can be used to create n-grams from tokens that are not
-# immediate neighbors but further apart, which could be useful for German
-# (e.g., for a phrase like "Ich mag das nicht" it could be desirable to have a 
-# token "mag_nicht").
+pattern_emoji <- stringr::str_c(c(
+  "[^\001-\177]", # unicode emojis
+  "(\\:(\\-)?\\))", # simple happy smiley w/ or w/o nose
+  "(\\:(\\-)?\\()", # simple sad smiley w/ or w/o nose
+  "(\\;(\\-)?\\))", # simple winking smiley w/ or w/o nose
+  "\\:P"), # simple smiley sticking tongue out
+  collapse = "|")
 
-tweets_unigrams <- quanteda::tokens_ngrams(tweets_tokens, n = 1L)
-tweets_bigrams <- quanteda::tokens_ngrams(tweets_tokens, n = 2L)
+pattern_hashtag <- "#\\S+"
+pattern_tag <- "@\\S+"
 
-# Create dfm (unweighted version for topic extraction)
+patterns_to_remove <- stringr::str_c(
+  c(pattern_emoji, "#", pattern_tag), # remove only hashtag symbol, not content
+  collapse = "|")
 
-tweets_dfm_unigrams <- make_dfm(
-  tokens_ngrams = tweets_unigrams,
-  min_termfreq = 10L
-)
+# Extract/remove patterns and remove leading/trailing/double spaces
+
+data_clean[, `:=` (
+  emojis = stringr::str_extract_all(full_text, pattern_emoji), 
+  hashtags = stringr::str_extract_all(full_text, pattern_hashtag),
+  tags = stringr::str_extract_all(full_text, pattern_tag),
+  full_text = stringr::str_remove_all(full_text, patterns_to_remove))
+  ][, full_text := stringr::str_squish(full_text)]
+
+# Split camel case sometimes used in hashtags
+
+data_clean[, full_text := lapply(
+  .I, function(i) {
+    str_c(
+      unlist(str_split(full_text[i], "(?<=[[:lower:]])(?=[[:upper:]])")),
+      collapse = " ")})]  
+
+# Save data
 
 save(
-  tweets_dfm_unigrams,
-  file = here("2_code/1_preprocessing", "rdata-tweets-dfm-unigrams.RData")
+  data_clean, 
+  file = here("2_code", "rdata-data-processed.RData")
 )
-
-# Create weighted version for sentiment analysis
-
-tweets_dfm_unigrams_tfidf <- tweets_dfm_unigrams %>% 
-  quanteda::dfm_tfidf()
-
-save(
-  tweets_dfm_unigrams_tfidf,
-  file = here("2_code/1_preprocessing", "rdata-tweets-dfm-unigrams-tfidf.RData")
-)
-
