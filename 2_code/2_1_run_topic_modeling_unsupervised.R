@@ -22,105 +22,141 @@ tweets_tokens_tm <- quanteda::tokens(
   split_hyphens = TRUE,
   include_docvars = TRUE) 
 
-# LOWERCASE TOKENS, REMOVE STOPWORDS AND PERFORM STEMMING
+# LOWERCASE TOKENS, REMOVE STOPWORDS AND PERFORM STEMMING ----------------------
 
 # Standard stopwords removal and stemming
 
 tweets_tokens_tm <- tweets_tokens_tm %>% 
-  quanteda::tokens_tolower() %>% 
   quanteda::tokens_wordstem(language = "german") %>% 
+  quanteda::tokens_select(
+    pattern = c("[[:upper:]]([[:lower:]])+"),
+    valuetype = "regex",
+    selection = "keep",
+    case_insensitive = FALSE) %>% 
+  quanteda::tokens_tolower() %>%
   quanteda::tokens_select(
     pattern = make_stopwords_tm(),
     selection = "remove") 
 
-# TODO remove empty docs
-
-# CREATE DFM OBJECT AND GROUP DOCUMENTS BY USER AND WEEK
+# CREATE DFM OBJECT AND GROUP DOCUMENTS BY USER AND MONTH/WEEK -----------------
 
 tweets_dfm_tm <- quanteda::dfm(tweets_tokens_tm)
 
-tweets_dfm_tm_user_week <- quanteda::dfm_group(
-  tweets_dfm_tm, c("username", "year", "week"))
+temporal_grouping_var <- "month"
 
-tweets_dfm_tm_user_month <- quanteda::dfm_group(
-  tweets_dfm_tm, c("username", "year", "month"))
+tweets_dfm_tm_grouped <- quanteda::dfm_group(
+  tweets_dfm_tm, c("username", "year", temporal_grouping_var))
 
-test_stm <- quanteda::convert(
-  tweets_dfm_tm_user_week,
+# CREATE STM OBJECT AND FIT STM ------------------------------------------------
+
+# Create stm object
+
+tweets_stm <- quanteda::convert(
+  tweets_dfm_tm_grouped,
   to = "stm")
+
+# Define formula for topical prevalence variables
+# TODO find sensible formula
 
 prevalence_covariates <- 
   "party + bundesland +  
   s(1 - pop_german_k / pop_k, df = 5) +
-  s(bip_per_capita, df = 5) "
+  s(bip_per_capita, df = 5)"
 
 prevalence_formula <- as.formula(paste("", prevalence_covariates, sep = "~"))
 
+# Find optimal number of topics
+
+# hyperparameter_search <- stm::searchK(
+#   documents = tweets_stm$documents,
+#   vocab = tweets_stm$vocab,
+#   data = tweets_stm$meta,
+#   K = c(3:10),
+#   prevalence = prevalence_formula,
+#   heldout.seed = 1L,
+#   max.em.its = 1L,
+#   init.type = "Spectral"
+# )
+# 
+# hyperparameter_search_results <- as.data.table(hyperparameter_search$results)
+# 
+# n_topics <- as.numeric(hyperparameter_search_results[
+#   which.min(hyperparameter_search_results[, heldout]), K])
+
+n_topics <- 5L
+
+# Fit STM
+
 topic_model <- stm::stm(
-  documents = test_stm$documents,
-  vocab = test_stm$vocab,
-  data = test_stm$meta,
-  K = 5,
+  documents = tweets_stm$documents,
+  vocab = tweets_stm$vocab,
+  data = tweets_stm$meta,
+  K = n_topics,
   prevalence = prevalence_formula,
   gamma.prior = 'L1',
   seed = 1L,
   max.em.its = 1L,
   init.type = "Spectral")
 
-stm::labelTopics(topic_model, n = 10L)
+result_tm <- stm::labelTopics(topic_model, n = 15L)
 
+# Assign topic labels to documents
 
+topic_probs <- stm::make.dt(topic_model)[, `:=` (
+  topic_doc_id = names(tweets_stm$documents),
+  docnum = NULL)] 
 
+setnames(topic_probs, tolower(names(topic_probs)))
 
+topic_cols <- paste0("topic", 1:n_topics)
 
+topic_probs[
+  , `:=` (
+    max_topic_score = max(.SD, na.rm = TRUE),
+    max_topic = which.max(.SD)),
+  .SDcols = topic_cols,
+  by = seq_len(nrow(topic_probs))
+]
 
-test <- tokens_subset(
-  tweets_tokens_tm, 
-  as.logical(rbinom(25633, 1, prob = 0.001)))
+# Map topic labels to original tweets
 
-test <- data.frame(
-  embedding_1 = abs(rnorm(10)),
-  embedding_2 = abs(rnorm(10)),
-  embedding_3 = abs(rnorm(10)),
-  embedding_4 = abs(rnorm(10)),
-  embedding_5 = abs(rnorm(10)),
-  embedding_6 = abs(rnorm(10)),
-  embedding_7 = abs(rnorm(10)),
-  embedding_8 = abs(rnorm(10)),
-  embedding_9 = abs(rnorm(10))
+tweets_corpus_topics <- tweets_corpus
+
+docvars(tweets_corpus_topics, "topic_doc_id") <- paste0(
+  docvars(tweets_corpus_topics, "username"),
+  ".",
+  docvars(tweets_corpus_topics, "year"),
+  ".",
+  docvars(tweets_corpus_topics, temporal_grouping_var)
 )
 
-test_dfm <- quanteda::as.dfm(test)
+docvars(tweets_corpus_topics) <- docvars(tweets_corpus_topics) %>% 
+  left_join(
+    topic_probs,
+    by = "topic_doc_id")
 
-test_stm <- quanteda::convert(
-  test_dfm,
-  to = "stm")
+# For tweets that could not be labeled, choose most frequent topic of author
 
-prevalence_covariates <- 
-  "party + bundesland + s(time_index, df = 5) + 
-  s(1 - pop_german_k / pop_k, df = 5) +
-  s(bip_per_capita, df = 5) + s(vote_share_own_party, df = 5)"
+topic_highscore <- docvars(tweets_corpus_topics) %>% 
+  group_by(username) %>% 
+  count(max_topic) %>% 
+  slice(which.max(n)) %>% 
+  select(username, max_topic) %>% 
+  rename("top_user_topic" = max_topic)
 
-prevalence_formula <- as.formula(paste("", prevalence_covariates, sep = "~"))
+docvars(tweets_corpus_topics) <- docvars(tweets_corpus_topics) %>% 
+  left_join(
+    topic_highscore[, c("username", "top_user_topic")],
+    by = "username") 
 
-topic_model <- stm::stm(
-  documents = test_stm$documents,
-  vocab = test_stm$vocab,
-  data = test_stm$meta,
-  K = 2,
-  # prevalence = prevalence_formula,
-  # gamma.prior = 'L1',
-  seed = 1L,
-  max.em.its = 1L,
-  init.type = "Spectral")
+docvars(tweets_corpus_topics) <- docvars(tweets_corpus_topics) %>% 
+  mutate(topic_label = ifelse(
+    is.na(max_topic), 
+    top_user_topic,
+    max_topic))
 
-stm::labelTopics(topic_model, n = 3L)
-
-sum(sapply(data_clean$hashtags, function(i) length(i) == 0)) / nrow(data_clean)
-
-data_clean[, .N, by = .(year(as.Date(created_at)), username)]
-
-corp <- corpus(c("a a b", "a b c c", "a c d d", "a c c d"),
-               docvars = data.frame(grp = c("grp1", "grp1", "grp2", "grp2")))
-dfmat <- dfm(corp)
-dfm_group(dfmat, groups = "grp")
+save(
+  tweets_corpus_topics, 
+  file = here(
+    "2_code", 
+    paste0("rdata_", as.character(bquote(tweets_corpus_topics)), ".RData")))
