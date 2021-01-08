@@ -1,0 +1,79 @@
+# ------------------------------------------------------------------------------
+# SET-UP
+# ------------------------------------------------------------------------------
+
+# Purpose: load required packages
+
+# Install, if necessary, and load required packages
+
+packages_required <-  c(
+  
+  "checkmate", # input checking
+  "cld3", # language detection
+  "data.table", # data wrangling
+  "here", # path management
+  "mlr3", # machine learning basics
+  "mlr3learners", # machine learning learners
+  "mlr3pipelines", # machine learning pipelining
+  "mlr3tuning", # machine learning tuning
+  "paradox", # handling parameter spaces
+  "quanteda", # natural language processing
+  "spacyr", # lemmatization
+  "stm", # structural topic modeling
+  "testthat", # code testing
+  "tidyverse", # data wrangling
+  "XML" # xml parsing
+  
+)
+
+set_up_packages <- function(pkg) {
+  
+  my_type <- ifelse(
+    Sys.info()[["sysname"]] == "Linux", 
+    "source", 
+    "binary"
+  )
+  
+  not_installed <- 
+    packages_required[!packages_required %in% installed.packages()[, "Package"]]
+  
+  if (length(not_installed) > 0) {
+    
+    lapply(
+      not_installed,
+      install.packages,
+      repos = "http://cran.us.r-project.org",
+      dependencies = TRUE,
+      type = my_type
+    )
+    
+  }
+  
+  lapply(packages_required, library, character.only = TRUE, quietly = TRUE)
+  
+}
+
+invisible(set_up_packages(packages_required))
+
+# Source required files containing sub-level functions
+# Attention: if a function 1 is needed in the global environment AND within 
+# another function, it must be in a separate file that a function 2 must source
+# if it uses function 1. 
+# Otherwise, the following call will only source function 1 into the global 
+# environment but not into the # function environment of function 2.
+
+files_required <- list.files(
+  here("2_code"), 
+  pattern = "^fun_.*\\.R$", 
+  recursive = TRUE,
+  full.names = TRUE)
+
+invisible(sapply(files_required, source, .GlobalEnv))
+
+# FIXME STILL DOES NOT WORK!
+
+# data <- as.data.table(iris)
+# data$Species <- as.character(data$Species)
+# data$Species[1:3] <- "Döner@Night"
+# data_clean <- make_clean_tweets(data, "Species")
+# head(data_clean)

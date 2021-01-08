@@ -37,7 +37,7 @@ auth.set_access_token(twitter_keys['access_token_key'], twitter_keys['access_tok
 api = tweepy.API(auth, wait_on_rate_limit = True)
 
 # Helper function to check whether tweet is retweet
-def is_rewteet(x):
+def is_retweet(x):
     try:
         res = not(math.isnan(x))
     except:
@@ -68,12 +68,8 @@ def download_tweets_tweepy_mod(username):
         'full_text', 
         'retweet_count', 
         'favorite_count', 
-        'reply_count',
         'followers_count', 
         'location'
-        #, 
-        #'hashtags',
-        #'mentions'
     ]
     
     try:
@@ -101,7 +97,7 @@ def download_tweets_tweepy_mod(username):
         outtweets = pd.DataFrame([tweet.__dict__ for tweet in alltweets])
         
         # Check whether tweet is retweet
-        outtweets['is_retweet'] = outtweets['retweeted_status'].apply(is_rewteet)
+        outtweets['is_retweet'] = outtweets['retweeted_status'].apply(is_retweet)
                 
         # Retrieve other metrics
         outtweets['followers_count'] = [x.followers_count for x in outtweets['author']]
