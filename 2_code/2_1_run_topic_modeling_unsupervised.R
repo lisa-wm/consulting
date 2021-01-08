@@ -24,13 +24,55 @@ tweets_tokens_tm <- quanteda::tokens(
 
 # LOWERCASE TOKENS, REMOVE STOPWORDS AND PERFORM STEMMING
 
+# Standard stopwords removal and stemming
+
 tweets_tokens_tm <- tweets_tokens_tm %>% 
   quanteda::tokens_tolower() %>% 
+  quanteda::tokens_wordstem(language = "german") %>% 
   quanteda::tokens_select(
     pattern = make_stopwords_tm(),
-    selection = "remove"
-  ) %>% 
-  quanteda::tokens_wordstem(language = "german")
+    selection = "remove") 
+
+# TODO remove empty docs
+
+# CREATE DFM OBJECT AND GROUP DOCUMENTS BY USER AND WEEK
+
+tweets_dfm_tm <- quanteda::dfm(tweets_tokens_tm)
+
+tweets_dfm_tm_user_week <- quanteda::dfm_group(
+  tweets_dfm_tm, c("username", "year", "week"))
+
+tweets_dfm_tm_user_month <- quanteda::dfm_group(
+  tweets_dfm_tm, c("username", "year", "month"))
+
+test_stm <- quanteda::convert(
+  tweets_dfm_tm_user_week,
+  to = "stm")
+
+prevalence_covariates <- 
+  "party + bundesland +  
+  s(1 - pop_german_k / pop_k, df = 5) +
+  s(bip_per_capita, df = 5) "
+
+prevalence_formula <- as.formula(paste("", prevalence_covariates, sep = "~"))
+
+topic_model <- stm::stm(
+  documents = test_stm$documents,
+  vocab = test_stm$vocab,
+  data = test_stm$meta,
+  K = 5,
+  prevalence = prevalence_formula,
+  gamma.prior = 'L1',
+  seed = 1L,
+  max.em.its = 1L,
+  init.type = "Spectral")
+
+stm::labelTopics(topic_model, n = 10L)
+
+
+
+
+
 
 test <- tokens_subset(
   tweets_tokens_tm, 
@@ -77,3 +119,8 @@ stm::labelTopics(topic_model, n = 3L)
 sum(sapply(data_clean$hashtags, function(i) length(i) == 0)) / nrow(data_clean)
 
 data_clean[, .N, by = .(year(as.Date(created_at)), username)]
+
+corp <- corpus(c("a a b", "a b c c", "a c d d", "a c c d"),
+               docvars = data.frame(grp = c("grp1", "grp1", "grp2", "grp2")))
+dfmat <- dfm(corp)
+dfm_group(dfmat, groups = "grp")

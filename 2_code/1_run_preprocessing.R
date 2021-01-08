@@ -21,8 +21,15 @@ tweets_raw <- tweets_raw[created_at >= "2017-09-24"]
 
 tweets_raw <- tweets_raw[
   cld3::detect_language(full_text) == "de"
-  ][, doc_id := .I
-    ][, word_count := quanteda::ntoken(full_text, remove_punct = TRUE)]
+  ][, doc_id := .I]
+
+# Add word count and date variables
+
+tweets_raw[, `:=` (
+  word_count = quanteda::ntoken(full_text, remove_punct = TRUE),
+  year = year(as.Date(created_at)),
+  month = month(as.Date(created_at)),
+  week = week(as.Date(created_at)))]
 
 # Read meta data
 

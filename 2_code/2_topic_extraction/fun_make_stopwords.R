@@ -22,18 +22,25 @@ make_stopwords_tm <- function() {
     "stopwords-iso.txt"), encoding = "UTF-8") %>% 
     unlist()
   
-  sw <- sort(unique(remove_umlauts(c(sw_1, sw_2, sw_3))))
+  sw <- c(sw_1, sw_2, sw_3) %>% 
+    remove_umlauts() %>% 
+    SnowballC::wordStem(language = "de") %>% 
+    unique() %>% 
+    sort()
   
-  # Add some domain-specific stopwords
+  # Additional removal of some domain-specific stopwords (after stemming so no
+  # conjugations must be provided)
   
-  # sw_extended <- c(sw, c(
-  #   "politik",
-  #   "politisch",
-  #   "^bundesregier",
-  #   "^bundestag",
-  #   "^deutsch",
-  #   "berlin",
-  #   "prozent"))
+  c(sw, c(
+    "polit",
+    "bundesregier",
+    "bundestag",
+    "deutsch",
+    "deutschland",
+    "berlin",
+    "prozent"))
+  
+  
   # 
   # stringr::str_remove_all(
   #   stopwords, 
