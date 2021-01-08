@@ -14,12 +14,15 @@ tweets_raw <- data.table::fread(
   encoding = "UTF-8",
   sep = ",")
 
+tweets_raw <- tweets_raw[created_at >= "2017-09-24"]
+
 # Discard non-German tweets and add unique document ID
 # TODO Make language detection better
 
 tweets_raw <- tweets_raw[
   cld3::detect_language(full_text) == "de"
-  ][, doc_id := .I]
+  ][, doc_id := .I
+    ][, word_count := quanteda::ntoken(full_text, remove_punct = TRUE)]
 
 # Read meta data
 
