@@ -53,7 +53,7 @@ set_up_packages <- function(pkg) {
   
 }
 
-invisible(set_up_packages(packages_required))
+invisible(suppressMessages(set_up_packages(packages_required)))
 
 # Source required files containing sub-level functions
 

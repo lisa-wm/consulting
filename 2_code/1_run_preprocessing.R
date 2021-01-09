@@ -26,17 +26,16 @@ tweets_raw <- tweets_raw[
 
 tweets_raw[, `:=` (
   word_count = quanteda::ntoken(full_text, remove_punct = TRUE),
-  year = year(as.Date(created_at)),
-  month = month(as.Date(created_at)),
-  week = week(as.Date(created_at)))]
+  year = year(created_at),
+  month = month(created_at),
+  week = week(created_at))]
 
 # Remove umlauts and non-informative symbols
 # TODO check whether it's worthwhile to harmonize locations
 
 tweets_raw[
-  , full_text := remove_umlauts(full_text)
-  ][, full_text := remove_noisy_symbols(full_text)
-    ][, name_matching := remove_umlauts(name_matching)]
+  , full_text := remove_noisy_symbols(remove_umlauts(full_text))
+  ][, name_matching := remove_noisy_symbols(remove_umlauts(name_matching))]
 
 # Read meta data
 
@@ -47,9 +46,9 @@ meta_mp_level <- data.table::fread(
   drop = "twitter")
 
 meta_mp_level[, `:=` (
-  name_matching = remove_umlauts(name_matching),
-  bundesland = remove_umlauts(bundesland),
-  wahlkreis = remove_umlauts(bundesland))]
+  name_matching = remove_noisy_symbols(remove_umlauts(name_matching)),
+  bundesland = remove_noisy_symbols(remove_umlauts(bundesland)),
+  wahlkreis = remove_noisy_symbols(remove_umlauts(bundesland)))]
 
 # FIXME find out why for so many MP no wahlkreis is scraped
 
@@ -74,13 +73,6 @@ data_clean <- merge_tweets_meta(
 
 # String pattern of emojis, hashtags and tags
 
-# emoji_lexicon <- data.table::fread(
-#   here(
-#     "2_code/3_sentiment_analysis/1_dict_based/dicts", 
-#     "emojis-sentiment-ranking.csv"), 
-#   encoding = "UTF-8",
-#   sep = ",")
-
 pattern_emoji <- stringr::str_c(c(
   "[^\001-\177]", # unicode emojis
   "(\\:(\\-)?\\))", # simple happy smiley w/ or w/o nose
@@ -92,26 +84,38 @@ pattern_emoji <- stringr::str_c(c(
 pattern_hashtag <- "#\\S+"
 pattern_tag <- "@\\S+"
 
-patterns_to_remove <- stringr::str_c(
-  c(pattern_emoji, "#", pattern_tag), # remove only hashtag symbol, not content
-  collapse = "|")
-
-# Extract/remove patterns and remove leading/trailing/double spaces
+# Extract emojis, hashtags and tags
 
 data_clean[, `:=` (
   emojis = stringr::str_extract_all(full_text, pattern_emoji), 
   hashtags = stringr::str_extract_all(full_text, pattern_hashtag),
-  tags = stringr::str_extract_all(full_text, pattern_tag),
-  full_text = stringr::str_remove_all(full_text, patterns_to_remove))
-  ][, full_text := stringr::str_squish(full_text)]
+  tags = stringr::str_extract_all(full_text, pattern_tag))]
 
-# Split camel case sometimes used in hashtags
+# Split camel case used in hashtags (only in hashtags, only if at most one 
+# lowercase letter follows, to escape cases such as "#AfD")
 
 data_clean[, full_text := lapply(
   .I, function(i) {
-    str_c(
-      unlist(str_split(full_text[i], "(?<=[[:lower:]])(?=[[:upper:]])")),
-      collapse = " ")})]  
+    pattern_camelcase_hashtag <- "(#)(.)+([[:upper:]])([[:lower:]])+"
+    pattern_split_camelcase <- "(?<=[[:lower:]])(?=[[:upper:]])"
+    components <- unlist(str_split(full_text[i], " "))
+    case_numbers <- which(str_detect(components, pattern_camelcase_hashtag))
+    cases <- components[case_numbers]
+    solved_cases <- sapply(
+      str_split(cases, pattern_split_camelcase),
+      function(j) paste0(c(j), collapse = " "))
+    components[case_numbers] <- solved_cases
+    paste0(c(components), collapse = " ")})]  
+
+# Remove emojis, hashtag symbols (not contents) and tags
+
+patterns_to_remove <- stringr::str_c(
+  c(pattern_emoji, "#", pattern_tag),
+  collapse = "|")
+
+data_clean[
+  , full_text := stringr::str_remove_all(full_text, patterns_to_remove)
+  ][, full_text := stringr::str_squish(full_text)]
 
 # CREATE CORPUS OBJECT ---------------------------------------------------------
 

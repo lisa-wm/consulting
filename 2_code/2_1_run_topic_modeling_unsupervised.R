@@ -111,8 +111,7 @@ topic_model <- stm::stm(
   max.em.its = 10L,
   init.type = "Spectral")
 
-result_tm <- stm::labelTopics(topic_model, n = 15L)
-
+result_tm <- stm::labelTopics(topic_model, n = 50L)
 top_words_frex <- t(result_tm$frex)
 
 # ASSIGN TOPIC LABELS TO PSEUDO-DOCUMENTS --------------------------------------

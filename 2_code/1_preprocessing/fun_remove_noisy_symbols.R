@@ -23,6 +23,7 @@ remove_noisy_symbols <- function(text) {
       collapse = "|")) %>% # all kinds of quotes
     stringr::str_remove_all("&amp;|&lt;|&gt;") %>% # ampersands etc.
     stringr::str_remove_all("%") %>% # percent signs
-    stringr::str_remove_all(" http([^ ]*)") # hyperlinks
-  
+    stringr::str_remove_all(" http([^ ]*)") %>%  # hyperlinks
+    stringr::str_remove_all("\\\n") %>%  # spaces
+    stringr::str_squish()
 }

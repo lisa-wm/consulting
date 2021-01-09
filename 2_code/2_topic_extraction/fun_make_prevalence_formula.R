@@ -14,7 +14,7 @@ make_prevalence_formula <- function(data, categorical_vars, smooth_vars) {
   checkmate::assert_character(cv)
   checkmate::assert_character(sv)
   
-  # Check whether columns exist in docvars and do not contain NA (not allowed in 
+  # Make sure columns exist in docvars and do not contain NA (not allowed in 
   # STM prevalence formula)
   
   data_dt <- as.data.table(data)

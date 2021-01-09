@@ -38,7 +38,9 @@ make_stopwords_tm <- function() {
     "deutsch",
     "deutschland",
     "berlin",
-    "prozent"))
+    "prozent",
+    "herzlich",
+    "glueckwunsch"))
   
   
   # 
