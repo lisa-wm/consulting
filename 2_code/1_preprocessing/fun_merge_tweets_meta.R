@@ -49,8 +49,8 @@ merge_tweets_meta <- function(tweets_data, mp_data, se_data) {
   
   # Create time index to be included as smooth effect
   
-  tweets_data_mp_se[
-    , `:=` (year = year(created_at), month = month(created_at))
-    ][, time_index := frank(list(year, month), ties.method = "min")]
+  tweets_data_mp_se[ 
+    , time_index := frank(list(year, week), ties.method = "dense"),
+    by = username]
  
 }

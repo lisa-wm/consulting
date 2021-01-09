@@ -22,8 +22,6 @@ remove_noisy_symbols <- function(text) {
       "\U201F"), 
       collapse = "|")) %>% # all kinds of quotes
     stringr::str_remove_all("&amp;|&lt;|&gt;") %>% # ampersands etc.
-    # stringr::str_remove_all("#") %>% # hashtag symbols
-    # stringr::str_remove_all("(?=@).*?(?=\\s)") %>% # targets
     stringr::str_remove_all("%") %>% # percent signs
     stringr::str_remove_all(" http([^ ]*)") # hyperlinks
   

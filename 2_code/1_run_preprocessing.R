@@ -5,7 +5,7 @@
 # IN: raw twitter data + meta data
 # OUT: single data file of cleaned tweets and meta data
 
-# READ AND MERGE DATA ----------------------------------------------------------
+# READ, CLEAN AND MERGE DATA ---------------------------------------------------
 
 # Read tweets
 
@@ -17,7 +17,6 @@ tweets_raw <- data.table::fread(
 tweets_raw <- tweets_raw[created_at >= "2017-09-24"]
 
 # Discard non-German tweets and add unique document ID
-# TODO Make language detection better
 
 tweets_raw <- tweets_raw[
   cld3::detect_language(full_text) == "de"
@@ -31,6 +30,14 @@ tweets_raw[, `:=` (
   month = month(as.Date(created_at)),
   week = week(as.Date(created_at)))]
 
+# Remove umlauts and non-informative symbols
+# TODO check whether it's worthwhile to harmonize locations
+
+tweets_raw[
+  , full_text := remove_umlauts(full_text)
+  ][, full_text := remove_noisy_symbols(full_text)
+    ][, name_matching := remove_umlauts(name_matching)]
+
 # Read meta data
 
 meta_mp_level <- data.table::fread(
@@ -39,6 +46,13 @@ meta_mp_level <- data.table::fread(
   sep = ",",
   drop = "twitter")
 
+meta_mp_level[, `:=` (
+  name_matching = remove_umlauts(name_matching),
+  bundesland = remove_umlauts(bundesland),
+  wahlkreis = remove_umlauts(bundesland))]
+
+# FIXME find out why for so many MP no wahlkreis is scraped
+
 meta_socio_electoral <- data.table::fread(
   here("1_scraping/output", "socioeconomics_zweitstimmen_df.csv"),
   encoding = "UTF-8",
@@ -46,24 +60,19 @@ meta_socio_electoral <- data.table::fread(
   drop = c("district", "wahlkreis")
 )
 
+meta_socio_electoral[, bundesland := remove_umlauts(bundesland)]
+
 # Merge tweets and meta data
 
-data_raw <- merge_tweets_meta(
+data_clean <- merge_tweets_meta(
   tweets_data = tweets_raw,
   mp_data = meta_mp_level,
   se_data = meta_socio_electoral
 )
 
-# REMOVE UMLAUTS AND NON-INFORMATIVE SYMBOLS -----------------------------------
-
-data_clean <- copy(data_raw)[
-  , full_text := remove_umlauts(full_text)
-  ][, full_text := remove_noisy_symbols(full_text)]
-
 # EXTRACT TWITTER-SPECIFIC ELEMENTS --------------------------------------------
 
 # String pattern of emojis, hashtags and tags
-# TODO remove mentions and hashtags from jupyter
 
 # emoji_lexicon <- data.table::fread(
 #   here(
