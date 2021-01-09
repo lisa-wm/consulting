@@ -6,15 +6,22 @@
 
 remove_umlauts <- function(text) {
   
-  text %>% 
-    stringr::str_replace_all(c(
-      "Ä" = "Ae",
-      "ä" = "ae",
-      "Ö" = "Oe",
-      "ö" = "oe",
-      "Ü" = "Ue",
-      "ü" = "ue",
-      "ß" = "ss"
-    ))
+  checkmate::assert_character(text)
+
+  # This is necessary for R to convert all representations of umlauts (of which 
+  # there are several) to a single one that can then be reliably detected 
   
+  text <- stringi::stri_trans_general(text, "Any-Latin")
+  
+  text %>%
+    stringr::str_replace_all(c(
+      "\u00c4" = "Ae",
+      "\u00e4" = "ae",
+      "\u00d6" = "Oe",
+      "\u00f6" = "oe",
+      "\u00dc" = "Ue",
+      "\u00fc" = "ue",
+      "\u00df" = "ss"
+  ))
+
 }

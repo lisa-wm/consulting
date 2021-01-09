@@ -40,7 +40,12 @@ tweets_tokens_tm <- tweets_tokens_tm %>%
 
 # CREATE DFM OBJECT AND GROUP DOCUMENTS BY USER AND MONTH/WEEK -----------------
 
+# Create dfm 
+
 tweets_dfm_tm <- quanteda::dfm(tweets_tokens_tm)
+
+# Aggregate documents in pseudo-documents fit for topic modeling (original 
+# documents are too short, so dfm is very large and sparse)
 
 temporal_grouping_var <- "month"
 
@@ -100,7 +105,7 @@ topic_model <- stm::stm(
 
 result_tm <- stm::labelTopics(topic_model, n = 15L)
 
-# Assign topic labels to documents
+# ASSIGN TOPIC LABELS TO PSEUDO-DOCUMENTS --------------------------------------
 
 topic_probs <- stm::make.dt(topic_model)[, `:=` (
   topic_doc_id = names(tweets_stm$documents),
@@ -113,47 +118,38 @@ topic_cols <- paste0("topic", 1:n_topics)
 topic_probs[
   , `:=` (
     max_topic_score = max(.SD, na.rm = TRUE),
-    max_topic = which.max(.SD)),
+    topic_label = which.max(.SD)),
   .SDcols = topic_cols,
   by = seq_len(nrow(topic_probs))
 ]
 
-# Map topic labels to original tweets
+# MAP TOPIC LABLES TO ORIGINAL DOCUMENTS ---------------------------------------
 
-tweets_corpus_topics <- tweets_corpus
+# Extract docvars as data.table for modification (more convenient than quanteda 
+# implementation in data.frame format)
 
-docvars(tweets_corpus_topics, "topic_doc_id") <- paste0(
-  docvars(tweets_corpus_topics, "username"),
-  ".",
-  docvars(tweets_corpus_topics, "year"),
-  ".",
-  docvars(tweets_corpus_topics, temporal_grouping_var)
-)
+docvars_dt <- as.data.table(docvars(tweets_corpus_topics))
 
-docvars(tweets_corpus_topics) <- docvars(tweets_corpus_topics) %>% 
-  left_join(
-    topic_probs,
-    by = "topic_doc_id")
+# Create ID for pseudo-documents equivalent to what quanteda assigns internally 
+# when grouping dfm
+
+docvars_dt[, topic_doc_id := paste0(
+  username, ".", year, ".", get(temporal_grouping_var))]
+
+# Append topic labels
+
+docvars_dt <- topic_probs[docvars_dt, on = "topic_doc_id"]
 
 # For tweets that could not be labeled, choose most frequent topic of author
 
-topic_highscore <- docvars(tweets_corpus_topics) %>% 
-  group_by(username) %>% 
-  count(max_topic) %>% 
-  slice(which.max(n)) %>% 
-  select(username, max_topic) %>% 
-  rename("top_user_topic" = max_topic)
+docvars_dt[
+  , top_user_topic := which.max(tabulate(topic_label)), by = username
+  ][, topic_label := ifelse(is.na(topic_label), top_user_topic, topic_label)]
 
-docvars(tweets_corpus_topics) <- docvars(tweets_corpus_topics) %>% 
-  left_join(
-    topic_highscore[, c("username", "top_user_topic")],
-    by = "username") 
+# Insert modified docvars back into corpus
 
-docvars(tweets_corpus_topics) <- docvars(tweets_corpus_topics) %>% 
-  mutate(topic_label = ifelse(
-    is.na(max_topic), 
-    top_user_topic,
-    max_topic))
+tweets_corpus_topics <- tweets_corpus
+docvars(tweets_corpus_topics) <- docvars_dt
 
 save(
   tweets_corpus_topics, 
