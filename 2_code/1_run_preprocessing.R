@@ -93,6 +93,7 @@ data_clean[, `:=` (
 
 # Split camel case used in hashtags (only in hashtags, only if at most one 
 # lowercase letter follows, to escape cases such as "#AfD")
+# TODO check if this can be done faster / more elegantly
 
 data_clean[, full_text := lapply(
   .I, function(i) {
@@ -131,3 +132,97 @@ save(
   file = here(
     "2_code", 
     paste0("rdata_", as.character(bquote(tweets_corpus)), ".RData")))
+
+# EXTRACT SOME DESCRIPTIVE STATISTICS ------------------------------------------
+
+ndoc(tweets_corpus)
+
+party_colors <- c(
+  "deepskyblue",
+  "chartreuse4",
+  "black",
+  "deeppink3",
+  "darkgoldenrod1",
+  "red"
+)
+
+# Tweets over time by party
+
+docvars(tweets_corpus) %>% 
+  group_by(time_index_month, party) %>% 
+  ggplot(aes(x = year, fill = party)) +
+  geom_bar(position = "dodge") +
+  scale_fill_manual(values = party_colors)
+
+# Tweets over time
+
+docvars(tweets_corpus) %>% 
+  group_by(year, month) %>% 
+  ggplot(aes(x = paste0(year, month))) +
+  geom_bar() +
+  xlab("time") +
+  theme(axis.text.x = element_text(angle = 90))
+
+# Most active users by party
+
+docvars(tweets_corpus) %>%
+  group_by(party, username) %>% 
+  count() %>% 
+  arrange(party, desc(n)) %>% 
+  group_by(party) %>%
+  top_n(3L) %>% 
+  ggplot(aes(x = paste0(party, "_", username), y = n, fill = party)) +
+  geom_col(position = "dodge") +
+  scale_fill_manual(values = party_colors) +
+  xlab("party, user") +
+  theme(axis.text.x = element_text(angle = 90))
+
+# Tweet length by party
+
+docvars(tweets_corpus) %>% 
+  group_by(party) %>% 
+  ggplot(aes(x = party, y = word_count, fill = party)) +
+  geom_boxplot() +
+  scale_fill_manual(values = party_colors)
+
+# Number of used hashtags by party
+
+docvars(tweets_corpus) %>%
+  group_by(row_number()) %>% 
+  mutate(n_hashtags = length(unlist(hashtags))) %>% 
+  group_by(party) %>% 
+  ggplot(aes(x = party, y = n_hashtags, fill = party)) +
+  geom_boxplot() +
+  scale_fill_manual(values = party_colors)
+
+# Number of used emojis
+
+docvars(tweets_corpus) %>%
+  group_by(row_number()) %>% 
+  mutate(n_emojis = length(unlist(emojis))) %>%
+  filter(n_emojis < 10L) %>% 
+  ggplot(aes(x = n_emojis)) +
+  geom_bar()
+
+# Number of used tags
+
+docvars(tweets_corpus) %>%
+  group_by(row_number()) %>% 
+  mutate(n_tags = length(unlist(tags))) %>%
+  filter(n_tags < 10L) %>% 
+  ggplot(aes(x = n_tags)) +
+  geom_bar()
+
+# Number of likes
+
+docvars(tweets_corpus) %>%
+  filter(favorite_count < 300L) %>% 
+  ggplot(aes(x = favorite_count)) +
+  geom_histogram(binwidth = 1L)  
+
+# Number of retweets
+
+docvars(tweets_corpus) %>%
+  filter(retweet_count < 50L) %>%
+  ggplot(aes(x = retweet_count)) +
+  geom_histogram(binwidth = 1L)  
