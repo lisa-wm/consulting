@@ -16,11 +16,9 @@ tweets_raw <- data.table::fread(
 
 tweets_raw <- tweets_raw[created_at >= "2017-09-24"]
 
-# Discard non-German tweets and add unique document ID
+# Discard non-German tweets
 
-tweets_raw <- tweets_raw[
-  cld3::detect_language(full_text) == "de"
-  ][, doc_id := .I]
+tweets_raw <- tweets_raw[cld3::detect_language(full_text) == "de"]
 
 # Add word count and date variables
 
@@ -120,18 +118,23 @@ data_clean[
 
 # CREATE CORPUS OBJECT ---------------------------------------------------------
 
+# Re-convert full text to character (from list)
+
 data_clean[, full_text := as.character(full_text)]
+
+# Add unique doc_id (only now, since in the beginning, documents may be 
+# discarded during language detection etc.)
+
+data_clean[, doc_id := .I]
 
 tweets_corpus <- quanteda::corpus(
   x = data_clean,
   docid_field = "doc_id",
   text_field = "full_text")
 
-save(
-  tweets_corpus, 
-  file = here(
-    "2_code", 
-    paste0("rdata_", as.character(bquote(tweets_corpus)), ".RData")))
+save_rdata_files(
+  robject = tweets_corpus, 
+  folder = "2_code")
 
 # EXTRACT SOME DESCRIPTIVE STATISTICS ------------------------------------------
 
