@@ -41,7 +41,9 @@ make_stopwords_tm <- function() {
     "prozent",
     "herzlich",
     "glueckwunsch",
-    "frag"))
+    "frag",
+    "woch",
+    "partei"))
   
   
   # 

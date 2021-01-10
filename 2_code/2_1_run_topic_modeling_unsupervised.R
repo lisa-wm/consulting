@@ -24,7 +24,8 @@ tweets_tokens_tm <- quanteda::tokens(
 
 # LOWERCASE TOKENS, REMOVE STOPWORDS AND PERFORM STEMMING ----------------------
 
-# Standard stopwords removal and stemming
+# Standard stopwords removal and stemming, selection of words starting with 
+# uppercase letters (assumption: nouns are more indicative of topics)
 
 tweets_tokens_tm <- tweets_tokens_tm %>% 
   quanteda::tokens_wordstem(language = "german") %>% 
