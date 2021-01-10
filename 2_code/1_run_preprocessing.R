@@ -81,7 +81,7 @@ pattern_emoji <- stringr::str_c(c(
   "\\:P"), # simple smiley sticking tongue out
   collapse = "|")
 
-pattern_hashtag <- "#\\S+"
+pattern_hashtag <- "(#)[[:alnum:]]+"
 pattern_tag <- "@\\S+"
 
 # Extract emojis, hashtags and tags
@@ -194,6 +194,13 @@ docvars(tweets_corpus) %>%
   ggplot(aes(x = party, y = n_hashtags, fill = party)) +
   geom_boxplot() +
   scale_fill_manual(values = party_colors)
+
+docvars(tweets_corpus) %>%
+  group_by(row_number()) %>% 
+  mutate(n_hashtags = length(unlist(hashtags))) %>% 
+  filter(n_hashtags > 10L) %>% 
+  select(username, hashtags) %>% 
+  as.data.table() # looks fine
 
 # Number of used emojis
 
