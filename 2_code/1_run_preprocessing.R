@@ -124,8 +124,29 @@ data_clean[, full_text := as.character(full_text)]
 
 # Add unique doc_id (only now, since in the beginning, documents may be 
 # discarded during language detection etc.)
+# TODO check whether this can be converted to username_time (time being numeric 
+# conversion from posixct)
 
-data_clean[, doc_id := .I]
+data_clean[
+  , doc_id := .I]
+
+data_clean[
+  , rank_timestamp := seq_len(.N),
+  by = .(username, created_at)
+  ][, doc_id_new := paste(
+    username,
+    as.character(as.numeric(as.POSIXct(created_at))),
+    rank_timestamp,
+    sep = ""),
+    by = seq_len(nrow(data_clean))]
+
+stopifnot(nrow(data_clean) - length(unique(data_clean$doc_id_new)) == 0)
+
+# Save
+
+save_rdata_files(data_clean, "2_code/attic")
+
+# Convert to corpus object
 
 tweets_corpus <- quanteda::corpus(
   x = data_clean,

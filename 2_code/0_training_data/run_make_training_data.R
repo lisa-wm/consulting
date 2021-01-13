@@ -17,6 +17,20 @@ training_data_annotated <- tweepy_df_subset_processed[
   tweets_annotated[, .(doc_id, label, topic)], on = "doc_id"
 ]
 
-save(
-  training_data_annotated,
-  file = here("2_code/0_training_data", "rdata-training-data-annotated.RData"))
+save_rdata_files(training_data_annotated, "2_code/0_training_data")
+
+# ROUND 2 ----------------------------------------------------------------------
+
+load_rdata_files(training_data_annotated, "2_code/0_training_data")
+
+training_data_annotated[
+  , rank_timestamp := seq_len(.N),
+  by = .(username, created_at)
+  ][, doc_id_new := paste(
+    username,
+    as.character(as.numeric(as.POSIXct(created_at))),
+    rank_timestamp,
+    sep = ""),
+    by = seq_len(nrow(training_data_annotated))]
+
+save_rdata_files(training_data_annotated, "2_code/0_training_data")
