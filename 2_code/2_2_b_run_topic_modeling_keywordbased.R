@@ -47,6 +47,58 @@ keywords_byterms[
     function(i) doc_id[order(i, decreasing = TRUE)]), .SDcols = keywords
   ][, doc_id := NULL]
 
+# If a term occurs in more than one keyword list, retain them in the list where 
+# its position is highest; in the others, remove it and choose next most 
+# frequent co-occurrence
+
+keywords_byterms_pruned_initial <- keywords_byterms[1:n_byterms]
+
+for (i in seq_len(nrow(keywords_byterms_pruned_initial))) {
+  
+  for (j in seq_along(keywords_byterms_pruned_initial)) {
+    
+    above <- keywords_byterms_pruned_initial[seq_len(i) - 1L]
+    same_row <- unlist(keywords_byterms_pruned_initial[i, ])
+    
+    overlaps_above <- apply(
+      above, 
+      c(1, 2),
+      function(k) k == keywords_byterms_pruned_initial[i, j, with = F])
+    
+    overlaps_in_row <- sapply(
+      same_row, 
+      function(k) {
+        k == keywords_byterms_pruned_initial[i, j, with = F]})
+    
+    overlaps_in_row[j] <- FALSE
+    
+  }
+  
+}
+
+
+for (k in seq_along(keywords)) {
+  
+  counter <- 1L
+  
+  while (counter <= n_byterms) {
+    
+    subset_to_check <- 
+      keywords_byterms_pruned_initial[
+        counter:nrow(keywords_byterms_pruned_initial), 
+        2:ncol(keywords_byterms_pruned_initial)]
+    
+    overlaps <- apply(
+      subset_to_check, 
+      c(1, 2),
+      function(i) keywords_byterms_pruned_initial[1, keywords[counter]] == i)
+    
+    keywords_byterms_pruned_initial[which(overlaps, arr.ind = TRUE)]
+    
+  }
+  
+}
+
 # TODO find way to make keyword lists topic-unique
 
 # FIND DERIVATIVES OF KEYWORDS AND ADD TO LIST ---------------------------------
