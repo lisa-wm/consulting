@@ -14,6 +14,8 @@
     observation that politicians will mostly tweet ad-hoc in response to a 
     certain event, not as an overall statement of their stance toward some 
     issue.
+    Literature also suggests this is a reasonable assumption 
+    \citep{quiangetal2019}.
   \end{itemize}
   \item \textbf{Relation to other problems of NLP.} We refer to the problem 
   treated herein as topic-specific sentiment analysis (TSSA). 
