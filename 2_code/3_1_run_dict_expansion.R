@@ -53,3 +53,5 @@ dict_emojis <- quanteda::dictionary(
     positive = emojis_ranking[polarity == "positive", .(unicode)],
     negative = emojis_ranking[polarity == "negative", .(unicode)]),
   tolower = FALSE)
+
+# TOPIC-SPECIFIC DICTIONARIES --------------------------------------------------
