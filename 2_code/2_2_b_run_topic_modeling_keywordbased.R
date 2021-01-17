@@ -47,59 +47,26 @@ keywords_byterms[
     function(i) doc_id[order(i, decreasing = TRUE)]), .SDcols = keywords
   ][, doc_id := NULL]
 
-# If a term occurs in more than one keyword list, retain them in the list where 
-# its position is highest; in the others, remove it and choose next most 
-# frequent co-occurrence
+# REMOVE DUPLICATES ------------------------------------------------------------
 
-keywords_byterms_pruned_initial <- keywords_byterms[1:n_byterms]
+# To make this faster, first prune data to maximum required length
 
-for (i in seq_len(nrow(keywords_byterms_pruned_initial))) {
+keywords_byterms <- keywords_byterms[1:(ncol(keywords_byterms) * n_byterms)]
+
+# Remove terms that co-occur with other keywords in higher frequencies to keep
+# terms unique to topics
+
+keywords_byterms_unique <- lapply(
   
-  for (j in seq_along(keywords_byterms_pruned_initial)) {
+  seq_along(keywords_byterms), 
+  
+  function(i) {
     
-    above <- keywords_byterms_pruned_initial[seq_len(i) - 1L]
-    same_row <- unlist(keywords_byterms_pruned_initial[i, ])
-    
-    overlaps_above <- apply(
-      above, 
-      c(1, 2),
-      function(k) k == keywords_byterms_pruned_initial[i, j, with = F])
-    
-    overlaps_in_row <- sapply(
-      same_row, 
-      function(k) {
-        k == keywords_byterms_pruned_initial[i, j, with = F]})
-    
-    overlaps_in_row[j] <- FALSE
+    duplicates <- find_duplicate_occurrence(keywords_byterms)
+    keywords_byterms[, i, with = FALSE][!duplicates[, i]]
     
   }
-  
-}
-
-
-for (k in seq_along(keywords)) {
-  
-  counter <- 1L
-  
-  while (counter <= n_byterms) {
-    
-    subset_to_check <- 
-      keywords_byterms_pruned_initial[
-        counter:nrow(keywords_byterms_pruned_initial), 
-        2:ncol(keywords_byterms_pruned_initial)]
-    
-    overlaps <- apply(
-      subset_to_check, 
-      c(1, 2),
-      function(i) keywords_byterms_pruned_initial[1, keywords[counter]] == i)
-    
-    keywords_byterms_pruned_initial[which(overlaps, arr.ind = TRUE)]
-    
-  }
-  
-}
-
-# TODO find way to make keyword lists topic-unique
+)
 
 # FIND DERIVATIVES OF KEYWORDS AND ADD TO LIST ---------------------------------
 
