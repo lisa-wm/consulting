@@ -18,7 +18,8 @@ packages_required <-  c(
   "mlr3tuning", # machine learning tuning
   "paradox", # handling parameter spaces
   "quanteda", # natural language processing
-  "spacyr", # lemmatization
+  "stringi", # string manipulation
+  "stringr", # string manipulation
   "stm", # structural topic modeling
   "testthat", # code testing
   "tidyverse", # data wrangling
