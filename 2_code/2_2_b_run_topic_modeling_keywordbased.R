@@ -35,39 +35,6 @@ quanteda::featnames(tweets_fcm)[startsWith(
 tweets_fcm_dfm <- quanteda::as.dfm(tweets_fcm) %>% 
   quanteda::dfm_select(keywords)
 
-keywords_byterms <- as.data.table(convert(tweets_fcm_dfm, to = "data.frame"))
-
-# DETERMINE TOP CO-OCCURRING TERMS FOR KEYWORDS --------------------------------
-
-# Order by-terms by co-occurrence
-
-keywords_byterms[
-  , c(keywords) := lapply(
-    .SD, 
-    function(i) doc_id[order(i, decreasing = TRUE)]), .SDcols = keywords
-  ][, doc_id := NULL]
-
-# REMOVE DUPLICATES ------------------------------------------------------------
-
-# To make this faster, first prune data to maximum required length
-
-keywords_byterms <- keywords_byterms[1:(ncol(keywords_byterms) * n_byterms)]
-
-# Remove terms that co-occur with other keywords in higher frequencies to keep
-# terms unique to topics
-
-keywords_byterms_unique <- lapply(
-  
-  seq_along(keywords_byterms), 
-  
-  function(i) {
-    
-    duplicates <- find_duplicate_occurrence(keywords_byterms)
-    keywords_byterms[, i, with = FALSE][!duplicates[, i]]
-    
-  }
-)
-
 # FIND DERIVATIVES OF KEYWORDS AND ADD TO LIST ---------------------------------
 
 # Find similar words (containing a literal match of the keywords), along with 
@@ -94,14 +61,60 @@ keywords_derivatives <- lapply(
 
 names(keywords_derivatives) <- keywords
 
+# DETERMINE TOP CO-OCCURRING TERMS FOR KEYWORDS --------------------------------
+
+# Find by-terms and order by co-occurrence
+
+keywords_byterms <- as.data.table(convert(tweets_fcm_dfm, to = "data.frame"))
+
+keywords_byterms[
+  , c(keywords) := lapply(
+    .SD, 
+    function(i) doc_id[order(i, decreasing = TRUE)]), .SDcols = keywords
+  ][, doc_id := NULL]
+
+# REMOVE DUPLICATES ------------------------------------------------------------
+
+# To make this faster, first prune data to maximum required length (corresponds 
+# to worst case where all keywords and derivatives are duplicates across topics)
+
+n_derivatives <- sum(sapply(keywords_derivatives, nrow))
+n_potential_duplicates <- ncol(keywords_byterms) * n_byterms + n_derivatives
+keywords_byterms <- keywords_byterms[1:n_potential_duplicates]
+  
+# Remove terms that co-occur with other keywords in higher frequencies to keep
+# terms unique to topics
+
+keywords_byterms_unique <- lapply(
+  
+  seq_along(keywords_byterms), 
+  
+  function(i) {
+    
+    duplicates <- find_duplicate_occurrence(keywords_byterms)
+    keywords_byterms[, i, with = FALSE][!duplicates[, i]]
+    
+  }
+)
+
 # Merge with co-occurrence list and prune to desired length
 
 keywords_list <- lapply(
+  
   seq_along(keywords_derivatives), 
+  
   function(k) {
-    c(
-      keywords_derivatives[[k]]$derivative, 
-      keywords_byterms[[k]][1:n_byterms])})
+    
+    derivatives <- keywords_derivatives[[k]]$derivative
+    overlaps <- intersect(keywords_byterms[[k]][1:n_byterms], derivatives)
+    remaining_byterms <- keywords_byterms[[k]]
+    
+    if (length(overlaps)) {
+      remaining_byterms <- 
+        remaining_byterms[remaining_byterms != overlaps]
+    }
+    
+    c(derivatives, remaining_byterms[1:n_byterms])})
 
 # FIND MATCHES BETWEEN DOCUMENTS AND KEYWORDS (OR ASSOCIATED TOP TERMS) --------
 
