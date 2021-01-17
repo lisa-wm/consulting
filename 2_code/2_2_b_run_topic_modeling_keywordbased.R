@@ -12,7 +12,7 @@ load_rdata_files(tweets_dfm_tm, folder = "2_code")
 # Define keywords and number of by-terms (frequent co-occurrences of the 
 # keyword, in addition to word-stem-based derivatives) to be retrieved
 
-keywords <- c("corona", "klima", "europa", "wirtschaft")
+keywords <- c("corona", "klima", "wirtschaft")
 n_byterms <- 10L
 
 # CREATE FEATURE-CO-OCCURENCE MATRIX -------------------------------------------
@@ -73,6 +73,10 @@ keywords_byterms[
     function(i) doc_id[order(i, decreasing = TRUE)]), .SDcols = keywords
   ][, doc_id := NULL]
 
+# Arrange column by order of keywords so matches do not crash
+
+setcolorder(keywords_byterms, keywords)
+
 # REMOVE DUPLICATES ------------------------------------------------------------
 
 # To make this faster, first prune data to maximum required length (corresponds 
@@ -97,6 +101,9 @@ keywords_byterms_unique <- lapply(
   }
 )
 
+stopifnot(length(unlist(keywords_byterms_unique)) == 
+            length(unique(unlist(keywords_byterms_unique))))
+
 # Merge with co-occurrence list and prune to desired length
 
 keywords_list <- lapply(
@@ -106,15 +113,20 @@ keywords_list <- lapply(
   function(k) {
     
     derivatives <- keywords_derivatives[[k]]$derivative
-    overlaps <- intersect(keywords_byterms[[k]][1:n_byterms], derivatives)
-    remaining_byterms <- keywords_byterms[[k]]
+    byterms <- unlist(keywords_byterms_unique[[k]])
+    overlaps <- intersect(derivatives, byterms)
+    remaining_byterms <- byterms
     
     if (length(overlaps)) {
       remaining_byterms <- 
-        remaining_byterms[remaining_byterms != overlaps]
+        remaining_byterms[!(remaining_byterms %in% overlaps)]
     }
     
-    c(derivatives, remaining_byterms[1:n_byterms])})
+    unname(c(derivatives, remaining_byterms[1:n_byterms]))})
+
+names(keywords_list) <- keywords
+
+stopifnot(all(lengths(keywords_list) >= n_byterms))
 
 # FIND MATCHES BETWEEN DOCUMENTS AND KEYWORDS (OR ASSOCIATED TOP TERMS) --------
 
@@ -186,14 +198,18 @@ topic_matches[
       
       })]
 
+save_rdata_files(topic_matches, folder = "2_code/2_topic_extraction")
+
 # ASSIGN TOPIC LABELS ----------------------------------------------------------
+
+load_rdata_files(topic_matches, folder = "2_code/2_topic_extraction")
 
 # Convert topic columns from list to numeric
 
 topic_cols <- paste0("topic_", keywords)
 topic_matches[, c(topic_cols) := lapply(.SD, as.numeric), .SDcols = topic_cols]
 
-# Assign topic labels, accounting for a number of cases
+# Assign topic labels
 
 topic_matches[
   , topic_label := which.min(.SD),
@@ -209,8 +225,7 @@ topic_matches[
 
 docvars_dt <- as.data.table(docvars(tweets_dfm_tm))
 
-# Create ID for pseudo-documents equivalent to what quanteda assigns internally 
-# when grouping dfm
+# Create ID equivalent to what quanteda assigns internally when creating dfm
 
 docvars_dt[, doc_id := .I]
 

@@ -23,7 +23,7 @@ ndoc(tweets_dfm_tm_grouped) / ndoc(tweets_dfm_tm)
 summary(ntoken(tweets_dfm_tm))
 summary(ntoken(tweets_dfm_tm_grouped))
 
-# CREATE STM OBJECT AND FIT STM ------------------------------------------------
+# CREATE STM OBJECT AND DEFINE PREVALENCE FORMULA ------------------------------
 
 # Create stm object
 
@@ -45,36 +45,72 @@ prevalence_formula <- as.formula(make_prevalence_formula(
     "bip_per_capita",
     "share_pop_migration")))
 
+# FIND OR SPECIFY NUMBER OF TOPICS ---------------------------------------------
+
 # Find optimal number of topics - THIS TAKES A WHILE
 
-hyperparameter_search <- stm::searchK(
-  documents = tweets_stm$documents,
-  vocab = tweets_stm$vocab,
-  data = tweets_stm$meta,
-  K = c(3L:6L),
-  prevalence = prevalence_formula,
-  heldout.seed = 1L,
-  max.em.its = 5L,
-  init.type = "Spectral"
-)
+run_hyperparameter_search <- readline(
+  prompt = paste0(
+    "Would you like to re-run a time-intensive search for optimal k? ",
+    "T/F: "))
 
-hyperparameter_search_results <- as.data.table(hyperparameter_search$results)
+if (as.logical(run_hyperparameter_search)) {
+  
+  hyperparameter_search <- stm::searchK(
+    documents = tweets_stm$documents,
+    vocab = tweets_stm$vocab,
+    data = tweets_stm$meta,
+    K = c(3L:6L),
+    prevalence = prevalence_formula,
+    heldout.seed = 1L,
+    max.em.its = 5L,
+    init.type = "Spectral"
+  )
+  
+  hyperparameter_search_results <- as.data.table(hyperparameter_search$results)
+  
+  save_rdata_files(
+    hyperparameter_search_results,
+    folder = "2_code/2_topic_extraction")
+  
+}
+
+load_rdata_files(
+  hyperparameter_search_results, 
+  folder = "2_code/2_topic_extraction")
 
 n_topics <- as.numeric(hyperparameter_search_results[
   which.min(hyperparameter_search_results[, heldout]), K])
 
-# Fit STM
+# FIT STM ----------------------------------------------------------------------
 
-topic_model <- stm::stm(
-  documents = tweets_stm$documents,
-  vocab = tweets_stm$vocab,
-  data = tweets_stm$meta,
-  K = n_topics,
-  prevalence = prevalence_formula,
-  gamma.prior = 'L1',
-  seed = 1L,
-  max.em.its = 10L,
-  init.type = "Spectral")
+run_stm <- readline(
+  prompt = paste0(
+    "Would you like to re-run the STM (time-intensive)? ", 
+    "T/F: "))
+
+if (run_stm) {
+  
+  topic_model <- stm::stm(
+    documents = tweets_stm$documents,
+    vocab = tweets_stm$vocab,
+    data = tweets_stm$meta,
+    K = n_topics,
+    prevalence = prevalence_formula,
+    gamma.prior = 'L1',
+    seed = 1L,
+    max.em.its = 5L,
+    init.type = "Spectral")
+  
+  save_rdata_files(
+    topic_model,
+    folder = "2_code/2_topic_extraction")
+  
+}
+
+load_rdata_files(
+  topic_model, 
+  folder = "2_code/2_topic_extraction")
 
 result_tm <- stm::labelTopics(topic_model, n = 50L)
 top_words_frex <- t(result_tm$frex)
