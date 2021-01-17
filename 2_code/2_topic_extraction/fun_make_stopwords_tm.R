@@ -12,13 +12,13 @@ make_stopwords_tm <- function() {
   sw_1 <- quanteda::stopwords("de")
   
   sw_2 <- XML::xmlToDataFrame(XML::xmlParse(here(
-    "2_code/3_sentiment_analysis/1_dict_based/dicts", 
+    "2_code/0_external_data/dicts", 
     "german_stopwords.xml"), 
     encoding = "UTF-8")) %>% 
     unlist()
   
   sw_3 <- read.delim(here(
-    "2_code/3_sentiment_analysis/1_dict_based/dicts", 
+    "2_code/0_external_data/dicts", 
     "stopwords-iso.txt"), encoding = "UTF-8") %>% 
     unlist()
   
