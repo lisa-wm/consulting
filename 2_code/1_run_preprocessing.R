@@ -8,9 +8,11 @@
 # READ, CLEAN AND MERGE DATA ---------------------------------------------------
 
 # Read tweets
+# Attention, these are stored in time-stamped folder to keep downloads from 
+# different time points apart --> adjust
 
 tweets_raw <- data.table::fread(
-  here("1_scraping/output", "tweepy_df_subset_no_retweets.csv"), 
+  here("1_scraping/output/202010113_2146", "tweepy_df_subset_no_retweets.csv"), 
   encoding = "UTF-8",
   sep = ",")
 
@@ -124,27 +126,23 @@ data_clean[, full_text := as.character(full_text)]
 
 # Add unique doc_id (only now, since in the beginning, documents may be 
 # discarded during language detection etc.)
-# TODO check whether this can be converted to username_time (time being numeric 
-# conversion from posixct)
-
-data_clean[
-  , doc_id := .I]
 
 data_clean[
   , rank_timestamp := seq_len(.N),
   by = .(username, created_at)
-  ][, doc_id_new := paste(
+  ][, doc_id := paste(
     username,
     as.character(as.numeric(as.POSIXct(created_at))),
     rank_timestamp,
     sep = ""),
-    by = seq_len(nrow(data_clean))]
+    by = seq_len(nrow(data_clean))
+    ][, rank_timestamp := NULL]
 
-stopifnot(nrow(data_clean) - length(unique(data_clean$doc_id_new)) == 0)
+stopifnot(nrow(data_clean) - length(unique(data_clean$doc_id)) == 0)
 
-# Save
+# Save for labeling
 
-save_rdata_files(data_clean, "2_code/attic")
+# save_rdata_files(data_clean, "2_code/attic")
 
 # Convert to corpus object
 

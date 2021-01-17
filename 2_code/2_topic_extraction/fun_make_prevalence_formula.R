@@ -4,7 +4,10 @@
 
 # PURPOSE: map desired input variables for STM topical prevalence to formula
 
-make_prevalence_formula <- function(data, categorical_vars, smooth_vars) {
+make_prevalence_formula <- function(data, 
+                                    categorical_vars, 
+                                    smooth_vars,
+                                    smooth_df = 5L) {
   
   # Check whether input is of character type
   
@@ -43,7 +46,7 @@ make_prevalence_formula <- function(data, categorical_vars, smooth_vars) {
   # Add smoothing terms and collapse to formula
   
   cv_formula <- paste0(cv, collapse = "+")
-  sv_formula <- paste0("s(", sv, ", df = 5)", collapse = "+")
+  sv_formula <- paste0("s(", sv, ", df = ", smooth_df, ")", collapse = "+")
   formula_right <- paste0(c(cv_formula, sv_formula), collapse = "+")
   
   paste("", formula_right, sep = "~")
