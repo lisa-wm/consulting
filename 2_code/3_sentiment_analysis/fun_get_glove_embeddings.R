@@ -3,6 +3,11 @@ library(checkmate)
 library(backports)
 library(data.table)
 library(text2vec)
+library(readr)
+
+# Set working directory to our project root: setwd("./consulting")
+# The code below is based on the original documentation: 
+# http://text2vec.org/glove.html
 
 
 ##' Train GloVe-wordvectors
