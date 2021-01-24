@@ -152,6 +152,8 @@ names(matches_per_keyword) <- keywords
 # Recall that by-terms are ordered by number of co-occurrences with the keyword,
 # so match positions indicate topical congruence 
 
+# TODO make this faster
+
 topic_matches <- data.table(doc_id = docnames(tweets_dfm_tm))
 
 topic_matches[
