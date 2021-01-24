@@ -8,6 +8,7 @@
 
 packages_required <-  c(
   
+  "backports", # enable use of functions in different R versions
   "checkmate", # input checking
   "cld3", # language detection
   "data.table", # data wrangling
@@ -21,7 +22,9 @@ packages_required <-  c(
   "stringi", # string manipulation
   "stringr", # string manipulation
   "stm", # structural topic modeling
+  "svDialogs", # message boxes
   "testthat", # code testing
+  "text2vec", # word embeddings
   "tidyverse", # data wrangling
   "XML" # xml parsing
   
@@ -50,7 +53,8 @@ set_up_packages <- function(pkg) {
     
   }
   
-  lapply(packages_required, library, character.only = TRUE, quietly = TRUE)
+  invisible(
+    lapply(packages_required, library, character.only = TRUE, quietly = TRUE))
   
 }
 

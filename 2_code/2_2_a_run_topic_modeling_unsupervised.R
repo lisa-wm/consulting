@@ -69,6 +69,8 @@ if (as.logical(run_hyperparameter_search)) {
   
   hyperparameter_search_results <- as.data.table(hyperparameter_search$results)
   
+  svDialogs::msg_box("done with hyperparameter search")
+  
   save_rdata_files(
     hyperparameter_search_results,
     folder = "2_code/2_topic_extraction")
@@ -99,8 +101,10 @@ if (run_stm) {
     prevalence = prevalence_formula,
     gamma.prior = 'L1',
     seed = 1L,
-    max.em.its = 5L,
+    max.em.its = 15L,
     init.type = "Spectral")
+  
+  svDialogs::msg_box("done fitting stm")
   
   save_rdata_files(
     topic_model,
@@ -130,7 +134,7 @@ topic_probs[
     max_topic_score = max(.SD, na.rm = TRUE),
     topic_label = which.max(.SD)),
   .SDcols = topic_cols,
-  by = seq_len(nrow(topic_probs)) # .EACHI??
+  by = seq_len(nrow(topic_probs))
 ]
 
 # MAP TOPIC LABLES TO ORIGINAL DOCUMENTS ---------------------------------------

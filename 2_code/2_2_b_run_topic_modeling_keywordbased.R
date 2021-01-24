@@ -12,7 +12,7 @@ load_rdata_files(tweets_dfm_tm, folder = "2_code")
 # Define keywords and number of by-terms (frequent co-occurrences of the 
 # keyword, in addition to word-stem-based derivatives) to be retrieved
 
-keywords <- c("corona", "klima", "wirtschaft")
+keywords <- c("corona")
 n_byterms <- 10L
 
 # CREATE FEATURE-CO-OCCURENCE MATRIX -------------------------------------------
@@ -149,7 +149,7 @@ names(matches_per_keyword) <- keywords
 
 # RETRIEVE POSITIONS IN TOPIC KEYWORD LISTS THAT ARE MATCHED -------------------
 
-# Recall that by-terms are ordered by number of co-occurrences with the keyword, 
+# Recall that by-terms are ordered by number of co-occurrences with the keyword,
 # so match positions indicate topical congruence 
 
 topic_matches <- data.table(doc_id = docnames(tweets_dfm_tm))
@@ -198,6 +198,8 @@ topic_matches[
       
       })]
 
+svDialogs::msg_box("done matching topics")
+
 save_rdata_files(topic_matches, folder = "2_code/2_topic_extraction")
 
 # ASSIGN TOPIC LABELS ----------------------------------------------------------
@@ -215,8 +217,7 @@ topic_matches[
   , topic_label := which.min(.SD),
   .SDcols = topic_cols,
   by = seq_len(nrow(topic_matches))
-  ][, topic_name := keywords[topic_label]
-    ][, doc_id := as.numeric(doc_id)]
+  ][, topic_name := keywords[topic_label]]
 
 # MAP TOPIC LABLES TO ORIGINAL DOCUMENTS ---------------------------------------
 
@@ -227,7 +228,7 @@ docvars_dt <- as.data.table(docvars(tweets_dfm_tm))
 
 # Create ID equivalent to what quanteda assigns internally when creating dfm
 
-docvars_dt[, doc_id := .I]
+docvars_dt[, doc_id := docid(tweets_dfm_tm)]
 
 # Append topic labels
 

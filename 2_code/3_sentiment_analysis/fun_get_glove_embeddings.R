@@ -53,4 +53,4 @@ get_glove_embeddings <- function(data_path = "./2_code/0_training_data/data-twee
   
 }
 
-create_glove_embeddings()
+# create_glove_embeddings()
