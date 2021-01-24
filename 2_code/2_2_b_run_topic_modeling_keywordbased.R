@@ -122,30 +122,75 @@ keywords_list <- lapply(
         remaining_byterms[!(remaining_byterms %in% overlaps)]
     }
     
-    unname(c(derivatives, remaining_byterms[1:n_byterms]))})
+    list(
+      keyword = names(keywords_derivatives)[k],
+      derivatives = derivatives,
+      byterms = unname(remaining_byterms[1:n_byterms]))
+    
+    # list(
+    #   keyword = names(keywords_derivatives)[k],
+    #   derivatives = list(
+    #     derivatives = derivatives,
+    #     byterms = list(byterms = unname(remaining_byterms[1:n_byterms]))))
+    
+    })
+
+keywords_list_dict <- list(
+  keywords = do.call(rbind, keywords_list)[, 1],
+  derivatives = do.call(rbind, keywords_list)[, 2],
+  byterms = do.call(rbind, keywords_list)[, 3])
 
 names(keywords_list) <- keywords
 
-stopifnot(all(lengths(keywords_list) >= n_byterms))
+# MATCH DOCUMENTS WITH KEYWORDS ------------------------------------------------
 
-# FIND MATCHES BETWEEN DOCUMENTS AND KEYWORDS (OR ASSOCIATED TOP TERMS) --------
+# Create dictionary objects with multiple levels (per keyword: the keyword
+# itself, its derivatives, and its by-terms)
 
-# For each keyword, find the documents matching the word itself or its by-terms
+dict_keywords <- quanteda::dictionary(keywords_list)
 
-matches_per_keyword <- lapply(
+matches_dfm <- quanteda::dfm_lookup(
+  tweets_dfm_tm, 
+  dict_keywords,
+  levels = 1:3)
+
+matches_dt <- as.data.table(quanteda::convert(matches_dfm, to = "data.frame"))
+
+setkey(matches_dt, doc_id)
+
+# ASSIGN TOPIC LABELS ----------------------------------------------------------
+
+# Take multi-step approach: first, assign all documents that can be 
+# unambiguously matched (because they only match one topic, or the level of one
+# topic match is strictly higher than that of others); second, check for all
+# ambiguous cases on which position their matches are in the keyword list
+# (matches higher up obtain priority)
+
+numeric_cols <- names(matches_dt)[sapply(matches_dt, is.numeric)]
+keyword_cols <- unlist(
+  stringr::str_extract_all(names(matches_dt), "(.?)+.keyword$"))
   
-  seq_along(keywords), 
-  
-  function(k) {
-    
-    keyword_features <- keywords_list[[k]]
-    matches_k <- quanteda::dfm_match(
-      tweets_dfm_tm,
-      keyword_features)
-    
-  })
+  (sapply(
+  names(matches_dt), 
+  stringr::str_extract_all, "keyword$"))
 
-names(matches_per_keyword) <- keywords
+matches_dt[
+  , sum_matches := sum(.SD), 
+  .SDcols = numeric_cols,
+  by = seq_len(nrow(matches_dt))
+  ][, topic_label := ifelse(
+    sum_matches == 0,
+    NA,
+    ifelse(
+      xor(
+        xor(
+          corona.keyword > 0,
+          klima.keyword > 0),
+        wirtschaft.keyword > 0),
+      "foo",
+      "poo"
+    )
+  )]
 
 # RETRIEVE POSITIONS IN TOPIC KEYWORD LISTS THAT ARE MATCHED -------------------
 
