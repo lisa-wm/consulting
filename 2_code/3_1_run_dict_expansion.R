@@ -21,7 +21,9 @@ dict_sentiments <- quanteda::dictionary(
   list(
     positive = unique(c(german_polarity_clues$positive, senti_ws$positive)),
     negative = unique(c(german_polarity_clues$negative, senti_ws$negative))),
-  tolower = FALSE)
+  tolower = TRUE)
+
+save_rdata_files(dict_sentiments, folder = "2_code/3_sentiment_analysis")
 
 # EMOJI DICTIONARY -------------------------------------------------------------
 
@@ -54,4 +56,9 @@ dict_emojis <- quanteda::dictionary(
     negative = emojis_ranking[polarity == "negative", .(unicode)]),
   tolower = FALSE)
 
+save_rdata_files(dict_emojis, folder = "2_code/3_sentiment_analysis")
+
+
 # TOPIC-SPECIFIC DICTIONARIES --------------------------------------------------
+
+# TODO Set up

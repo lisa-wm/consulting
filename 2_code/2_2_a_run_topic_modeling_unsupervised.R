@@ -130,7 +130,7 @@ topic_probs[
     max_topic_score = max(.SD, na.rm = TRUE),
     topic_label = which.max(.SD)),
   .SDcols = topic_cols,
-  by = seq_len(nrow(topic_probs))
+  by = seq_len(nrow(topic_probs)) # .EACHI??
 ]
 
 # MAP TOPIC LABLES TO ORIGINAL DOCUMENTS ---------------------------------------

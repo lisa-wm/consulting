@@ -41,6 +41,4 @@ tweets_tokens_tm <- tweets_tokens_tm %>%
 
 tweets_dfm_tm <- quanteda::dfm(tweets_tokens_tm)
 
-save_rdata_files(
-  robject = tweets_dfm_tm, 
-  folder = "2_code")
+save_rdata_files(tweets_dfm_tm, folder = "2_code")

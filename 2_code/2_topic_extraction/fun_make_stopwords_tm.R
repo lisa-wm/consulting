@@ -12,13 +12,13 @@ make_stopwords_tm <- function() {
   sw_1 <- quanteda::stopwords("de")
   
   sw_2 <- XML::xmlToDataFrame(XML::xmlParse(here(
-    "2_code/0_external_data/dicts", 
+    "2_code/0_external_data", 
     "german_stopwords.xml"), 
     encoding = "UTF-8")) %>% 
     unlist()
   
   sw_3 <- read.delim(here(
-    "2_code/0_external_data/dicts", 
+    "2_code/0_external_data", 
     "stopwords-iso.txt"), encoding = "UTF-8") %>% 
     unlist()
   
@@ -44,32 +44,6 @@ make_stopwords_tm <- function() {
     "frag",
     "woch",
     "partei"))
-  
-  
-  # 
-  # stringr::str_remove_all(
-  #   stopwords, 
-  #   pattern = stringr::str_c(c(
-  #     "gegen", 
-  #     "^kein",
-  #     "^nicht",
-  #     "sehr",
-  #     "^besser",
-  #     "^beste",
-  #     "^gut",
-  #     "^gern",
-  #     "kaum",
-  #     "nein",
-  #     "nie",
-  #     "^niemand",
-  #     "^richtig",
-  #     "^schlecht",
-  #     "^(polit",
-  #     "^bundesregier",
-  #     "^bundestag",
-  #     "^deutsch",
-  #     "berlin",
-  #     "prozent)"),
-  #     collapse = "|"))
+
   
 }
