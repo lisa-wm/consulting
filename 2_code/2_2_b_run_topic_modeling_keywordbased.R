@@ -12,7 +12,18 @@ load_rdata_files(tweets_dfm_tm, folder = "2_code")
 # Define keywords and number of by-terms (frequent co-occurrences of the 
 # keyword, in addition to word-stem-based derivatives) to be retrieved
 
-keywords <- c("corona")
+keywords <- list(
+  corona = c("corona", "pandemie", "virus", "krise"),
+  klima = c("klima", "grün", "future", "umwelt")
+)
+
+keywords_clean <- lapply(
+  keywords,
+  function(i) {
+    SnowballC::wordStem(remove_umlauts(i), language = "de")
+  }
+)
+
 n_byterms <- 10L
 
 # CREATE FEATURE-CO-OCCURENCE MATRIX -------------------------------------------
@@ -21,7 +32,7 @@ tweets_fcm <- quanteda::fcm(tweets_dfm_tm, tri = FALSE)
 
 # Check whether keywords are among the text features
 
-stopifnot(keywords %in% quanteda::featnames(tweets_fcm))
+stopifnot(names(keywords_clean) %in% quanteda::featnames(tweets_fcm))
 
 # If not, try similar words and perhaps adjust keywords
 
@@ -33,7 +44,18 @@ quanteda::featnames(tweets_fcm)[startsWith(
 # select keywords only
 
 tweets_fcm_dfm <- quanteda::as.dfm(tweets_fcm) %>% 
-  quanteda::dfm_select(keywords)
+  quanteda::dfm_select(unlist(keywords_clean))
+
+# Remove keywords that were not found in data
+
+keywords_clean_available <- lapply(
+  seq_along(keywords_clean), 
+  function(k) {
+    intersect(keywords_clean[[k]], quanteda::featnames(tweets_fcm_dfm))
+  }
+)
+
+names(keywords_clean_available) <- names(keywords_clean)
 
 # FIND DERIVATIVES OF KEYWORDS AND ADD TO LIST ---------------------------------
 
@@ -42,24 +64,36 @@ tweets_fcm_dfm <- quanteda::as.dfm(tweets_fcm) %>%
 
 keywords_derivatives <- lapply(
   
-  seq_along(keywords),
+  seq_along(keywords_clean_available),
   
   function(k) {
     
-    derivatives <- unlist(stringr::str_extract_all(
-      quanteda::featnames(tweets_fcm),
-      paste0("(.?)*(", keywords[k], ")(.?)*")))
+    freq_list <- lapply(
+      
+      seq_along(keywords_clean_available[[k]]),
+      
+      function(i) {
+        
+        derivatives <- unlist(stringr::str_extract_all(
+          quanteda::featnames(tweets_fcm),
+          paste0("(.?)*(", keywords[[k]][i], ")(.?)*")))
+        
+        freq_dt <- as.data.table(
+          featfreq(tweets_fcm)[unlist(derivatives)],
+          keep.rownames = TRUE)
+        
+        setnames(freq_dt, c("derivative", "freq"))
+        setorder(freq_dt, -freq)
+        
+      }
+      
+    )
     
-    freq_dt <- as.data.table(
-      featfreq(tweets_fcm)[unlist(derivatives)],
-      keep.rownames = TRUE)
-    
-    setnames(freq_dt, c("derivative", "freq"))
-    setorder(freq_dt, -freq)
+    freq_list <- do.call(rbind, freq_list)
     
   })
 
-names(keywords_derivatives) <- keywords
+names(keywords_derivatives) <- names(keywords_clean_available)
 
 # DETERMINE TOP CO-OCCURRING TERMS FOR KEYWORDS --------------------------------
 
@@ -67,39 +101,68 @@ names(keywords_derivatives) <- keywords
 
 keywords_byterms <- as.data.table(convert(tweets_fcm_dfm, to = "data.frame"))
 
-keywords_byterms[
-  , c(keywords) := lapply(
-    .SD, 
-    function(i) doc_id[order(i, decreasing = TRUE)]), .SDcols = keywords
-  ][, doc_id := NULL]
+keywords_byterms <- lapply(
+  
+  seq_along(keywords_clean_available),
+  
+  function(k) {
+    
+    fcm_k <- quanteda::dfm_select(tweets_fcm_dfm, keywords_clean_available[[k]])
+    dt_k <- as.data.table(convert(fcm_k, to = "data.frame"))
+    
+    dt_k[
+      , keywords_clean_available[[k]] := lapply(
+        .SD, 
+        function(i) doc_id[order(i, decreasing = TRUE)]
+        ), 
+      .SDcols = keywords_clean_available[[k]]
+      ][, doc_id := NULL]
+    
+    setcolorder(dt_k, keywords_clean_available[[k]])
+    
+    })
 
-# Arrange column by order of keywords so matches do not crash
-
-setcolorder(keywords_byterms, keywords)
+names(keywords_byterms) <- names(keywords_clean_available)
 
 # REMOVE DUPLICATES ------------------------------------------------------------
 
 # To make this faster, first prune data to maximum required length (corresponds 
 # to worst case where all keywords and derivatives are duplicates across topics)
 
+keywords_byterms_merged <- do.call(cbind, keywords_byterms)
+
 n_derivatives <- sum(sapply(keywords_derivatives, nrow))
-n_potential_duplicates <- ncol(keywords_byterms) * n_byterms + n_derivatives
-keywords_byterms <- keywords_byterms[1:n_potential_duplicates]
+n_potential_duplicates <- ncol(keywords_byterms_merged) * n_byterms + 
+  n_derivatives
+keywords_byterms_short <- keywords_byterms_merged[1:n_potential_duplicates]
   
 # Remove terms that co-occur with other keywords in higher frequencies to keep
 # terms unique to topics
 
-keywords_byterms_unique <- lapply(
+keywords_byterms_unique <- sapply(
   
-  seq_along(keywords_byterms), 
+  seq_along(keywords_byterms_short), 
   
   function(i) {
     
-    duplicates <- find_duplicate_occurrence(keywords_byterms)
-    keywords_byterms[, i, with = FALSE][!duplicates[, i]]
+    duplicates <- find_duplicate_occurrence(keywords_byterms_short)
+    keywords_byterms_short[, i, with = FALSE][!duplicates[, i]]
     
-  }
+  },
+  
+  USE.NAMES = TRUE
+  
 )
+
+keywords_byterms_unique <- sapply(
+  
+  names(keywords_clean_available),
+  
+  function(i) {
+    
+    unname(
+      unlist(
+        keywords_byterms_unique[grepl(i, names(keywords_byterms_unique))]))})
 
 stopifnot(length(unlist(keywords_byterms_unique)) == 
             length(unique(unlist(keywords_byterms_unique))))
@@ -126,13 +189,7 @@ keywords_list <- lapply(
       keyword = names(keywords_derivatives)[k],
       derivatives = derivatives,
       byterms = unname(remaining_byterms[1:n_byterms]))
-    
-    # list(
-    #   keyword = names(keywords_derivatives)[k],
-    #   derivatives = list(
-    #     derivatives = derivatives,
-    #     byterms = list(byterms = unname(remaining_byterms[1:n_byterms]))))
-    
+
     })
 
 keywords_list_dict <- list(
@@ -140,7 +197,7 @@ keywords_list_dict <- list(
   derivatives = do.call(rbind, keywords_list)[, 2],
   byterms = do.call(rbind, keywords_list)[, 3])
 
-names(keywords_list) <- keywords
+names(keywords_list) <- names(keywords_clean_available)
 
 # MATCH DOCUMENTS WITH KEYWORDS ------------------------------------------------
 
@@ -154,9 +211,9 @@ matches_dfm <- quanteda::dfm_lookup(
   dict_keywords,
   levels = 1:3)
 
-matches_dt <- as.data.table(quanteda::convert(matches_dfm, to = "data.frame"))
-
-setkey(matches_dt, doc_id)
+tweets_matches <- as.data.table(
+  quanteda::convert(matches_dfm, to = "data.frame"))
+setkey(tweets_matches, doc_id)
 
 # ASSIGN TOPIC LABELS ----------------------------------------------------------
 
@@ -166,31 +223,22 @@ setkey(matches_dt, doc_id)
 # ambiguous cases on which position their matches are in the keyword list
 # (matches higher up obtain priority)
 
-numeric_cols <- names(matches_dt)[sapply(matches_dt, is.numeric)]
-keyword_cols <- unlist(
-  stringr::str_extract_all(names(matches_dt), "(.?)+.keyword$"))
-  
-  (sapply(
-  names(matches_dt), 
-  stringr::str_extract_all, "keyword$"))
+numeric_cols <- names(tweets_matches)[sapply(tweets_matches, is.numeric)]
 
-matches_dt[
-  , sum_matches := sum(.SD), 
+tweets_matches[
+  , sum_matches := sum(.SD),
   .SDcols = numeric_cols,
-  by = seq_len(nrow(matches_dt))
-  ][, topic_label := ifelse(
-    sum_matches == 0,
-    NA,
-    ifelse(
-      xor(
-        xor(
-          corona.keyword > 0,
-          klima.keyword > 0),
-        wirtschaft.keyword > 0),
-      "foo",
-      "poo"
-    )
-  )]
+  by = seq_len(nrow(tweets_matches))
+  ][, topic_label := ifelse(sum_matches == 0, NA, 0)]
+
+tweets_matches_none <- tweets_matches[
+  is.na(topic_label)
+  ][, .(doc_id, topic_label)]
+
+tweets_matches_any <- tweets_matches[
+  !is.na(topic_label)
+  ][, ]
+
 
 # RETRIEVE POSITIONS IN TOPIC KEYWORD LISTS THAT ARE MATCHED -------------------
 
