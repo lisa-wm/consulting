@@ -12,7 +12,7 @@ get_dict_sentiws <- function() {
   
   sapply(
     
-    seq_along(data_german_polarity_clues),
+    seq_along(data_sentiws),
     
     function(i) {
       

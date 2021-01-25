@@ -138,6 +138,8 @@ data_clean[
     by = seq_len(nrow(data_clean))
     ][, rank_timestamp := NULL]
 
+setkey(data_clean, doc_id)
+
 stopifnot(nrow(data_clean) - length(unique(data_clean$doc_id)) == 0)
 
 # Save for labeling
