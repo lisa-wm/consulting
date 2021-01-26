@@ -65,6 +65,8 @@ save_rdata_files(dict_emojis, folder = "2_code/3_sentiment_analysis")
 
 # CONVERT DATA TO DFM OBJECT ---------------------------------------------------
 
+load_rdata_files(tweets_corpus_topics_unsupervised, folder = "2_code")
+
 tweets_corpus_sa <- tweets_corpus_topics_unsupervised
 
 # Tokenize for sentiment analysis
@@ -93,48 +95,67 @@ save_rdata_files(tweets_dfm_sa, folder = "2_code")
 
 # MATCH POLARITY WORDS IN DOCUMENTS --------------------------------------------
 
-foo <- quanteda::dfm_lookup(tweets_dfm_sa, dict_sentiments)
+load_rdata_files(data_clean, folder = "2_code")
 
-sentiments_df <- convert(
-  dfm_lookup(dfm, dictionary),
-  to = "data.frame") %>% 
-  as.data.table()
+# Extract texts
 
-make_sentiments_dict <- function(dfm, dictionary) {
-  
-  sentiments_df <- convert(
-    dfm_lookup(dfm, dictionary),
-    to = "data.frame") %>% 
-    as.data.table()
-  
-  sentiments_df[, `:=` (
-    doc_id = as.numeric(doc_id),
-    sentiments_found = positive + negative,
-    diff_pos = positive - negative,
-    label = case_when(
-      positive - negative > 0 ~ "positive",
-      positive - negative < 0 ~ "negative",
-      positive - negative == 0 ~ "indecisive"))]
-  
-  median_sentiments_found <- median(sentiments_df[, sentiments_found])
-  
-  sentiments_df[, confidence_factor := 
-                  sentiments_found / ..median_sentiments_found]
-  
-}
+tweets_texts <- data_clean[, .(doc_id, full_text)]
 
-sentiments_dict_unigrams <- make_sentiments_dict(
-  tweets_dfm_unigrams,
-  global_dict_unigrams
-)
+# Find documents using emojis and convert to unicode
 
-# Append labels to data and save
-# This may look the wrong way round but is actually data.table's way to perform
-# a left join
+tweets_emojis <- data_clean[
+  , .(doc_id, emojis)
+  ][, n_emojis := lengths(emojis)
+    ][n_emojis > 0
+      ][, n_emojis := NULL
+        ][, emojis := paste(unlist(emojis), collapse = " "), by = doc_id
+          ][, emojis := as.character(emojis)
+          ][, emojis := iconv(emojis, "", "ASCII", "Unicode")]
 
-data_labeled_dict_unigrams <- sentiments_dict_unigrams[
-  data_processed, on = "doc_id"]
+tweets_corpus_emojis <- quanteda::corpus(
+  tweets_emojis, 
+  docid_field = "doc_id",
+  text_field = "emojis")
 
-save(
-  data_labeled_dict_unigrams,
-  file = here("2_code", "rdata-tweets-labeled-dict-unigrams.RData"))
+# tweets_dfm_emojis <- quanteda::dfm(tweets_corpus_emojis)
+# 
+# # Combine
+# 
+# tweets_lookup <- tweets_emojis[tweets_texts]
+# 
+# # Look up in dictionaries
+# 
+# tweets_global_sentiments <- setDT(
+#   quanteda::convert(
+#     quanteda::dfm_lookup(tweets_dfm_sa, dict_sentiments),
+#     to = "data.frame"))
+# 
+# 
+# 
+# tweets_emojis <- data_clean[, .(doc_id, emojis)][
+#   , list(emojis = as.character(unlist(emojis))), 
+#   by = doc_id]
+# 
+# 
+# 
+# tweets_emojis <- data_clean[1:50][
+#   , list(emojis = as.character(unlist(emojis))), 
+#   by = doc_id
+#   ]
+# 
+# sapply(tweets_emojis$emojis, stringi::stri_trans_general, "Hex-Any/Unicode")
+# 
+# foo <- quanteda::corpus()
+# 
+# foo <- data_clean[
+#   , .(doc_id, emojis)
+#   ][, emojis := unlist(emojis)]
+# 
+# foo <- as.matrix(data_clean[, .(doc_id, emojis)])
+# foo_dfm <- quanteda::as.dfm(foo)
+# 
+# tweets_emoji_sentiments <- as.data.table(
+#   quanteda::convert(
+#     quanteda::dfm_lookup(tweets_dfm_sa, dict_emojis)
+#   )
+# )

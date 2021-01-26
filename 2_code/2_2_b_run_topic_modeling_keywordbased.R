@@ -44,7 +44,7 @@ quanteda::featnames(tweets_fcm)[startsWith(
 # select keywords only
 
 tweets_fcm_dfm <- quanteda::as.dfm(tweets_fcm) %>% 
-  quanteda::dfm_select(unlist(keywords_clean))
+  quanteda::dfm_select(unlist(keywords_clean)) 
 
 # Remove keywords that were not found in data
 
@@ -99,7 +99,7 @@ names(keywords_derivatives) <- names(keywords_clean_available)
 
 # Find by-terms and order by co-occurrence
 
-keywords_byterms <- as.data.table(convert(tweets_fcm_dfm, to = "data.frame"))
+keywords_byterms <- setDT(convert(tweets_fcm_dfm, to = "data.frame"))
 
 keywords_byterms <- lapply(
   
@@ -108,7 +108,7 @@ keywords_byterms <- lapply(
   function(k) {
     
     fcm_k <- quanteda::dfm_select(tweets_fcm_dfm, keywords_clean_available[[k]])
-    dt_k <- as.data.table(convert(fcm_k, to = "data.frame"))
+    dt_k <- setDT(convert(fcm_k, to = "data.frame"))
     
     dt_k[
       , keywords_clean_available[[k]] := lapply(
@@ -192,10 +192,10 @@ keywords_list <- lapply(
 
     })
 
-keywords_list_dict <- list(
-  keywords = do.call(rbind, keywords_list)[, 1],
-  derivatives = do.call(rbind, keywords_list)[, 2],
-  byterms = do.call(rbind, keywords_list)[, 3])
+# keywords_list_dict <- list(
+#   keywords = do.call(rbind, keywords_list)[, 1],
+#   derivatives = do.call(rbind, keywords_list)[, 2],
+#   byterms = do.call(rbind, keywords_list)[, 3])
 
 names(keywords_list) <- names(keywords_clean_available)
 
@@ -211,7 +211,7 @@ matches_dfm <- quanteda::dfm_lookup(
   dict_keywords,
   levels = 1:3)
 
-tweets_matches <- as.data.table(
+tweets_matches <- setDT(
   quanteda::convert(matches_dfm, to = "data.frame"))
 setkey(tweets_matches, doc_id)
 

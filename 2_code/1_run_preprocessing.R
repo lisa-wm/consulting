@@ -142,6 +142,8 @@ setkey(data_clean, doc_id)
 
 stopifnot(nrow(data_clean) - length(unique(data_clean$doc_id)) == 0)
 
+save_rdata_files(data_clean, "2_code")
+
 # Save for labeling
 
 # save_rdata_files(data_clean, "2_code/attic")
