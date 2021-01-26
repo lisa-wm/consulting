@@ -9,9 +9,13 @@
 
 remove_noisy_symbols <- function(text) {
   
-  text %>% 
-    stringr::str_replace_all(c("\\n" = " ")) %>% 
-    stringr::str_remove_all(str_c(c(
+  checkmate::assert_character(text)
+  
+  text <- stringr::str_replace_all(text, c("\\n" = " "))
+  
+  text <- stringr::str_remove_all(
+    text,
+    stringr::str_c(c(
       "\U0022", 
       "\U0027", 
       "\U2018", 
@@ -19,11 +23,15 @@ remove_noisy_symbols <- function(text) {
       "\U201C", 
       "\U201D", 
       "\U201E", 
-      "\U201F"), 
-      collapse = "|")) %>% # all kinds of quotes
-    stringr::str_remove_all("&amp;|&lt;|&gt;") %>% # ampersands etc.
-    stringr::str_remove_all("%") %>% # percent signs
-    stringr::str_remove_all(" http([^ ]*)") %>%  # hyperlinks
-    stringr::str_remove_all("\\\n") %>%  # spaces
-    stringr::str_squish()
+      "\U201F",
+      "&amp;",
+      "&lt;", 
+      "&gt;",
+      "%",
+      " http([^ ]*)",
+      "\\\n"), 
+      collapse = "|")
+  )
+  
+  stringr::str_squish(text)
 }

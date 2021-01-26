@@ -13,15 +13,15 @@ remove_umlauts <- function(text) {
   
   text <- stringi::stri_trans_general(text, "Any-Latin")
   
-  text %>%
-    stringr::str_replace_all(c(
+  stringr::str_replace_all(
+    text, 
+    c(
       "\u00c4" = "Ae",
       "\u00e4" = "ae",
       "\u00d6" = "Oe",
       "\u00f6" = "oe",
       "\u00dc" = "Ue",
       "\u00fc" = "ue",
-      "\u00df" = "ss"
-  ))
+      "\u00df" = "ss"))
 
 }
