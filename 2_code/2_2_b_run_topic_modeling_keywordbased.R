@@ -76,14 +76,14 @@ keywords_derivatives <- lapply(
         
         derivatives <- unlist(stringr::str_extract_all(
           quanteda::featnames(tweets_fcm),
-          paste0("(.?)*(", keywords[[k]][i], ")(.?)*")))
+          sprintf("(.?)*(%s)(.?)*", keywords[[k]][i])))
         
         freq_dt <- as.data.table(
-          featfreq(tweets_fcm)[unlist(derivatives)],
+          quanteda::featfreq(tweets_fcm)[unlist(derivatives)],
           keep.rownames = TRUE)
         
-        setnames(freq_dt, c("derivative", "freq"))
-        setorder(freq_dt, -freq)
+        data.table::setnames(freq_dt, c("derivative", "freq"))
+        data.table::setorder(freq_dt, -freq)
         
       }
       
@@ -99,8 +99,6 @@ names(keywords_derivatives) <- names(keywords_clean_available)
 
 # Find by-terms and order by co-occurrence
 
-keywords_byterms <- setDT(convert(tweets_fcm_dfm, to = "data.frame"))
-
 keywords_byterms <- lapply(
   
   seq_along(keywords_clean_available),
@@ -108,7 +106,7 @@ keywords_byterms <- lapply(
   function(k) {
     
     fcm_k <- quanteda::dfm_select(tweets_fcm_dfm, keywords_clean_available[[k]])
-    dt_k <- setDT(convert(fcm_k, to = "data.frame"))
+    dt_k <- data.table::setDT(quanteda::convert(fcm_k, to = "data.frame"))
     
     dt_k[
       , keywords_clean_available[[k]] := lapply(
@@ -118,7 +116,7 @@ keywords_byterms <- lapply(
       .SDcols = keywords_clean_available[[k]]
       ][, doc_id := NULL]
     
-    setcolorder(dt_k, keywords_clean_available[[k]])
+    data.table::setcolorder(dt_k, keywords_clean_available[[k]])
     
     })
 
@@ -211,9 +209,10 @@ matches_dfm <- quanteda::dfm_lookup(
   dict_keywords,
   levels = 1:3)
 
-tweets_matches <- setDT(
+tweets_matches <- data.table::setDT(
   quanteda::convert(matches_dfm, to = "data.frame"))
-setkey(tweets_matches, doc_id)
+
+data.table::setkey(tweets_matches, doc_id)
 
 # ASSIGN TOPIC LABELS ----------------------------------------------------------
 
@@ -239,7 +238,6 @@ tweets_matches_any <- tweets_matches[
   !is.na(topic_label)
   ][, ]
 
-
 # RETRIEVE POSITIONS IN TOPIC KEYWORD LISTS THAT ARE MATCHED -------------------
 
 # Recall that by-terms are ordered by number of co-occurrences with the keyword,
@@ -247,13 +245,14 @@ tweets_matches_any <- tweets_matches[
 
 # TODO make this faster
 
-topic_matches <- data.table(doc_id = docnames(tweets_dfm_tm))
+topic_matches <- data.table::data.table(
+  doc_id = quanteda::docnames(tweets_dfm_tm))
 
 topic_matches[
   
   # Create column for every topic
   
-  , sapply(keywords, function(k) paste0("topic_", k)) 
+  , sapply(keywords, function(k) sprintf("topic_%d", k)) 
   
   := lapply(
     
@@ -268,9 +267,9 @@ topic_matches[
       matches_d <- lapply(
         doc_id,
         function (d) {
-          this_row <- dfm_subset(this_dfm, docnames(this_dfm) == d)
-          this_df <- convert(this_row, to = "data.frame")
-          column_to_rownames(this_df, "doc_id")})
+          this_row <- quanteda::dfm_subset(this_dfm, docnames(this_dfm) == d)
+          this_df <- quanteda::convert(this_row, to = "data.frame")
+          tibble::column_to_rownames(this_df, "doc_id")})
       
       # For each document-topic combination, retrieve positions of matches
       # This omits cases where words are mentioned twice in one tweet, which 
@@ -303,7 +302,7 @@ load_rdata_files(topic_matches, folder = "2_code/2_topic_extraction")
 
 # Convert topic columns from list to numeric
 
-topic_cols <- paste0("topic_", keywords)
+topic_cols <- sprintf("topic_%d", keywords)
 topic_matches[, c(topic_cols) := lapply(.SD, as.numeric), .SDcols = topic_cols]
 
 # Assign topic labels
@@ -319,11 +318,12 @@ topic_matches[
 # Extract docvars as data.table for modification (more convenient than quanteda 
 # implementation in data.frame format)
 
-docvars_dt <- as.data.table(docvars(tweets_dfm_tm))
+docvars_dt <- as.data.table(quanteda::docvars(tweets_dfm_tm))
 
 # Create ID equivalent to what quanteda assigns internally when creating dfm
+# TODO insert setkey statement
 
-docvars_dt[, doc_id := docid(tweets_dfm_tm)]
+docvars_dt[, doc_id := quanteda::docid(tweets_dfm_tm)]
 
 # Append topic labels
 
@@ -332,7 +332,8 @@ docvars_dt <- topic_matches[docvars_dt, on = "doc_id"]
 # Insert modified docvars back into corpus
 
 tweets_corpus_topics_keywordbased <- tweets_corpus
-docvars(tweets_corpus_topics_keywordbased) <- as.data.frame(docvars_dt)
+quanteda::docvars(tweets_corpus_topics_keywordbased) <- 
+  as.data.frame(docvars_dt)
 
 # Save
 

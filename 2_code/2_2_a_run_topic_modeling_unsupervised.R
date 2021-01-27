@@ -20,8 +20,8 @@ tweets_dfm_tm_grouped <- quanteda::dfm_group(
 # Degree of compression
 
 ndoc(tweets_dfm_tm_grouped) / ndoc(tweets_dfm_tm)
-summary(ntoken(tweets_dfm_tm))
-summary(ntoken(tweets_dfm_tm_grouped))
+summary(quanteda::ntoken(tweets_dfm_tm))
+summary(quanteda::ntoken(tweets_dfm_tm_grouped))
 
 # CREATE STM OBJECT AND DEFINE PREVALENCE FORMULA ------------------------------
 
@@ -36,7 +36,7 @@ tweets_stm <- quanteda::convert(
 # TODO find sensible formula
 
 prevalence_formula <- as.formula(make_prevalence_formula(
-  data = docvars(tweets_dfm_tm_grouped),
+  data = quanteda::docvars(tweets_dfm_tm_grouped),
   categorical_vars = list(
     "party", 
     "bundesland"),
@@ -125,9 +125,9 @@ topic_probs <- stm::make.dt(topic_model)[, `:=` (
   topic_doc_id = names(tweets_stm$documents),
   docnum = NULL)] 
 
-setnames(topic_probs, tolower(names(topic_probs)))
+data.table::setnames(topic_probs, tolower(names(topic_probs)))
 
-topic_cols <- paste0("topic", 1:n_topics)
+topic_cols <- sprintf("topic_%d", 1:n_topics)
 
 topic_probs[
   , `:=` (
@@ -163,7 +163,8 @@ docvars_dt[
 # Insert modified docvars back into corpus
 
 tweets_corpus_topics_unsupervised <- tweets_corpus
-docvars(tweets_corpus_topics_unsupervised) <- as.data.frame(docvars_dt)
+quanteda::docvars(tweets_corpus_topics_unsupervised) <- 
+  as.data.frame(docvars_dt)
 
 save_rdata_files(
   robject = tweets_corpus_topics_unsupervised, 
