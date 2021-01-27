@@ -23,17 +23,23 @@ tweets_tokens_tm <- quanteda::tokens(
 # Standard stopwords removal and stemming, selection of words starting with 
 # uppercase letters (assumption: nouns are more indicative of topics)
 
-tweets_tokens_tm <- tweets_tokens_tm %>% 
-  quanteda::tokens_wordstem(language = "german") %>% 
-  quanteda::tokens_select(
-    pattern = c("[[:upper:]]([[:lower:]])+"),
-    valuetype = "regex",
-    selection = "keep",
-    case_insensitive = FALSE) %>% 
-  quanteda::tokens_tolower() %>%
-  quanteda::tokens_select(
-    pattern = make_stopwords_tm(),
-    selection = "remove") 
+# !!! removed pipe op bc it is pretty but slooow
+
+tweets_tokens_tm <- quanteda::tokens_wordstem(
+  tweets_tokens_tm, 
+  language = "german")
+
+tweets_tokens_tm <- quanteda::tokens_select(
+  tweets_tokens_tm,
+  pattern = c("[[:upper:]]([[:lower:]])+"),
+  valuetype = "regex",
+  selection = "keep",
+  case_insensitive = FALSE)
+
+tweets_tokens_tm <- quanteda::tokens_select(
+  quanteda::tokens_tolower(tweets_tokens_tm),
+  pattern = make_stopwords_tm(),
+  selection = "remove")
 
 # CREATE DFM OBJECT ------------------------------------------------------------
 

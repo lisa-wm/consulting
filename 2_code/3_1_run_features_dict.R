@@ -38,7 +38,8 @@ emojis_ranking <- data.table::fread(
     "negative", 
     "neutral",
     "positive", 
-    "name"))
+    "name"),
+  encoding = "UTF-8")
 
 # TODO Check whether this the right encoding
 
@@ -47,14 +48,14 @@ emojis_ranking[
   .SDcols = c("negative", "neutral", "positive"),
   by = seq_len(nrow(emojis_ranking))
   ][, polarity := data.table::fcase(
-    principal_emotion == 1, "positive",
+    principal_emotion == 1, "negative",
     principal_emotion == 2, "neutral",
-    principal_emotion == 3, "negative")]
+    principal_emotion == 3, "positive")]
 
 dict_emojis <- quanteda::dictionary(
   list(
-    positive = emojis_ranking[polarity == "positive", .(unicode)],
-    negative = emojis_ranking[polarity == "negative", .(unicode)]),
+    positive = emojis_ranking[polarity == "positive", unicode],
+    negative = emojis_ranking[polarity == "negative", unicode]),
   tolower = FALSE)
 
 save_rdata_files(dict_emojis, folder = "2_code/3_sentiment_analysis")
@@ -80,12 +81,14 @@ tweets_tokens_sa <- quanteda::tokens(
   split_hyphens = TRUE,
   include_docvars = TRUE) 
 
-tweets_tokens_sa <- tweets_tokens_sa %>% 
-  quanteda::tokens_wordstem(language = "german") %>% 
-  quanteda::tokens_tolower() %>%
-  quanteda::tokens_select(
-    pattern = make_stopwords_sa(),
-    selection = "remove") 
+tweets_tokens_sa <- quanteda::tokens_wordstem(
+  quanteda::tokens_tolower(tweets_tokens_sa),
+  language = "german")
+
+tweets_tokens_sa <- quanteda::tokens_select(
+  tweets_tokens_sa,
+  pattern = make_stopwords_sa(),
+  selection = "remove") 
 
 # Convert to dfm object
 
@@ -95,13 +98,57 @@ save_rdata_files(tweets_dfm_sa, folder = "2_code")
 
 # MATCH POLARITY WORDS IN DOCUMENTS --------------------------------------------
 
-load_rdata_files(data_clean, folder = "2_code")
+tweets_sentiments_global <- setDT(
+  quanteda::convert(
+    quanteda::dfm_lookup(tweets_dfm_sa, dict_sentiments),
+    to = "data.frame"))
 
-# Extract texts
-
-tweets_texts <- data_clean[, .(doc_id, full_text)]
+# MATCH EMOJIS -----------------------------------------------------------------
 
 # Find documents using emojis and convert to unicode
+
+lex_pos <- emojis_ranking[polarity == "positive", unicode]
+print(intToUtf8(lex_pos))
+
+zwinker_smiley <- lex_pos[16]
+zwinker_smiley_orig <- foo$emojis[5]
+stringi::stri_trans_general(zwinker_smiley, "Any-Hex/Unicode")
+stringi::stri_trans_general(zwinker_smiley_orig, "Any-Hex")
+stringi::stri_trans_general(foo$emojis, "Any-Hex")
+
+utf8ToInt(intToUtf8(0x1f609))
+utf8ToInt(zwinker_smiley_orig)
+
+x <- c(0xD801, 0xDC37)
+intToUtf8(x)
+
+foo <- data_clean[
+  , .(doc_id, emojis)
+][, n_emojis := lengths(emojis)
+][n_emojis > 0
+][, n_emojis := NULL
+][, emojis := paste(unlist(emojis), collapse = " "), by = doc_id
+][, emojis := as.character(emojis)
+]#[, emojis := utf8ToInt(emojis)]
+
+
+foo <- data_clean[
+  , .(doc_id, emojis)
+][, n_emojis := lengths(emojis)
+][n_emojis > 0
+][, n_emojis := NULL
+][, emojis := paste(unlist(emojis), collapse = " "), by = doc_id
+][, emojis := as.character(emojis)
+][, emojis := paste(as.character(
+  sapply(unlist(str_split(emojis, " ")), utf8ToInt)), collapse = " "), by = doc_id]
+
+poo <- sapply(sapply(lex_pos, intToUtf8), utf8ToInt)
+
+intersect(foo$emojis, poo)
+
+c("Latin-ASCII", "Any-Hex/Unicode", "Hex-Any/Unicode")
+
+load_rdata_files(data_clean, folder = "2_code")
 
 tweets_emojis <- data_clean[
   , .(doc_id, emojis)
@@ -110,52 +157,32 @@ tweets_emojis <- data_clean[
       ][, n_emojis := NULL
         ][, emojis := paste(unlist(emojis), collapse = " "), by = doc_id
           ][, emojis := as.character(emojis)
-          ][, emojis := iconv(emojis, "", "ASCII", "Unicode")]
+            ][, emojis := iconv(emojis, "", "ASCII", "Unicode")]
+
+test <- tweets_emojis$emojis[1:200]
+a <- stringi::stri_trans_general(test, "hex")
+test_2 <- emojis_ranking[polarity == "positive", unicode]
+
+iconv(test_2, "", "ASCII", "Unicode")
+
+iconv(test, "Unicode", "byte")
 
 tweets_corpus_emojis <- quanteda::corpus(
   tweets_emojis, 
   docid_field = "doc_id",
   text_field = "emojis")
 
-# tweets_dfm_emojis <- quanteda::dfm(tweets_corpus_emojis)
-# 
-# # Combine
-# 
-# tweets_lookup <- tweets_emojis[tweets_texts]
-# 
-# # Look up in dictionaries
-# 
-# tweets_global_sentiments <- setDT(
-#   quanteda::convert(
-#     quanteda::dfm_lookup(tweets_dfm_sa, dict_sentiments),
-#     to = "data.frame"))
-# 
-# 
-# 
-# tweets_emojis <- data_clean[, .(doc_id, emojis)][
-#   , list(emojis = as.character(unlist(emojis))), 
-#   by = doc_id]
-# 
-# 
-# 
-# tweets_emojis <- data_clean[1:50][
-#   , list(emojis = as.character(unlist(emojis))), 
-#   by = doc_id
-#   ]
-# 
-# sapply(tweets_emojis$emojis, stringi::stri_trans_general, "Hex-Any/Unicode")
-# 
-# foo <- quanteda::corpus()
-# 
-# foo <- data_clean[
-#   , .(doc_id, emojis)
-#   ][, emojis := unlist(emojis)]
-# 
-# foo <- as.matrix(data_clean[, .(doc_id, emojis)])
-# foo_dfm <- quanteda::as.dfm(foo)
-# 
-# tweets_emoji_sentiments <- as.data.table(
-#   quanteda::convert(
-#     quanteda::dfm_lookup(tweets_dfm_sa, dict_emojis)
-#   )
-# )
+tweets_dfm_emojis <- quanteda::dfm(tweets_corpus_emojis)
+
+# FIXME not working, emojis are encoded in different ways
+
+tweets_sentiments_emojis <- setDT(
+  quanteda::convert(
+    quanteda::dfm_lookup(tweets_dfm_emojis, dict_emojis),
+    to = "data.frame"))
+
+utf8_normalize(test_2)
+
+
+iconv(emojis_ranking[polarity == "positive", unicode], "", "ASCII", "Unicode")
+featnames(tweets_dfm_emojis)
