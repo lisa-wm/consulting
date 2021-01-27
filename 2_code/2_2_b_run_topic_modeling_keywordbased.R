@@ -14,7 +14,7 @@ load_rdata_files(tweets_dfm_tm, folder = "2_code")
 
 keywords <- list(
   corona = c("corona", "pandemie", "virus", "krise"),
-  klima = c("klima", "grün", "future", "umwelt")
+  klima = c("klima", "grün", "natur", "umwelt")
 )
 
 keywords_clean <- lapply(
@@ -50,8 +50,8 @@ tweets_fcm_dfm <- quanteda::as.dfm(tweets_fcm) %>%
 
 keywords_clean_available <- lapply(
   seq_along(keywords_clean), 
-  function(k) {
-    intersect(keywords_clean[[k]], quanteda::featnames(tweets_fcm_dfm))
+  function(i) {
+    intersect(keywords_clean[[i]], quanteda::featnames(tweets_fcm_dfm))
   }
 )
 
@@ -66,17 +66,17 @@ keywords_derivatives <- lapply(
   
   seq_along(keywords_clean_available),
   
-  function(k) {
+  function(i) {
     
     freq_list <- lapply(
       
-      seq_along(keywords_clean_available[[k]]),
+      seq_along(keywords_clean_available[[i]]),
       
-      function(i) {
+      function(j) {
         
         derivatives <- unlist(stringr::str_extract_all(
           quanteda::featnames(tweets_fcm),
-          sprintf("(.?)*(%s)(.?)*", keywords[[k]][i])))
+          sprintf("(.?)*(%s)(.?)*", keywords[[i]][j])))
         
         freq_dt <- as.data.table(
           quanteda::featfreq(tweets_fcm)[unlist(derivatives)],
@@ -103,20 +103,20 @@ keywords_byterms <- lapply(
   
   seq_along(keywords_clean_available),
   
-  function(k) {
+  function(i) {
     
-    fcm_k <- quanteda::dfm_select(tweets_fcm_dfm, keywords_clean_available[[k]])
-    dt_k <- data.table::setDT(quanteda::convert(fcm_k, to = "data.frame"))
+    fcm_i <- quanteda::dfm_select(tweets_fcm_dfm, keywords_clean_available[[i]])
+    dt_i <- data.table::setDT(quanteda::convert(fcm_i, to = "data.frame"))
     
-    dt_k[
-      , keywords_clean_available[[k]] := lapply(
+    dt_i[
+      , keywords_clean_available[[i]] := lapply(
         .SD, 
-        function(i) doc_id[order(i, decreasing = TRUE)]
+        function(j) doc_id[order(j, decreasing = TRUE)]
         ), 
-      .SDcols = keywords_clean_available[[k]]
+      .SDcols = keywords_clean_available[[i]]
       ][, doc_id := NULL]
     
-    data.table::setcolorder(dt_k, keywords_clean_available[[k]])
+    data.table::setcolorder(dt_i, keywords_clean_available[[i]])
     
     })
 
@@ -171,10 +171,10 @@ keywords_list <- lapply(
   
   seq_along(keywords_derivatives), 
   
-  function(k) {
+  function(i) {
     
-    derivatives <- keywords_derivatives[[k]]$derivative
-    byterms <- unlist(keywords_byterms_unique[[k]])
+    derivatives <- keywords_derivatives[[i]]$derivative
+    byterms <- unlist(keywords_byterms_unique[[i]])
     overlaps <- intersect(derivatives, byterms)
     remaining_byterms <- byterms
     
@@ -210,9 +210,8 @@ matches_dfm <- quanteda::dfm_lookup(
   levels = 1:3)
 
 tweets_matches <- data.table::setDT(
-  quanteda::convert(matches_dfm, to = "data.frame"))
-
-data.table::setkey(tweets_matches, doc_id)
+  quanteda::convert(matches_dfm, to = "data.frame"), 
+  key = "doc_id")
 
 # ASSIGN TOPIC LABELS ----------------------------------------------------------
 
@@ -222,21 +221,64 @@ data.table::setkey(tweets_matches, doc_id)
 # ambiguous cases on which position their matches are in the keyword list
 # (matches higher up obtain priority)
 
-numeric_cols <- names(tweets_matches)[sapply(tweets_matches, is.numeric)]
-
-tweets_matches[
-  , sum_matches := sum(.SD),
-  .SDcols = numeric_cols,
+tweets_matches_none <- tweets_matches[
+  , n_matches := sum(.SD),
+  .SDcols = -c("doc_id"),
   by = seq_len(nrow(tweets_matches))
-  ][, topic_label := ifelse(sum_matches == 0, NA, 0)]
+  ][n_matches == 0]
+
+tweets_matches_any <- tweets_matches[!(doc_id %in% tweets_matches_none$doc_id)] 
+
+test <- lapply(
+  
+  seq_along(keywords_clean_available),
+  
+  function(i) {
+    
+    topic_i <- names(keywords_clean_available)[i]
+    cols_i <- names(tweets_matches_any)[which(
+      startsWith(names(tweets_matches_any), topic_i) | 
+        names(tweets_matches_any) == "doc_id")]
+    dt_i <- tweets_matches_any[
+      , ..cols_i
+      ][, sum_matches := sum(.SD),
+        .SDcols = -c("doc_id"), 
+        by = doc_id
+        ][sum_matches > 0]
+    
+  }
+  
+)
+
+match_cols <- names(tweets_matches)[sapply(tweets_matches, is.numeric)]
+
+tweets_matches[, `:=` (
+  n_matches = sum(.SD), 
+  n_topics_matched = sum(.SD > 0)),
+  .SDcols = match_cols,
+  by = seq_len(nrow(tweets_matches))]
 
 tweets_matches_none <- tweets_matches[
-  is.na(topic_label)
-  ][, .(doc_id, topic_label)]
+  n_matches == 0
+  ][, topic_label := NA
+    ][, .(doc_id, topic_label)]
 
-tweets_matches_any <- tweets_matches[
-  !is.na(topic_label)
-  ][, ]
+tweets_matches_unambiguous <- tweets_matches[
+  n_matches > 0 & n_lists_matched == 1
+  ][, topic_label := which.max(.SD),
+    .SDcols = match_cols,
+    by = doc_id
+    ][, .(doc_id, topic_label)]
+
+tweets_matches_ambiguous <- tweets_matches[
+  n_matches > 0 & n_lists_matched != 1
+  ][, foo := ifelse(n_matches %% n_lists_matches)]
+
+# [, topic_label := ifelse(
+#       n_topics_matched > 1 & n_matches %% n_topics_matched > 0, 
+#       which.max(.SD), 0), 
+#       .SDcols = match_cols, 
+#       by = doc_id]
 
 # RETRIEVE POSITIONS IN TOPIC KEYWORD LISTS THAT ARE MATCHED -------------------
 
@@ -252,22 +294,22 @@ topic_matches[
   
   # Create column for every topic
   
-  , sapply(keywords, function(k) sprintf("topic_%d", k)) 
+  , sapply(keywords, function(i) sprintf("topic_%d", i)) 
   
   := lapply(
     
     seq_along(keywords),
     
-    function(k) {
+    function(i) {
       
-      this_dfm <- matches_per_keyword[[k]]
+      this_dfm <- matches_per_keyword[[i]]
       
       # For each document-topic combination, extract binary match list
       
       matches_d <- lapply(
         doc_id,
-        function (d) {
-          this_row <- quanteda::dfm_subset(this_dfm, docnames(this_dfm) == d)
+        function (j) {
+          this_row <- quanteda::dfm_subset(this_dfm, docnames(this_dfm) == j)
           this_df <- quanteda::convert(this_row, to = "data.frame")
           tibble::column_to_rownames(this_df, "doc_id")})
       
@@ -277,18 +319,18 @@ topic_matches[
       
       matches_d_pos <- lapply(
         seq_along(matches_d), 
-        function(m) which(matches_d[[m]] == 1))
+        function(j) which(matches_d[[j]] == 1))
       
       # In case of multiple matches, calculate score to balance position and 
       # number of matches
       # TODO find better heuristic
       
       lapply(
-        seq_along(matches_d_pos), function(m) {
+        seq_along(matches_d_pos), function(j) {
           ifelse(
-            length(matches_d_pos[[m]]) <= 1,
-            matches_d_pos[[m]],
-            min(matches_d_pos[[m]]) / length(matches_d_pos[[m]]))})
+            length(matches_d_pos[[j]]) <= 1,
+            matches_d_pos[[j]],
+            min(matches_d_pos[[j]]) / length(matches_d_pos[[j]]))})
       
       })]
 
