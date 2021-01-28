@@ -1,10 +1,10 @@
 # ------------------------------------------------------------------------------
-# DICTIONARY EXPANSION BY TOPIC-SPECIFIC TERMS
+# EXTRACTION OF DICTIONARY FEATURES
 # ------------------------------------------------------------------------------
 
 # IN: topic-word distributions + publicly available sentiment dictionaries +
 # data with topic labels
-# OUT: dictionaries + dictionary-based data features
+# OUT: dictionaries + data with dictionary-based features
 
 # MAKE STANDARD SENTIMENT DICTIONARY -------------------------------------------
 

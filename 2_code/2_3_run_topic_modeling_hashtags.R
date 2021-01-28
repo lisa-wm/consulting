@@ -1,7 +1,8 @@
 # ------------------------------------------------------------------------------
-# EXTRACTION OF WORD EMBEDDINGS
+# MINING HASHTAGS FOR TOPIC EXTRACTION
 # ------------------------------------------------------------------------------
 
-# IN: data with topic labels
-# OUT: data with loadings on word embeddings
+# IN:
+# OUT:
 
+# how on earth
