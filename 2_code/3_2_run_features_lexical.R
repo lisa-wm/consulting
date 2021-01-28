@@ -5,13 +5,6 @@
 # IN: data with topic labels
 # OUT: data with lexical features
 
-
-
-# first extract stuff like negation, then throw out and tokenize remainder
-# pos tags
-
-
-
 # CREATE BASIC DFM -------------------------------------------------------------
 
 # TODO check whether this could also be solved w/ bigrams / skipgrams
@@ -40,7 +33,7 @@ tokens_negation <- SnowballC::wordStem(c(
 
 # Match documents with negation patterns
 
-tweets_negation <- convert_dfm_to_dt(
+tweets_negation <- convert_qtda_to_dt(
   quanteda::dfm_match(tweets_dfm_basic, tokens_negation),
   key = "doc_id"
 )
@@ -67,7 +60,7 @@ tokens_punctuation <- c(
 
 # Match documents with punctuation patterns
 
-tweets_punctuation <- convert_dfm_to_dt(
+tweets_punctuation <- convert_qtda_to_dt(
   quanteda::dfm_match(tweets_dfm_basic, tokens_punctuation),
   key = "doc_id")
 
@@ -82,7 +75,7 @@ tokens_repetition <- c(
   repeated_char = "(.)\\1{2}", 
   repeated_char_seq = "\\b(\\S+?)\\1\\S*\\b")
 
-tweets_repetition <- convert_dfm_to_dt(
+tweets_repetition <- convert_qtda_to_dt(
   quanteda::dfm_match(tweets_dfm_basic, tokens_repetition),
   key = "doc_id")
 
@@ -109,7 +102,7 @@ tweets_unigrams <- quanteda::tokens_select(
   selection = "remove"
 )
 
-tweets_unigrams <- convert_dfm_to_dt(
+tweets_unigrams <- convert_qtda_to_dt(
   quanteda::dfm_tfidf(
     quanteda::dfm_trim(
       quanteda::dfm(tweets_unigrams),
@@ -159,7 +152,7 @@ tweets_char_unigrams <- quanteda::tokens(
   remove_separators = TRUE,
   split_hyphens = TRUE) 
 
-tweets_char_unigrams <- convert_dfm_to_dt(
+tweets_char_unigrams <- convert_qtda_to_dt(
   quanteda::dfm(tweets_char_unigrams),
   key = "doc_id"
 )

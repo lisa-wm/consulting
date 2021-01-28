@@ -120,7 +120,8 @@ tweets_emojis <- data_clean[
         ][, emojis := paste(as.character(
           sapply(unlist(stringr::str_split(emojis, " ")), utf8ToInt)),
           collapse = " "),
-          by = doc_id]
+          by = doc_id
+          ][, n_emojis := stringr::str_count(emojis, "\\w+"), by = doc_id]
 
 # Convert to dfm object
 
@@ -137,10 +138,8 @@ tweets_sentiments_emojis <- convert_dfm_to_dt(
   quanteda::dfm_lookup(tweets_dfm_emojis, dict_emojis),
   key = "doc_id")
 
-sum(apply(
-  tweets_sentiments_emojis[, .(positive_emojis, negative_emojis)], 
-  1, 
-  sum) > 0)
+tweets_sentiments_emojis <- 
+  tweets_sentiments_emojis[tweets_emojis[, .(doc_id, n_emojis)]]
 
 # MAKE TOPIC-SPECIFIC DICTIONARIES ---------------------------------------------
 
