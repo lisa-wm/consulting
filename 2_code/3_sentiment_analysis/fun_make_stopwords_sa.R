@@ -22,32 +22,26 @@ make_stopwords_sa <- function() {
     "stopwords-iso.txt"), encoding = "UTF-8") %>% 
     unlist()
   
-  sw <- c(sw_1, sw_2, sw_3) %>% 
-    remove_umlauts() %>% 
-    SnowballC::wordStem(language = "de") %>% 
-    unique() %>% 
-    sort()
-  
   # Additional removal of some domain-specific stopwords (after stemming so no
   # conjugations must be provided)
   
-  # c(sw, c(
-  #   "polit",
-  #   "bundesregier",
-  #   "bundestag",
-  #   "deutsch",
-  #   "deutschland",
-  #   "berlin",
-  #   "prozent",
-  #   "herzlich",
-  #   "glueckwunsch",
-  #   "frag",
-  #   "woch",
-  #   "partei"))
+  sw <- c(c(sw_1, sw_2, sw_3), c(
+    "polit",
+    "bundesregier",
+    "bundestag",
+    "deutsch",
+    "deutschland",
+    "berlin",
+    "prozent",
+    "herzlich",
+    "glueckwunsch",
+    "frag",
+    "woch",
+    "partei"))
   
   # Remove some stopwords from list that might help in classifying sentiment
   
-  stringr::str_remove_all(
+  sw <- stringr::str_remove_all(
     sw,
     pattern = stringr::str_c(c(
       "",
@@ -66,5 +60,12 @@ make_stopwords_sa <- function() {
       "richtig",
       "schlecht"),
       collapse = "|"))
+  
+  sw %>% 
+    tolower() %>% 
+    remove_umlauts() %>% 
+    SnowballC::wordStem(language = "de") %>% 
+    unique() %>% 
+    sort()
   
 }

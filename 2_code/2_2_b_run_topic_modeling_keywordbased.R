@@ -108,7 +108,7 @@ keywords_byterms <- lapply(
   function(i) {
     
     fcm_i <- quanteda::dfm_select(tweets_fcm_dfm, keywords_clean_available[[i]])
-    dt_i <- data.table::setDT(quanteda::convert(fcm_i, to = "data.frame"))
+    dt_i <- convert_dfm_to_dt(fcm_i, key = NULL)
     
     dt_i[
       , keywords_clean_available[[i]] := lapply(
@@ -206,9 +206,7 @@ matches_dfm <- quanteda::dfm_lookup(
   dict_keywords,
   levels = 1:3)
 
-tweets_matches <- data.table::setDT(
-  quanteda::convert(matches_dfm, to = "data.frame"), 
-  key = "doc_id")
+tweets_matches <- convert_dfm_to_dt(matches_dfm, key = "doc_id")
 
 # ASSIGN TOPIC LABELS ----------------------------------------------------------
 

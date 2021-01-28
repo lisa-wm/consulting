@@ -8,12 +8,6 @@
 
 
 # first extract stuff like negation, then throw out and tokenize remainder
-# negations
-# exclamation marks etc.
-# repeated char seqs such as hahaha?
-# n-grams
-# char k-grams
-# skip grams?
 # pos tags
 
 
@@ -39,22 +33,30 @@ tweets_dfm_basic <- quanteda::dfm(tweets_tokens_basic)
 
 # EXTRACT NEGATIONS ------------------------------------------------------------
 
+# Take any common German negation patterns
+
 tokens_negation <- SnowballC::wordStem(c(
   "nicht", "nie", "niemals", "nein", "niemand", "nix", "nirgends", "kein"))
 
-tweets_negations <- as.data.table(
-  quanteda::convert(
-    quanteda::dfm_match(tweets_dfm_basic, tokens_negation), 
-    to = "data.frame"),
-  key = "doc_id")
+# Match documents with negation patterns
 
-tweets_negations <- tweets_negations[
+tweets_negation <- convert_dfm_to_dt(
+  quanteda::dfm_match(tweets_dfm_basic, tokens_negation),
+  key = "doc_id"
+)
+
+# Sum negations over all negation patterns
+
+tweets_negation <- tweets_negation[
   , n_negations := sum(.SD),
   .SDcols = -c("doc_id"),
   by = doc_id
   ][, .(doc_id, n_negations)]
 
 # EXTRACT PUNCTUATION ----------------------------------------------------------
+
+# Take punctuation patterns deemed indicative for sentiments: 3 consecutive
+# dots and one or multiple exclamation / question marks
 
 tokens_punctuation <- c(
   dotdotdot = "[.]{3}", 
@@ -63,11 +65,109 @@ tokens_punctuation <- c(
   exclamation_mark_rep = "[!]{2}", 
   question_mark_rep = "[\\?]{2}")
 
-tweets_punctuation <- as.data.table(
-  quanteda::convert(
-    quanteda::dfm_match(tweets_dfm_basic, tokens_punctuation), 
-    to = "data.frame"),
+# Match documents with punctuation patterns
+
+tweets_punctuation <- convert_dfm_to_dt(
+  quanteda::dfm_match(tweets_dfm_basic, tokens_punctuation),
   key = "doc_id")
 
 data.table::setnames(tweets_punctuation, c("doc_id", names(tokens_punctuation)))
 
+# EXTRACT REPEATED CHARACTER SEQUENCES -----------------------------------------
+
+# Take single characters repeated at least 3 times and repated character
+# sequences (such as "haha")
+
+tokens_repetition <- c(
+  repeated_char = "(.)\\1{2}", 
+  repeated_char_seq = "\\b(\\S+?)\\1\\S*\\b")
+
+tweets_repetition <- convert_dfm_to_dt(
+  quanteda::dfm_match(tweets_dfm_basic, tokens_repetition),
+  key = "doc_id")
+
+data.table::setnames(tweets_repetition, c("doc_id", names(tokens_repetition)))
+
+# TODO check whether there are really no matches
+
+# EXTRACT N-GRAMS --------------------------------------------------------------
+
+# Now that specific patterns, such as negations, have been extracted, stopwords
+# may be removed
+
+# Word unigrams
+
+tweets_tokens_ngrams <- quanteda::tokens_select(
+  quanteda::tokens_tolower(tweets_tokens_basic),
+  pattern = make_stopwords_sa(),
+  selection = "remove")
+
+tweets_unigrams <- quanteda::tokens_select(
+  tweets_tokens_ngrams,
+  pattern = "[[:punct:]]",
+  valuetype = "regex",
+  selection = "remove"
+)
+
+tweets_unigrams <- convert_dfm_to_dt(
+  quanteda::dfm_tfidf(
+    quanteda::dfm_trim(
+      quanteda::dfm(tweets_unigrams),
+      min_docfreq = 0.005,
+      docfreq_type = "prop")),
+  key = "doc_id"
+)
+
+# Word bigrams
+
+# Not worth it (even if min doc freq is set to 0.001, only 60 bigrams are found
+# across docs)
+
+# tweets_bigrams <- quanteda::tokens_ngrams(
+#   tweets_unigrams,
+#   n = 2L
+# )
+
+# Word skipgrams
+
+# Not worth it (even if min doc freq is set to 0.001 and skips from 1 to 20 are
+# allowed, only 50 skipgrams are found across docs)
+
+# tweets_skipgrams <- quanteda::tokens_skipgrams(
+#   tweets_unigrams,
+#   n = 2L,
+#   skip = 1L:20L
+# )
+# 
+# tweets_dfm_skipgrams <- convert_dfm_to_dt(
+#   quanteda::dfm_tfidf(
+#     quanteda::dfm_trim(
+#       quanteda::dfm(tweets_skipgrams),
+#       min_docfreq = 0.001,
+#       docfreq_type = "prop")),
+#   key = "doc_id"
+# )
+
+# Character unigrams
+
+tweets_char_unigrams <- quanteda::tokens(
+  tweets_corpus,
+  what = "character",
+  remove_punct = TRUE,
+  remove_symbols = TRUE,
+  remove_numbers = TRUE,
+  remove_separators = TRUE,
+  split_hyphens = TRUE) 
+
+tweets_char_unigrams <- convert_dfm_to_dt(
+  quanteda::dfm(tweets_char_unigrams),
+  key = "doc_id"
+)
+
+# COLLECT EXTRACTED FEATURES ---------------------------------------------------
+
+tweets_features_lexical <- tweets_negation[
+  tweets_punctuation, 
+  ][tweets_repetition, 
+    ][tweets_unigrams, 
+      ][tweets_char_unigrams, ]

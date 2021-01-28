@@ -62,11 +62,10 @@ tweets_dfm_sa <- quanteda::dfm(tweets_tokens_sa)
 
 save_rdata_files(tweets_dfm_sa, folder = "2_code")
 
-tweets_sentiments_global <- data.table::setDT(
-  quanteda::convert(
-    quanteda::dfm_lookup(tweets_dfm_sa, dict_global),
-    to = "data.frame"),
-  key = "doc_id")
+tweets_sentiments_global <- convert_dfm_to_dt(
+  quanteda::dfm_lookup(tweets_dfm_sa, dict_global),
+  key = "doc_id"
+)
 
 # MAKE EMOJI DICTIONARY --------------------------------------------------------
 
@@ -134,10 +133,8 @@ tweets_dfm_emojis <- quanteda::dfm(tweets_corpus_emojis)
 
 # TODO look into that - non-matches veritable non-matches?
 
-tweets_sentiments_emojis <- data.table::setDT(
-  quanteda::convert(
-    quanteda::dfm_lookup(tweets_dfm_emojis, dict_emojis),
-    to = "data.frame"),
+tweets_sentiments_emojis <- convert_dfm_to_dt(
+  quanteda::dfm_lookup(tweets_dfm_emojis, dict_emojis),
   key = "doc_id")
 
 sum(apply(
@@ -155,8 +152,8 @@ sum(apply(
 
 # COMBINE ALL DICTIONARY-BASED FEATURES ----------------------------------------
 
-tweets_sentiment_features <- tweets_sentiments_emojis[tweets_sentiments_global]
+tweets_features_dict <- tweets_sentiments_emojis[tweets_sentiments_global]
 
 save_rdata_files(
-  tweets_sentiment_features, 
+  tweets_features_dict, 
   folder = "2_code/3_sentiment_analysis")
