@@ -164,10 +164,45 @@ tweets_char_unigrams <- convert_dfm_to_dt(
   key = "doc_id"
 )
 
+# EXTRACT POS TAGS -------------------------------------------------------------
+
+# TODO run this in set up
+
+if (FALSE) spacy_install()
+if (FALSE) spacy_download_langmodel("de")
+
+if (FALSE) {
+  
+  spacy_initialize(model = "de_core_news_sm")
+  
+  tweets_corpus_tagged <- as.data.table(
+    spacyr::spacy_parse(
+      tweets_corpus,
+      lemma = FALSE,
+      entity = FALSE),
+    key = "doc_id")
+  
+  save_rdata_files(tweets_corpus_tagged, folder = "2_code/3_sentiment_analysis")
+  
+}
+
+load_rdata_files(tweets_corpus_tagged, folder = "2_code/3_sentiment_analysis")
+
+tweets_dt_tagged <- tweets_corpus_tagged[
+  , .(doc_id, pos)
+  ][, n_tags := .N]
+
+tweets_dt_tagged <- dcast(tweets_dt_tagged, doc_id ~ pos, value.var = "n_tags")
+
 # COLLECT EXTRACTED FEATURES ---------------------------------------------------
 
 tweets_features_lexical <- tweets_negation[
   tweets_punctuation, 
   ][tweets_repetition, 
     ][tweets_unigrams, 
-      ][tweets_char_unigrams, ]
+      ][tweets_char_unigrams, 
+        ][tweets_dt_tagged, ]
+
+save_rdata_files(
+  tweets_features_lexical, 
+  folder = "2_code/3_sentiment_analysis")

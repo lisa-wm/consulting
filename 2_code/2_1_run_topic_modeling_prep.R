@@ -25,6 +25,8 @@ tweets_tokens_tm <- quanteda::tokens(
 
 # !!! removed pipe op bc it is pretty but slooow
 
+# TODO check out spacyr tagger for nouns
+
 tweets_tokens_tm <- quanteda::tokens_wordstem(
   tweets_tokens_tm, 
   language = "german")

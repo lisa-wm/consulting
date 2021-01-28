@@ -52,12 +52,7 @@ prevalence_formula <- as.formula(make_prevalence_formula(
 
 # Find optimal number of topics - THIS TAKES A WHILE
 
-run_hyperparameter_search <- readline(
-  prompt = paste0(
-    "Would you like to re-run a time-intensive search for optimal k? ",
-    "T/F: "))
-
-if (as.logical(run_hyperparameter_search)) {
+if (FALSE) {
   
   hyperparameter_search <- stm::searchK(
     documents = tweets_stm$documents,
@@ -89,12 +84,7 @@ n_topics <- as.numeric(hyperparameter_search_results[
 
 # FIT STM ----------------------------------------------------------------------
 
-run_stm <- readline(
-  prompt = paste0(
-    "Would you like to re-run the STM (time-intensive)? ", 
-    "T/F: "))
-
-if (run_stm) {
+if (FALSE) {
   
   topic_model <- stm::stm(
     documents = tweets_stm$documents,
