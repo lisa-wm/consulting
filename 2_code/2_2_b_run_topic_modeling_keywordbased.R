@@ -26,6 +26,8 @@ keywords_clean <- lapply(
 
 n_byterms <- 10L
 
+# TODO check out quantedas keyness statistic instead of fcm
+
 # CREATE FEATURE-CO-OCCURENCE MATRIX -------------------------------------------
 
 tweets_fcm <- quanteda::fcm(tweets_dfm_tm, tri = FALSE)

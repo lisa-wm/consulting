@@ -43,7 +43,7 @@ tweets_tokens_tm <- quanteda::tokens_select(
 
 # CREATE DFM OBJECT ------------------------------------------------------------
 
-# Create dfm 
+# Create dfm (featuring only words of certain frequency and exclusiveness)
 
 tweets_dfm_tm <- quanteda::dfm(tweets_tokens_tm)
 

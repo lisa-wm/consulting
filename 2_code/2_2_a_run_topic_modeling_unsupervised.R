@@ -14,6 +14,9 @@ load_rdata_files(tweets_dfm_tm, folder = "2_code")
 
 temporal_grouping_var <- "month"
 
+# TODO check whether dfm should be constrained to terms w/ certain termfreq
+# and max docfreq
+
 tweets_dfm_tm_grouped <- quanteda::dfm_group(
   tweets_dfm_tm, c("username", "year", temporal_grouping_var))
 
@@ -25,7 +28,7 @@ summary(quanteda::ntoken(tweets_dfm_tm_grouped))
 
 # CREATE STM OBJECT AND DEFINE PREVALENCE FORMULA ------------------------------
 
-# Create stm object
+# Create stm object (tfidf weighting not possible here)
 
 tweets_stm <- quanteda::convert(
   tweets_dfm_tm_grouped,
