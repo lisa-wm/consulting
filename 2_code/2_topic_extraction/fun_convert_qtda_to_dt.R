@@ -8,7 +8,7 @@
 convert_qtda_to_dt <- function(quanteda_object, key) {
 
   data.table::setDT(
-    quanteda::convert(dfm, to = "data.frame"),
+    quanteda::convert(quanteda_object, to = "data.frame"),
     key = key)
   
 }
