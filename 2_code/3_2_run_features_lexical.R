@@ -29,7 +29,8 @@ tweets_dfm_basic <- quanteda::dfm(tweets_tokens_basic)
 # Take any common German negation patterns
 
 tokens_negation <- SnowballC::wordStem(c(
-  "nicht", "nie", "niemals", "nein", "niemand", "nix", "nirgends", "kein"))
+  "nicht", "nie", "niemals", "nein", "niemand", "nix", "nirgends", "kein"),
+  language = "de")
 
 # Match documents with negation patterns
 
@@ -45,6 +46,29 @@ tweets_negation <- tweets_negation[
   .SDcols = -c("doc_id"),
   by = doc_id
   ][, .(doc_id, n_negations)]
+
+# EXTRACT INTENSIFIERS ---------------------------------------------------------
+
+# Take any common German intensification patterns
+
+tokens_intensification <- SnowballC::wordStem(c(
+  "sehr", "besonders", "total", "absolut", "völlig", "enorm", "maximal"),
+  language = "de")
+
+# Match documents with intensification patterns
+
+tweets_intensification <- convert_qtda_to_dt(
+  quanteda::dfm_match(tweets_dfm_basic, tokens_intensification),
+  key = "doc_id"
+)
+
+# Sum intensifications over all intensification patterns
+
+tweets_intensification <- tweets_intensification[
+  , n_intensifications := sum(.SD),
+  .SDcols = -c("doc_id"),
+  by = doc_id
+  ][, .(doc_id, n_intensifications)]
 
 # EXTRACT PUNCTUATION ----------------------------------------------------------
 
@@ -194,7 +218,8 @@ tweets_features_lexical <- tweets_negation[
   ][tweets_repetition, 
     ][tweets_unigrams, 
       ][tweets_char_unigrams, 
-        ][tweets_dt_tagged, ]
+        ][tweets_dt_tagged, 
+          ][tweets_intensification, ]
 
 save_rdata_files(
   tweets_features_lexical, 
