@@ -211,6 +211,8 @@ tweets_dt_tagged <- tweets_corpus_tagged[
 
 tweets_dt_tagged <- dcast(tweets_dt_tagged, doc_id ~ pos, value.var = "n_tags")
 
+data.table::setnames(tweets_dt_tagged, tolower(names(tweets_dt_tagged)))
+
 # COLLECT EXTRACTED FEATURES ---------------------------------------------------
 
 tweets_features_lexical <- tweets_negation[

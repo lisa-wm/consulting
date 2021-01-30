@@ -23,8 +23,6 @@ tweets_tokens_tm <- quanteda::tokens(
 # Standard stopwords removal and stemming, selection of words starting with 
 # uppercase letters (assumption: nouns are more indicative of topics)
 
-# !!! removed pipe op bc it is pretty but slooow
-
 # TODO check out spacyr tagger for nouns
 
 tweets_tokens_tm <- quanteda::tokens_wordstem(

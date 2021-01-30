@@ -14,16 +14,12 @@ tweets_response <- convert_qtda_to_dt(
   key = "doc_id")
 
 tweets_features_response <- tweets_response[
-  , .(doc_id,
-      retweet_count,
-      favorite_count,
-      word_count,
-      hashtags,
-      tags)
+  , .(doc_id, hashtags, tags)
   ][, `:=` (
     n_hashtags = lengths(hashtags),
     n_tags = lengths(tags)),
-    by = doc_id]
+    by = doc_id
+    ][, `:=` (hashtags = NULL, tags = NULL)]
 
 save_rdata_files(
   tweets_features_response, 

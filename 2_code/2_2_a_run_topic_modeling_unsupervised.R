@@ -120,7 +120,7 @@ topic_probs <- stm::make.dt(topic_model)[, `:=` (
 
 data.table::setnames(topic_probs, tolower(names(topic_probs)))
 
-topic_cols <- sprintf("topic_%d", 1:n_topics)
+topic_cols <- sprintf("topic%d", 1:n_topics)
 
 topic_probs[
   , `:=` (
