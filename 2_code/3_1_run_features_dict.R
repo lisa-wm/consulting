@@ -14,6 +14,8 @@ dict_german_polarity_clues <- get_dict_gpc()
 dict_sentiws <- get_dict_sentiws()
 dict_rauh <- get_dict_rauh()
 
+# TODO check whether strong weak is so beneficial, rauh does not fit in
+
 # Dictionary
 
 dict_global <- quanteda::dictionary(

@@ -211,7 +211,7 @@ tweets_dt_tagged <- tweets_corpus_tagged[
     ][, n_tags := sum(aux), by = list(doc_id, pos)
       ][, aux := NULL]
 
-tweets_dt_tagged <- dcast(
+tweets_dt_tagged <- data.table::dcast(
   unique(tweets_dt_tagged), 
   doc_id ~ pos, 
   value.var = "n_tags",
