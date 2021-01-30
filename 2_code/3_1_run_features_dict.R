@@ -8,30 +8,30 @@
 
 # MAKE STANDARD SENTIMENT DICTIONARY -------------------------------------------
 
-# German polarity clues
+# Get dictionaries from various sources
 
-german_polarity_clues <- get_dict_gpc()
-
-# SentiWS
-
-senti_ws <- get_dict_sentiws()
+dict_german_polarity_clues <- get_dict_gpc()
+dict_sentiws <- get_dict_sentiws()
+dict_rauh <- get_dict_rauh()
 
 # Dictionary
 
 dict_global <- quanteda::dictionary(
   list(
     positive_global_strong = unique(c(
-      german_polarity_clues$positive[polarity_degree == "strong", term], 
-      senti_ws$positive[polarity_degree == "strong", term])),
+      dict_german_polarity_clues$positive[polarity_degree == "strong", term], 
+      dict_sentiws$positive[polarity_degree == "strong", term])),
     negative_global_strong = unique(c(
-      german_polarity_clues$negative[polarity_degree == "strong", term], 
-      senti_ws$negative[polarity_degree == "strong", term])),
+      dict_german_polarity_clues$negative[polarity_degree == "strong", term], 
+      dict_sentiws$negative[polarity_degree == "strong", term])),
     positive_global_weak = unique(c(
-      german_polarity_clues$positive[polarity_degree == "weak", term],
-      senti_ws$positive[polarity_degree == "weak", term])),
+      dict_german_polarity_clues$positive[polarity_degree == "weak", term],
+      dict_sentiws$positive[polarity_degree == "weak", term],
+      dict_rauh[polarity == "positive", term])),
     negative_global_weak = unique(c(
-      german_polarity_clues$negative[polarity_degree == "weak", term],
-      senti_ws$negative[polarity_degree == "weak", term]))))
+      dict_german_polarity_clues$negative[polarity_degree == "weak", term],
+      dict_sentiws$negative[polarity_degree == "weak", term],
+      dict_rauh[polarity == "negative", term]))))
 
 save_rdata_files(dict_global, folder = "2_code/3_sentiment_analysis")
 
