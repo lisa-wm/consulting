@@ -9,10 +9,10 @@
 
 # TODO check whether this could also be solved w/ bigrams / skipgrams
 
-load_rdata_files(tweets_corpus, folder = "2_code")
+load_rdata_files(tweets_corpus_topics_unsupervised, folder = "2_code")
 
 tweets_tokens_basic <- quanteda::tokens(
-  tweets_corpus,
+  tweets_corpus_topics_unsupervised,
   remove_symbols = TRUE,
   remove_numbers = TRUE,
   remove_separators = TRUE,
@@ -168,7 +168,7 @@ tweets_unigrams <- convert_qtda_to_dt(
 # Character unigrams
 
 tweets_char_unigrams <- quanteda::tokens(
-  tweets_corpus,
+  tweets_corpus_topics_unsupervised,
   what = "character",
   remove_punct = TRUE,
   remove_symbols = TRUE,
@@ -194,7 +194,7 @@ if (FALSE) {
   
   tweets_corpus_tagged <- as.data.table(
     spacyr::spacy_parse(
-      tweets_corpus,
+      tweets_corpus_topics_unsupervised,
       lemma = FALSE,
       entity = FALSE),
     key = "doc_id")

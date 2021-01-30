@@ -20,13 +20,18 @@ senti_ws <- get_dict_sentiws()
 
 dict_global <- quanteda::dictionary(
   list(
-    positive_global = unique(c(
-      german_polarity_clues$positive, 
-      senti_ws$positive)),
-    negative_global = unique(c(
-      german_polarity_clues$negative, 
-      senti_ws$negative))),
-  tolower = TRUE)
+    positive_global_strong = unique(c(
+      german_polarity_clues$positive[polarity_degree == "strong", term], 
+      senti_ws$positive[polarity_degree == "strong", term])),
+    negative_global_strong = unique(c(
+      german_polarity_clues$negative[polarity_degree == "strong", term], 
+      senti_ws$negative[polarity_degree == "strong", term])),
+    positive_global_weak = unique(c(
+      german_polarity_clues$positive[polarity_degree == "weak", term],
+      senti_ws$positive[polarity_degree == "weak", term])),
+    negative_global_weak = unique(c(
+      german_polarity_clues$negative[polarity_degree == "weak", term],
+      senti_ws$negative[polarity_degree == "weak", term]))))
 
 save_rdata_files(dict_global, folder = "2_code/3_sentiment_analysis")
 
@@ -34,12 +39,10 @@ save_rdata_files(dict_global, folder = "2_code/3_sentiment_analysis")
 
 load_rdata_files(tweets_corpus_topics_unsupervised, folder = "2_code")
 
-tweets_corpus_sa <- tweets_corpus_topics_unsupervised
-
 # Tokenize for sentiment analysis
 
-tweets_tokens_sa <- quanteda::tokens(
-  tweets_corpus_sa,
+tweets_tokens_dict <- quanteda::tokens(
+  tweets_corpus_topics_unsupervised,
   remove_punct = TRUE,
   remove_symbols = TRUE,
   remove_numbers = TRUE,
@@ -47,23 +50,21 @@ tweets_tokens_sa <- quanteda::tokens(
   split_hyphens = TRUE,
   include_docvars = TRUE) 
 
-tweets_tokens_sa <- quanteda::tokens_wordstem(
-  quanteda::tokens_tolower(tweets_tokens_sa),
+tweets_tokens_dict <- quanteda::tokens_wordstem(
+  quanteda::tokens_tolower(tweets_tokens_dict),
   language = "german")
 
-tweets_tokens_sa <- quanteda::tokens_select(
-  tweets_tokens_sa,
+tweets_tokens_dict <- quanteda::tokens_select(
+  tweets_tokens_dict,
   pattern = make_stopwords_sa(),
   selection = "remove") 
 
 # Match with polarities
 
-tweets_dfm_sa <- quanteda::dfm(tweets_tokens_sa)
+tweets_dfm_dict <- quanteda::dfm(tweets_tokens_dict)
 
-save_rdata_files(tweets_dfm_sa, folder = "2_code")
-
-tweets_sentiments_global <- convert_dfm_to_dt(
-  quanteda::dfm_lookup(tweets_dfm_sa, dict_global),
+tweets_sentiments_global <- convert_qtda_to_dt(
+  quanteda::dfm_lookup(tweets_dfm_dict, dict_global),
   key = "doc_id"
 )
 
@@ -134,7 +135,7 @@ tweets_dfm_emojis <- quanteda::dfm(tweets_corpus_emojis)
 
 # TODO look into that - non-matches veritable non-matches?
 
-tweets_sentiments_emojis <- convert_dfm_to_dt(
+tweets_sentiments_emojis <- convert_qtda_to_dt(
   quanteda::dfm_lookup(tweets_dfm_emojis, dict_emojis),
   key = "doc_id")
 
@@ -151,7 +152,7 @@ tweets_sentiments_emojis <-
 
 # COMBINE ALL DICTIONARY-BASED FEATURES ----------------------------------------
 
-tweets_features_dict <- tweets_sentiments_emojis[tweets_sentiments_global]
+tweets_features_dict <- tweets_sentiments_emojis[tweets_sentiments_global, ]
 
 save_rdata_files(
   tweets_features_dict, 

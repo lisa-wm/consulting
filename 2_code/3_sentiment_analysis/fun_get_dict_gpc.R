@@ -9,9 +9,10 @@ get_dict_gpc <- function() {
  
   data_german_polarity_clues <- c(
     "GermanPolarityClues-Positive-21042012.tsv", 
-    "GermanPolarityClues-Negative-21042012.tsv")
+    "GermanPolarityClues-Negative-21042012.tsv",
+    "GermanPolarityClues-Neutral-21042012.tsv")
   
-  sapply(
+  dict_list <- lapply(
     
     seq_along(data_german_polarity_clues),
     
@@ -20,28 +21,31 @@ get_dict_gpc <- function() {
       # Read data
       
       dict <- data.table::fread(
-        here(paste0("2_code/0_external_data/", data_german_polarity_clues[i])),
+        here("2_code/0_external_data", data_german_polarity_clues[i]),
         encoding = "UTF-8",
-        drop = 2:6)
+        drop = c(2:4, 6),
+        header = FALSE,
+        col.names = c("term", "polarity_score"),
+        quote = "")
       
-      # Remove umlauts
-
-      words <- unlist(dict)
-      words <- remove_umlauts(words)
+      # Assign strong polarity if polarity score is available, and remove
+      # umlauts
       
-      # Save
-
-      polarities <- c("positive", "negative")
-
-      assign(
-        paste0("words_", polarities[i]), 
-        words,
-        pos = parent.env(environment()))
+      dict[
+        , polarity_degree := ifelse(
+          str_detect(polarity_score, "[0-9]"),
+          "strong",
+          "weak"
+        )
+        ][, term := remove_umlauts(tolower(term))
+          ][, term := SnowballC::wordStem(term, language = "de")]
+      
+      dict <- unique(dict)
       
     })
   
-  list(
-    positive = words_positive, 
-    negative = words_negative)
+  names(dict_list) <- c("positive", "negative", "neutral")
+  
+  dict_list
    
 }

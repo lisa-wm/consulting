@@ -10,7 +10,7 @@ get_dict_sentiws <- function() {
     "SentiWS_v2.0_Positive.txt", 
     "SentiWS_v2.0_Negative.txt")
   
-  sapply(
+  dict_list <- lapply(
     
     seq_along(data_sentiws),
     
@@ -21,30 +21,34 @@ get_dict_sentiws <- function() {
       dict <- data.table::fread(
         here(paste0("2_code/0_external_data/", data_sentiws[i])),
         encoding = "UTF-8",
-        col.names = c("lemma", "score", "word"))
-
-      # Extract sentiment words
+        drop = 1L,
+        col.names = c("polarity_score", "term"))
       
-      words <- unlist(str_split(dict$word, ","))
+      # Assign strong polarity if polarity score is available, and remove
+      # umlauts
       
-      # Remove empty strings and umlauts
+      median_polarity_score <- quantile(abs(dict$polarity_score), 0.75)
       
-      words <- words[nchar(words) > 0]
-      words <- remove_umlauts(words)
+      dict[
+        , polarity_degree := ifelse(
+          abs(polarity_score) > median_polarity_score,
+          "strong",
+          "weak"
+        )
+      ][, term := remove_umlauts(tolower(term))
+        ][, term := str_split(term, ",")]
       
-      # Save
+      dict <- dict[
+        , list(term = as.character(unlist(term))), 
+        by = list(polarity_score, polarity_degree)
+        ][, term := SnowballC::wordStem(term, language = "de")]
       
-      polarities <- c("positive", "negative")
-      
-      assign(
-        paste0("words_", polarities[i]), 
-        words,
-        pos = parent.env(environment()))
+      dict <- unique(dict[nchar(term) > 0])
       
     })
   
-  list(
-    positive = words_positive, 
-    negative = words_negative)
+  names(dict_list) <- c("positive", "negative")
+  
+  dict_list
   
 }
