@@ -207,11 +207,20 @@ load_rdata_files(tweets_corpus_tagged, folder = "2_code/3_sentiment_analysis")
 
 tweets_dt_tagged <- tweets_corpus_tagged[
   , .(doc_id, pos)
-  ][, n_tags := .N]
+  ][, aux := 1L
+    ][, n_tags := sum(aux), by = list(doc_id, pos)
+      ][, aux := NULL]
 
-tweets_dt_tagged <- dcast(tweets_dt_tagged, doc_id ~ pos, value.var = "n_tags")
+tweets_dt_tagged <- dcast(
+  unique(tweets_dt_tagged), 
+  doc_id ~ pos, 
+  value.var = "n_tags",
+  fun.aggregate = sum)
 
 data.table::setnames(tweets_dt_tagged, tolower(names(tweets_dt_tagged)))
+
+tweets_dt_tagged <- tweets_dt_tagged[
+  , .(doc_id, adj, adv, cconj, noun, propn, verb)]
 
 # COLLECT EXTRACTED FEATURES ---------------------------------------------------
 
