@@ -152,7 +152,12 @@ tweets_sentiments_emojis <-
 
 # COMBINE ALL DICTIONARY-BASED FEATURES ----------------------------------------
 
-tweets_features_dict <- tweets_sentiments_emojis[tweets_sentiments_global, ]
+tweets_features_dict <- tweets_sentiments_emojis[
+  tweets_sentiments_global, on = "doc_id"
+  ][, c("positive_emojis", "negative_emojis", "n_emojis") :=
+      lapply(.SD, function(i) {ifelse(is.na(i), 0, i)}),
+    .SDcols = c("positive_emojis", "negative_emojis", "n_emojis"),
+    by = "doc_id"]
 
 save_rdata_files(
   tweets_features_dict, 
