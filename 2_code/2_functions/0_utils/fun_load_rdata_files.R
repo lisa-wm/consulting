@@ -4,7 +4,7 @@
 
 # PURPOSE: save files created to rdata with automatic file name creation
 
-load_rdata_files <- function(robject, folder, tmp = FALSE) {
+load_rdata_files <- function(robject, folder, tmp = TRUE) {
   
   robject_name <- deparse(substitute(robject))
   

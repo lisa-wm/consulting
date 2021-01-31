@@ -4,7 +4,7 @@
 
 # PURPOSE: save files created to rdata with automatic file name creation
 
-save_rdata_files <- function(robject, folder, tmp = FALSE) {
+save_rdata_files <- function(robject, folder, tmp = TRUE) {
 
   # Assign to correctly named object in execution environment (otherwise, the 
   # name of the saved object will be "robject", which is also its name after 

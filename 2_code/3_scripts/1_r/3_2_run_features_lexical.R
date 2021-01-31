@@ -217,14 +217,18 @@ if (FALSE) {
   
   tweets_corpus_tagged <- as.data.table(
     spacyr::spacy_parse(
-      tweets_corpus_topics_unsupervised,
+      tweets_corpus,
       lemma = FALSE,
       entity = FALSE),
     key = "doc_id")
   
-  save_rdata_files(tweets_corpus_tagged, folder = "2_code/3_sentiment_analysis")
+  save_rdata_files(
+    tweets_corpus_tagged, 
+    folder = "2_code/1_data/2_tmp_data",
+    tmp = TRUE)
   
 }
+
 
 load_rdata_files(tweets_corpus_tagged, folder = "2_code/3_sentiment_analysis")
 

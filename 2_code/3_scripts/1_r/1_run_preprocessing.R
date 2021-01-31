@@ -39,8 +39,7 @@ tweets_raw[
 
 save_rdata_files(
   tweets_raw,
-  folder = "2_code/1_data/2_tmp_data",
-  tmp = TRUE
+  folder = "2_code/1_data/2_tmp_data"
 )
 
 # READ META DATA ---------------------------------------------------------------
@@ -159,8 +158,7 @@ stopifnot(nrow(data_clean) - length(unique(data_clean$doc_id)) == 0)
 
 save_rdata_files(
   data_clean,
-  folder = "2_code/1_data/2_tmp_data",
-  tmp = TRUE
+  folder = "2_code/1_data/2_tmp_data"
 )
 
 # Save for labeling
@@ -177,9 +175,8 @@ tweets_corpus <- quanteda::corpus(
   text_field = "full_text")
 
 save_rdata_files(
-  robject = tweets_corpus, 
-  folder = "2_code/1_data/2_tmp_data",
-  tmp = TRUE)
+  tweets_corpus, 
+  folder = "2_code/1_data/2_tmp_data")
 
 # EXTRACT SOME DESCRIPTIVE STATISTICS ------------------------------------------
 
