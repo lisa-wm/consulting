@@ -64,7 +64,7 @@ set_up_packages(packages_required)
 # Source required files containing sub-level functions
 
 files_required <- list.files(
-  here("2_code"), 
+  here("2_code/2_functions"), 
   pattern = "^fun_.*\\.R$", 
   recursive = TRUE,
   full.names = TRUE)

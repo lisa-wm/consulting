@@ -5,7 +5,7 @@
 # IN: raw twitter data + meta data
 # OUT: single data file of cleaned tweets and meta data
 
-# READ, CLEAN AND MERGE DATA ---------------------------------------------------
+# READ AND CLEAN DATA ----------------------------------------------------------
 
 # Read tweets
 # Attention, these are stored in time-stamped folder to keep downloads from 
@@ -37,37 +37,55 @@ tweets_raw[
   , full_text := remove_noisy_symbols(remove_umlauts(full_text))
   ][, name_matching := remove_noisy_symbols(remove_umlauts(name_matching))]
 
-# Read meta data
+save_rdata_files(
+  tweets_raw,
+  folder = "2_code/1_data/2_tmp_data",
+  tmp = TRUE
+)
+
+# READ META DATA ---------------------------------------------------------------
 
 meta_mp_level <- data.table::fread(
   here("1_scraping/output", "abg_twitter_df.csv"),
   encoding = "UTF-8",
   sep = ",",
-  drop = "twitter")
+  drop = "twitter",
+  key = "name_matching")
 
 meta_mp_level[, `:=` (
   name_matching = remove_noisy_symbols(remove_umlauts(name_matching)),
   bundesland = remove_noisy_symbols(remove_umlauts(bundesland)),
-  wahlkreis = remove_noisy_symbols(remove_umlauts(bundesland)))]
-
-# FIXME find out why for so many MP no wahlkreis is scraped
+  wahlkreis = remove_noisy_symbols(remove_umlauts(wahlkreis)))]
 
 meta_socio_electoral <- data.table::fread(
   here("1_scraping/output", "socioeconomics_zweitstimmen_df.csv"),
   encoding = "UTF-8",
   sep = ",",
-  drop = c("district", "wahlkreis")
+  drop = c("district", "wahlkreis", "bundesland"),
+  key = "wahlkreis_nr"
 )
 
-meta_socio_electoral[, bundesland := remove_umlauts(bundesland)]
+# MERGE TWEETS AND META DATA ---------------------------------------------------
 
-# Merge tweets and meta data
+# Mind order of join: to perform a left join of dt w/ dt2, use dt2[dt]
 
-data_clean <- merge_tweets_meta(
-  tweets_data = tweets_raw,
-  mp_data = meta_mp_level,
-  se_data = meta_socio_electoral
-)
+# TODO think of sth to handle mps w/ *
+
+data_clean <- meta_mp_level[
+  meta_socio_electoral, on = "wahlkreis_nr"
+  ][tweets_raw, on = "name_matching"
+    ][!stringr::str_detect(party, "\\*")
+      ][, `:=` (
+      bundesland = as.factor(bundesland),
+      party = as.factor(party))
+      ][, `:=` (
+        time_index_month = frank(list(year, month), ties.method = "dense"),
+        time_index_week = frank(list(year, week), ties.method = "dense"))]
+
+data.table::setattr(
+  data_clean$party, 
+  "levels",
+  c("afd", "gruene", "cdu_csu", "linke", "fdp", "fraktionslos", "spd"))
 
 # EXTRACT TWITTER-SPECIFIC ELEMENTS --------------------------------------------
 
@@ -118,35 +136,38 @@ data_clean[
   , full_text := stringr::str_remove_all(full_text, patterns_to_remove)
   ][, full_text := stringr::str_squish(full_text)]
 
-# CREATE CORPUS OBJECT ---------------------------------------------------------
-
-# Re-convert full text to character (from list)
-
-data_clean[, full_text := as.character(full_text)]
+# CREATE UNIQUE DOC ID ---------------------------------------------------------
 
 # Add unique doc_id (only now, since in the beginning, documents may be 
 # discarded during language detection etc.)
 
 data_clean[
-  , rank_timestamp := seq_len(.N),
-  by = .(username, created_at)
-  ][, doc_id := paste(
-    username,
-    as.character(as.numeric(as.POSIXct(created_at))),
-    rank_timestamp,
-    sep = ""),
-    by = seq_len(nrow(data_clean))
-    ][, rank_timestamp := NULL]
+  , full_text := as.character(full_text)
+  ][, rank_timestamp := seq_len(.N),
+    by = .(username, created_at)
+    ][, doc_id := paste(
+      username,
+      as.character(as.numeric(as.POSIXct(created_at))),
+      rank_timestamp,
+      sep = ""),
+      by = seq_len(nrow(data_clean))
+      ][, rank_timestamp := NULL]
 
-setkey(data_clean, doc_id)
+data.table::setkey(data_clean, doc_id)
 
 stopifnot(nrow(data_clean) - length(unique(data_clean$doc_id)) == 0)
 
-save_rdata_files(data_clean, "2_code")
+save_rdata_files(
+  data_clean,
+  folder = "2_code/1_data/2_tmp_data",
+  tmp = TRUE
+)
 
 # Save for labeling
 
 # save_rdata_files(data_clean, "2_code/attic")
+
+# CREATE CORPUS OBJECT ---------------------------------------------------------
 
 # Convert to corpus object
 
@@ -157,32 +178,22 @@ tweets_corpus <- quanteda::corpus(
 
 save_rdata_files(
   robject = tweets_corpus, 
-  folder = "2_code")
+  folder = "2_code/1_data/2_tmp_data",
+  tmp = TRUE)
 
 # EXTRACT SOME DESCRIPTIVE STATISTICS ------------------------------------------
 
-ndoc(tweets_corpus)
-
-party_colors <- c(
-  "deepskyblue",
-  "chartreuse4",
-  "black",
-  "deeppink3",
-  "darkgoldenrod1",
-  "red"
-)
-
 # Tweets over time by party
 
-docvars(tweets_corpus) %>% 
+quanteda::docvars(tweets_corpus) %>% 
   group_by(time_index_month, party) %>% 
   ggplot(aes(x = year, fill = party)) +
   geom_bar(position = "dodge") +
-  scale_fill_manual(values = party_colors)
+  scale_fill_manual(values = make_party_colors())
 
 # Tweets over time
 
-docvars(tweets_corpus) %>% 
+quanteda::docvars(tweets_corpus) %>% 
   group_by(year, month) %>% 
   ggplot(aes(x = paste0(year, month))) +
   geom_bar() +
@@ -191,7 +202,7 @@ docvars(tweets_corpus) %>%
 
 # Most active users by party
 
-docvars(tweets_corpus) %>%
+quanteda::docvars(tweets_corpus) %>%
   group_by(party, username) %>% 
   count() %>% 
   arrange(party, desc(n)) %>% 
@@ -199,29 +210,29 @@ docvars(tweets_corpus) %>%
   top_n(3L) %>% 
   ggplot(aes(x = paste0(party, "_", username), y = n, fill = party)) +
   geom_col(position = "dodge") +
-  scale_fill_manual(values = party_colors) +
+  scale_fill_manual(values = make_party_colors()) +
   xlab("party, user") +
   theme(axis.text.x = element_text(angle = 90))
 
 # Tweet length by party
 
-docvars(tweets_corpus) %>% 
+quanteda::docvars(tweets_corpus) %>% 
   group_by(party) %>% 
   ggplot(aes(x = party, y = word_count, fill = party)) +
   geom_boxplot() +
-  scale_fill_manual(values = party_colors)
+  scale_fill_manual(values = make_party_colors())
 
 # Number of used hashtags by party
 
-docvars(tweets_corpus) %>%
+quanteda::docvars(tweets_corpus) %>%
   group_by(row_number()) %>% 
   mutate(n_hashtags = length(unlist(hashtags))) %>% 
   group_by(party) %>% 
   ggplot(aes(x = party, y = n_hashtags, fill = party)) +
   geom_boxplot() +
-  scale_fill_manual(values = party_colors)
+  scale_fill_manual(values = make_party_colors())
 
-docvars(tweets_corpus) %>%
+quanteda::docvars(tweets_corpus) %>%
   group_by(row_number()) %>% 
   mutate(n_hashtags = length(unlist(hashtags))) %>% 
   filter(n_hashtags > 10L) %>% 
@@ -230,7 +241,7 @@ docvars(tweets_corpus) %>%
 
 # Number of used emojis
 
-docvars(tweets_corpus) %>%
+quanteda::docvars(tweets_corpus) %>%
   group_by(row_number()) %>% 
   mutate(n_emojis = length(unlist(emojis))) %>%
   filter(n_emojis < 10L) %>% 
@@ -239,7 +250,7 @@ docvars(tweets_corpus) %>%
 
 # Number of used tags
 
-docvars(tweets_corpus) %>%
+quanteda::docvars(tweets_corpus) %>%
   group_by(row_number()) %>% 
   mutate(n_tags = length(unlist(tags))) %>%
   filter(n_tags < 10L) %>% 
@@ -248,14 +259,14 @@ docvars(tweets_corpus) %>%
 
 # Number of likes
 
-docvars(tweets_corpus) %>%
+quanteda::docvars(tweets_corpus) %>%
   filter(favorite_count < 300L) %>% 
   ggplot(aes(x = favorite_count)) +
   geom_histogram(binwidth = 1L)  
 
 # Number of retweets
 
-docvars(tweets_corpus) %>%
+quanteda::docvars(tweets_corpus) %>%
   filter(retweet_count < 50L) %>%
   ggplot(aes(x = retweet_count)) +
   geom_histogram(binwidth = 1L)  
