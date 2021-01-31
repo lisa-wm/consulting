@@ -11,16 +11,43 @@
 # Attention, these are stored in time-stamped folder to keep downloads from 
 # different time points apart --> adjust
 
-tweets_raw <- data.table::fread(
+tweets_raw_new <- data.table::fread(
   here("1_scraping/output/202010113_2146", "tweepy_df_subset_no_retweets.csv"), 
   encoding = "UTF-8",
   sep = ",")
 
-tweets_raw <- tweets_raw[created_at >= "2017-09-24"]
+tweets_raw_new <- tweets_raw_new[created_at >= "2017-09-24"]
 
 # Discard non-German tweets
 
-tweets_raw <- tweets_raw[cld3::detect_language(full_text) == "de"]
+tweets_raw_new <- tweets_raw_new[cld3::detect_language(full_text) == "de"]
+
+# Set timestamp to posixct format
+
+tweets_raw_new[, created_at := as.POSIXct(created_at)]
+
+# Append annotated data
+
+tweets_raw_new[, label := "none"]
+
+load_rdata_files(
+  training_data_annotated, 
+  folder = "2_code/1_data/1_training_data",
+  tmp = FALSE)
+
+tweets_raw_labeled <- training_data_annotated[
+  , .(name_matching, 
+      username, 
+      available, 
+      created_at, 
+      full_text,
+      retweet_count,
+      favorite_count,
+      followers_count,
+      location,
+      label)]
+
+tweets_raw <- unique(rbind(tweets_raw_new, tweets_raw_labeled))
 
 # Add word count and date variables
 
@@ -39,8 +66,7 @@ tweets_raw[
 
 save_rdata_files(
   tweets_raw,
-  folder = "2_code/1_data/2_tmp_data"
-)
+  folder = "2_code/1_data/2_tmp_data")
 
 # READ META DATA ---------------------------------------------------------------
 
@@ -61,8 +87,7 @@ meta_socio_electoral <- data.table::fread(
   encoding = "UTF-8",
   sep = ",",
   drop = c("district", "wahlkreis", "bundesland"),
-  key = "wahlkreis_nr"
-)
+  key = "wahlkreis_nr")
 
 # MERGE TWEETS AND META DATA ---------------------------------------------------
 
@@ -158,8 +183,7 @@ stopifnot(nrow(data_clean) - length(unique(data_clean$doc_id)) == 0)
 
 save_rdata_files(
   data_clean,
-  folder = "2_code/1_data/2_tmp_data"
-)
+  folder = "2_code/1_data/2_tmp_data")
 
 # Save for labeling
 

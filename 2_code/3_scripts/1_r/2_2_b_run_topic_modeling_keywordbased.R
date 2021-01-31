@@ -14,15 +14,11 @@ load_rdata_files(tweets_dfm_tm, folder = "2_code/1_data/2_tmp_data")
 
 keywords <- list(
   corona = c("corona", "pandemie", "virus", "krise"),
-  klima = c("klima", "grün", "natur", "umwelt")
-)
+  klima = c("klima", "grün", "natur", "umwelt"))
 
 keywords_clean <- lapply(
   keywords,
-  function(i) {
-    SnowballC::wordStem(remove_umlauts(i), language = "de")
-  }
-)
+  function(i) SnowballC::wordStem(remove_umlauts(i), language = "de"))
 
 n_byterms <- 10L
 
@@ -53,9 +49,7 @@ tweets_fcm_dfm <- quanteda::as.dfm(tweets_fcm) %>%
 keywords_clean_available <- lapply(
   seq_along(keywords_clean), 
   function(i) {
-    intersect(keywords_clean[[i]], quanteda::featnames(tweets_fcm_dfm))
-  }
-)
+    intersect(keywords_clean[[i]], quanteda::featnames(tweets_fcm_dfm))})
 
 names(keywords_clean_available) <- names(keywords_clean)
 

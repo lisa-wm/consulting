@@ -14,8 +14,7 @@ load_rdata_files(tweets_dfm_tm, folder = "2_code/1_data/2_tmp_data")
 
 tweets_dfm_stm <- quanteda::dfm_subset(
   tweets_dfm_tm,
-  party != "fraktionslos"
-)
+  party != "fraktionslos")
 
 # Aggregate documents in pseudo-documents (original documents are too short for 
 # stm to handle, because dfm is very large and sparse)
@@ -50,7 +49,7 @@ tweets_stm <- quanteda::convert(
 # TODO find sensible formula
 
 prevalence_formula <- make_prevalence_formula(
-  data = quanteda::docvars(tweets_dfm_tm_grouped),
+  data = quanteda::docvars(tweets_dfm_stm_grouped),
   categorical_vars = list(
     "party", 
     "bundesland"),

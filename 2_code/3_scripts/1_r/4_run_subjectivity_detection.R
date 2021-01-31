@@ -27,13 +27,20 @@ load_rdata_files(tweets_corpus, folder = "2_code/1_data/2_tmp_data")
 tweets_sa <- convert_qtda_to_dt(tweets_corpus, key = "doc_id")
 
 tweets_sa <- tweets_sa[
-  , .(doc_id, text, topic_label_stm, retweet_count, favorite_count, word_count)
+  , .(doc_id, 
+      text, 
+      topic_label_stm, 
+      retweet_count, 
+      favorite_count, 
+      word_count,
+      label)
   ][tweets_features, ]
 
 # FILTER SUBJECTIVE TWEETS -----------------------------------------------------
 
 tweets_sa <- tweets_sa[
-  n_emojis > 0 | positive_global_strong > 1 | negative_global_strong > 1 |
+  label != "none" | 
+    n_emojis > 0 | positive_global_strong > 1 | negative_global_strong > 1 |
     exclamation_mark_rep > 0 | question_mark_rep > 0 |
     repeated_char > 0 | repeated_char_seq > 0 | favorite_count > 100L]
 

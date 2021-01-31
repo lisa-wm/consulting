@@ -7,11 +7,15 @@
 
 # EXTRACT TWITTER-SPECIFIC FEATURES --------------------------------------------
 
+load_rdata_files(tweets_sa, folder = "2_code/1_data/2_tmp_data")
 
-
-
-
-
+task <- make_classification_task(
+  task_name = "tweets",
+  data = tweets_sa[label != "none"],
+  feature_columns = list(
+    names(tweets_sa)[!names(tweets_sa) %in% c("doc_id", "text", "label")]),
+  target_column = "label"
+)
 
 # ------------------------------------------------------------------------------
 # SENTIMENT ANALYSIS: MEDIUM APPROACH USING STANDARD MACHINE LEARNING
