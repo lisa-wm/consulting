@@ -16,6 +16,10 @@ save_rdata_files <- function(robject, folder, tmp = FALSE) {
   # Use do.call because save() evaluates its arguments in a weird way, such that
   # neither strings nor get() are usable to reference the object
   
+  # tmp option is used to add a "tmp_" prefix that will be ignored by git
+  # Sensible if file should be stored within a running session to build upon it
+  # in later steps but permanent storage is not necessary
+  
   if (tmp) {
     
     do.call(
