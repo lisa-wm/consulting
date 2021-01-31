@@ -2,10 +2,10 @@
 # SENTIMENT CLASSIFICATION
 # ------------------------------------------------------------------------------
 
-# IN: data with topic labels
-# OUT: data with twitter-specific features
+# IN: data with twitter-specific features and topic labels
+# OUT: data with sentiment predictions
 
-# EXTRACT TWITTER-SPECIFIC FEATURES --------------------------------------------
+# MAKE CLASSIFICATION TASK -----------------------------------------------------
 
 load_rdata_files(tweets_sa, folder = "2_code/1_data/2_tmp_data")
 
@@ -14,8 +14,123 @@ task <- make_classification_task(
   data = tweets_sa[label != "none"],
   feature_columns = list(
     names(tweets_sa)[!names(tweets_sa) %in% c("doc_id", "text", "label")]),
-  target_column = "label"
+  target_column = "label")
+
+# SET UP LIST OF LEARNERS ------------------------------------------------------
+
+svm_dt <- data.table(
+  id = "svm",
+  learner_svm = list(make_graph_learner(
+    learner_type = "svm",
+    learner_params = list(
+      kernel = "radial",
+      type = "C-classification"),
+    learner_name = "support_vector_machine")),
+  # tuning_search_space = list(list(
+  #   list(id = "tolerance", value = list(0.001, 0.003)),
+  #   list(
+  #     id = "type",
+  #     value = list("C-classification", "nu-classification"))))
+  )
+
+learner_svm <- make_graph_learner(
+  learner_type = "svm",
+  learner_params = list(
+    kernel = "radial",
+    type = "C-classification"),
+  learner_name = "support_vector_machine")
+
+foo <- data.table(
+  id = "svm", 
+  learner_svm = make_graph_learner(
+    learner_type = "svm",
+    learner_params = list(
+      kernel = "radial",
+      type = "C-classification"),
+    learner_name = "support_vector_machine"),
+  tuning_search_space = poo)
+
+foo <- list(
+  id = "svm"
 )
+
+poo <- list(
+  ids = c("tolerance", "type"),
+  values = list(list(0.001, 0.003), list("C-classification", "nu-classification"))
+)
+
+poo <- as.list(
+  list(id = "tolerance", value = list(0.001, 0.003)),
+  list(
+    id = "type", 
+    value = list("C-classification", "nu-classification")))
+
+learner_svm <- make_graph_learner(
+  learner_type = "svm",
+  learner_params = list(
+    kernel = "radial",
+    type = "C-classification"),
+  learner_name = "support_vector_machine")
+
+learner_rf <- make_graph_learner(
+  learner_type = "ranger",
+  learner_params = list(),
+  learner_name = "random_forest")
+
+learners <- rbind(
+  data.table(
+    id = "svm",
+    graph_learner = list(
+      learner = learner_svm,
+      tuning_search_space = list(
+        list(id = "tolerance", value = list(0.001, 0.003)),
+        list(
+          id = "type", 
+          value = list("C-classification", "nu-classification"))))),
+  data.table(
+    id = "rf",
+    graph_learner = list(
+      learner = learner_rf,
+      tuning_search_space = list(
+        list(id = "tolerance", value = list(0.001, 0.003)),
+        list(id = "num.trees", value = list(1L, 10L))))))
+
+learners <- rbind(
+  data.table(
+    id = "svm",
+    graph_learner = learner_svm,
+    tuning_search_space = list(list(
+      list(id = "tolerance", value = list(0.001, 0.003)),
+      list(
+        id = "type",
+        value = list("C-classification", "nu-classification"))))),
+  data.table(
+    id = "svm",
+    graph_learner = learner_svm,
+    tuning_search_space = list(list(
+      list(id = "tolerance", value = list(0.001, 0.003)),
+      list(
+        id = "type",
+        value = list("C-classification", "nu-classification"))))))
+
+hyperparameter_ranges <- list(
+  list(id = "tolerance", value = list(0.001, 0.003)),
+  list(id = "type", 
+       value = list("C-classification", "nu-classification")))
+
+# PERFORM TRAIN-TEST SPLIT -----------------------------------------------------
+
+learners[, tuning_results := lapply(
+  .I,
+  function(m) {list(tuning_result = tune_graph_learner(
+    graph_learner = graph_learner[[m]],
+    task = task,
+    outer_resampling = mlr3::rsmp("cv", folds = 3L),
+    inner_resampling = mlr3::rsmp("cv", folds = 3L),
+    outer_loss = mlr3::msr("classif.ce"),
+    inner_loss = mlr3::msr("classif.ce"),
+    hyperparameter_ranges = tuning_search_space[[m]],
+    tuning_iterations = 1L))})]
 
 # ------------------------------------------------------------------------------
 # SENTIMENT ANALYSIS: MEDIUM APPROACH USING STANDARD MACHINE LEARNING
@@ -101,33 +216,22 @@ ml_models <- rbindlist(list(
       learner_params = list(
         kernel = "radial",
         type = "C-classification"),
-      learner_name = "support_vector_machine",
-      preprocessing_pipeline = preprocessing_pipeline)$learner),
+      learner_name = "support_vector_machine"),
     tuning_search_space = list(list(
       list(id = "tolerance", value = list(0.001, 0.003)),
       list(id = "type", value = list("C-classification", "nu-classification"))))
-  ),
+  )),
 
   data.table(
     id = "rf",
     graph_learner = list(learner = make_graph_learner(
       learner_type = "ranger",
       learner_params = list(),
-      learner_name = "random_forest",
-      preprocessing_pipeline = preprocessing_pipeline)$learner),
+      learner_name = "random_forest"),
     tuning_search_space = list(list(
-      list(id = "num.trees", value = list(1L, 10L))))),
-  
-  data.table(
-    id = "naive_bayes",
-    graph_learner = list(learner = make_graph_learner(
-      learner_type = "naive_bayes",
-      learner_params = list(),
-      learner_name = "naive_bayes",
-      preprocessing_pipeline = preprocessing_pipeline)$learner),
-    tuning_search_space = NA)
+      list(id = "num.trees", value = list(1L, 10L)))))
       
-))
+)))
 
 # STEP 2: TRAIN LEARNERS -------------------------------------------------------
 

@@ -4,6 +4,8 @@
 
 # PURPOSE: create classfication task to perform sentiment analysis in mlr3
 
+# CREATE TASK (TOP-LEVEL) ------------------------------------------------------
+
 make_classification_task <- function(task_name,
                                      data,
                                      feature_columns,
@@ -25,6 +27,8 @@ make_classification_task <- function(task_name,
     target = target_column)
   
 }
+
+# CREATE DATA BACKEND (SUB-LEVEL) ----------------------------------------------
 
 make_data_backend <- function(data, feature_columns, target_column) {
   
