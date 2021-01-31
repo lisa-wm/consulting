@@ -7,13 +7,13 @@
 
 # EXTRACT TWITTER-SPECIFIC FEATURES --------------------------------------------
 
-load_rdata_files(tweets_corpus_topics_unsupervised, folder = "2_code")
+load_rdata_files(tweets_corpus, folder = "2_code/1_data/2_tmp_data")
 
-tweets_response <- convert_qtda_to_dt(
-  tweets_corpus_topics_unsupervised,
+tweets_features_response <- convert_qtda_to_dt(
+  tweets_corpus,
   key = "doc_id")
 
-tweets_features_response <- tweets_response[
+tweets_features_response <- tweets_features_response[
   , .(doc_id, hashtags, tags)
   ][, `:=` (
     n_hashtags = lengths(hashtags),
@@ -21,8 +21,6 @@ tweets_features_response <- tweets_response[
     by = doc_id
     ][, `:=` (hashtags = NULL, tags = NULL)]
 
-save_rdata_files(
-  tweets_features_response, 
-  folder = "2_code/3_sentiment_analysis")
+save_rdata_files(tweets_features_response, folder = "2_code/1_data/2_tmp_data")
 
 # TODO find sth to do w/ hashtags

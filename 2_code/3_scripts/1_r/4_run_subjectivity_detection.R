@@ -12,41 +12,22 @@
 
 # COLLECT DATA FEATURES --------------------------------------------------------
 
-load_rdata_files(
-  tweets_features_dict, 
-  folder = "2_code/3_sentiment_analysis")
-load_rdata_files(
-  tweets_features_lexical, 
-  folder = "2_code/3_sentiment_analysis")
-# load_rdata_files(
-#   tweets_features_embeddings, 
-#   folder = "2_code/3_sentiment_analysis")
-load_rdata_files(
-  tweets_features_response, 
-  folder = "2_code/3_sentiment_analysis")
-
-tweets_features_lexical <- tweets_negation[
-  tweets_punctuation, 
-][tweets_repetition, 
-][tweets_unigrams, 
-][tweets_char_unigrams, 
-][tweets_dt_tagged, 
-][tweets_intensification, ]
+load_rdata_files(tweets_features_dict, folder = "2_code/1_data/2_tmp_data")
+load_rdata_files(tweets_features_lexical, folder = "2_code/1_data/2_tmp_data")
+# load_rdata_files(tweets_features_embed, folder = "2_code/1_data/2_tmp_data")
+load_rdata_files(tweets_features_response, folder = "2_code/1_data/2_tmp_data")
 
 tweets_features <- tweets_features_dict[
   tweets_features_lexical, 
-  # ][tweets_features_embeddings, 
+  # ][tweets_features_embed, 
     ][tweets_features_response, ]
 
-load_rdata_files(tweets_corpus_topics_unsupervised, folder = "2_code")
+load_rdata_files(tweets_corpus, folder = "2_code/1_data/2_tmp_data")
 
-tweets_sa <- convert_qtda_to_dt(
-  tweets_corpus_topics_unsupervised, 
-  key = "doc_id"
-)
+tweets_sa <- convert_qtda_to_dt(tweets_corpus, key = "doc_id")
 
 tweets_sa <- tweets_sa[
-  , .(doc_id, text, topic_label, retweet_count, favorite_count, word_count)
+  , .(doc_id, text, topic_label_stm, retweet_count, favorite_count, word_count)
   ][tweets_features, ]
 
 # FILTER SUBJECTIVE TWEETS -----------------------------------------------------
@@ -56,4 +37,4 @@ tweets_sa <- tweets_sa[
     exclamation_mark_rep > 0 | question_mark_rep > 0 |
     repeated_char > 0 | repeated_char_seq > 0 | favorite_count > 100L]
 
-save_rdata_files(tweets_sa, folder = "2_code")
+save_rdata_files(tweets_sa, folder = "2_code/1_data/2_tmp_data", tmp = FALSE)
