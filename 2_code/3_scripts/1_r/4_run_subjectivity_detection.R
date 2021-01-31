@@ -37,4 +37,4 @@ tweets_sa <- tweets_sa[
     exclamation_mark_rep > 0 | question_mark_rep > 0 |
     repeated_char > 0 | repeated_char_seq > 0 | favorite_count > 100L]
 
-save_rdata_files(tweets_sa, folder = "2_code/1_data/2_tmp_data", tmp = FALSE)
+save_rdata_files(tweets_sa, folder = "2_code/1_data/2_tmp_data")
