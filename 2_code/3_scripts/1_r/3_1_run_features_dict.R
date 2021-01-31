@@ -16,7 +16,7 @@ dict_rauh <- get_dict_rauh()
 
 # TODO check whether strong weak is so beneficial, rauh does not fit in
 
-# Dictionary
+# Create global dictionary
 
 dict_global <- quanteda::dictionary(
   list(
@@ -35,56 +35,65 @@ dict_global <- quanteda::dictionary(
       dict_sentiws$negative[polarity_degree == "weak", term],
       dict_rauh[polarity == "negative", term]))))
 
-save_rdata_files(dict_global, folder = "2_code/3_sentiment_analysis")
-
 # LABEL WITH STANDARD POLARITIES -----------------------------------------------
 
-load_rdata_files(tweets_corpus_topics_unsupervised, folder = "2_code")
+load_rdata_files(tweets_corpus, folder = "2_code/1_data/2_tmp_data")
+load_rdata_files(tweets_tokens_basic, folder = "2_code/1_data/2_tmp_data")
 
-# Tokenize for sentiment analysis
+# Exclude some potentially sentiment-bearing words from stopwords list
 
-tweets_tokens_dict <- quanteda::tokens(
-  tweets_corpus_topics_unsupervised,
-  remove_punct = TRUE,
-  remove_symbols = TRUE,
-  remove_numbers = TRUE,
-  remove_separators = TRUE,
-  split_hyphens = TRUE,
-  include_docvars = TRUE) 
+stopwords_sa <- stringr::str_remove_all(
+  make_stopwords(),
+  stringr::str_c(unique(SnowballC::wordStem(remove_umlauts(tolower(c(
+      "gegen",
+      "kein",
+      "nicht",
+      "sehr",
+      "besser",
+      "beste",
+      "gut",
+      "gern",
+      "kaum",
+      "nein",
+      "nie",
+      "niemand",
+      "richtig",
+      "schlecht"))),
+      language = "de")),
+    collapse = "|"))
 
-tweets_tokens_dict <- quanteda::tokens_wordstem(
-  quanteda::tokens_tolower(tweets_tokens_dict),
-  language = "german")
+stopwords_sa <- stopwords_sa[nchar(stopwords_sa) > 0]
 
-tweets_tokens_dict <- quanteda::tokens_select(
-  tweets_tokens_dict,
-  pattern = make_stopwords_sa(),
-  selection = "remove") 
+# Create dfm object
+
+tweets_tokens_sa <- quanteda::tokens_remove(
+  quanteda::tokens_tolower(tweets_tokens_basic),
+  pattern = stopwords_sa) 
+
+save_rdata_files(tweets_tokens_sa, folder = "2_code/1_data/2_tmp_data")
+
+tweets_dfm_sa <- quanteda::dfm(tweets_tokens_sa)
+
+save_rdata_files(tweets_dfm_sa, folder = "2_code/1_data/2_tmp_data")
 
 # Match with polarities
 
-tweets_dfm_dict <- quanteda::dfm(tweets_tokens_dict)
-
 tweets_sentiments_global <- convert_qtda_to_dt(
-  quanteda::dfm_lookup(tweets_dfm_dict, dict_global),
-  key = "doc_id"
-)
+  quanteda::dfm_lookup(tweets_dfm_sa, dict_global),
+  key = "doc_id")
 
 # MAKE EMOJI DICTIONARY --------------------------------------------------------
 
 # Read data
 
 emojis_ranking <- data.table::fread(
-  here("2_code/0_external_data", "emojis-sentiment-ranking.csv"),
-  drop = c(1, 9), 
+  here("2_code/1_data/0_external_data", "emojis-sentiment-ranking.csv"),
+  drop = c(1, 3, 4, 8, 9), 
   col.names = c(
     "unicode", 
-    "occurrences", 
-    "position", 
     "negative", 
     "neutral",
-    "positive", 
-    "name"),
+    "positive"),
   encoding = "UTF-8")
 
 # TODO Check whether this the right encoding
@@ -107,13 +116,11 @@ dict_emojis <- quanteda::dictionary(
     positive_emojis = emojis_ranking[polarity == "positive", unicode],
     negative_emojis = emojis_ranking[polarity == "negative", unicode]))
 
-save_rdata_files(dict_emojis, folder = "2_code/3_sentiment_analysis")
-
 # LABEL WITH EMOJI POLARITIES --------------------------------------------------
 
 # Find tweets using emojis and convert those to int representation
 
-load_rdata_files(data_clean, folder = "2_code")
+load_rdata_files(data_clean, folder = "2_code/1_data/2_tmp_data")
 
 tweets_emojis <- data_clean[
   , .(doc_id, emojis)
@@ -161,6 +168,4 @@ tweets_features_dict <- tweets_sentiments_emojis[
     .SDcols = c("positive_emojis", "negative_emojis", "n_emojis"),
     by = "doc_id"]
 
-save_rdata_files(
-  tweets_features_dict, 
-  folder = "2_code/3_sentiment_analysis")
+save_rdata_files(tweets_features_dict, folder = "2_code/1_data/2_tmp_data")

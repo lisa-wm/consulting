@@ -5,39 +5,29 @@
 # IN: data with topic labels
 # OUT: data with lexical features
 
-# CREATE BASIC DFM -------------------------------------------------------------
-
-# TODO check whether this could also be solved w/ bigrams / skipgrams
-
-load_rdata_files(tweets_corpus_topics_unsupervised, folder = "2_code")
-
-tweets_tokens_basic <- quanteda::tokens(
-  tweets_corpus_topics_unsupervised,
-  remove_symbols = TRUE,
-  remove_numbers = TRUE,
-  remove_separators = TRUE,
-  split_hyphens = TRUE) 
-
-tweets_tokens_basic <- quanteda::tokens_wordstem(
-  tweets_tokens_basic, 
-  language = "german")
-
-tweets_dfm_basic <- quanteda::dfm(tweets_tokens_basic)
-
 # EXTRACT NEGATIONS ------------------------------------------------------------
+
+load_rdata_files(tweets_dfm_sa, folder = "2_code/1_data/2_tmp_data")
 
 # Take any common German negation patterns
 
-tokens_negation <- SnowballC::wordStem(c(
-  "nicht", "nie", "niemals", "nein", "niemand", "nix", "nirgends", "kein"),
+tokens_negation <- SnowballC::wordStem(
+  remove_umlauts(c(
+    "nicht", 
+    "nie", 
+    "niemals", 
+    "nein", 
+    "niemand", 
+    "nix", 
+    "nirgends", 
+    "kein")),
   language = "de")
 
 # Match documents with negation patterns
 
 tweets_negation <- convert_qtda_to_dt(
-  quanteda::dfm_match(tweets_dfm_basic, tokens_negation),
-  key = "doc_id"
-)
+  quanteda::dfm_match(tweets_dfm_sa, tokens_negation),
+  key = "doc_id")
 
 # Sum negations over all negation patterns
 
@@ -47,33 +37,26 @@ tweets_negation <- tweets_negation[
   by = doc_id
   ][, .(doc_id, n_negations)]
 
-tmp_tweets_negation <- tweets_negation
-save_rdata_files(tmp_tweets_negation, folder = "2_code/3_sentiment_analysis")
-
-save_rdata_files(
-  tweets_negation, 
-  folder = "2_code/3_sentiment_analysis",
-  tmp = TRUE)
-
-load_rdata_files(
-  tweets_negation, 
-  folder = "2_code/3_sentiment_analysis",
-  tmp = TRUE)
-
 # EXTRACT INTENSIFIERS ---------------------------------------------------------
 
 # Take any common German intensification patterns
 
-tokens_intensification <- SnowballC::wordStem(c(
-  "sehr", "besonders", "total", "absolut", "völlig", "enorm", "maximal"),
+tokens_intensification <- SnowballC::wordStem(
+  remove_umlauts(c(
+    "sehr", 
+    "besonders", 
+    "total", 
+    "absolut", 
+    "völlig", 
+    "enorm", 
+    "maximal")),
   language = "de")
 
 # Match documents with intensification patterns
 
 tweets_intensification <- convert_qtda_to_dt(
-  quanteda::dfm_match(tweets_dfm_basic, tokens_intensification),
-  key = "doc_id"
-)
+  quanteda::dfm_match(tweets_dfm_sa, tokens_intensification),
+  key = "doc_id")
 
 # Sum intensifications over all intensification patterns
 
@@ -82,8 +65,6 @@ tweets_intensification <- tweets_intensification[
   .SDcols = -c("doc_id"),
   by = doc_id
   ][, .(doc_id, n_intensifications)]
-
-save_rdata_files(tweets_intensification, folder = "2_code/3_sentiment_analysis")
 
 # EXTRACT PUNCTUATION ----------------------------------------------------------
 
@@ -100,12 +81,10 @@ tokens_punctuation <- c(
 # Match documents with punctuation patterns
 
 tweets_punctuation <- convert_qtda_to_dt(
-  quanteda::dfm_match(tweets_dfm_basic, tokens_punctuation),
+  quanteda::dfm_match(tweets_dfm_sa, tokens_punctuation),
   key = "doc_id")
 
 data.table::setnames(tweets_punctuation, c("doc_id", names(tokens_punctuation)))
-
-save_rdata_files(tweets_punctuation, folder = "2_code/3_sentiment_analysis")
 
 # EXTRACT REPEATED CHARACTER SEQUENCES -----------------------------------------
 
@@ -117,12 +96,10 @@ tokens_repetition <- c(
   repeated_char_seq = "\\b(\\S+?)\\1\\S*\\b")
 
 tweets_repetition <- convert_qtda_to_dt(
-  quanteda::dfm_match(tweets_dfm_basic, tokens_repetition),
+  quanteda::dfm_match(tweets_dfm_sa, tokens_repetition),
   key = "doc_id")
 
 data.table::setnames(tweets_repetition, c("doc_id", names(tokens_repetition)))
-
-save_rdata_files(tweets_repetition, folder = "2_code/3_sentiment_analysis")
 
 # TODO check whether there are really no matches
 
@@ -133,17 +110,12 @@ save_rdata_files(tweets_repetition, folder = "2_code/3_sentiment_analysis")
 
 # Word unigrams
 
-tweets_tokens_ngrams <- quanteda::tokens_select(
-  quanteda::tokens_tolower(tweets_tokens_basic),
-  pattern = make_stopwords_sa(),
-  selection = "remove")
+load_rdata_files(tweets_tokens_sa, folder = "2_code/1_data/2_tmp_data")
 
-tweets_unigrams <- quanteda::tokens_select(
-  tweets_tokens_ngrams,
+tweets_unigrams <- quanteda::tokens_remove(
+  tweets_tokens_sa,
   pattern = "[[:punct:]]",
-  valuetype = "regex",
-  selection = "remove"
-)
+  valuetype = "regex")
 
 tweets_unigrams <- convert_qtda_to_dt(
   quanteda::dfm_tfidf(
@@ -151,10 +123,7 @@ tweets_unigrams <- convert_qtda_to_dt(
       quanteda::dfm(tweets_unigrams),
       min_docfreq = 0.005,
       docfreq_type = "prop")),
-  key = "doc_id"
-)
-
-save_rdata_files(tweets_unigrams, folder = "2_code/3_sentiment_analysis")
+  key = "doc_id")
 
 # Word bigrams
 
@@ -188,8 +157,10 @@ save_rdata_files(tweets_unigrams, folder = "2_code/3_sentiment_analysis")
 
 # Character unigrams
 
+load_rdata_files(tweets_corpus, folder = "2_code/1_data/2_tmp_data")
+
 tweets_char_unigrams <- quanteda::tokens(
-  tweets_corpus_topics_unsupervised,
+  tweets_corpus,
   what = "character",
   remove_punct = TRUE,
   remove_symbols = TRUE,
@@ -199,10 +170,7 @@ tweets_char_unigrams <- quanteda::tokens(
 
 tweets_char_unigrams <- convert_qtda_to_dt(
   quanteda::dfm(tweets_char_unigrams),
-  key = "doc_id"
-)
-
-save_rdata_files(tweets_char_unigrams, folder = "2_code/3_sentiment_analysis")
+  key = "doc_id")
 
 # EXTRACT POS TAGS -------------------------------------------------------------
 
@@ -224,13 +192,11 @@ if (FALSE) {
   
   save_rdata_files(
     tweets_corpus_tagged, 
-    folder = "2_code/1_data/2_tmp_data",
-    tmp = TRUE)
+    folder = "2_code/1_data/2_tmp_data")
   
 }
 
-
-load_rdata_files(tweets_corpus_tagged, folder = "2_code/3_sentiment_analysis")
+load_rdata_files(tweets_corpus_tagged, folder = "2_code/1_data/2_tmp_data")
 
 tweets_pos_tags <- tweets_corpus_tagged[
   , .(doc_id, pos)
@@ -249,4 +215,14 @@ data.table::setnames(tweets_pos_tags, tolower(names(tweets_pos_tags)))
 tweets_pos_tags <- tweets_pos_tags[
   , .(doc_id, adj, adv, cconj, noun, propn, verb)]
 
-save_rdata_files(tweets_pos_tags, folder = "2_code/3_sentiment_analysis")
+# COLLECT FEATURES -------------------------------------------------------------
+
+tweets_features_lexical <- tweets_pos_tags[
+  tweets_negation
+  ][tweets_intensification,
+    ][tweets_punctuation,
+      ][tweets_repetition,
+        ][tweets_unigrams,
+          ][tweets_char_unigrams, ]
+
+save_rdata_files(tweets_features_lexical, folder = "2_code/1_data/2_tmp_data")

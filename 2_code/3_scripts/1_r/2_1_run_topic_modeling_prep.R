@@ -45,20 +45,7 @@ tweets_tokens_tm <- quanteda::tokens_keep(
 
 tweets_tokens_tm <- quanteda::tokens_remove(
   quanteda::tokens_tolower(tweets_tokens_tm),
-  pattern = c(
-    make_stopwords(),
-    c("polit",
-      "bundesregier",
-      "bundestag",
-      "deutsch",
-      "deutschland",
-      "berlin",
-      "prozent",
-      "herzlich",
-      "glueckwunsch",
-      "frag",
-      "woch",
-      "partei")))
+  pattern = make_stopwords())
 
 # CREATE DFM OBJECT ------------------------------------------------------------
 

@@ -6,10 +6,11 @@
 
 get_dict_rauh <- function() {
   
-  load(here("2_code/0_external_data", "Rauh_SentDictionaryGerman.Rdata"))
+  load(here(
+    "2_code/1_data/0_external_data", 
+    "Rauh_SentDictionaryGerman.Rdata"))
   
   dict <- data.table::setDT(sent.dictionary)
-  rm(sent.dictionary)
   data.table::setnames(dict, c("term", "polarity"))
   
   dict[, polarity := as.factor(as.numeric(polarity))]
@@ -17,7 +18,7 @@ get_dict_rauh <- function() {
   
   dict[
     , term := remove_umlauts(tolower(term))
-  ][, term := SnowballC::wordStem(term, language = "de")]
+    ][, term := SnowballC::wordStem(term, language = "de")]
   
   dict
   

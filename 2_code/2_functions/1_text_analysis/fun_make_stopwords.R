@@ -20,7 +20,22 @@ make_stopwords <- function() {
     "2_code/1_data/0_external_data", 
     "stopwords-iso.txt"), encoding = "UTF-8")
   
-  sw <- c(sw_1, unlist(sw_2), unlist(sw_3))
+  sw <- c(
+    sw_1, 
+    unlist(sw_2), 
+    unlist(sw_3),
+    c("polit",
+      "bundesregier",
+      "bundestag",
+      "deutsch",
+      "deutschland",
+      "berlin",
+      "prozent",
+      "herzlich",
+      "glueckwunsch",
+      "frag",
+      "woch",
+      "partei"))
   
   sort(
     unique(

@@ -7,7 +7,7 @@
 
 # SET KEYWORDS -----------------------------------------------------------------
 
-load_rdata_files(tweets_dfm_tm, folder = "2_code")
+load_rdata_files(tweets_dfm_tm, folder = "2_code/1_data/2_tmp_data")
 
 # Define keywords and number of by-terms (frequent co-occurrences of the 
 # keyword, in addition to word-stem-based derivatives) to be retrieved

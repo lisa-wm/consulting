@@ -19,7 +19,7 @@ get_dict_sentiws <- function() {
       # Read data
       
       dict <- data.table::fread(
-        here(paste0("2_code/0_external_data/", data_sentiws[i])),
+        here("2_code/1_data/0_external_data", data_sentiws[i]),
         encoding = "UTF-8",
         drop = 1L,
         col.names = c("polarity_score", "term"))
@@ -33,8 +33,7 @@ get_dict_sentiws <- function() {
         , polarity_degree := ifelse(
           abs(polarity_score) > median_polarity_score,
           "strong",
-          "weak"
-        )
+          "weak")
       ][, term := remove_umlauts(tolower(term))
         ][, term := str_split(term, ",")]
       

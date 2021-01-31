@@ -21,7 +21,7 @@ get_dict_gpc <- function() {
       # Read data
       
       dict <- data.table::fread(
-        here("2_code/0_external_data", data_german_polarity_clues[i]),
+        here("2_code/1_data/0_external_data", data_german_polarity_clues[i]),
         encoding = "UTF-8",
         drop = c(2:4, 6),
         header = FALSE,
@@ -35,8 +35,7 @@ get_dict_gpc <- function() {
         , polarity_degree := ifelse(
           str_detect(polarity_score, "[0-9]"),
           "strong",
-          "weak"
-        )
+          "weak")
         ][, term := remove_umlauts(tolower(term))
           ][, term := SnowballC::wordStem(term, language = "de")]
       
