@@ -18,16 +18,24 @@ load_rdata_files(
 load_rdata_files(
   tweets_features_lexical, 
   folder = "2_code/3_sentiment_analysis")
-load_rdata_files(
-  tweets_features_embeddings, 
-  folder = "2_code/3_sentiment_analysis")
+# load_rdata_files(
+#   tweets_features_embeddings, 
+#   folder = "2_code/3_sentiment_analysis")
 load_rdata_files(
   tweets_features_response, 
   folder = "2_code/3_sentiment_analysis")
 
+tweets_features_lexical <- tweets_negation[
+  tweets_punctuation, 
+][tweets_repetition, 
+][tweets_unigrams, 
+][tweets_char_unigrams, 
+][tweets_dt_tagged, 
+][tweets_intensification, ]
+
 tweets_features <- tweets_features_dict[
   tweets_features_lexical, 
-  ][tweets_features_embeddings, 
+  # ][tweets_features_embeddings, 
     ][tweets_features_response, ]
 
 load_rdata_files(tweets_corpus_topics_unsupervised, folder = "2_code")

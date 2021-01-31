@@ -4,7 +4,7 @@
 
 # PURPOSE: save files created to rdata with automatic file name creation
 
-save_rdata_files <- function(robject, folder) {
+save_rdata_files <- function(robject, folder, tmp = FALSE) {
 
   # Assign to correctly named object in execution environment (otherwise, the 
   # name of the saved object will be "robject", which is also its name after 
@@ -16,12 +16,26 @@ save_rdata_files <- function(robject, folder) {
   # Use do.call because save() evaluates its arguments in a weird way, such that
   # neither strings nor get() are usable to reference the object
   
-  do.call(
-    save, 
-    list(
-      env_vars[which(env_vars == deparse(substitute(robject)))], 
-      file = here(
-        folder, 
-        paste0("rdata_", deparse(substitute(robject)), ".RData"))))
-
+  if (tmp) {
+    
+    do.call(
+      save, 
+      list(
+        env_vars[which(env_vars == deparse(substitute(robject)))], 
+        file = here(
+          folder, 
+          sprintf("tmp_rdata_%s.RData", deparse(substitute(robject))))))
+    
+  } else {
+    
+    do.call(
+      save, 
+      list(
+        env_vars[which(env_vars == deparse(substitute(robject)))], 
+        file = here(
+          folder, 
+          sprintf("rdata_%s.RData", deparse(substitute(robject))))))
+    
+  }
+  
 }

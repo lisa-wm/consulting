@@ -8,3 +8,5 @@ tweepy_df*
 *.snm
 *.gz
 *.toc
+rdata_tmp*
+tmp*

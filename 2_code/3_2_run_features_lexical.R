@@ -47,6 +47,19 @@ tweets_negation <- tweets_negation[
   by = doc_id
   ][, .(doc_id, n_negations)]
 
+tmp_tweets_negation <- tweets_negation
+save_rdata_files(tmp_tweets_negation, folder = "2_code/3_sentiment_analysis")
+
+save_rdata_files(
+  tweets_negation, 
+  folder = "2_code/3_sentiment_analysis",
+  tmp = TRUE)
+
+load_rdata_files(
+  tweets_negation, 
+  folder = "2_code/3_sentiment_analysis",
+  tmp = TRUE)
+
 # EXTRACT INTENSIFIERS ---------------------------------------------------------
 
 # Take any common German intensification patterns
@@ -70,6 +83,8 @@ tweets_intensification <- tweets_intensification[
   by = doc_id
   ][, .(doc_id, n_intensifications)]
 
+save_rdata_files(tweets_intensification, folder = "2_code/3_sentiment_analysis")
+
 # EXTRACT PUNCTUATION ----------------------------------------------------------
 
 # Take punctuation patterns deemed indicative for sentiments: 3 consecutive
@@ -90,6 +105,8 @@ tweets_punctuation <- convert_qtda_to_dt(
 
 data.table::setnames(tweets_punctuation, c("doc_id", names(tokens_punctuation)))
 
+save_rdata_files(tweets_punctuation, folder = "2_code/3_sentiment_analysis")
+
 # EXTRACT REPEATED CHARACTER SEQUENCES -----------------------------------------
 
 # Take single characters repeated at least 3 times and repated character
@@ -104,6 +121,8 @@ tweets_repetition <- convert_qtda_to_dt(
   key = "doc_id")
 
 data.table::setnames(tweets_repetition, c("doc_id", names(tokens_repetition)))
+
+save_rdata_files(tweets_repetition, folder = "2_code/3_sentiment_analysis")
 
 # TODO check whether there are really no matches
 
@@ -134,6 +153,8 @@ tweets_unigrams <- convert_qtda_to_dt(
       docfreq_type = "prop")),
   key = "doc_id"
 )
+
+save_rdata_files(tweets_unigrams, folder = "2_code/3_sentiment_analysis")
 
 # Word bigrams
 
@@ -181,6 +202,8 @@ tweets_char_unigrams <- convert_qtda_to_dt(
   key = "doc_id"
 )
 
+save_rdata_files(tweets_char_unigrams, folder = "2_code/3_sentiment_analysis")
+
 # EXTRACT POS TAGS -------------------------------------------------------------
 
 # TODO run this in set up
@@ -205,33 +228,21 @@ if (FALSE) {
 
 load_rdata_files(tweets_corpus_tagged, folder = "2_code/3_sentiment_analysis")
 
-tweets_dt_tagged <- tweets_corpus_tagged[
+tweets_pos_tags <- tweets_corpus_tagged[
   , .(doc_id, pos)
   ][, aux := 1L
     ][, n_tags := sum(aux), by = list(doc_id, pos)
       ][, aux := NULL]
 
-tweets_dt_tagged <- data.table::dcast(
-  unique(tweets_dt_tagged), 
+tweets_pos_tags <- data.table::dcast(
+  unique(tweets_pos_tags), 
   doc_id ~ pos, 
   value.var = "n_tags",
   fun.aggregate = sum)
 
-data.table::setnames(tweets_dt_tagged, tolower(names(tweets_dt_tagged)))
+data.table::setnames(tweets_pos_tags, tolower(names(tweets_pos_tags)))
 
-tweets_dt_tagged <- tweets_dt_tagged[
+tweets_pos_tags <- tweets_pos_tags[
   , .(doc_id, adj, adv, cconj, noun, propn, verb)]
 
-# COLLECT EXTRACTED FEATURES ---------------------------------------------------
-
-tweets_features_lexical <- tweets_negation[
-  tweets_punctuation, 
-  ][tweets_repetition, 
-    ][tweets_unigrams, 
-      ][tweets_char_unigrams, 
-        ][tweets_dt_tagged, 
-          ][tweets_intensification, ]
-
-save_rdata_files(
-  tweets_features_lexical, 
-  folder = "2_code/3_sentiment_analysis")
+save_rdata_files(tweets_pos_tags, folder = "2_code/3_sentiment_analysis")
