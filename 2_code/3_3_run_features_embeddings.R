@@ -58,6 +58,8 @@ save_rdata_files(
 # simply package the texts into smaller documents (w/o warning......) which make
 # no sense
 
+# source code https://github.com/bnosac/doc2vec/blob/master/src/rcpp_doc2vec.cpp
+
 if (FALSE) {
   
   foo <- copy(tweets_dense_topics)[
