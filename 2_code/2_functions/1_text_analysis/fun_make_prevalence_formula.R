@@ -49,6 +49,6 @@ make_prevalence_formula <- function(data,
   sv_formula <- paste0("s(", sv, ", df = ", smooth_df, ")", collapse = "+")
   formula_right <- paste0(c(cv_formula, sv_formula), collapse = "+")
   
-  paste("", formula_right, sep = "~")
+  as.formula(paste("", formula_right, sep = "~"))
   
 }
