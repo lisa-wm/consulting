@@ -1,5 +1,5 @@
 # ------------------------------------------------------------------------------
-# CREATION OF GRAPH LEARNER OBJECT
+# CREATION OF LEARNER OBJECT
 # ------------------------------------------------------------------------------
 
 # PURPOSE: create graph learner to perform sentiment analysis in mlr3

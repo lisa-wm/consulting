@@ -15,6 +15,8 @@ tune_graph_learner <- function(graph_learner,
                                hyperparameter_ranges,
                                tuning_iterations) {
   
+  # Break early if no tuning is desired
+  
   if (any(is.na(hyperparameter_ranges))) return(NA)
   
   set.seed(1L)
@@ -73,8 +75,8 @@ get_hyperparameter_set <- function(graph_learner, hyperparameter_ranges) {
     # this_id <- names(hyperparameter_ranges)[hp]
     # this_value <- hyperparameter_ranges[[this_id]]
     
-    this_id <- hyperparameter_ranges[[hp]]$id
-    this_value <- hyperparameter_ranges[[hp]]$value
+    this_id <- hyperparameter_ranges[[hp]]
+    this_range <- hyperparameter_ranges[[hp]]$ranges
     
     # Check whether specified hyperparameters exist
     
@@ -100,7 +102,7 @@ get_hyperparameter_set <- function(graph_learner, hyperparameter_ranges) {
     
     # TODO Check whether this works for logical and utility parameters also 
 
-    if (this_hp_class == "Fct") this_value <- list(unlist(this_value))
+    if (this_hp_class == "Fct") this_range <- list(unlist(this_range))
     
     # This looks so ugly because do.call calls a method here, not a function
     # (and as such on an object that does not yet exist)
@@ -109,7 +111,7 @@ get_hyperparameter_set <- function(graph_learner, hyperparameter_ranges) {
       eval(parse(text = paste0("Param", this_hp_class, "$new"))),
       append(
         paste0(learner, ".", this_id),
-        this_value))
+        this_range))
     
     params_list[[this_id]] <- param
     

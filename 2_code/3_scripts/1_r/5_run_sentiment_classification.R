@@ -16,109 +16,118 @@ task <- make_classification_task(
     names(tweets_sa)[!names(tweets_sa) %in% c("doc_id", "text", "label")]),
   target_column = "label")
 
+tweets_sa_fake <- copy(tweets_sa)[
+  , label := ifelse(
+    label == "none" & positive_emojis > 0,
+    "positive",
+    label)
+  ][, label := ifelse(
+    label == "none" & negative_emojis > 0,
+    "negative",
+    label)
+    ][, label := as.factor(label)
+      ][label != "none"]
+
+cols_numeric <- names(tweets_sa_fake)[sapply(tweets_sa_fake, is.numeric)]
+cols_numeric <- cols_numeric[cols_numeric != "topic_label_stm"]
+colSums(tweets_sa_fake[, ..cols_numeric], na.rm = TRUE)
+
+tweets_sa_fake <- na.omit(tweets_sa_fake)
+
+task <- make_classification_task(
+  task_name = "tweets",
+  data = tweets_sa_fake,
+  feature_columns = list(
+    names(tweets_sa_fake)[!names(tweets_sa_fake) %in% c("doc_id", "text", "label")]),
+  target_column = "label")
+
+graph <- mlr3pipelines::mlr_pipeops$get("branch", c("foo", "poo")) %>>%
+  gunion(list(
+    mlr_pipeops$get(
+      "learner", 
+      learner = PipeOpLearner$new(mlr_learners$get("classif.svm")), 
+      id = "svm"),
+    mlr_pipeops$get(
+      "learner", 
+      learner = PipeOpLearner$new(mlr_learners$get("classif.ranger")), 
+      id = "rf")
+  )) %>>%
+  mlr_pipeops$get("unbranch")
+
+graph$plot(html = FALSE)
+
+glrn <- GraphLearner$new(graph)
+glrn$param_set$values$svm.classif.svm.type <- "C-classification"
+
+ps <- ParamSet$new(list(
+  ParamDbl$new("svm.classif.svm.cost", lower = 0, upper = 0.5),
+  ParamInt$new("rf.classif.ranger.num.trees", lower = 1L, upper = 10L)
+))
+
+instance <- TuningInstanceSingleCrit$new(
+  task = task,
+  learner = glrn,
+  resampling = rsmp("cv", folds = 3L),
+  measure = msr("classif.ce"),
+  search_space = ps,
+  terminator = trm("evals", n_evals = 3L)
+)
+
+tuner <- tnr("random_search")
+tuner$optimize(instance)
+
+instance$result_learner_param_vals
+instance$result_y
+
 # SET UP LIST OF LEARNERS ------------------------------------------------------
 
-svm_dt <- data.table(
-  id = "svm",
-  learner_svm = list(make_graph_learner(
-    learner_type = "svm",
-    learner_params = list(
-      kernel = "radial",
-      type = "C-classification"),
-    learner_name = "support_vector_machine")),
-  # tuning_search_space = list(list(
-  #   list(id = "tolerance", value = list(0.001, 0.003)),
-  #   list(
-  #     id = "type",
-  #     value = list("C-classification", "nu-classification"))))
-  )
-
-learner_svm <- make_graph_learner(
-  learner_type = "svm",
-  learner_params = list(
-    kernel = "radial",
-    type = "C-classification"),
-  learner_name = "support_vector_machine")
-
-foo <- data.table(
-  id = "svm", 
-  learner_svm = make_graph_learner(
-    learner_type = "svm",
-    learner_params = list(
-      kernel = "radial",
-      type = "C-classification"),
-    learner_name = "support_vector_machine"),
-  tuning_search_space = poo)
-
-foo <- list(
-  id = "svm"
-)
-
-poo <- list(
-  ids = c("tolerance", "type"),
-  values = list(list(0.001, 0.003), list("C-classification", "nu-classification"))
-)
-
-poo <- as.list(
-  list(id = "tolerance", value = list(0.001, 0.003)),
-  list(
-    id = "type", 
-    value = list("C-classification", "nu-classification")))
-
-learner_svm <- make_graph_learner(
-  learner_type = "svm",
-  learner_params = list(
-    kernel = "radial",
-    type = "C-classification"),
-  learner_name = "support_vector_machine")
-
-learner_rf <- make_graph_learner(
-  learner_type = "ranger",
-  learner_params = list(),
-  learner_name = "random_forest")
-
-learners <- rbind(
-  data.table(
-    id = "svm",
-    graph_learner = list(
-      learner = learner_svm,
-      tuning_search_space = list(
-        list(id = "tolerance", value = list(0.001, 0.003)),
-        list(
-          id = "type", 
-          value = list("C-classification", "nu-classification"))))),
-  data.table(
-    id = "rf",
-    graph_learner = list(
-      learner = learner_rf,
-      tuning_search_space = list(
-        list(id = "tolerance", value = list(0.001, 0.003)),
-        list(id = "num.trees", value = list(1L, 10L))))))
-
-learners <- rbind(
-  data.table(
-    id = "svm",
-    graph_learner = learner_svm,
-    tuning_search_space = list(list(
-      list(id = "tolerance", value = list(0.001, 0.003)),
-      list(
+learners <- list(
+  
+  ids = c("svm", "rf"),
+  
+  learners = list(
+    svm = make_graph_learner(
+      learner_type = "svm",
+      learner_params = list(
+        kernel = "radial",
+        type = "C-classification"),
+      learner_name = "support_vector_machine"),
+    rf = make_graph_learner(
+      learner_type = "ranger",
+      learner_params = list(),
+      learner_name = "random_forest")),
+  
+  hyperparameter_ranges = list(
+    svm = list(
+      tol = list(
+        id = "tolerance", 
+        ranges = c(0.001, 0.003)),
+      type = list(
         id = "type",
-        value = list("C-classification", "nu-classification"))))),
-  data.table(
-    id = "svm",
-    graph_learner = learner_svm,
-    tuning_search_space = list(list(
-      list(id = "tolerance", value = list(0.001, 0.003)),
-      list(
-        id = "type",
-        value = list("C-classification", "nu-classification"))))))
+        ranges = list("C-classification", "nu-classification"))),
+    rf = list(
+      tol = list(
+        id = "tolerance",
+        ranges = c(0.001, 0.003)),
+      n_trees = list(
+        id = "num.trees", 
+        ranges = c(1L, 10L)))))
 
-hyperparameter_ranges <- list(
-  list(id = "tolerance", value = list(0.001, 0.003)),
-  list(id = "type", 
-       value = list("C-classification", "nu-classification")))
+# TUNE LEARNERS ----------------------------------------------------------------
 
-# PERFORM TRAIN-TEST SPLIT -----------------------------------------------------
+learners$tuning_results <- lapply(
+  seq_along(learners$ids),
+  function(i) {
+    this_learner <- learners$ids[i]
+    tune_graph_learner(
+      graph_learner = learners$learners[[this_learner]],
+      task = task,
+      outer_resampling = mlr3::rsmp("cv", folds = 3L),
+      inner_resampling = mlr3::rsmp("cv", folds = 3L),
+      outer_loss = mlr3::msr("classif.ce"),
+      inner_loss = mlr3::msr("classif.ce"),
+      hyperparameter_ranges = learners$hyperparameter_ranges[[this_learner]],
+      tuning_iterations = 1L)})
 
 learners[, tuning_results := lapply(
   .I,
