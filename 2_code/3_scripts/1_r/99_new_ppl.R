@@ -28,16 +28,17 @@ task = mlr_tasks$get("iris")
 # poca$param_set$values$affect_columns = selector_grep("^Petal")
 # poca$train(list(task))[[1]]$data()
 
-f3 <- function(x, y, z) {cbind(a = x + y + z, b = y - z)}
+f3 <- function(x, y, z) {data.table(a = x + y + z, b = y - z)}
 
 
 
 pom <- po("mutate")
 pom$param_set$values$mutation = list(
   Sepal.Area = ~ Sepal.Width * Sepal.Length,
-  foo = ~ f3(Sepal.Width, Sepal.Length, Petal.Length)
+  "foo%s" = ~ f3(Sepal.Width, Sepal.Length, Petal.Length)
 )
 
+pom$train(list(task))[[1]]$data()
 
 graph = pom %>>%
   mlr_pipeops$get(
