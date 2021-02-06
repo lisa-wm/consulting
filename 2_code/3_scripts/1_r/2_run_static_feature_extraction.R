@@ -3,7 +3,7 @@
 # ------------------------------------------------------------------------------
 
 # IN: corpus object of cleaned tweets and meta data
-# OUT: data with dictionary-based features
+# OUT: corpus object of cleaned tweets, meta data and static features
 
 # EXTRACT TWITTER-SPECIFIC FEATURES --------------------------------------------
 
@@ -336,3 +336,5 @@ save_rdata_files(tweets_features_static, folder = "2_code/1_data/2_tmp_data")
 
 quanteda::docvars(tweets_corpus) <- as.data.frame(
   tweets_features_static[data_dt, on = "doc_id"])
+
+save_rdata_files(tweets_corpus, folder = "2_code/1_data/2_tmp_data")
