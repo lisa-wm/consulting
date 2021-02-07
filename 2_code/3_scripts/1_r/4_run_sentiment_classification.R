@@ -18,7 +18,6 @@ PipeOpScaleAlwaysSimple = R6::R6Class(
         ParamDbl$new("lhs", default = 5),
         ParamUty$new("rhs")
       ))
-      # ps$values = list(lhs = numeric(), rhs = character())
       super$initialize(id, ps, param_vals = param_vals)
     }
   ),
@@ -40,7 +39,7 @@ PipeOpScaleAlwaysSimple = R6::R6Class(
     .transform_dt = function(dt, levels) {
       dt_new <- cbind(
         dt,
-        rep(self$param_set$values$lhs, nrow(dt)),
+        rep(self$state$foo, nrow(dt)),
         t((t(dt) - self$state$center) / self$state$scale))
       setnames(dt_new, letters[1:ncol(dt_new)])
       dt_new
