@@ -18,12 +18,38 @@
 toy_data <- data.table::data.table(cbind(
   iris,
   doc_id = c(seq_len(nrow(iris))),
-  full_text = c(rep("hello What up", nrow(iris)))))
+  full_text = rep("hello What up Pancake Sunday Morning Powder", nrow(iris)),
+  username = letters[seq_len(nrow(iris))]))
+
+
+prevalence_formula <- make_prevalence_formula(
+  data = data_clean,
+  categorical_vars = list(
+    "party", 
+    "bundesland"),
+  smooth_vars = list(
+    "unemployment_rate", 
+    "bip_per_capita",
+    "share_pop_migration"))
+
+toy_data <- data_clean[
+  , .(doc_id, full_text, username, year, month, party, bundesland, bip_per_capita,
+      unemployment_rate, share_pop_migration)
+  ][, target := as.factor(sample(c(0, 1), size = nrow(data_clean), replace = TRUE))]
+
+# toy_data <- toy_data[sample(seq_len(nrow(toy_data)), 1000L)]
+
+toy_data <- toy_data[complete.cases(toy_data)]
+
+setattr(
+  toy_data$target,
+  "levels",
+  c("good", "bad"))
 
 task <- mlr3::TaskClassif$new(
   "foo", 
   backend = toy_data,
-  target = "Species")
+  target = "target")
 
 PipeOpExtractTopicsSTM = R6::R6Class(
   
@@ -37,32 +63,29 @@ PipeOpExtractTopicsSTM = R6::R6Class(
       
       ps = ParamSet$new(params = list(
         ParamUty$new("docid_field"),
-        ParamUty$new(
-          "text_field"),
+        ParamUty$new("text_field"),
         ParamUty$new("stm_formula"),
-        ParamUty$new("stopwords")
-        # ParamUty$new(
-        #   "document_grouping_var", 
-        #   default = c("username", "year", "month")),
-        # ParamInt$new("n_topics_lower", lower = 2L),
-        # ParamInt$new("n_topics_upper", lower = 2L),
-        # ParamInt$new("max.em.its"),
-        # ParamFct$new(
-        #   "init.type", 
-        #   levels = c("Spectral", "LDA", "Random", "Custom"), 
-        #   default = "Spectral"),
-        # ParamDbl$new("emtol", default = 1e-05),
-        # ParamDbl$new("seed", default = 1),
-        # ParamLgl$new("verbose", default = TRUE),
-        # ParamInt$new("reportevery", default = 5L, lower = 1L),
-        # ParamLgl$new("LDAbeta", default = TRUE),
-        # ParamInt$new("ngroups", default = 1L),
-        # ParamFct$new("gamma.prior", levels = c("Pooled", "L1"), default = "L1"),
-        # ParamDbl$new("sigma.prior", lower = 0L, upper = 1L, default = 0L),
-        # ParamFct$new(
-        #   "kappa.prior", 
-        #   levels = c("L1", "Jeffreys"), 
-        #   default = "L1")
+        ParamUty$new("stopwords"),
+        ParamUty$new("doc_grouping_var"),
+        ParamInt$new("n_topics_lower", lower = 2L),
+        ParamInt$new("n_topics_upper", lower = 2L),
+        ParamInt$new("max.em.its"),
+        ParamFct$new(
+          "init.type",
+          levels = c("Spectral", "LDA", "Random", "Custom"),
+          default = "Spectral"),
+        ParamDbl$new("emtol", default = 1e-05),
+        ParamDbl$new("seed", default = 1),
+        ParamLgl$new("verbose", default = TRUE),
+        ParamInt$new("reportevery", default = 5L, lower = 1L),
+        ParamLgl$new("LDAbeta", default = TRUE),
+        ParamInt$new("ngroups", default = 1L),
+        ParamFct$new("gamma.prior", levels = c("Pooled", "L1"), default = "L1"),
+        ParamDbl$new("sigma.prior", lower = 0L, upper = 1L, default = 0L),
+        ParamFct$new(
+          "kappa.prior",
+          levels = c("L1", "Jeffreys"),
+          default = "L1")
       ))
       
       super$initialize(
@@ -76,37 +99,39 @@ PipeOpExtractTopicsSTM = R6::R6Class(
   
   private = list(
     
-    # .get_state = function(dt, levels) {
-    #   
-    #   # TODO insert hp search for k
-    #   
-    #   crp <- quanteda::corpus(
-    #     x = dt,
-    #     docid_field = self$param_set$values$docid_field,
-    #     text_field = as.character(self$param_set$values$text_field))
-    # 
-    #   tkns <- private$.tokenize(crp, self$param_set$values$stopwords)
-    #   
-    #   list(opt_k = 3L)
-    #   
-    # },
-    
     .transform_dt = function(dt, levels) {
 
       colnames <- c(
         self$param_set$values$docid_field, 
-        self$param_set$values$text_field)
+        self$param_set$values$text_field,
+        self$param_set$values$doc_grouping_var)
       
       crp <- quanteda::corpus(
         dt[, ..colnames],
         docid_field = self$param_set$values$docid_field,
         text_field = self$param_set$values$text_field)
 
-      tkns <- private$.tokenize(crp, self$param_set$values$stopwords)
+      tkns <- private$.tokenize(
+        corpus = crp, 
+        stopwords = self$param_set$values$stopwords)
+      
+      stm_obj <- private$.make_stm_obj(
+        tokens = tkns, 
+        doc_grouping_var = self$param_set$values$doc_grouping_var)
+      
+      stm_mod <- private$.run_stm(
+        stm = stm_obj,
+        # stm_formula = as.formula(self$param_set$values$stm_formula),
+        k = 3L,
+        max.em.its = self$param_set$values$max.em.its)
+
+      stm_res <- stm::labelTopics(stm_mod, n = 3L)
+      top_words_frex <- t(stm_res$frex)
 
       dt_new <- cbind(
         dt,
-        rep(mean(quanteda::ntoken(tkns)), nrow(dt)))
+        rep(length(top_words_frex), nrow(dt)),
+        rep(class(stm)[1], nrow(dt)))
 
       setnames(dt_new, letters[1:ncol(dt_new)])
       dt_new
@@ -138,28 +163,46 @@ PipeOpExtractTopicsSTM = R6::R6Class(
 
       tkns_topics
 
-    }
-    # 
-    # .make_stm_obj = function(dt, levels) {dt},
-    # 
+    },
+
+    .make_stm_obj = function(tokens, doc_grouping_var) {
+      
+      dfm <- quanteda::dfm(tokens)
+      dfm_grp <- quanteda::dfm_group(dfm, doc_grouping_var)
+      quanteda::convert(dfm_grp, to = "stm")
+      
+    },
+
     # .find_k = function(dt, levels) {dt}, # get_state instead of transform_dt?
-    # 
-    # .run_stm = function(dt, levels) {dt}
+   
+    .run_stm = function(stm, stm_formula, k, max.em.its) {
+      
+      stm::stm(
+        documents = stm$documents,
+        vocab = stm$vocab,
+        # data = stm$meta,
+        K = k,
+        # prevalence = stm_formula,
+        # gamma.prior = "L1",
+        seed = 1L,
+        max.em.its = max.em.its,
+        init.type = "Spectral")
+      
+    }
   )
 )
 
 pop <- PipeOpExtractTopicsSTM$new()
 pop$param_set$values$docid_field <- "doc_id"
 pop$param_set$values$text_field <- "full_text"
+pop$param_set$values$doc_grouping_var <- c("username", "year", "month")
+pop$param_set$values$stm_formula <- prevalence_formula
+pop$param_set$values$max.em.its <- 1L
 pop$param_set$values$stopwords <- make_stopwords()
 gr = Graph$new()$add_pipeop(pop)
 
 result_posa = gr$train(task)[[1]]
 result_posa$data()
-
-
-
-
 
 PipeOpExtractTopicsSTM = R6::R6Class(
 

@@ -111,6 +111,8 @@ data.table::setattr(
   "levels",
   c("afd", "gruene", "cdu_csu", "linke", "fdp", "fraktionslos", "spd"))
 
+data_clean <- data_clean[party != "fraktionslos"]
+
 # EXTRACT TWITTER-SPECIFIC ELEMENTS --------------------------------------------
 
 # String pattern of emojis, hashtags and tags
