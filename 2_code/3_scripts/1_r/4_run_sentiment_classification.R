@@ -5,6 +5,10 @@
 # IN: data filtered for subjective tweets
 # OUT: data with sentiment labels
 
+# MAKE CLASSIFICATION TASK -----------------------------------------------------
+
+# Make task
+
 data <- tweets_subjective[
   label != "none"
   ][, created_at := NULL]
@@ -15,6 +19,16 @@ task <- mlr3::TaskClassif$new(
   "twitter_ttsa", 
   backend = data,
   target = "label")
+
+# Create train-test split
+
+set.seed(123L)
+train_set = sample(task$nrow, 0.7 * task$nrow)
+test_set = setdiff(seq_len(task$nrow), train_set)
+
+# CREATE PREPROCESSING PIPELINE ------------------------------------------------
+
+# Define topic modeling pipeop
 
 prevalence_formula <- make_prevalence_formula(
   data = task$data(),
@@ -35,8 +49,7 @@ po_tm$param_set$values <- list(
   stopwords = make_stopwords(),
   K = 3L)
 
-# result_tm <- graph$train(task)[[1]]
-# result_tm$data()
+# Define selector pipeop for features to be piped into embedding extraction
 
 po_sel_ge <- PipeOpSelect$new(id = "select_embedding")
 po_sel_ge$param_set$values$selector <- selector_name(c("topic_label", "text"))
@@ -44,21 +57,21 @@ po_sel_ge_inv <- PipeOpSelect$new(id = "select_rest")
 po_sel_ge_inv$param_set$values$selector <- 
   selector_invert(selector_name(c("topic_label", "text")))
 
+# Define glove embedding pipeop
+
 po_ge <- PipeOpMakeGloveEmbeddings$new()
 po_ge$param_set$values$dimension <- 3L
 po_ge$param_set$values$stopwords <- make_stopwords()
 
+# Define trivial pipeop for features not piped into embedding extraction
+
 po_nop <- PipeOpNOP$new()
 
-po_sel_cl <- PipeOpSelect$new(id = "select_classif")
-po_sel_cl$param_set$values$selector <- 
-  selector_invert(selector_type(c("character")))
+# Create graph from preprocessing steps
 
-po_cart <- PipeOpLearner$new(learner = lrn("classif.rpart"))
+graph_preproc <- Graph$new()$add_pipeop(po_tm)
 
-graph <- Graph$new()$add_pipeop(po_tm)
-
-graph <- graph %>>% 
+graph_preproc <- graph_preproc %>>% 
   gunion(list(
     po_sel_ge %>>% 
       po_ge,
@@ -67,17 +80,93 @@ graph <- graph %>>%
     ) %>>%
   po("featureunion") 
 
-plot(graph, html = FALSE)
+plot(graph_preproc, html = FALSE)
 
-# res_preproc <- graph$train(task)[[1]]
-# res_preproc$data()
+res_preproc <- graph_preproc$train(task)[[1]]
+res_preproc$data()
 
-graph_full <- graph %>>%
-  po_sel_cl %>>%
-  po_cart
+# CREATE GRAPH LEARNERS --------------------------------------------------------
 
-graph_learner <- GraphLearner$new(graph_full)
+# Define selector pipeop for features to be piped into classification
 
-graph_learner$train(task)
-res <- graph_learner$predict(task)
+po_sel_cl <- PipeOpSelect$new(id = "select_classif")
+po_sel_cl$param_set$values$selector <- 
+  selector_invert(selector_type(c("character")))
+
+# Define pipeops for different classifiers
+
+po_learners <- list(
+  cart = PipeOpLearner$new(learner = lrn("classif.rpart")),
+  svm = PipeOpLearner$new(
+    learner = lrn("classif.svm", type = "C-classification"))
+  # ,
+  # nb = PipeOpLearner$new(learner = lrn("classif.naive_bayes"))
+  )
+
+# Create full graphs
+
+graphs_full <- lapply(
+  seq_along(po_learners),
+  function(i) graph_preproc %>>% po_sel_cl %>>% po_learners[[i]])
+
+# Create graph_learners
+
+graph_learners <- lapply(
+  seq_along(graphs_full),
+  function(i) GraphLearner$new(graphs_full[[i]]))
+
+names(graph_learners) <- names(po_learners)
+
+# BENCHMARK LEARNERS -----------------------------------------------------------
+
+# Define tuning parameters
+
+resampling_inner <- mlr3::rsmp("cv", folds = 2L)
+measure_inner <- mlr3::msr("classif.ce")
+terminator <- mlr3tuning::trm("evals", n_evals = 5L)
+tuner <- mlr3tuning::tnr("grid_search", resolution = 10L)
+
+search_spaces <- list(
+  cart = paradox::ParamSet$new(
+    params = list(
+      paradox::ParamInt$new("classif.rpart.minsplit", lower = 20L, upper = 25L))),
+  svm = paradox::ParamSet$new(
+    params = list(
+      paradox::ParamDbl$new("classif.svm.cost", lower = 0.001, upper = 0.1)))
+  # ,
+  # nb = NULL
+  )
+
+# Define tuning learners
+
+auto_tuners <- lapply(
+  seq_along(graph_learners), 
+  function(i) {
+    mlr3tuning::AutoTuner$new(
+      learner = graph_learners[[i]],
+      resampling = resampling_inner,
+      measure = measure_inner,
+      search_space = search_spaces[[i]],
+      terminator = terminator,
+      tuner = tuner)})
+
+# Define benchmarking parameters
+
+resampling_outer <- mlr3::rsmp("cv", folds = 2L)
+
+measures_outer <- list(
+  mlr3::msr("classif.auc", id = "auc_train", predict_sets = "train"),
+  mlr3::msr("classif.auc", id = "auc_test"))
+
+# Define benchmarking design
+
+bmr_design <- mlr3::benchmark_grid(task, auto_tuners, resampling_outer)
+
+# Run benchmark 
+
+bmr <- mlr3::benchmark(bmr_design)
+bmr$aggregate(measures_outer)
+
+graph_learner$train(task, row_ids = train_set)
+res <- graph_learner$predict(task, row_ids = test_set)
 res$confusion
