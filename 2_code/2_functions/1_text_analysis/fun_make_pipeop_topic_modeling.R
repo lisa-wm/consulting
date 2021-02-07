@@ -170,7 +170,13 @@ PipeOpExtractTopicsSTM = R6::R6Class(
   )
 )
 
-data <- tweets_subjective[label != "none"]
+data <- tweets_subjective[
+  label != "none"
+  ][, created_at := NULL]
+
+# cols_to_keep <- names(data)[c(1:54, 57:58, 104, 124:128)]
+# data <- data[, ..cols_to_keep]
+
 data$label <- as.factor(data$label)
 
 task <- mlr3::TaskClassif$new(
@@ -201,3 +207,19 @@ graph <- Graph$new()$add_pipeop(po_tm)
 
 result_tm = graph$train(task)[[1]]
 result_tm$data()
+
+po_cart <- PipeOpLearner$new(learner = lrn("classif.rpart"))
+
+po_sel <- PipeOpSelect$new()
+po_sel$param_set$values$selector <- 
+  selector_invert(selector_type(c("character")))
+
+graph <- graph %>>% po_sel %>>% po_cart
+
+plot(graph, html = F)
+
+graph_learner <- GraphLearner$new(graph)
+
+graph_learner$train(task)
+res <- graph_learner$predict(task)
+res$confusion
