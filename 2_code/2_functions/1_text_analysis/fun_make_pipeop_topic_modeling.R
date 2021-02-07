@@ -1,5 +1,5 @@
 # ------------------------------------------------------------------------------
-# CREATION TOPIC MODELING PIPEOP
+# TOPIC MODELING PIPEOP
 # ------------------------------------------------------------------------------
 
 # PURPOSE: create mlr3pipelines pipe operator for topic modeling
@@ -8,7 +8,7 @@
 
 PipeOpExtractTopicsSTM = R6::R6Class(
   
-  "PipeOpExtractTopics",
+  "PipeOpExtractTopicsSTM",
   
   inherit = mlr3pipelines::PipeOpTaskPreprocSimple,
   
@@ -91,7 +91,7 @@ PipeOpExtractTopicsSTM = R6::R6Class(
       
       topic_probs <- stm::make.dt(stm_mod)[
         , `:=` (
-          topic_doc_id_stm = names(stm_obj$documents),
+          topic_doc_id = names(stm_obj$documents),
           docnum = NULL)]
       
       data.table::setnames(topic_probs, tolower(names(topic_probs)))
@@ -100,29 +100,29 @@ PipeOpExtractTopicsSTM = R6::R6Class(
       
       topic_probs[
         , `:=` (
-          max_topic_score_stm = max(.SD, na.rm = TRUE),
-          topic_label_stm = which.max(.SD)),
+          max_topic_score = max(.SD, na.rm = TRUE),
+          topic_label = which.max(.SD)),
         .SDcols = topic_cols,
         by = seq_len(nrow(topic_probs))]
       
       dt_new <- copy(dt)
       
       dt_new[
-        , topic_doc_id_stm := sprintf(
+        , topic_doc_id := sprintf(
           "%s.%d.%d", username, year, month)]
 
-      dt_new <- topic_probs[dt_new, on = "topic_doc_id_stm"]
+      dt_new <- topic_probs[dt_new, on = "topic_doc_id"]
       
       dt_new[
-        , top_user_topic_stm := which.max(tabulate(topic_label_stm)), 
+        , top_user_topic := which.max(tabulate(topic_label)), 
         by = username
-        ][, topic_label_stm := ifelse(
-          is.na(topic_label_stm),
-          top_user_topic_stm,
-          topic_label_stm)
-          ][, top_user_topic_stm := NULL
+        ][, topic_label := ifelse(
+          is.na(topic_label),
+          top_user_topic,
+          topic_label)
+          ][, top_user_topic := NULL
             ][, c(topic_cols) := NULL
-              ][, topic_doc_id_stm := NULL]
+              ][, topic_doc_id := NULL]
       
       dt_new
 
@@ -170,56 +170,3 @@ PipeOpExtractTopicsSTM = R6::R6Class(
   )
 )
 
-data <- tweets_subjective[
-  label != "none"
-  ][, created_at := NULL]
-
-# cols_to_keep <- names(data)[c(1:54, 57:58, 104, 124:128)]
-# data <- data[, ..cols_to_keep]
-
-data$label <- as.factor(data$label)
-
-task <- mlr3::TaskClassif$new(
-  "twitter_ttsa", 
-  backend = data,
-  target = "label")
-
-prevalence_formula <- make_prevalence_formula(
-  data = task$data(),
-  categorical_vars = list(
-    "party", 
-    "bundesland"),
-  smooth_vars = list(
-    "unemployment_rate"))
-
-po_tm <- PipeOpExtractTopicsSTM$new()
-
-po_tm$param_set$values <- list(
-  docid_field = "doc_id",
-  text_field = "text",
-  doc_grouping_var = c("username", "year", "month"),
-  prevalence = prevalence_formula,
-  max.em.its = 1L,
-  stopwords = make_stopwords(),
-  K = 3L)
-
-graph <- Graph$new()$add_pipeop(po_tm)
-
-result_tm = graph$train(task)[[1]]
-result_tm$data()
-
-po_cart <- PipeOpLearner$new(learner = lrn("classif.rpart"))
-
-po_sel <- PipeOpSelect$new()
-po_sel$param_set$values$selector <- 
-  selector_invert(selector_type(c("character")))
-
-graph <- graph %>>% po_sel %>>% po_cart
-
-plot(graph, html = F)
-
-graph_learner <- GraphLearner$new(graph)
-
-graph_learner$train(task)
-res <- graph_learner$predict(task)
-res$confusion
