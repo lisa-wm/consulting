@@ -21,17 +21,6 @@ toy_data <- data.table::data.table(cbind(
   full_text = rep("hello What up Pancake Sunday Morning Powder", nrow(iris)),
   username = letters[seq_len(nrow(iris))]))
 
-
-prevalence_formula <- make_prevalence_formula(
-  data = data_clean,
-  categorical_vars = list(
-    "party", 
-    "bundesland"),
-  smooth_vars = list(
-    "unemployment_rate", 
-    "bip_per_capita",
-    "share_pop_migration"))
-
 toy_data <- data_clean[
   , .(doc_id, full_text, username, year, month, party, bundesland, bip_per_capita,
       unemployment_rate, share_pop_migration)
@@ -101,13 +90,14 @@ PipeOpExtractTopicsSTM = R6::R6Class(
     
     .transform_dt = function(dt, levels) {
 
-      colnames <- c(
-        self$param_set$values$docid_field, 
-        self$param_set$values$text_field,
-        self$param_set$values$doc_grouping_var)
+      # colnames <- c(
+      #   self$param_set$values$docid_field, 
+      #   self$param_set$values$text_field,
+      #   self$param_set$values$doc_grouping_var)
       
       crp <- quanteda::corpus(
-        dt[, ..colnames],
+        dt,
+        # dt[, ..colnames],
         docid_field = self$param_set$values$docid_field,
         text_field = self$param_set$values$text_field)
 
@@ -120,18 +110,34 @@ PipeOpExtractTopicsSTM = R6::R6Class(
         doc_grouping_var = self$param_set$values$doc_grouping_var)
       
       stm_mod <- private$.run_stm(
+        dt = dt,
         stm = stm_obj,
-        # stm_formula = as.formula(self$param_set$values$stm_formula),
+        stm_formula = as.formula(self$param_set$values$stm_formula),
         k = 3L,
         max.em.its = self$param_set$values$max.em.its)
 
-      stm_res <- stm::labelTopics(stm_mod, n = 3L)
-      top_words_frex <- t(stm_res$frex)
+      # stm_res <- stm::labelTopics(stm_mod, n = 3L)
+      # top_words_frex <- t(stm_res$frex)
+      
+      topic_probs <- stm::make.dt(stm_mod)[
+        , `:=` (
+          topic_doc_id_stm = names(stm_obj$documents),
+          docnum = NULL)]
+      
+      data.table::setnames(topic_probs, tolower(names(topic_probs)))
+      
+      topic_cols <- sprintf("topic%d", 1:3)
+      
+      topic_probs[
+        , `:=` (
+          max_topic_score_stm = max(.SD, na.rm = TRUE),
+          topic_label_stm = which.max(.SD)),
+        .SDcols = topic_cols,
+        by = seq_len(nrow(topic_probs))]
 
       dt_new <- cbind(
         dt,
-        rep(length(top_words_frex), nrow(dt)),
-        rep(class(stm)[1], nrow(dt)))
+        rep(length(unique(topic_probs$topic_label_stm))))
 
       setnames(dt_new, letters[1:ncol(dt_new)])
       dt_new
@@ -175,15 +181,15 @@ PipeOpExtractTopicsSTM = R6::R6Class(
 
     # .find_k = function(dt, levels) {dt}, # get_state instead of transform_dt?
    
-    .run_stm = function(stm, stm_formula, k, max.em.its) {
+    .run_stm = function(dt, stm, stm_formula, k, max.em.its) {
       
       stm::stm(
         documents = stm$documents,
         vocab = stm$vocab,
-        # data = stm$meta,
+        data = stm$meta,
         K = k,
-        # prevalence = stm_formula,
-        # gamma.prior = "L1",
+        prevalence = stm_formula,
+        gamma.prior = "L1",
         seed = 1L,
         max.em.its = max.em.its,
         init.type = "Spectral")
@@ -191,6 +197,15 @@ PipeOpExtractTopicsSTM = R6::R6Class(
     }
   )
 )
+
+prevalence_formula <- paste(make_prevalence_formula(
+  data = data_clean,
+  categorical_vars = list(
+    "party", 
+    "bundesland"),
+  smooth_vars = list(
+    "unemployment_rate")),
+  collapse = "")
 
 pop <- PipeOpExtractTopicsSTM$new()
 pop$param_set$values$docid_field <- "doc_id"
@@ -202,6 +217,7 @@ pop$param_set$values$stopwords <- make_stopwords()
 gr = Graph$new()$add_pipeop(pop)
 
 result_posa = gr$train(task)[[1]]
+
 result_posa$data()
 
 PipeOpExtractTopicsSTM = R6::R6Class(
