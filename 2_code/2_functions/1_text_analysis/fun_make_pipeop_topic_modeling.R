@@ -26,8 +26,6 @@ toy_data <- data_clean[
       unemployment_rate, share_pop_migration)
   ][, target := as.factor(sample(c(0, 1), size = nrow(data_clean), replace = TRUE))]
 
-# toy_data <- toy_data[sample(seq_len(nrow(toy_data)), 1000L)]
-
 toy_data <- toy_data[complete.cases(toy_data)]
 
 setattr(
@@ -56,6 +54,7 @@ PipeOpExtractTopicsSTM = R6::R6Class(
         ParamUty$new("stm_formula"),
         ParamUty$new("stopwords"),
         ParamUty$new("doc_grouping_var"),
+        ParamInt$new("n_topics", lower = 2L),
         ParamInt$new("n_topics_lower", lower = 2L),
         ParamInt$new("n_topics_upper", lower = 2L),
         ParamInt$new("max.em.its"),
@@ -90,14 +89,8 @@ PipeOpExtractTopicsSTM = R6::R6Class(
     
     .transform_dt = function(dt, levels) {
 
-      # colnames <- c(
-      #   self$param_set$values$docid_field, 
-      #   self$param_set$values$text_field,
-      #   self$param_set$values$doc_grouping_var)
-      
       crp <- quanteda::corpus(
         dt,
-        # dt[, ..colnames],
         docid_field = self$param_set$values$docid_field,
         text_field = self$param_set$values$text_field)
 
@@ -113,11 +106,8 @@ PipeOpExtractTopicsSTM = R6::R6Class(
         dt = dt,
         stm = stm_obj,
         stm_formula = as.formula(self$param_set$values$stm_formula),
-        k = 3L,
+        k = self$param_set$values$n_topics,
         max.em.its = self$param_set$values$max.em.its)
-
-      # stm_res <- stm::labelTopics(stm_mod, n = 3L)
-      # top_words_frex <- t(stm_res$frex)
       
       topic_probs <- stm::make.dt(stm_mod)[
         , `:=` (
@@ -126,7 +116,7 @@ PipeOpExtractTopicsSTM = R6::R6Class(
       
       data.table::setnames(topic_probs, tolower(names(topic_probs)))
       
-      topic_cols <- sprintf("topic%d", 1:3)
+      topic_cols <- sprintf("topic%d", seq_len(self$param_set$values$n_topics))
       
       topic_probs[
         , `:=` (
@@ -134,12 +124,30 @@ PipeOpExtractTopicsSTM = R6::R6Class(
           topic_label_stm = which.max(.SD)),
         .SDcols = topic_cols,
         by = seq_len(nrow(topic_probs))]
+      
+      dt_new <- copy(dt)
+      
+      dt_new[
+        , topic_doc_id_stm := sprintf(
+          "%s.%d.%d", username, year, month)]
 
-      dt_new <- cbind(
-        dt,
-        rep(length(unique(topic_probs$topic_label_stm))))
-
-      setnames(dt_new, letters[1:ncol(dt_new)])
+      dt_new <- topic_probs[dt_new, on = "topic_doc_id_stm"]
+      
+      dt_new[
+        , top_user_topic_stm := which.max(tabulate(topic_label_stm)), 
+        by = username
+        ][, topic_label_stm := ifelse(
+          is.na(topic_label_stm),
+          top_user_topic_stm,
+          topic_label_stm)
+          ][, top_user_topic_stm := NULL
+            ][, c(topic_cols) := NULL]
+      
+      # dt_new <- cbind(
+      #   dt,
+      #   rep(length(unique(topic_probs$topic_label_stm))))
+      # 
+      # setnames(dt_new, letters[1:ncol(dt_new)])
       dt_new
 
     },
@@ -214,6 +222,7 @@ pop$param_set$values$doc_grouping_var <- c("username", "year", "month")
 pop$param_set$values$stm_formula <- prevalence_formula
 pop$param_set$values$max.em.its <- 1L
 pop$param_set$values$stopwords <- make_stopwords()
+pop$param_set$values$n_topics <- 3L
 gr = Graph$new()$add_pipeop(pop)
 
 result_posa = gr$train(task)[[1]]
