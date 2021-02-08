@@ -45,7 +45,7 @@ PipeOpExtractTopicsSTM = R6::R6Class(
         init.type = "Spectral",
         emtol = 1e-05,
         seed = 123L,
-        verbose = TRUE,
+        verbose = FALSE,
         reportevery = 5L,
         LDAbeta = TRUE,
         ngroups = 1L,
@@ -79,6 +79,9 @@ PipeOpExtractTopicsSTM = R6::R6Class(
         tokens = tkns, 
         doc_grouping_var = self$param_set$values$doc_grouping_var)
       
+      warn_default <- getOption("warn") 
+      options(warn = -1) 
+      
       stm_mod <- mlr3misc::invoke(
         stm::stm, 
         .args = c(
@@ -86,8 +89,9 @@ PipeOpExtractTopicsSTM = R6::R6Class(
             documents = stm_obj$documents,
             vocab = stm_obj$vocab,
             data = stm_obj$meta),
-          self$param_set$get_values(tags = "stm")
-        ))
+          self$param_set$get_values(tags = "stm")))
+      
+      options(warn = warn_default)
       
       topic_probs <- stm::make.dt(stm_mod)[
         , `:=` (
