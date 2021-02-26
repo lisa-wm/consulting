@@ -58,7 +58,6 @@ tweets_raw[, `:=` (
   week = week(created_at))]
 
 # Remove umlauts and non-informative symbols
-# TODO check whether it's worthwhile to harmonize locations
 
 tweets_raw[
   , full_text := remove_noisy_symbols(remove_umlauts(full_text))

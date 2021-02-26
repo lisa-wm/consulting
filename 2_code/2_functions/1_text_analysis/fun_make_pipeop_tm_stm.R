@@ -1,8 +1,8 @@
 # ------------------------------------------------------------------------------
-# TOPIC MODELING PIPEOP
+# TOPIC MODELING PIPEOP (STM)
 # ------------------------------------------------------------------------------
 
-# PURPOSE: create mlr3pipelines pipe operator for topic modeling
+# PURPOSE: create mlr3pipelines pipe operator for topic modeling with STM
 
 # MAKE PIPEOP ------------------------------------------------------------------
 
@@ -65,6 +65,8 @@ PipeOpExtractTopicsSTM = R6::R6Class(
   private = list(
     
     .transform_dt = function(dt, levels) {
+      
+      # Transform data
 
       crp <- quanteda::corpus(
         dt,
@@ -79,6 +81,8 @@ PipeOpExtractTopicsSTM = R6::R6Class(
         tokens = tkns, 
         doc_grouping_var = self$param_set$values$doc_grouping_var)
       
+      # Run topic model
+      
       warn_default <- getOption("warn") 
       options(warn = -1) 
       
@@ -92,6 +96,8 @@ PipeOpExtractTopicsSTM = R6::R6Class(
           self$param_set$get_values(tags = "stm")))
       
       options(warn = warn_default)
+      
+      # Compute topic probabilities
       
       topic_probs <- stm::make.dt(stm_mod)[
         , `:=` (
@@ -108,6 +114,8 @@ PipeOpExtractTopicsSTM = R6::R6Class(
           topic_label = which.max(.SD)),
         .SDcols = topic_cols,
         by = seq_len(nrow(topic_probs))]
+      
+      # Define output
       
       dt_new <- copy(dt)
       

@@ -198,6 +198,6 @@ bmr_design <- mlr3::benchmark_grid(task, auto_tuners, resampling_outer)
 bmr <- mlr3::benchmark(bmr_design)
 bmr_res <- bmr$aggregate(measures_outer)
 
-graph_learner$train(task, row_ids = train_set)
-res <- graph_learner$predict(task, row_ids = test_set)
+graph_learners[[1]]$train(task, row_ids = train_set)
+res <- graph_learners[[1]]$predict(task, row_ids = test_set)
 res$confusion
