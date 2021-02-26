@@ -56,17 +56,33 @@ prevalence_formula <- make_prevalence_formula(
   smooth_vars = list(
     "unemployment_rate"))
 
-po_tm <- PipeOpExtractTopicsSTM$new()
+# po_tm <- PipeOpExtractTopicsSTM$new()
+# 
+# po_tm$param_set$values <- list(
+#   docid_field = "doc_id",
+#   text_field = "text",
+#   doc_grouping_var = c("username", "year", "month"),
+#   prevalence = prevalence_formula,
+#   max.em.its = 5L,
+#   stopwords = make_stopwords(),
+#   K = 3L,
+#   init.type = "LDA")
 
+po_tm <- PipeOpExtractTopicsKeyword$new()
 po_tm$param_set$values <- list(
   docid_field = "doc_id",
   text_field = "text",
-  doc_grouping_var = c("username", "year", "month"),
-  prevalence = prevalence_formula,
-  max.em.its = 5L,
-  stopwords = make_stopwords(),
-  K = 3L,
-  init.type = "LDA")
+  keywords = list(
+    corona = c("corona", "pandemie", "virus", "krise"),
+    klima = c("klima", "gruen", "umwelt", "future")),
+  n_byterms = 2L)
+
+# graph_preproc <- Graph$new()$add_pipeop(po_kw)
+# 
+# res_preproc <- graph_preproc$train(task)[[1]]
+# 
+# res_preproc$data()
+
 
 # Define selector pipeop for features to be piped into embedding extraction
 
@@ -126,8 +142,8 @@ po_learners <- list(
 # Create full graphs
 
 graphs_full <- lapply(
-  seq_along(po_learners),
-  function(i) graph_preproc %>>% po_sel_cl %>>% po_learners[[i]])
+  po_learners,
+  function(i) graph_preproc %>>% po_sel_cl %>>% i)
 
 # Create graph_learners
 

@@ -57,20 +57,66 @@ PipeOpExtractTopicsKeyword = R6::R6Class(
       
       # Prepare keywords list
       
+      keywords <- self$param_set$values$keywords
+      
       keywords_list <- private$.make_keywords_list(
-        keywords = self$param_set$values$keywords,
-        fcm = fcm)
+        keywords = keywords,
+        fcm = fcm, 
+        n_byterms = self$param_set$values$n_byterms)
+      
+      # Match with documents
       
       dict_keywords <- quanteda::dictionary(keywords_list)
       
-      # matches_dfm <- quanteda::dfm_lookup(
-      #   tweets_dfm_tm, 
-      #   dict_keywords,
-      #   levels = 1:3)
-      # 
-      # tweets_matches <- convert_qtda_to_dt(matches_dfm, key = "doc_id")
+      matches_dfm <- quanteda::dfm_lookup(
+        dfm,
+        dict_keywords,
+        levels = 1:3)
+
+      matches_dt <- convert_qtda_to_dt(matches_dfm, key = "doc_id")
       
-      dt_new <- copy(dt)[, foo := class(dict_keywords)[1]]
+      # Compute topic label
+      
+      matches_topics <- lapply(
+        
+        names(keywords),
+        
+        function(i) {
+          
+          relevant_cols <- c(
+            "doc_id", 
+            names(matches_dt)[startsWith(names(matches_dt), i)])
+          keyword_cols <- relevant_cols[endsWith(relevant_cols, "keyword")]
+          derivative_cols <- relevant_cols[
+            endsWith(relevant_cols, "derivatives")]
+          
+          dt <- copy(matches_dt)[, ..relevant_cols]
+          
+          dt[
+            , c(keyword_cols) := lapply(.SD, function(i) 3 * i),
+            .SDcols = keyword_cols,
+            by = doc_id
+            ][, c(derivative_cols) := lapply(.SD, function(i) 2 * i),
+              .SDcols = derivative_cols,
+              by = doc_id
+              ][, sprintf("score_%s", i) := sum(.SD),
+                .SDcols = relevant_cols[-1L],
+                by = doc_id]})
+      
+      matches_topics <- do.call(merge, matches_topics)
+      
+      score_cols <- names(matches_topics)[
+        startsWith(names(matches_topics), "score")]
+      
+      # Prepare output
+      
+      matches_topics <- matches_topics[
+        , topic_label := ifelse(sum(.SD) == 0, 0, which.max(.SD)),
+        .SDcols = score_cols, 
+        by = doc_id
+        ][, .(doc_id, topic_label)]
+      
+      dt_new <- copy(dt)[matches_topics, on = "doc_id"]
       
       dt_new
 
@@ -119,7 +165,7 @@ PipeOpExtractTopicsKeyword = R6::R6Class(
       
     },
     
-    .make_keywords_list = function(keywords, fcm) {
+    .make_keywords_list = function(keywords, fcm, n_byterms) {
       
       keywords <- lapply(
         keywords,
@@ -204,8 +250,8 @@ PipeOpExtractTopicsKeyword = R6::R6Class(
       # duplicates across topics)
       
       n_derivatives <- sum(sapply(keywords_derivatives, nrow))
-      n_potential_dup <- 
-        ncol(keywords_byterms_merged) * n_byterms + n_derivatives
+      n_potential_dup <- ncol(keywords_byterms_merged) * n_byterms + 
+        n_derivatives
       keywords_byterms_short <- keywords_byterms_merged[1:n_potential_dup]
       
       # Remove terms that co-occur with other keywords in higher frequencies
@@ -259,18 +305,3 @@ PipeOpExtractTopicsKeyword = R6::R6Class(
 
   )
 )
-
-po_kw <- PipeOpExtractTopicsKeyword$new()
-po_kw$param_set$values <- list(
-  docid_field = "doc_id",
-  text_field = "text",
-  keywords = list(
-    corona = c("corona", "pandemie", "virus", "krise"),
-    klima = c("klima", "grün", "natur", "umwelt")),
-  n_byterms = 2L)
-
-graph_preproc <- Graph$new()$add_pipeop(po_kw)
-
-res_preproc <- graph_preproc$train(task)[[1]]
-res_preproc$data()
-
