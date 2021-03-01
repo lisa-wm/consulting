@@ -75,7 +75,7 @@ po_tm$param_set$values <- list(
   keywords = list(
     corona = c("corona", "pandemie", "virus", "krise"),
     klima = c("klima", "gruen", "umwelt", "future")),
-  n_byterms = 2L)
+  n_byterms = 10L)
 
 # graph_preproc <- Graph$new()$add_pipeop(po_kw)
 # 
@@ -117,8 +117,8 @@ graph_preproc <- graph_preproc %>>%
 
 plot(graph_preproc, html = FALSE)
 
-# res_preproc <- graph_preproc$train(task)[[1]]
-# res_preproc$data()
+res_preproc <- graph_preproc$train(task)[[1]]
+res_preproc$data()
 
 # CREATE GRAPH LEARNERS --------------------------------------------------------
 
@@ -144,6 +144,8 @@ po_learners <- list(
 graphs_full <- lapply(
   po_learners,
   function(i) graph_preproc %>>% po_sel_cl %>>% i)
+
+# plot(graphs_full$cart, html = F)
 
 # Create graph_learners
 

@@ -11,12 +11,19 @@
 
 load_rdata_files(tweets_corpus, folder = "2_code/1_data/2_tmp_data")
 
-tweets_subjective <- convert_qtda_to_dt(tweets_corpus, key = "doc_id")[
+tweets_subjective <- convert_qtda_to_dt(tweets_corpus, key = "doc_id")
+
+cols_to_keep <- c(
+  "doc_id",
+  "label",
+  names(tweets_subjective)[startsWith(names(tweets_subjective), "feat")])
+
+tweets_subjective <- tweets_subjective[, ..cols_to_keep][
   label != "none" | 
-    n_emojis > 0 | positive_global_strong > 1 | negative_global_strong > 1 |
-    exclamation_mark_rep > 0 | question_mark_rep > 0 |
-    repeated_char > 0 | repeated_char_seq > 0 | favorite_count > 10L
-  ][, c("emojis", "hashtags", "tags") := NULL
-    ][, doc_id := NULL]
+    feat_n_emojis > 0 | feat_polarity_positive_strong > 1 | 
+    feat_polarity_negative_strong > 1 | feat_exclamation_mark_rep > 0 | 
+    feat_question_mark_rep > 0 | feat_repeated_char > 0 | 
+    feat_repeated_char_seq > 0 | feat_favorite_count > 10L
+  ][, doc_id := NULL]
 
 save_rdata_files(tweets_subjective, folder = "2_code/1_data/2_tmp_data")

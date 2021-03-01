@@ -14,12 +14,16 @@ tweets_features_twitter <- convert_qtda_to_dt(
   key = "doc_id")
 
 tweets_features_twitter <- tweets_features_twitter[
-  , .(doc_id, hashtags, tags, retweet_count, favorite_count)
+  , .(doc_id, 
+      twitter_hashtags, 
+      twitter_tags, 
+      feat_retweet_count = twitter_retweet_count, 
+      feat_favorite_count = twitter_favorite_count)
   ][, `:=` (
-    n_hashtags = lengths(hashtags),
-    n_tags = lengths(tags)),
+    feat_n_hashtags = lengths(twitter_hashtags),
+    feat_n_tags = lengths(twitter_tags)),
     by = doc_id
-    ][, `:=` (hashtags = NULL, tags = NULL)]
+    ][, `:=` (twitter_hashtags = NULL, twitter_tags = NULL)]
 
 save_rdata_files(tweets_features_twitter, folder = "2_code/1_data/2_tmp_data")
 
@@ -38,17 +42,17 @@ dict_rauh <- get_dict_rauh()
 
 dict_global <- quanteda::dictionary(
   list(
-    positive_global_strong = unique(c(
+    feat_polarity_positive_strong = unique(c(
       dict_german_polarity_clues$positive[polarity_degree == "strong", term], 
       dict_sentiws$positive[polarity_degree == "strong", term])),
-    negative_global_strong = unique(c(
+    feat_polarity_negative_strong = unique(c(
       dict_german_polarity_clues$negative[polarity_degree == "strong", term], 
       dict_sentiws$negative[polarity_degree == "strong", term])),
-    positive_global_weak = unique(c(
+    feat_polarity_positive_weak = unique(c(
       dict_german_polarity_clues$positive[polarity_degree == "weak", term],
       dict_sentiws$positive[polarity_degree == "weak", term],
       dict_rauh[polarity == "positive", term])),
-    negative_global_weak = unique(c(
+    feat_polarity_negative_weak = unique(c(
       dict_german_polarity_clues$negative[polarity_degree == "weak", term],
       dict_sentiws$negative[polarity_degree == "weak", term],
       dict_rauh[polarity == "negative", term]))))
@@ -146,8 +150,8 @@ emojis_ranking[
 
 dict_emojis <- quanteda::dictionary(
   list(
-    positive_emojis = emojis_ranking[polarity == "positive", unicode],
-    negative_emojis = emojis_ranking[polarity == "negative", unicode]))
+    feat_positive_emojis = emojis_ranking[polarity == "positive", unicode],
+    feat_negative_emojis = emojis_ranking[polarity == "negative", unicode]))
 
 # Find tweets using emojis and convert those to integer representation
 
@@ -158,22 +162,24 @@ data_dt <- data.table::as.data.table(
   key = "doc_id")
 
 tweets_emojis <- data_dt[
-  , .(doc_id, emojis)
-  ][lengths(emojis) > 0
-    ][, emojis := paste(unlist(emojis), collapse = " "), by = doc_id
-      ][, emojis := as.character(emojis)
-        ][, emojis := paste(as.character(
-          sapply(unlist(stringr::str_split(emojis, " ")), utf8ToInt)),
+  , .(doc_id, twitter_emojis)
+  ][lengths(twitter_emojis) > 0
+    ][, twitter_emojis := paste(unlist(twitter_emojis), collapse = " "), 
+      by = doc_id
+      ][, twitter_emojis := as.character(twitter_emojis)
+        ][, twitter_emojis := paste(as.character(
+          sapply(unlist(stringr::str_split(twitter_emojis, " ")), utf8ToInt)),
           collapse = " "),
           by = doc_id
-          ][, n_emojis := stringr::str_count(emojis, "\\w+"), by = doc_id]
+          ][, feat_n_emojis := stringr::str_count(twitter_emojis, "\\w+"), 
+            by = doc_id]
 
 # Convert to dfm object
 
 tweets_corpus_emojis <- quanteda::corpus(
   tweets_emojis, 
   docid_field = "doc_id",
-  text_field = "emojis")
+  text_field = "twitter_emojis")
 
 tweets_dfm_emojis <- quanteda::dfm(tweets_corpus_emojis)
 
@@ -184,7 +190,7 @@ tweets_sentiments_emojis <- convert_qtda_to_dt(
   key = "doc_id")
 
 tweets_sentiments_emojis <- 
-  tweets_sentiments_emojis[tweets_emojis[, .(doc_id, n_emojis)]]
+  tweets_sentiments_emojis[tweets_emojis[, .(doc_id, feat_n_emojis)]]
 
 # ------------------------------------------------------------------------------
 
@@ -192,9 +198,12 @@ tweets_sentiments_emojis <-
 
 tweets_features_dict <- tweets_sentiments_emojis[
   tweets_sentiments_global, on = "doc_id"
-  ][, c("positive_emojis", "negative_emojis", "n_emojis") :=
+  ][, c("feat_positive_emojis", "feat_negative_emojis", "feat_n_emojis") :=
       lapply(.SD, function(i) {ifelse(is.na(i), 0, i)}),
-    .SDcols = c("positive_emojis", "negative_emojis", "n_emojis"),
+    .SDcols = c(
+      "feat_positive_emojis", 
+      "feat_negative_emojis", 
+      "feat_n_emojis"),
     by = "doc_id"]
 
 save_rdata_files(tweets_features_dict, folder = "2_code/1_data/2_tmp_data")
@@ -242,28 +251,34 @@ tokens_repetition <- c(
 tweets_negation <- convert_qtda_to_dt(
   quanteda::dfm_match(tweets_dfm_sfe, tokens_negation),
   key = "doc_id")[
-    , n_negations := sum(.SD),
+    , feat_n_negations := sum(.SD),
     .SDcols = -c("doc_id"),
     by = doc_id
-    ][, .(doc_id, n_negations)]
+    ][, .(doc_id, feat_n_negations)]
 
 tweets_intensification <- convert_qtda_to_dt(
   quanteda::dfm_match(tweets_dfm_sfe, tokens_intensification),
   key = "doc_id")[
-    , n_intensifications := sum(.SD),
+    , feat_n_intensifications := sum(.SD),
     .SDcols = -c("doc_id"),
     by = doc_id
-    ][, .(doc_id, n_intensifications)]
+    ][, .(doc_id, feat_n_intensifications)]
 
 tweets_punctuation <- convert_qtda_to_dt(
   quanteda::dfm_match(tweets_dfm_sfe, tokens_punctuation),
   key = "doc_id")
-data.table::setnames(tweets_punctuation, c("doc_id", names(tokens_punctuation)))
+
+data.table::setnames(
+  tweets_punctuation, 
+  c("doc_id", sprintf("feat_%s", names(tokens_punctuation))))
 
 tweets_repetition <- convert_qtda_to_dt(
   quanteda::dfm_match(tweets_dfm_sfe, tokens_repetition),
   key = "doc_id")
-data.table::setnames(tweets_repetition, c("doc_id", names(tokens_repetition)))
+
+data.table::setnames(
+  tweets_repetition, 
+  c("doc_id", sprintf("feat_%s", names(tokens_repetition))))
 
 # Get character unigrams
 
@@ -280,7 +295,17 @@ tweets_char_unigrams <- convert_qtda_to_dt(
   quanteda::dfm(tweets_char_unigrams),
   key = "doc_id")
 
-data.table::setcolorder(tweets_char_unigrams, c("doc_id", letters))
+data.table::setcolorder(
+  tweets_char_unigrams, 
+  c("doc_id", 
+    sort(names(tweets_char_unigrams)[names(tweets_char_unigrams) != "doc_id"])))
+
+data.table::setnames(
+  tweets_char_unigrams, 
+  c("doc_id",
+    sprintf(
+      "feat_%s", 
+      names(tweets_char_unigrams)[names(tweets_char_unigrams) != "doc_id"])))
 
 # EXTRACT POS TAGS -------------------------------------------------------------
 
@@ -316,10 +341,16 @@ tweets_pos_tags <- data.table::dcast(
   value.var = "n_tags",
   fun.aggregate = sum)
 
-data.table::setnames(tweets_pos_tags, tolower(names(tweets_pos_tags)))
-
 tweets_pos_tags <- tweets_pos_tags[
-  , .(doc_id, adj, adv, cconj, noun, propn, verb)]
+  , .(doc_id, ADJ, ADV, CCONJ, NOUN, PROPN, VERB)]
+
+data.table::setnames(
+  tweets_pos_tags, 
+  c("doc_id", 
+    sprintf(
+      "feat_%s",
+      tolower(
+        names(tweets_pos_tags)[names(tweets_pos_tags) != "doc_id"]))))
 
 # COLLECT ALL STATIC FEATURES --------------------------------------------------
 

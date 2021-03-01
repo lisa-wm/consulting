@@ -24,14 +24,11 @@ PipeOpExtractTopicsKeyword = R6::R6Class(
         ParamInt$new("n_byterms")
       ))
       
-      # ps$values <- list(
-      #   init.type = "Spectral")
-      
       super$initialize(
         id = id, 
         param_set = ps, 
         param_vals = param_vals,
-        packages = c("quanteda", "stm"))
+        packages = c("quanteda", "SnowballC"))
       
     }
   ),
