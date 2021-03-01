@@ -44,65 +44,84 @@ test_set = setdiff(seq_len(task$nrow), train_set)
 
 # CREATE PREPROCESSING PIPELINE ------------------------------------------------
 
-# Define topic modeling pipeop
+# topic_type <- "stm"
 
-prevalence_formula <- make_prevalence_formula(
-  data = task$data(),
-  categorical_vars = list(
-    "meta_party", 
-    "meta_bundesland"),
-  smooth_vars = list(
-    "meta_unemployment_rate"))
-
-# po_tm <- PipeOpExtractTopicsSTM$new()
-
-# po_tm$param_set$values <- list(
-#   docid_field = "doc_id",
-#   text_field = "text",
-#   doc_grouping_var = c("twitter_username", "twitter_year", "twitter_month"),
-#   prevalence = prevalence_formula,
-#   max.em.its = 5L,
-#   stopwords = make_stopwords(),
-#   K = 3L,
-#   init.type = "LDA")
+topic_type <- "keyword"
 
 keywords <- list(
   corona = c("corona", "pandemie", "virus", "krise"),
-  klima = c("klima", "gruen", "umwelt", "future"))
+  klima = c("klima", "umwelt"),
+  poo = c("osterhasi"),
+  foo = c("foo"))
 
-po_sk <- mlr3pipelines::PipeOpStratifyKeywords$new()
+if (topic_type == "stm") {
+  
+  # Define topic modeling pipeop
+  
+  prevalence_formula <- make_prevalence_formula(
+    data = task$data(),
+    categorical_vars = list(
+      "meta_party", 
+      "meta_bundesland"),
+    smooth_vars = list(
+      "meta_unemployment_rate"))
+  
+  po_tm <- PipeOpExtractTopicsSTM$new()
+  
+  po_tm$param_set$values <- list(
+    docid_field = "doc_id",
+    text_field = "text",
+    doc_grouping_var = c("twitter_username", "twitter_year", "twitter_month"),
+    prevalence = prevalence_formula,
+    max.em.its = 5L,
+    stopwords = make_stopwords(),
+    K = 3L,
+    init.type = "LDA")
+  
+} else if (topic_type == "keyword") {
+  
+  po_sk <- PipeOpStratifyKeywords$new()
+  
+  po_sk$param_set$values <- list(
+    docid_field = "doc_id",
+    text_field = "text",
+    stopwords = make_stopwords(),
+    keywords = keywords)
 
-po_sk$param_set$values <- list(
-  docid_field = "doc_id",
-  text_field = "text",
-  stopwords = make_stopwords(),
-  keywords = keywords)
+  po_cr <- mlr3pipelines::PipeOpColRoles$new()
+  
+  strati <- as.list(rep("stratum", length(keywords)))
+  names(strati) <- sprintf("stratum_%s", seq_along(keywords))
 
-po_cr <- mlr3pipelines::PipeOpColRoles$new()
+  po_cr$param_set$values$new_role <- strati
 
-po_cr$param_set$values$new_role <- list(is_match_any = "stratum")
+  po_tm <- PipeOpExtractTopicsKeyword$new()
+
+  po_tm$param_set$values <- list(
+    docid_field = "doc_id",
+    text_field = "text",
+    stopwords = make_stopwords(),
+    keywords = keywords,
+    n_byterms = 10L)
+  
+}
 
 # graph_preproc <- mlr3pipelines::Graph$new()$add_pipeop(po_sk)
 # res_preproc <- graph_preproc$train(task)[[1]]
 # res_preproc$data()
 # table(res_preproc$data()$is_match_any)
 
-po_tm <- PipeOpExtractTopicsKeyword$new()
-
-po_tm$param_set$values <- list(
-  docid_field = "doc_id",
-  text_field = "text",
-  stopwords = make_stopwords(),
-  keywords = keywords = keywords,
-  n_byterms = 10L)
-
 # Define selector pipeop for features to be piped into embedding extraction
 
-po_sel_ge <- PipeOpSelect$new(id = "select_embedding")
-po_sel_ge$param_set$values$selector <- selector_name(c("topic_label", "text"))
-po_sel_ge_inv <- PipeOpSelect$new(id = "select_rest")
-po_sel_ge_inv$param_set$values$selector <- 
-  selector_invert(selector_name(c("topic_label", "text")))
+po_sel_ge <- mlr3pipelines::PipeOpSelect$new(id = "select_embedding")
+
+po_sel_ge$param_set$values$selector <- 
+  mlr3pipelines::selector_name(c("topic_label", "text"))
+
+po_sel_ge_inv <- mlr3pipelines::PipeOpSelect$new(id = "select_rest")
+
+po_sel_ge_inv$param_set$values$selector <- mlr3pipelines::selector_invert(
+  mlr3pipelines::selector_name(c("topic_label", "text")))
 
 # Define glove embedding pipeop
 
@@ -112,26 +131,35 @@ po_ge$param_set$values$stopwords <- make_stopwords()
 
 # Define trivial pipeop for features not piped into embedding extraction
 
-po_nop <- PipeOpNOP$new()
+po_nop <- mlr3pipelines::PipeOpNOP$new()
 
 # Define selector pipeop for features to be piped into classification
 # TODO tailor to learners (e.g., cart could handle factors)
 
-po_sel_cl <- PipeOpSelect$new(id = "select_classif")
+po_sel_cl <- mlr3pipelines::PipeOpSelect$new(id = "select_classif")
+
 po_sel_cl$param_set$values$selector <- 
-  selector_invert(
-    selector_union(
-      selector_type(c("character", "POSIXct", "logical", "factor")),
-      selector_missing()))
+  mlr3pipelines::selector_invert(
+    mlr3pipelines::selector_union(
+      mlr3pipelines::selector_type(
+        c("character", "POSIXct", "logical", "factor")),
+      mlr3pipelines::selector_missing()))
 
 # Create graph from preprocessing steps
 
-# graph_preproc <- Graph$new()$add_pipeop(po_tm)
-graph_preproc <- mlr3pipelines::Graph$new()$add_pipeop(po_sk)
+if (topic_type == "stm") {
+  
+  graph_preproc <- mlr3pipelines::Graph$new()$add_pipeop(po_tm)
+  
+} else if (topic_type == "keyword") {
+  
+  graph_preproc <- mlr3pipelines::Graph$new()$add_pipeop(po_sk) %>>% 
+    po_cr %>>% 
+    po_tm
+  
+}
 
-graph_preproc <- mlr3pipelines::Graph$new()$add_pipeop(po_sk) %>>% 
-  po_cr %>>%
-  po_tm %>>%
+graph_preproc <- graph_preproc %>>%
   gunion(list(
     po_sel_ge %>>% 
       po_ge,
@@ -143,6 +171,8 @@ graph_preproc <- mlr3pipelines::Graph$new()$add_pipeop(po_sk) %>>%
 
 # plot(graph_preproc, html = FALSE)
 
+# graph_preproc <- graph_preproc <- mlr3pipelines::Graph$new()$add_pipeop(po_sk)
+# 
 # res_preproc <- graph_preproc$train(task)[[1]]
 # res_preproc$data()
 
