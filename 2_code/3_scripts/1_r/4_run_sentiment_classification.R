@@ -12,8 +12,7 @@
 load_rdata_files(tweets_subjective, folder = "2_code/1_data/2_tmp_data")
 
 data <- tweets_subjective[
-  label != "none"
-  ][, created_at := NULL]
+  label != "none"]
 
 labels_fake <- sample(
   c("positive", "negative"),
@@ -22,8 +21,7 @@ labels_fake <- sample(
 
 data_fake <- tweets_subjective[
   label == "none"
-  ][, label := labels_fake
-    ][, created_at := NULL]
+  ][, label := labels_fake]
 
 data_fake <- data_fake[sample(seq_len(nrow(data_fake)), size = 1000L)]
 
@@ -51,38 +49,52 @@ test_set = setdiff(seq_len(task$nrow), train_set)
 prevalence_formula <- make_prevalence_formula(
   data = task$data(),
   categorical_vars = list(
-    "party", 
-    "bundesland"),
+    "meta_party", 
+    "meta_bundesland"),
   smooth_vars = list(
-    "unemployment_rate"))
+    "meta_unemployment_rate"))
 
 # po_tm <- PipeOpExtractTopicsSTM$new()
-# 
+
 # po_tm$param_set$values <- list(
 #   docid_field = "doc_id",
 #   text_field = "text",
-#   doc_grouping_var = c("username", "year", "month"),
+#   doc_grouping_var = c("twitter_username", "twitter_year", "twitter_month"),
 #   prevalence = prevalence_formula,
 #   max.em.its = 5L,
 #   stopwords = make_stopwords(),
 #   K = 3L,
 #   init.type = "LDA")
 
+keywords <- list(
+  corona = c("corona", "pandemie", "virus", "krise"),
+  klima = c("klima", "gruen", "umwelt", "future"))
+
+po_sk <- mlr3pipelines::PipeOpStratifyKeywords$new()
+
+po_sk$param_set$values <- list(
+  docid_field = "doc_id",
+  text_field = "text",
+  stopwords = make_stopwords(),
+  keywords = keywords)
+
+po_cr <- mlr3pipelines::PipeOpColRoles$new()
+
+po_cr$param_set$values$new_role <- list(is_match_any = "stratum")
+
+# graph_preproc <- mlr3pipelines::Graph$new()$add_pipeop(po_sk)
+# res_preproc <- graph_preproc$train(task)[[1]]
+# res_preproc$data()
+# table(res_preproc$data()$is_match_any)
+
 po_tm <- PipeOpExtractTopicsKeyword$new()
+
 po_tm$param_set$values <- list(
   docid_field = "doc_id",
   text_field = "text",
-  keywords = list(
-    corona = c("corona", "pandemie", "virus", "krise"),
-    klima = c("klima", "gruen", "umwelt", "future")),
+  stopwords = make_stopwords(),
+  keywords = keywords = keywords,
   n_byterms = 10L)
-
-# graph_preproc <- Graph$new()$add_pipeop(po_kw)
-# 
-# res_preproc <- graph_preproc$train(task)[[1]]
-# 
-# res_preproc$data()
-
 
 # Define selector pipeop for features to be piped into embedding extraction
 
@@ -102,26 +114,6 @@ po_ge$param_set$values$stopwords <- make_stopwords()
 
 po_nop <- PipeOpNOP$new()
 
-# Create graph from preprocessing steps
-
-graph_preproc <- Graph$new()$add_pipeop(po_tm)
-
-graph_preproc <- graph_preproc %>>% 
-  gunion(list(
-    po_sel_ge %>>% 
-      po_ge,
-    po_sel_ge_inv %>>% 
-      po_nop)
-    ) %>>%
-  po("featureunion") 
-
-plot(graph_preproc, html = FALSE)
-
-res_preproc <- graph_preproc$train(task)[[1]]
-res_preproc$data()
-
-# CREATE GRAPH LEARNERS --------------------------------------------------------
-
 # Define selector pipeop for features to be piped into classification
 # TODO tailor to learners (e.g., cart could handle factors)
 
@@ -132,6 +124,30 @@ po_sel_cl$param_set$values$selector <-
       selector_type(c("character", "POSIXct", "logical", "factor")),
       selector_missing()))
 
+# Create graph from preprocessing steps
+
+# graph_preproc <- Graph$new()$add_pipeop(po_tm)
+graph_preproc <- mlr3pipelines::Graph$new()$add_pipeop(po_sk)
+
+graph_preproc <- mlr3pipelines::Graph$new()$add_pipeop(po_sk) %>>% 
+  po_cr %>>%
+  po_tm %>>%
+  gunion(list(
+    po_sel_ge %>>% 
+      po_ge,
+    po_sel_ge_inv %>>% 
+      po_nop)
+    ) %>>%
+  po("featureunion") %>>%
+  po_sel_cl
+
+# plot(graph_preproc, html = FALSE)
+
+# res_preproc <- graph_preproc$train(task)[[1]]
+# res_preproc$data()
+
+# CREATE GRAPH LEARNERS --------------------------------------------------------
+
 # Define pipeops for different classifiers
 
 po_learners <- list(
@@ -141,9 +157,7 @@ po_learners <- list(
 
 # Create full graphs
 
-graphs_full <- lapply(
-  po_learners,
-  function(i) graph_preproc %>>% po_sel_cl %>>% i)
+graphs_full <- lapply(po_learners, function(i) graph_preproc %>>% i)
 
 # plot(graphs_full$cart, html = F)
 

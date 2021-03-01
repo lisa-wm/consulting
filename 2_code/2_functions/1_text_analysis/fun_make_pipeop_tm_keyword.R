@@ -20,6 +20,7 @@ PipeOpExtractTopicsKeyword = R6::R6Class(
       ps = ParamSet$new(params = list(
         ParamUty$new("docid_field"),
         ParamUty$new("text_field"),
+        ParamUty$new("stopwords"),
         ParamUty$new("keywords"),
         ParamInt$new("n_byterms")
       ))
@@ -113,7 +114,7 @@ PipeOpExtractTopicsKeyword = R6::R6Class(
         by = doc_id
         ][, .(doc_id, topic_label)]
       
-      dt_new <- copy(dt)[matches_topics, on = "doc_id"]
+      dt_new <- data.table::copy(dt)[matches_topics, on = "doc_id"]
       
       dt_new
 
@@ -169,8 +170,8 @@ PipeOpExtractTopicsKeyword = R6::R6Class(
         function(i) SnowballC::wordStem(remove_umlauts(i), language = "de"))
       
       if (any(!names(keywords) %in% quanteda::featnames(fcm))) {
-        stop(sprintf(
-          "keyword %s not in data, please change selection", 
+        warning(sprintf(
+          "keyword %s not in data, please change selection",
           names(keywords)[
             which(!names(keywords) %in% quanteda::featnames(fcm))]))
       }

@@ -79,7 +79,7 @@ PipeOpExtractTopicsSTM = R6::R6Class(
       
       stm_obj <- private$.make_stm_obj(
         tokens = tkns, 
-        doc_grouping_var = self$param_set$values$doc_grouping_var)
+        doc_grouping_var = unlist(self$param_set$values$doc_grouping_var))
       
       # Run topic model
       
@@ -116,18 +116,21 @@ PipeOpExtractTopicsSTM = R6::R6Class(
         by = seq_len(nrow(topic_probs))]
       
       # Define output
+ 
+      dt_new <- data.table::copy(dt)
       
-      dt_new <- copy(dt)
+      id_cols <- unlist(self$param_set$values$doc_grouping_var)
       
-      dt_new[
-        , topic_doc_id := sprintf(
-          "%s.%d.%d", username, year, month)]
-
+      dt_new <- dt_new[
+        , topic_doc_id := paste(.SD, collapse = "."),
+        .SDcols = id_cols,
+        by = seq_len(nrow(dt_new))]
+      
       dt_new <- topic_probs[dt_new, on = "topic_doc_id"]
       
       dt_new[
-        , top_user_topic := which.max(tabulate(topic_label)), 
-        by = username
+        , top_user_topic := which.max(tabulate(topic_label)),
+        by = get(id_cols[1L])
         ][, topic_label := ifelse(
           is.na(topic_label),
           top_user_topic,
@@ -181,4 +184,3 @@ PipeOpExtractTopicsSTM = R6::R6Class(
 
   )
 )
-
