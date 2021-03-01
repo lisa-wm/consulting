@@ -113,7 +113,7 @@ PipeOpExtractTopicsKeyword = R6::R6Class(
       # Prepare output
 
       matches_topics <- matches_topics[
-        , topic_label := ifelse(sum(.SD) == 0, 0, which.max(.SD)),
+        , topic_label := ifelse(sum(.SD) == 0L, 0L, which.max(.SD)),
         .SDcols = score_cols,
         by = doc_id
         ][, .(doc_id, topic_label)]
@@ -131,6 +131,7 @@ PipeOpExtractTopicsKeyword = R6::R6Class(
         what = "word",
         remove_symbols = TRUE,
         remove_numbers = TRUE,
+        remove_punct = TRUE,
         remove_separators = TRUE,
         split_hyphens = TRUE,
         include_docvars = TRUE)
@@ -280,7 +281,9 @@ PipeOpExtractTopicsKeyword = R6::R6Class(
         function(i) {
           
           unname(unlist(keywords_byterms_unique[
-            grepl(i, names(keywords_byterms_unique))]))})
+            grepl(i, names(keywords_byterms_unique))]))},
+        
+        simplify = FALSE)
       
       # Merge with co-occurrence list and prune to desired length
       
@@ -301,7 +304,8 @@ PipeOpExtractTopicsKeyword = R6::R6Class(
           list(
             keyword = names(keywords_derivatives)[i],
             derivatives = derivatives,
-            byterms = unname(remainder[1:n_byterms]))})
+            byterms = unname(
+              remainder[seq_len(max(length(remainder), n_byterms))]))})
       
       names(keywords_list) <- names(keywords)
       

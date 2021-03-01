@@ -69,7 +69,7 @@ PipeOpStratifyKeywords = R6::R6Class(
       mtch <- mtch[
         , sprintf("stratum_%d", seq_along(mtch_cols)) := lapply(
           .SD, 
-          function(i) i > 0L),
+          function(i) ifelse(i > 0L, 1L, 0L)),
         .SDcols = mtch_cols,
         by = seq_len(nrow(mtch))]
       

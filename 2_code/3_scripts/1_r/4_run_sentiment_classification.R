@@ -49,10 +49,10 @@ test_set = setdiff(seq_len(task$nrow), train_set)
 topic_type <- "keyword"
 
 keywords <- list(
-  corona = c("corona", "pandemie", "virus", "krise"),
-  klima = c("klima", "umwelt"),
-  poo = c("osterhasi"),
-  foo = c("foo"))
+  corona = c("corona", "pandemie", "virus", "krise")
+  ,
+  klima = c("klima", "umwelt")
+  )
 
 if (topic_type == "stm") {
   
@@ -171,10 +171,9 @@ graph_preproc <- graph_preproc %>>%
 
 # plot(graph_preproc, html = FALSE)
 
-# graph_preproc <- graph_preproc <- mlr3pipelines::Graph$new()$add_pipeop(po_sk)
-# 
-# res_preproc <- graph_preproc$train(task)[[1]]
-# res_preproc$data()
+# graph_preproc <- mlr3pipelines::Graph$new()$add_pipeop(po_tm)
+# res_preproc_train <- graph_preproc$train(task$clone()$filter(train_set))[[1]]
+# res_preproc_test <- graph_preproc$predict(task$clone()$filter(test_set))[[1]]
 
 # CREATE GRAPH LEARNERS --------------------------------------------------------
 
@@ -196,6 +195,10 @@ graphs_full <- lapply(po_learners, function(i) graph_preproc %>>% i)
 graph_learners <- lapply(
   seq_along(graphs_full),
   function(i) GraphLearner$new(graphs_full[[i]], id = names(po_learners)[i]))
+
+graph_learners[[1]]$train(task, row_ids = train_set)
+res <- graph_learners[[1]]$predict(task, row_ids = test_set)
+res$confusion
 
 # BENCHMARK LEARNERS -----------------------------------------------------------
 
@@ -259,7 +262,3 @@ bmr_design <- mlr3::benchmark_grid(task, auto_tuners, resampling_outer)
 
 bmr <- mlr3::benchmark(bmr_design)
 bmr_res <- bmr$aggregate(measures_outer)
-
-graph_learners[[1]]$train(task, row_ids = train_set)
-res <- graph_learners[[1]]$predict(task, row_ids = test_set)
-res$confusion
