@@ -1,8 +1,9 @@
 # ------------------------------------------------------------------------------
-# TOKENIZATION PIPEOP
+# STRATIFICATION PIPEOP
 # ------------------------------------------------------------------------------
 
-# PURPOSE: create pipe operator for tokenization
+# PURPOSE: create pipe operator for stratification so data can be resampled
+# along strata containing keywords
 
 # MAKE PIPEOP ------------------------------------------------------------------
 
@@ -57,17 +58,23 @@ PipeOpStratifyKeywords = R6::R6Class(
         self$param_set$values$keywords,
         function(i) SnowballC::wordStem(remove_umlauts(i), language = "de"))
       
+      dict <- quanteda::dictionary(keywords)
+      
       mtch <- convert_qtda_to_dt(
-        quanteda::dfm_match(dfm, unlist(keywords)),
+        quanteda::dfm_lookup(dfm, dict),
         key = "doc_id")
       
-      mtch_cols <- names(mtch)[names(mtch) != "doc_id"]
+      mtch_cols <- names(keywords)
       
       mtch <- mtch[
-        , is_match_any := sum(.SD) > 0L,
+        , sprintf("stratum_%d", seq_along(mtch_cols)) := lapply(
+          .SD, 
+          function(i) i > 0L),
         .SDcols = mtch_cols,
-        by = seq_len(nrow(mtch))
-        ][, .(doc_id, is_match_any)]
+        by = seq_len(nrow(mtch))]
+      
+      cols_to_keep <- c("doc_id", sprintf("stratum_%d", seq_along(mtch_cols)))
+      mtch <- mtch[, ..cols_to_keep]
       
       dt_new <- data.table::copy(dt)
       

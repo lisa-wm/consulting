@@ -62,34 +62,38 @@ PipeOpExtractTopicsKeyword = R6::R6Class(
         fcm = fcm, 
         n_byterms = self$param_set$values$n_byterms)
       
-      # Match with documents
-      
+      if (length(keywords_list) == 0L) {
+        return(data.table::copy(dt)[, topic_label := 0L])
+      }
+
+      # Match with keywords
+
       dict_keywords <- quanteda::dictionary(keywords_list)
-      
+
       matches_dfm <- quanteda::dfm_lookup(
         dfm,
         dict_keywords,
         levels = 1:3)
 
       matches_dt <- convert_qtda_to_dt(matches_dfm, key = "doc_id")
-      
+
       # Compute topic label
-      
+
       matches_topics <- lapply(
-        
-        names(keywords),
-        
+
+        names(keywords_list),
+
         function(i) {
-          
+
           relevant_cols <- c(
-            "doc_id", 
+            "doc_id",
             names(matches_dt)[startsWith(names(matches_dt), i)])
           keyword_cols <- relevant_cols[endsWith(relevant_cols, "keyword")]
           derivative_cols <- relevant_cols[
             endsWith(relevant_cols, "derivatives")]
-          
+
           dt <- copy(matches_dt)[, ..relevant_cols]
-          
+
           dt[
             , c(keyword_cols) := lapply(.SD, function(i) 3 * i),
             .SDcols = keyword_cols,
@@ -100,22 +104,22 @@ PipeOpExtractTopicsKeyword = R6::R6Class(
               ][, sprintf("score_%s", i) := sum(.SD),
                 .SDcols = relevant_cols[-1L],
                 by = doc_id]})
-      
+
       matches_topics <- do.call(merge, matches_topics)
-      
+
       score_cols <- names(matches_topics)[
         startsWith(names(matches_topics), "score")]
-      
+
       # Prepare output
-      
+
       matches_topics <- matches_topics[
         , topic_label := ifelse(sum(.SD) == 0, 0, which.max(.SD)),
-        .SDcols = score_cols, 
+        .SDcols = score_cols,
         by = doc_id
         ][, .(doc_id, topic_label)]
-      
+
       dt_new <- data.table::copy(dt)[matches_topics, on = "doc_id"]
-      
+
       dt_new
 
     },
@@ -169,11 +173,11 @@ PipeOpExtractTopicsKeyword = R6::R6Class(
         keywords,
         function(i) SnowballC::wordStem(remove_umlauts(i), language = "de"))
       
-      if (any(!names(keywords) %in% quanteda::featnames(fcm))) {
+      if (any(!unlist(keywords) %in% quanteda::featnames(fcm))) {
         warning(sprintf(
-          "keyword %s not in data, please change selection",
-          names(keywords)[
-            which(!names(keywords) %in% quanteda::featnames(fcm))]))
+          "keyword %s not in data\n",
+          unlist(keywords)[
+            which(!unlist(keywords) %in% quanteda::featnames(fcm))]))
       }
       
       # Re-convert to easy-to-handle dfm
@@ -185,6 +189,10 @@ PipeOpExtractTopicsKeyword = R6::R6Class(
         keywords,
         function(i) {
           intersect(i, quanteda::featnames(fcm_red))})
+      
+      if (sum(lengths(keywords)) == 0L) return(list())
+      
+      keywords <- keywords[lengths(keywords) > 0L]
       
       # Find words from the same family as keywords
       
