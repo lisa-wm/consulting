@@ -24,9 +24,12 @@ get_glove_embeddings <- function(data_path = "./2_code/0_training_data/data-twee
                        escape_double = FALSE, trim_ws = TRUE)
   
   # Tokenize tweets
-  tokens <- space_tokenizer(data$full_text)
+  tokens2 <- space_tokenizer(data$text)
   
-  it <- itoken(tokens, progressbar = FALSE)
+  tokens <- quanteda::tokens(data$text)
+  tokens_list <- as.list(tokens)
+  
+  it <- itoken(tokens_list, progressbar = FALSE)
   
   # TF und DF per token 
   vocab <- create_vocabulary(it)
