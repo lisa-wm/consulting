@@ -55,9 +55,9 @@ tweets_raw <- unique(rbind(tweets_raw_new, tweets_raw_labeled))
 
 tweets_raw[, `:=` (
   word_count = quanteda::ntoken(full_text, remove_punct = TRUE),
-  year = year(created_at),
-  month = month(created_at),
-  week = week(created_at))]
+  year = data.table::year(created_at),
+  month = data.table::month(created_at),
+  week = data.table::week(created_at))]
 
 # Remove umlauts and non-informative symbols
 

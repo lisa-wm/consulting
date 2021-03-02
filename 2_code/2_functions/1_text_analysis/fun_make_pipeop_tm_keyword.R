@@ -63,8 +63,7 @@ PipeOpExtractTopicsKeyword = R6::R6Class(
         n_byterms = self$param_set$values$n_byterms)
       
       if (length(keywords_list) == 0L) {
-        return(data.table::copy(dt)[, topic_label := 0L])
-      }
+        return(data.table::copy(dt)[, topic_label := 0L])}
 
       # Match with keywords
 
@@ -73,7 +72,7 @@ PipeOpExtractTopicsKeyword = R6::R6Class(
       matches_dfm <- quanteda::dfm_lookup(
         dfm,
         dict_keywords,
-        levels = 1:3)
+        levels = 1L:3L)
 
       matches_dt <- convert_qtda_to_dt(matches_dfm, key = "doc_id")
 
@@ -95,10 +94,10 @@ PipeOpExtractTopicsKeyword = R6::R6Class(
           dt <- copy(matches_dt)[, ..relevant_cols]
 
           dt[
-            , c(keyword_cols) := lapply(.SD, function(i) 3 * i),
+            , c(keyword_cols) := lapply(.SD, function(i) 3L * i),
             .SDcols = keyword_cols,
             by = doc_id
-            ][, c(derivative_cols) := lapply(.SD, function(i) 2 * i),
+            ][, c(derivative_cols) := lapply(.SD, function(i) 2L * i),
               .SDcols = derivative_cols,
               by = doc_id
               ][, sprintf("score_%s", i) := sum(.SD),
@@ -158,13 +157,13 @@ PipeOpExtractTopicsKeyword = R6::R6Class(
       
       count_cum <- sapply(
         seq_along(data_raw), 
-        function(i) sum(data_raw[1:i] == data_raw[i]))
+        function(i) sum(data_raw[seq_len(i)] == data_raw[i]))
       
       count_cum_dt <- as.data.table(
         matrix(count_cum, ncol = ncol(data), byrow = TRUE))
       setnames(count_cum_dt, names(data))
       
-      count_cum_dt > 1
+      count_cum_dt > 1L
       
     },
     
@@ -238,10 +237,10 @@ PipeOpExtractTopicsKeyword = R6::R6Class(
           this_dt <- convert_qtda_to_dt(this_fcm, key = NULL)
           
           this_dt[
-            , names(this_dt)[-1] := lapply(
+            , names(this_dt)[-1L] := lapply(
               .SD,
               function(j) doc_id[order(j, decreasing = TRUE)]), 
-            .SDcols = names(this_dt)[-1]
+            .SDcols = names(this_dt)[-1L]
           ][, doc_id := NULL]
           
           data.table::setcolorder(this_dt, i)
@@ -259,7 +258,8 @@ PipeOpExtractTopicsKeyword = R6::R6Class(
       n_derivatives <- sum(sapply(keywords_derivatives, nrow))
       n_potential_dup <- ncol(keywords_byterms_merged) * n_byterms + 
         n_derivatives
-      keywords_byterms_short <- keywords_byterms_merged[1:n_potential_dup]
+      keywords_byterms_short <- 
+        keywords_byterms_merged[seq_len(n_potential_dup)]
       
       # Remove terms that co-occur with other keywords in higher frequencies
       
