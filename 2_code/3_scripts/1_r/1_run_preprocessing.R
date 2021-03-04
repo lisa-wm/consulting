@@ -30,23 +30,30 @@ tweets_raw_new[, created_at := as.POSIXct(created_at)]
 
 tweets_raw_new[, label := "none"]
 
+# load_rdata_files(
+#   training_data_annotated, 
+#   folder = "2_code/1_data/1_training_data",
+#   tmp = FALSE)
+
 load_rdata_files(
-  training_data_annotated, 
+  labeling_asmik_final, 
   folder = "2_code/1_data/1_training_data",
   tmp = FALSE)
 
-tweets_raw_labeled <- training_data_annotated[
-  , .(name_matching, 
-      username, 
-      available, 
-      created_at, 
-      full_text,
-      retweet_count,
-      favorite_count,
-      followers_count,
-      location,
-      label)]
+# tweets_raw_labeled <- training_data_annotated[
+#   , .(name_matching, 
+#       username, 
+#       available, 
+#       created_at, 
+#       full_text,
+#       retweet_count,
+#       favorite_count,
+#       followers_count,
+#       location,
+#       label)]
 
+tweets_raw_labeled <- labeling_asmik_final
+data.table::setcolorder(tweets_raw_labeled, names(tweets_raw_new))
 tweets_raw <- unique(rbind(tweets_raw_new, tweets_raw_labeled))
 
 # data.table::setkey(tweets_raw, "name_matching")
@@ -208,14 +215,12 @@ data_clean[
       ][, rank_timestamp := NULL]
 
 data.table::setkey(data_clean, doc_id)
-
 stopifnot(nrow(data_clean) - length(unique(data_clean$doc_id)) == 0)
 
 save_rdata_files(data_clean, folder = "2_code/1_data/2_tmp_data")
 
-# Save for labeling
-
-# save_rdata_files(data_clean, "2_code/attic")
+data_labeled <- data_clean[label != "none"]
+save_rdata_files(data_labeled, folder = "2_code/1_data/2_training_data")
 
 # CREATE CORPUS OBJECT ---------------------------------------------------------
 

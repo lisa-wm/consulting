@@ -71,3 +71,7 @@ stopifnot(length(intersect(
 
 save_rdata_files(tweepy_subset_labeling_asmik_2, "2_code/0_training_data")
 save_rdata_files(tweepy_subset_labeling_lisa_2, "2_code/0_training_data")
+
+load_rdata_files(
+  tweepy_subset_labeling_asmik_2, 
+  "2_code/1_data/1_training_data")
