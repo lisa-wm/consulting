@@ -40,6 +40,11 @@ load_rdata_files(
   folder = "2_code/1_data/1_training_data",
   tmp = FALSE)
 
+load_rdata_files(
+  labeling_lisa_final, 
+  folder = "2_code/1_data/1_training_data",
+  tmp = FALSE)
+
 # tweets_raw_labeled <- training_data_annotated[
 #   , .(name_matching, 
 #       username, 
@@ -52,9 +57,15 @@ load_rdata_files(
 #       location,
 #       label)]
 
-tweets_raw_labeled <- labeling_asmik_final
-data.table::setcolorder(tweets_raw_labeled, names(tweets_raw_new))
-tweets_raw <- unique(rbind(tweets_raw_new, tweets_raw_labeled))
+tweets_raw_labeled_1 <- labeling_asmik_final
+tweets_raw_labeled_2 <- labeling_lisa_final
+data.table::setcolorder(tweets_raw_labeled_1, names(tweets_raw_new))  
+data.table::setcolorder(tweets_raw_labeled_2, names(tweets_raw_new))
+
+tweets_raw <- unique(rbind(
+  tweets_raw_new, 
+  tweets_raw_labeled_1,
+  tweets_raw_labeled_2))
 
 # data.table::setkey(tweets_raw, "name_matching")
 
@@ -220,7 +231,10 @@ stopifnot(nrow(data_clean) - length(unique(data_clean$doc_id)) == 0)
 save_rdata_files(data_clean, folder = "2_code/1_data/2_tmp_data")
 
 data_labeled <- data_clean[label != "none"]
-save_rdata_files(data_labeled, folder = "2_code/1_data/2_training_data")
+save_rdata_files(
+  data_labeled, 
+  folder = "2_code/1_data/1_training_data", 
+  tmp = FALSE)
 
 # CREATE CORPUS OBJECT ---------------------------------------------------------
 
