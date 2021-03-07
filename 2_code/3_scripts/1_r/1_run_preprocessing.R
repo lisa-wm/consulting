@@ -26,6 +26,8 @@ tweets_raw_new <- tweets_raw_new[cld3::detect_language(full_text) == "de"]
 
 tweets_raw_new[, created_at := as.POSIXct(created_at)]
 
+save_rdata_files(tweets_raw_new, folder = "2_code/1_data/2_tmp_data")
+
 # Append annotated data
 
 tweets_raw_new[, label := "none"]
