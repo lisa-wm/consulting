@@ -22,54 +22,23 @@ tweets_raw_new <- tweets_raw_new[created_at >= "2017-09-24"]
 
 tweets_raw_new <- tweets_raw_new[cld3::detect_language(full_text) == "de"]
 
-# Set timestamp to posixct format
-
-tweets_raw_new[, created_at := as.POSIXct(created_at)]
-
-save_rdata_files(tweets_raw_new, folder = "2_code/1_data/2_tmp_data")
-
 # Append annotated data
 
 tweets_raw_new[, label := "none"]
 
-# load_rdata_files(
-#   training_data_annotated, 
-#   folder = "2_code/1_data/1_training_data",
-#   tmp = FALSE)
-
 load_rdata_files(
-  labeling_asmik_final, 
+  data_labeled,
   folder = "2_code/1_data/1_training_data",
   tmp = FALSE)
 
-load_rdata_files(
-  labeling_lisa_final, 
-  folder = "2_code/1_data/1_training_data",
-  tmp = FALSE)
+tweets_raw_labeled <- data_labeled
+data.table::setcolorder(tweets_raw_labeled, names(tweets_raw_new))  
 
-# tweets_raw_labeled <- training_data_annotated[
-#   , .(name_matching, 
-#       username, 
-#       available, 
-#       created_at, 
-#       full_text,
-#       retweet_count,
-#       favorite_count,
-#       followers_count,
-#       location,
-#       label)]
+tweets_raw <- unique(rbind(tweets_raw_new, tweets_raw_labeled))
 
-tweets_raw_labeled_1 <- labeling_asmik_final
-tweets_raw_labeled_2 <- labeling_lisa_final
-data.table::setcolorder(tweets_raw_labeled_1, names(tweets_raw_new))  
-data.table::setcolorder(tweets_raw_labeled_2, names(tweets_raw_new))
+# Set timestamp to posixct format
 
-tweets_raw <- unique(rbind(
-  tweets_raw_new, 
-  tweets_raw_labeled_1,
-  tweets_raw_labeled_2))
-
-# data.table::setkey(tweets_raw, "name_matching")
+tweets_raw[, created_at := as.POSIXct(created_at)]
 
 # Add word count and date variables
 
@@ -134,7 +103,10 @@ data.table::setnames(
 data_clean <- meta_mp_level[
   meta_socio_electoral, on = "meta_wahlkreis_nr"
   ][tweets_raw, on = c(meta_name_matching = "twitter_name_matching")
-    ][!stringr::str_detect(meta_party, "\\*")
+    ][, meta_party := ifelse(
+      stringr::str_detect(meta_party, "\\*"),
+      stringr::str_trim(stringr::str_replace_all(meta_party, "\\*", "")),
+      meta_party)
       ][, `:=` (
         meta_bundesland = as.factor(meta_bundesland),
         meta_party = as.factor(meta_party))
@@ -151,7 +123,7 @@ data.table::setattr(
   "levels",
   c("afd", "gruene", "cdu_csu", "linke", "fdp", "fraktionslos", "spd"))
 
-data_clean <- data_clean[meta_party != "fraktionslos"]
+# data_clean <- data_clean[meta_party != "fraktionslos"]
 
 # EXTRACT TWITTER-SPECIFIC ELEMENTS --------------------------------------------
 
@@ -232,11 +204,17 @@ stopifnot(nrow(data_clean) - length(unique(data_clean$doc_id)) == 0)
 
 save_rdata_files(data_clean, folder = "2_code/1_data/2_tmp_data")
 
-data_labeled <- data_clean[label != "none"]
-save_rdata_files(
-  data_labeled, 
-  folder = "2_code/1_data/1_training_data", 
-  tmp = FALSE)
+cols_to_keep <- c(
+  "doc_id",
+  names(data_clean)[startsWith(names(data_clean), "twitter_")],
+  "label")
+
+data_labeled_processed <- data_clean[label != "none"][, ..cols_to_keep]
+
+data.table::fwrite(
+  data_labeled_processed,
+  here("2_code/1_data/1_training_data", "data_labeled_processed.csv"),
+  sep = ";")
 
 # CREATE CORPUS OBJECT ---------------------------------------------------------
 
