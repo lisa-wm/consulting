@@ -105,10 +105,10 @@ tweets_tokens_sfe <- quanteda::tokens_remove(
   quanteda::tokens_tolower(tweets_tokens_basic),
   pattern = stopwords_sfe) 
 
-tweets_tokens_sfe <- quanteda::tokens_remove(
-  tweets_tokens_sfe,
-  pattern = "[[:punct:]]",
-  valuetype = "regex")
+# tweets_tokens_sfe <- quanteda::tokens_remove(
+#   tweets_tokens_sfe,
+#   pattern = "[[:punct:]]",
+#   valuetype = "regex")
 
 tweets_dfm_sfe <- quanteda::dfm(tweets_tokens_sfe)
 
@@ -236,15 +236,19 @@ tokens_intensification <- SnowballC::wordStem(
   language = "de")
 
 tokens_punctuation <- c(
-  dotdotdot = "[.]{3}", 
-  exclamation_mark_single = "!", 
-  question_mark_single = "\\?", 
-  exclamation_mark_rep = "[!]{2}", 
-  question_mark_rep = "[\\?]{2}")
+  exclamation_mark = "!", 
+  question_mark = "?")
 
-tokens_repetition <- c(
-  repeated_char = "(.)\\1{2}", 
-  repeated_char_seq = "\\b(\\S+?)\\1\\S*\\b")
+# tokens_punctuation <- c(
+#   dotdotdot = "[.]{3}",
+#   exclamation_mark_single = "!", 
+#   question_mark_single = "\\?",
+#   exclamation_mark_repeated = "[!]{2}",
+#   question_mark_repeated = "[\\?]{2}")
+
+# tokens_repetition <- c(
+#   repeated_char = "(.)\\1{3}", 
+#   repeated_char_seq = "\\b(\\S+?)\\1\\S*\\b")
 
 # Match patterns
 
@@ -271,14 +275,6 @@ tweets_punctuation <- convert_qtda_to_dt(
 data.table::setnames(
   tweets_punctuation, 
   c("doc_id", sprintf("feat_%s", names(tokens_punctuation))))
-
-tweets_repetition <- convert_qtda_to_dt(
-  quanteda::dfm_match(tweets_dfm_sfe, tokens_repetition),
-  key = "doc_id")
-
-data.table::setnames(
-  tweets_repetition, 
-  c("doc_id", sprintf("feat_%s", names(tokens_repetition))))
 
 # Get character unigrams
 
@@ -358,7 +354,7 @@ tweets_features_static <- tweets_pos_tags[
   tweets_negation
   ][tweets_intensification,
     ][tweets_punctuation,
-      ][tweets_repetition,
+      # ][tweets_repetition,
         ][tweets_char_unigrams, 
           ][tweets_features_twitter, 
             ][tweets_features_dict, ]
