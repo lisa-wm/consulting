@@ -29,9 +29,10 @@ remove_noisy_symbols <- function(text) {
       "&gt;",
       "%",
       " http([^ ]*)",
+      "http([^ ]*)",
       "\\\n"), 
-      collapse = "|")
-  )
+      collapse = "|"))
   
   stringr::str_squish(text)
+  
 }

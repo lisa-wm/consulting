@@ -24,21 +24,33 @@ tweets_raw_new <- tweets_raw_new[cld3::detect_language(full_text) == "de"]
 
 # Append annotated data
 
-tweets_raw_new[, label := "none"]
+tweets_raw_new[
+  , `:=` (label = "none", topic = "none")
+  ][, created_at := as.POSIXct(as.Date(created_at))]
 
-load_rdata_files(
-  data_labeled,
-  folder = "2_code/1_data/1_training_data",
-  tmp = FALSE)
+# load_rdata_files(
+  # data_labeled,
+  # folder = "2_code/1_data/1_training_data",
+  # tmp = FALSE)
 
-tweets_raw_labeled <- data_labeled
+tweets_raw_labeled <- data.table::fread(
+  here("2_code/1_data/1_training_data", "data_labeled.csv"),
+  encoding = "UTF-8",
+  sep = ";")
+
+tweets_raw_labeled[
+  , created_at := as.POSIXct(created_at, format = "%d.%m.%Y %H:%M")]
+
 data.table::setcolorder(tweets_raw_labeled, names(tweets_raw_new))  
 
-tweets_raw <- unique(rbind(tweets_raw_new, tweets_raw_labeled))
+tweets_raw_unlabeled <- which(
+  !tweets_raw_new$full_text %in% tweets_raw_labeled$full_text)
 
-# Set timestamp to posixct format
+tweets_raw <- unique(rbind(
+  tweets_raw_new[tweets_raw_unlabeled], 
+  tweets_raw_labeled))
 
-tweets_raw[, created_at := as.POSIXct(created_at)]
+tweets_raw <- tweets_raw[created_at > "2017-09-24"]
 
 # Add word count and date variables
 
@@ -56,12 +68,15 @@ tweets_raw[
 
 # Prefix column names and save
 
-data.table::setcolorder(tweets_raw, "label")
+data.table::setcolorder(tweets_raw, c("label", "topic"))
 
 data.table::setnames(
   tweets_raw, 
   c("label",
-    sprintf("twitter_%s", names(tweets_raw)[names(tweets_raw) != "label"])))
+    "topic",
+    sprintf(
+      "twitter_%s", 
+      names(tweets_raw)[!names(tweets_raw) %in% c("label", "topic")])))
 
 save_rdata_files(
   tweets_raw,
@@ -129,13 +144,22 @@ data.table::setattr(
 
 # String pattern of emojis, hashtags and tags
 
-pattern_emoji <- stringr::str_c(c(
-  "[^\001-\177]", # unicode emojis
-  "(\\:(\\-)?\\))", # simple happy smiley w/ or w/o nose
-  "(\\:(\\-)?\\()", # simple sad smiley w/ or w/o nose
-  "(\\;(\\-)?\\))", # simple winking smiley w/ or w/o nose
-  "\\:P"), # simple smiley sticking tongue out
-  collapse = "|")
+# test <- data.table::copy(data_clean)
+
+# pattern_emoji <- stringr::str_c(c(
+#   "[^\001-\177]", # unicode emojis
+#   "(\\:(\\-)?\\))", # simple happy smiley w/ or w/o nose
+#   "(\\:(\\-)?\\()", # simple sad smiley w/ or w/o nose
+#   "(\\;(\\-)?\\))", # simple winking smiley w/ or w/o nose
+#   "\\:P"), # simple smiley sticking tongue out
+#   collapse = "|")
+
+emojis_unicode <- data.table::fread(
+  here("2_code/1_data/1_training_data", "emojis_unicode.csv"),
+  encoding = "UTF-8",
+  sep = ";")
+
+pattern_emoji <- stringr::str_c(emojis_unicode$symbol, collapse = "|")
 
 pattern_hashtag <- "(#)[[:alnum:]]+"
 pattern_tag <- "@\\S+"
@@ -172,8 +196,10 @@ data_clean[, twitter_full_text := lapply(
 
 # Remove emojis, hashtag symbols (not contents) and tags
 
+pattern_unicode <- stringr::str_c(c("[^\001-\177]", collapse = "|"))
+
 patterns_to_remove <- stringr::str_c(
-  c(pattern_emoji, "#", pattern_tag),
+  c(pattern_emoji, "#", pattern_tag, pattern_unicode),
   collapse = "|")
 
 data_clean[
@@ -202,12 +228,11 @@ data_clean[
 data.table::setkey(data_clean, doc_id)
 stopifnot(nrow(data_clean) - length(unique(data_clean$doc_id)) == 0)
 
-save_rdata_files(data_clean, folder = "2_code/1_data/2_tmp_data")
-
 cols_to_keep <- c(
   "doc_id",
   names(data_clean)[startsWith(names(data_clean), "twitter_")],
-  "label")
+  "label", 
+  "topic")
 
 data_labeled_processed <- data_clean[label != "none"][, ..cols_to_keep]
 
@@ -215,6 +240,9 @@ data.table::fwrite(
   data_labeled_processed,
   here("2_code/1_data/1_training_data", "data_labeled_processed.csv"),
   sep = ";")
+
+data_clean[, topic := NULL]
+save_rdata_files(data_clean, folder = "2_code/1_data/2_tmp_data")
 
 # CREATE CORPUS OBJECT ---------------------------------------------------------
 
