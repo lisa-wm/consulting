@@ -14,18 +14,18 @@ load_rdata_files(tweets_subjective, folder = "2_code/1_data/2_tmp_data")
 data <- tweets_subjective[
   label != "none"]
 
-labels_fake <- sample(
-  c("positive", "negative"),
-  size = nrow(tweets_subjective[label == "none"]),
-  replace = TRUE)
-
-data_fake <- tweets_subjective[
-  label == "none"
-  ][, label := labels_fake]
-
-data_fake <- data_fake[sample(seq_len(nrow(data_fake)), size = 1000L)]
-
-data <- rbind(data, data_fake)
+# labels_fake <- sample(
+#   c("positive", "negative"),
+#   size = nrow(tweets_subjective[label == "none"]),
+#   replace = TRUE)
+# 
+# data_fake <- tweets_subjective[
+#   label == "none"
+#   ][, label := labels_fake]
+# 
+# data_fake <- data_fake[sample(seq_len(nrow(data_fake)), size = 1000L)]
+# 
+# data <- rbind(data, data_fake)
 
 data$label <- as.factor(data$label)
 
@@ -44,15 +44,13 @@ test_set = setdiff(seq_len(task$nrow), train_set)
 
 # CREATE PREPROCESSING PIPELINE ------------------------------------------------
 
-# topic_type <- "stm"
+topic_type <- "stm"
 
-topic_type <- "keyword"
+# topic_type <- "keyword"
 
 keywords <- list(
-  corona = c("corona", "pandemie", "virus", "krise")
-  ,
-  klima = c("klima", "umwelt")
-  )
+  corona = c("corona", "pandemie", "virus", "krise"),
+  klima = c("klima", "umwelt"))
 
 if (topic_type == "stm") {
   
@@ -75,7 +73,7 @@ if (topic_type == "stm") {
     prevalence = prevalence_formula,
     max.em.its = 5L,
     stopwords = make_stopwords(),
-    K = 3L,
+    K = 10L,
     init.type = "LDA")
   
 } else if (topic_type == "keyword") {
@@ -204,9 +202,9 @@ res$confusion
 
 # Define tuning parameters
 
-resampling_inner <- mlr3::rsmp("cv", folds = 2L)
+resampling_inner <- mlr3::rsmp("cv", folds = 5L)
 measure_inner <- mlr3::msr("classif.ce")
-terminator <- mlr3tuning::trm("evals", n_evals = 1L)
+terminator <- mlr3tuning::trm("evals", n_evals = 5L)
 tuner <- mlr3tuning::tnr("grid_search", resolution = 10L)
 
 # Attention: svm crashes (error length(response) < length(prediction data) - 
@@ -249,7 +247,7 @@ auto_tuners <- lapply(
 
 # Define benchmarking parameters
 
-resampling_outer <- mlr3::rsmp("cv", folds = 2L)
+resampling_outer <- mlr3::rsmp("cv", folds = 5L)
 
 measures_outer <- list(
   mlr3::msr("classif.ce", id = "mmce_test"))
@@ -262,3 +260,7 @@ bmr_design <- mlr3::benchmark_grid(task, auto_tuners, resampling_outer)
 
 bmr <- mlr3::benchmark(bmr_design)
 bmr_res <- bmr$aggregate(measures_outer)
+
+benchmark_results <- data.table::as.data.table(bmr)
+
+save_rdata_files(benchmark_results, folder = "2_code/1_data/2_tmp_data")

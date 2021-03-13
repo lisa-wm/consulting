@@ -28,8 +28,6 @@ cols_to_keep <- c(
 tweets_subjective <- tweets_subjective[, ..cols_to_keep][
   label != "none" | 
     feat_n_emojis > 0 | feat_polarity_positive_strong > 1 | 
-    feat_polarity_negative_strong > 1 | feat_exclamation_mark_rep > 0 | 
-    feat_question_mark_rep > 0 | feat_repeated_char > 0 | 
-    feat_repeated_char_seq > 0 | feat_favorite_count > 10L]
+    feat_polarity_negative_strong > 1 | feat_favorite_count > 10L]
 
 save_rdata_files(tweets_subjective, folder = "2_code/1_data/2_tmp_data")
