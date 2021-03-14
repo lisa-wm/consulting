@@ -260,7 +260,18 @@ bmr_design <- mlr3::benchmark_grid(task, auto_tuners, resampling_outer)
 
 bmr <- mlr3::benchmark(bmr_design)
 bmr_res <- bmr$aggregate(measures_outer)
+perf <- bmr$score(measures_outer)
+winner <- which.min(perf$mmce_test)
+bmr$score(msr("classif.acc"))
 
-benchmark_results <- data.table::as.data.table(bmr)
+bmr_dt <- data.table::as.data.table(bmr)
 
-save_rdata_files(benchmark_results, folder = "2_code/1_data/2_tmp_data")
+conf <- table(
+  data.table::as.data.table(
+    bmr_dt$prediction[[winner]])[, .(truth, response)])
+
+benchmark_results <- bmr
+save_rdata_files(
+  benchmark_results, 
+  folder = "2_code/1_data/2_tmp_data",
+  tmp = FALSE)
