@@ -235,10 +235,16 @@ cols_to_keep <- c(
   "topic")
 
 data_labeled_processed <- data_clean[label != "none"][, ..cols_to_keep]
+data_unlabeled_processed <- data_clean[label == "none"][, ..cols_to_keep]
 
 data.table::fwrite(
   data_labeled_processed,
   here("2_code/1_data/1_training_data", "data_labeled_processed.csv"),
+  sep = ";")
+
+data.table::fwrite(
+  data_unlabeled_processed,
+  here("2_code/1_data/1_training_data", "data_unlabeled_processed.csv"),
   sep = ";")
 
 data_clean[, topic := NULL]

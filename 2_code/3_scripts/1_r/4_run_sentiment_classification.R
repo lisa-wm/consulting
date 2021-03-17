@@ -275,3 +275,8 @@ save_rdata_files(
   benchmark_results, 
   folder = "2_code/1_data/2_tmp_data",
   tmp = FALSE)
+
+load_rdata_files(
+  benchmark_results, 
+  folder = "2_code/1_data/2_tmp_data",
+  tmp = FALSE)
