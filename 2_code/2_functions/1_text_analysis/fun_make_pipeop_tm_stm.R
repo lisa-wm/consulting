@@ -157,9 +157,6 @@ PipeOpExtractTopicsSTM = R6::R6Class(
       dt_final <- rbind(dt_complete, dt_incomplete)
       data.table::setorder(dt_final, doc_id)
       dt_final
-      
-      # dt_new[, foo := nrow(dt_final)]
-      # dt_new
 
     },
 
@@ -211,8 +208,7 @@ PipeOpExtractTopicsSTM = R6::R6Class(
       checkmate::assert_character(cv)
       checkmate::assert_character(sv)
       
-      # Make sure columns exist in docvars and do not contain NA (not allowed in 
-      # STM prevalence formula)
+      # Make sure columns exist in docvars
       
       data_dt <- as.data.table(data)
       cols_docvars <- c(cv, sv)
@@ -234,10 +230,6 @@ PipeOpExtractTopicsSTM = R6::R6Class(
       as.formula(paste("", formula_right, sep = "~"))
       
     }
-
-    # .find_k = function(dt, levels) {dt}, # get_state instead of transform_dt?
-    
-    # FIXME find way to compute k
 
   )
 )

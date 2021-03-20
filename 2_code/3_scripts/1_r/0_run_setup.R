@@ -12,6 +12,8 @@ packages_required <-  c(
   "checkmate", # input checking
   "cld3", # language detection
   "data.table", # data wrangling
+  "future", # parallelization
+  "future.apply", # parallelization
   "here", # path management
   "mlr3", # machine learning basics
   "mlr3learners", # machine learning learners

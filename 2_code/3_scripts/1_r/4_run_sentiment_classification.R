@@ -18,12 +18,12 @@ data$label <- as.factor(data$label)
 
 data.table::setorder(data, doc_id)
 
-# TODO make complete cases better (i.e., only taking into account relevant vars)
-
 task <- mlr3::TaskClassif$new(
   "twitter_ttsa", 
   backend = data,
   target = "label")
+
+# task$set_col_roles("doc_id", roles = "name")
 
 # Create stratified train-test split
 
@@ -44,27 +44,11 @@ stopifnot(abs(
 
 # CREATE PREPROCESSING PIPELINE ------------------------------------------------
 
+# Define topic modeling type (parameters need to be set within if clause)
+
 topic_type <- c("stm", "keyword")[1L]
 
-keywords <- list(
-  corona = c("corona", "pandemie", "virus", "krise"),
-  klima = c("klima", "umwelt"))
-
 if (topic_type == "stm") {
-  
-  # Define contextual variables
-  
-  # context_vars <- list(
-  #   categorical_vars = list(
-  #     "meta_party", 
-  #     "meta_bundesland"),
-  #   smooth_vars = list(
-  #     "meta_unemployment_rate"))
-  # 
-  # prevalence_formula <- make_prevalence_formula(
-  #   data = task$data()[train_set],
-  #   categorical_vars = context_vars$categorical_vars,
-  #   smooth_vars = context_vars$smooth_vars)
   
   # Define topic modeling pipeop
   
@@ -78,10 +62,13 @@ if (topic_type == "stm") {
     prevalence_vars_smooth = list("meta_unemployment_rate"),
     max.em.its = 1L,
     stopwords = make_stopwords(),
-    K = 10L,
     init.type = "LDA")
   
 } else if (topic_type == "keyword") {
+  
+  keywords <- list(
+    corona = c("corona", "pandemie", "virus", "krise"),
+    klima = c("klima", "umwelt"))
   
   po_stratify <- PipeOpStratifyKeywords$new()
   
@@ -91,12 +78,12 @@ if (topic_type == "stm") {
     stopwords = make_stopwords(),
     keywords = keywords)
 
-  po_set_colroles <- mlr3pipelines::PipeOpColRoles$new()
+  po_set_strata <- mlr3pipelines::PipeOpColRoles$new()
   
   strata <- as.list(rep("stratum", length(keywords)))
   names(strata) <- sprintf("stratum_%s", seq_along(keywords))
 
-  po_set_colroles$param_set$values$new_role <- strata
+  po_set_strata$param_set$values$new_role <- strata
 
   po_topic_modeling <- PipeOpExtractTopicsKeyword$new()
 
@@ -130,12 +117,11 @@ po_sel_embeddings_inv$param_set$values$selector <-
 # Define glove embedding pipeop
 
 po_embeddings <- PipeOpMakeGloveEmbeddings$new()
-po_embeddings$param_set$values$dimension <- 3L
 po_embeddings$param_set$values$stopwords <- make_stopwords()
 
 # Define trivial pipeop for features not piped into embedding extraction
 
-po_nop <- mlr3pipelines::PipeOpNOP$new()
+po_nop <- mlr3pipelines::PipeOpNOP$new(id = "pipe_along")
 
 # Define selector pipeop for features to be piped into classification
 # TODO tailor to learners (e.g., cart could handle factors)
@@ -144,11 +130,14 @@ po_sel_sentiment_analysis <-
   mlr3pipelines::PipeOpSelect$new(id = "select_sentiment_analysis")
 
 po_sel_sentiment_analysis$param_set$values$selector <- 
-  mlr3pipelines::selector_invert(
-    mlr3pipelines::selector_union(
-      mlr3pipelines::selector_type(
-        c("character", "POSIXct", "logical", "factor")),
-      mlr3pipelines::selector_missing()))
+  mlr3pipelines::selector_union(
+    mlr3pipelines::selector_name("doc_id"),
+    mlr3pipelines::selector_grep("feat.*"))
+
+# Define pipeop to set col role for doc_id to naming column
+
+po_set_colroles <- mlr3pipelines::PipeOpColRoles$new(id = "set_colroles")
+po_set_colroles$param_set$values$new_role <- list(doc_id = "name")
 
 # Create graph from preprocessing steps
 
@@ -159,7 +148,7 @@ if (topic_type == "stm") {
 } else if (topic_type == "keyword") {
   
   graph_preproc <- mlr3pipelines::Graph$new()$add_pipeop(po_stratify) %>>% 
-    po_set_colroles %>>% 
+    po_set_strata %>>% 
     po_topic_modeling
   
 }
@@ -174,35 +163,45 @@ graph_preproc <- graph_preproc %>>%
     po_sel_embeddings_inv %>>% 
       po_nop)
     ) %>>%
-  po("featureunion") %>>%
-  po_sel_sentiment_analysis
+  po("featureunion", id = "unite_features") %>>%
+  po_sel_sentiment_analysis %>>%
+  po_set_colroles
 
 plot(graph_preproc, html = FALSE)
+
+# res_tm_train <- graph_preproc$train(task$clone()$filter(train_set))[[1]]
+# res_tm_train$col_roles
 
 # CREATE GRAPH LEARNERS --------------------------------------------------------
 
 # Define pipeops for different classifiers
 
 po_learners <- list(
-  cart = PipeOpLearner$new(learner = lrn("classif.rpart")),
-  glmnet = PipeOpLearner$new(
-    learner = lrn("classif.cv_glmnet")))
+  forest = mlr3pipelines::PipeOpLearner$new(
+    learner = lrn("classif.ranger"), 
+    id = "classify_forest"),
+  svm = mlr3pipelines::PipeOpLearner$new(
+    learner = lrn("classif.svm", type = "C-classification"), 
+    id = "classify_svm"),
+  lasso = mlr3pipelines::PipeOpLearner$new(
+    learner = lrn("classif.cv_glmnet"), 
+    id = "classify_lasso"))
 
 # Create full graphs
 
 graphs_full <- lapply(po_learners, function(i) graph_preproc %>>% i)
-
-# plot(graphs_full$cart, html = F)
+plot(graphs_full$forest, html = FALSE)
 
 # Create graph_learners
 
 graph_learners <- lapply(
   seq_along(graphs_full),
   function(i) GraphLearner$new(graphs_full[[i]], id = names(po_learners)[i]))
+names(graph_learners) <- names(po_learners)
 
-graph_learners[[1]]$train(task, row_ids = train_set)
-res <- graph_learners[[1]]$predict(task, row_ids = test_set)
-res$confusion
+# graph_learners[[1]]$train(task, row_ids = train_set)
+# res <- graph_learners[[1]]$predict(task, row_ids = test_set)
+# res$confusion
 
 # BENCHMARK LEARNERS -----------------------------------------------------------
 
@@ -211,24 +210,58 @@ res$confusion
 resampling_inner <- mlr3::rsmp("cv", folds = 5L)
 measure_inner <- mlr3::msr("classif.ce")
 terminator <- mlr3tuning::trm("evals", n_evals = 5L)
-tuner <- mlr3tuning::tnr("grid_search", resolution = 10L)
-
-# Attention: svm crashes (error length(response) < length(prediction data) - 
-# sth seems to be dropped along the way)
+tuner <- mlr3tuning::tnr("grid_search", resolution = 5L)
 
 search_spaces <- list(
-  cart = paradox::ParamSet$new(
+  forest = paradox::ParamSet$new(
     params = list(
       paradox::ParamInt$new(
-        "classif.rpart.minsplit", 
-        lower = 20L, 
-        upper = 25L))),
-  glmnet = paradox::ParamSet$new(
+        "extract_topics_stm.K",
+        lower = 5L,
+        upper = 10L),
+      paradox::ParamInt$new(
+        "make_glove_embeddings.dimension",
+        lower = 5L,
+        upper = 10L),
+      paradox::ParamInt$new(
+        "classify_forest.mtry", 
+        lower = 7L, 
+        upper = 30L))),
+  svm = paradox::ParamSet$new(
     params = list(
+      paradox::ParamInt$new(
+        "extract_topics_stm.K",
+        lower = 5L,
+        upper = 10L),
+      paradox::ParamInt$new(
+        "make_glove_embeddings.dimension",
+        lower = 5L,
+        upper = 10L),
+      paradox::ParamFct$new(
+        "classify_svm.kernel", 
+        levels = c("polynomial", "radial")),
       paradox::ParamDbl$new(
-        "classif.cv_glmnet.alpha", 
-        lower = 0.9, 
-        upper = 1L))))
+        "classify_svm.gamma",
+        lower = 1e-3,
+        upper = 1e-1))),
+  lasso = paradox::ParamSet$new(
+    params = list(
+      paradox::ParamInt$new(
+        "extract_topics_stm.K",
+        lower = 5L,
+        upper = 10L),
+      paradox::ParamInt$new(
+        "make_glove_embeddings.dimension",
+        lower = 5L,
+        upper = 10L),
+      paradox::ParamDbl$new(
+        "classify_lasso.alpha",
+        lower = 1e-2,
+        upper = 1L),
+      paradox::ParamDbl$new(
+        "classify_lasso.lambda",
+        lower = 0L,
+        upper = 0.2))))
 
 # Define tuning learners
 
@@ -246,7 +279,7 @@ auto_tuners <- lapply(
 # auto_tuners[[1]]$train(task, row_ids = train_set)
 # res_cart <- auto_tuners[[1]]$predict(task, row_ids = test_set)
 # res_cart$confusion
-# 
+
 # auto_tuners[[2]]$train(task, row_ids = train_set)
 # res_glmnet <- auto_tuners[[2]]$predict(task, row_ids = test_set)
 # res_glmnet$confusion
@@ -255,16 +288,18 @@ auto_tuners <- lapply(
 
 resampling_outer <- mlr3::rsmp("cv", folds = 5L)
 
-measures_outer <- list(
-  mlr3::msr("classif.ce", id = "mmce_test"))
-
 # Define benchmarking design
 
 bmr_design <- mlr3::benchmark_grid(task, auto_tuners, resampling_outer)
 
 # Run benchmark 
 
+future::plan("multiprocess")
 bmr <- mlr3::benchmark(bmr_design)
+
+measures_outer <- list(
+  mlr3::msr("classif.ce", id = "mmce_test"))
+
 bmr_res <- bmr$aggregate(measures_outer)
 perf <- bmr$score(measures_outer)
 winner <- which.min(perf$mmce_test)
