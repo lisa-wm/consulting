@@ -17,8 +17,8 @@ PipeOpMakeGloveEmbeddings = R6::R6Class(
     initialize = function(id = "make_glove_embeddings", param_vals = list()) {
       
       ps = ParamSet$new(params = list(
-        ParamUty$new("stopwords"),
-        ParamInt$new("dimension", lower = 1L),
+        ParamUty$new("stopwords", tags = "glove_setup"),
+        ParamInt$new("dimension", lower = 1L, tags = "glove_setup"),
         ParamInt$new("term_count_min", lower = 1L, tags = "glove"),
         ParamInt$new("skip_grams_window", lower = 1L, tags = "glove"),
         ParamInt$new("x_max", lower = 1L, tags = "glove"),

@@ -17,12 +17,12 @@ PipeOpExtractTopicsSTM = R6::R6Class(
     initialize = function(id = "extract_topics_stm", param_vals = list()) {
       
       ps = ParamSet$new(params = list(
-        ParamUty$new("docid_field"),
-        ParamUty$new("text_field"),
-        ParamUty$new("stopwords"),
-        ParamUty$new("doc_grouping_var"),
-        ParamUty$new("prevalence_vars_cat"),
-        ParamUty$new("prevalence_vars_smooth"),
+        ParamUty$new("docid_field", tags = "stm_setup"),
+        ParamUty$new("text_field", tags = "stm_setup"),
+        ParamUty$new("stopwords", tags = "stm_setup"),
+        ParamUty$new("doc_grouping_var", tags = "stm_setup"),
+        ParamUty$new("prevalence_vars_cat", tags = "stm_setup"),
+        ParamUty$new("prevalence_vars_smooth", tags = "stm_setup"),
         ParamInt$new("K", lower = 2L, tags = "stm"),
         ParamInt$new("max.em.its", tags = "stm"),
         ParamFct$new(
@@ -96,66 +96,84 @@ PipeOpExtractTopicsSTM = R6::R6Class(
         categorical_vars = self$param_set$values$prevalence_vars_cat,
         smooth_vars = self$param_set$values$prevalence_vars_smooth)
       
-      stm_mod <- mlr3misc::invoke(
-        stm::stm, 
-        .args = c(
-          list(
-            documents = stm_obj$documents,
-            vocab = stm_obj$vocab,
-            data = stm_obj$meta,
-            prevalence = prevalence_formula),
-          self$param_set$get_values(tags = "stm")))
+      stm_mod <- try(
+        mlr3misc::invoke(
+          stm::stm, 
+          .args = c(
+            list(
+              documents = stm_obj$documents,
+              vocab = stm_obj$vocab,
+              data = stm_obj$meta,
+              prevalence = prevalence_formula),
+            self$param_set$get_values(tags = "stm"))))
+      
+      # stm_mod <- mlr3misc::invoke(
+      #   stm::stm, 
+      #   .args = c(
+      #     list(
+      #       documents = stm_obj$documents,
+      #       vocab = stm_obj$vocab,
+      #       data = stm_obj$meta,
+      #       prevalence = prevalence_formula),
+      #     self$param_set$get_values(tags = "stm")))
       
       options(warn = warn_default)
       
       # Compute topic probabilities
       
-      topic_probs <- stm::make.dt(stm_mod)[
-        , `:=` (
-          topic_doc_id = names(stm_obj$documents),
-          docnum = NULL)]
-      
-      data.table::setnames(topic_probs, tolower(names(topic_probs)))
-      
-      topic_cols <- sprintf("topic%d", seq_len(self$param_set$values$K))
-      
-      topic_probs[
-        , `:=` (
-          # max_topic_score = max(.SD, na.rm = TRUE),
-          topic_label = which.max(.SD)),
-        .SDcols = topic_cols,
-        by = seq_len(nrow(topic_probs))]
-      
-      # Define output
- 
-      dt_new <- data.table::copy(dt)
-      dt_complete <- dt_new[complete_cases]
-      dt_incomplete <- dt_new[setdiff(dt_new[, .I], complete_cases)]
-      
-      id_cols <- unlist(self$param_set$values$doc_grouping_var)
-      
-      dt_complete <- dt_complete[
-        , topic_doc_id := paste(.SD, collapse = "."),
-        .SDcols = id_cols,
-        by = seq_len(nrow(dt_complete))]
-      
-      dt_complete <- topic_probs[dt_complete, on = "topic_doc_id"]
-      
-      dt_complete[
-        , top_user_topic := which.max(tabulate(topic_label)),
-        by = get(id_cols[1L])
+      if (inherits(stm_mod, "try-error")) {
+        
+        dt_final <- data.table::copy(dt)[, topic_label := 0L]
+        
+      } else {
+        
+        topic_probs <- stm::make.dt(stm_mod)[
+          , `:=` (
+            topic_doc_id = names(stm_obj$documents),
+            docnum = NULL)]
+        
+        data.table::setnames(topic_probs, tolower(names(topic_probs)))
+        
+        topic_cols <- sprintf("topic%d", seq_len(self$param_set$values$K))
+        
+        topic_probs[
+          , topic_label := which.max(.SD),
+          .SDcols = topic_cols,
+          by = seq_len(nrow(topic_probs))]
+        
+        # Define output
+        
+        dt_new <- data.table::copy(dt)
+        dt_complete <- dt_new[complete_cases]
+        dt_incomplete <- dt_new[setdiff(dt_new[, .I], complete_cases)]
+        
+        id_cols <- unlist(self$param_set$values$doc_grouping_var)
+        
+        dt_complete <- dt_complete[
+          , topic_doc_id := paste(.SD, collapse = "."),
+          .SDcols = id_cols,
+          by = seq_len(nrow(dt_complete))]
+        
+        dt_complete <- topic_probs[dt_complete, on = "topic_doc_id"]
+        
+        dt_complete[
+          , top_user_topic := which.max(tabulate(topic_label)),
+          by = get(id_cols[1L])
         ][, topic_label := ifelse(
           is.na(topic_label),
           top_user_topic,
           topic_label)
-          ][, top_user_topic := NULL
-            ][, c(topic_cols) := NULL
-              ][, topic_doc_id := NULL]
+        ][, top_user_topic := NULL
+        ][, c(topic_cols) := NULL
+        ][, topic_doc_id := NULL]
+        
+        dt_incomplete[, topic_label := 0L]
+        
+        dt_final <- rbind(dt_complete, dt_incomplete)
+        data.table::setorder(dt_final, doc_id)
+        
+      }
       
-      dt_incomplete[, topic_label := 0L]
-      
-      dt_final <- rbind(dt_complete, dt_incomplete)
-      data.table::setorder(dt_final, doc_id)
       dt_final
 
     },
