@@ -33,15 +33,15 @@ make_prevalence_formula <- function(data,
     
   }
   
-  if(any(is.na(data_dt[, .(cols_docvars)]))) {
-    
-    col_with_na <- paste(
-      cols_docvars[which(is.na(data_dt[, .(cols_docvars)]))],
-      collapse = ", ")
-    
-    stop(sprintf("column(s) %s contain(s) NA values", col_not_found))
-    
-  }
+  # if(any(is.na(data_dt[, .(cols_docvars)]))) {
+  #   
+  #   col_with_na <- paste(
+  #     cols_docvars[which(is.na(data_dt[, .(cols_docvars)]))],
+  #     collapse = ", ")
+  #   
+  #   stop(sprintf("column(s) %s contain(s) NA values", col_with_na))
+  #   
+  # }
   
   # Add smoothing terms and collapse to formula
   

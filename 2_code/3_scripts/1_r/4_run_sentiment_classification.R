@@ -14,39 +14,37 @@ load_rdata_files(tweets_subjective, folder = "2_code/1_data/2_tmp_data")
 data <- tweets_subjective[
   label != "none"]
 
-# labels_fake <- sample(
-#   c("positive", "negative"),
-#   size = nrow(tweets_subjective[label == "none"]),
-#   replace = TRUE)
-# 
-# data_fake <- tweets_subjective[
-#   label == "none"
-#   ][, label := labels_fake]
-# 
-# data_fake <- data_fake[sample(seq_len(nrow(data_fake)), size = 1000L)]
-# 
-# data <- rbind(data, data_fake)
-
 data$label <- as.factor(data$label)
+
+data.table::setorder(data, doc_id)
 
 # TODO make complete cases better (i.e., only taking into account relevant vars)
 
 task <- mlr3::TaskClassif$new(
   "twitter_ttsa", 
-  backend = data[complete.cases(data)],
+  backend = data,
   target = "label")
 
-# Create train-test split
+# Create stratified train-test split
+
+indices_positive <- data.table::copy(task$data())[
+  , row_indices := .I
+  ][label == "positive", row_indices]
+indices_negative <- setdiff(seq_len(task$nrow), indices_positive)
 
 set.seed(123L)
-train_set = sample(task$nrow, 0.7 * task$nrow)
+train_set = sort(union(
+  sample(indices_positive, 0.7 * length(indices_positive)),
+  sample(indices_negative, 0.7 * length(indices_negative))))
 test_set = setdiff(seq_len(task$nrow), train_set)
+
+stopifnot(abs(
+  table(task$data()[train_set]$label)["positive"] / length(train_set) -
+    table(task$data()[test_set]$label)["positive"] / length(test_set)) < 5e-2)
 
 # CREATE PREPROCESSING PIPELINE ------------------------------------------------
 
-topic_type <- "stm"
-
-# topic_type <- "keyword"
+topic_type <- c("stm", "keyword")[1L]
 
 keywords <- list(
   corona = c("corona", "pandemie", "virus", "krise"),
@@ -54,48 +52,55 @@ keywords <- list(
 
 if (topic_type == "stm") {
   
+  # Define contextual variables
+  
+  # context_vars <- list(
+  #   categorical_vars = list(
+  #     "meta_party", 
+  #     "meta_bundesland"),
+  #   smooth_vars = list(
+  #     "meta_unemployment_rate"))
+  # 
+  # prevalence_formula <- make_prevalence_formula(
+  #   data = task$data()[train_set],
+  #   categorical_vars = context_vars$categorical_vars,
+  #   smooth_vars = context_vars$smooth_vars)
+  
   # Define topic modeling pipeop
   
-  prevalence_formula <- make_prevalence_formula(
-    data = task$data(),
-    categorical_vars = list(
-      "meta_party", 
-      "meta_bundesland"),
-    smooth_vars = list(
-      "meta_unemployment_rate"))
+  po_topic_modeling <- PipeOpExtractTopicsSTM$new()
   
-  po_tm <- PipeOpExtractTopicsSTM$new()
-  
-  po_tm$param_set$values <- list(
+  po_topic_modeling$param_set$values <- list(
     docid_field = "doc_id",
     text_field = "text",
     doc_grouping_var = c("twitter_username", "twitter_year", "twitter_month"),
-    prevalence = prevalence_formula,
-    max.em.its = 5L,
+    prevalence_vars_cat = list("meta_party", "meta_bundesland"),
+    prevalence_vars_smooth = list("meta_unemployment_rate"),
+    max.em.its = 1L,
     stopwords = make_stopwords(),
     K = 10L,
     init.type = "LDA")
   
 } else if (topic_type == "keyword") {
   
-  po_sk <- PipeOpStratifyKeywords$new()
+  po_stratify <- PipeOpStratifyKeywords$new()
   
-  po_sk$param_set$values <- list(
+  po_stratify$param_set$values <- list(
     docid_field = "doc_id",
     text_field = "text",
     stopwords = make_stopwords(),
     keywords = keywords)
 
-  po_cr <- mlr3pipelines::PipeOpColRoles$new()
+  po_set_colroles <- mlr3pipelines::PipeOpColRoles$new()
   
-  strati <- as.list(rep("stratum", length(keywords)))
-  names(strati) <- sprintf("stratum_%s", seq_along(keywords))
+  strata <- as.list(rep("stratum", length(keywords)))
+  names(strata) <- sprintf("stratum_%s", seq_along(keywords))
 
-  po_cr$param_set$values$new_role <- strati
+  po_set_colroles$param_set$values$new_role <- strata
 
-  po_tm <- PipeOpExtractTopicsKeyword$new()
+  po_topic_modeling <- PipeOpExtractTopicsKeyword$new()
 
-  po_tm$param_set$values <- list(
+  po_topic_modeling$param_set$values <- list(
     docid_field = "doc_id",
     text_field = "text",
     stopwords = make_stopwords(),
@@ -111,21 +116,22 @@ if (topic_type == "stm") {
 
 # Define selector pipeop for features to be piped into embedding extraction
 
-po_sel_ge <- mlr3pipelines::PipeOpSelect$new(id = "select_embedding")
+po_sel_embeddings <- mlr3pipelines::PipeOpSelect$new(id = "select_embedding")
 
-po_sel_ge$param_set$values$selector <- 
+po_sel_embeddings$param_set$values$selector <- 
   mlr3pipelines::selector_name(c("topic_label", "text"))
 
-po_sel_ge_inv <- mlr3pipelines::PipeOpSelect$new(id = "select_rest")
+po_sel_embeddings_inv <- mlr3pipelines::PipeOpSelect$new(id = "select_rest")
 
-po_sel_ge_inv$param_set$values$selector <- mlr3pipelines::selector_invert(
-  mlr3pipelines::selector_name(c("topic_label", "text")))
+po_sel_embeddings_inv$param_set$values$selector <- 
+  mlr3pipelines::selector_invert(
+    mlr3pipelines::selector_name(c("topic_label", "text")))
 
 # Define glove embedding pipeop
 
-po_ge <- PipeOpMakeGloveEmbeddings$new()
-po_ge$param_set$values$dimension <- 3L
-po_ge$param_set$values$stopwords <- make_stopwords()
+po_embeddings <- PipeOpMakeGloveEmbeddings$new()
+po_embeddings$param_set$values$dimension <- 3L
+po_embeddings$param_set$values$stopwords <- make_stopwords()
 
 # Define trivial pipeop for features not piped into embedding extraction
 
@@ -134,9 +140,10 @@ po_nop <- mlr3pipelines::PipeOpNOP$new()
 # Define selector pipeop for features to be piped into classification
 # TODO tailor to learners (e.g., cart could handle factors)
 
-po_sel_cl <- mlr3pipelines::PipeOpSelect$new(id = "select_classif")
+po_sel_sentiment_analysis <- 
+  mlr3pipelines::PipeOpSelect$new(id = "select_sentiment_analysis")
 
-po_sel_cl$param_set$values$selector <- 
+po_sel_sentiment_analysis$param_set$values$selector <- 
   mlr3pipelines::selector_invert(
     mlr3pipelines::selector_union(
       mlr3pipelines::selector_type(
@@ -147,31 +154,30 @@ po_sel_cl$param_set$values$selector <-
 
 if (topic_type == "stm") {
   
-  graph_preproc <- mlr3pipelines::Graph$new()$add_pipeop(po_tm)
+  graph_preproc <- mlr3pipelines::Graph$new()$add_pipeop(po_topic_modeling)
   
 } else if (topic_type == "keyword") {
   
-  graph_preproc <- mlr3pipelines::Graph$new()$add_pipeop(po_sk) %>>% 
-    po_cr %>>% 
-    po_tm
+  graph_preproc <- mlr3pipelines::Graph$new()$add_pipeop(po_stratify) %>>% 
+    po_set_colroles %>>% 
+    po_topic_modeling
   
 }
 
+# res_tm_train <- graph_preproc$train(task$clone()$filter(train_set))[[1]]
+# res_tm_test <- graph_preproc$predict(task$clone()$filter(test_set))[[1]]
+
 graph_preproc <- graph_preproc %>>%
   gunion(list(
-    po_sel_ge %>>% 
-      po_ge,
-    po_sel_ge_inv %>>% 
+    po_sel_embeddings %>>% 
+      po_embeddings,
+    po_sel_embeddings_inv %>>% 
       po_nop)
     ) %>>%
   po("featureunion") %>>%
-  po_sel_cl
+  po_sel_sentiment_analysis
 
-# plot(graph_preproc, html = FALSE)
-
-# graph_preproc <- mlr3pipelines::Graph$new()$add_pipeop(po_tm)
-# res_preproc_train <- graph_preproc$train(task$clone()$filter(train_set))[[1]]
-# res_preproc_test <- graph_preproc$predict(task$clone()$filter(test_set))[[1]]
+plot(graph_preproc, html = FALSE)
 
 # CREATE GRAPH LEARNERS --------------------------------------------------------
 
