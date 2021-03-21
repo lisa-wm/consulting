@@ -48,10 +48,14 @@ PipeOpMakeGloveEmbeddings = R6::R6Class(
     
     .transform_dt = function(dt, levels) {
       
-      dt_subsets <- lapply(
-        unique(dt$topic_label), 
-        function(i) dt[topic_label == i])
-
+      if ("topic_label" %in% names(dt)) {
+        
+        dt_subsets <- lapply(
+          unique(dt$topic_label), 
+          function(i) data.table::copy(dt)[topic_label == i])
+        
+      } else dt_subsets <- list(data.table::copy(dt))
+      
       emb_mats <- lapply(
         seq_along(dt_subsets),
         function(i) {
