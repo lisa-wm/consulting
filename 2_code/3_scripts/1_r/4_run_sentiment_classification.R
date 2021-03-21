@@ -11,16 +11,16 @@
 
 load_rdata_files(tweets_subjective, folder = "2_code/1_data/2_tmp_data")
 
-data <- tweets_subjective[
-  label != "none"]
+data_labeled <- tweets_subjective[label != "none"]
+data_unlabeled <- tweets_subjective[label == "none"]
 
-data$label <- as.factor(data$label)
-
-data.table::setorder(data, doc_id)
+invisible(sapply(
+  list(data_labeled, data_unlabeled), 
+  data.table::setorder, doc_id))
 
 task <- mlr3::TaskClassif$new(
   "twitter_ttsa", 
-  backend = data,
+  backend = data_labeled,
   target = "label")
 
 # Create stratified train-test split
@@ -179,7 +179,7 @@ po_learners <- list(
     learner = lrn("classif.ranger"), 
     id = "classify_forest"),
   svm = mlr3pipelines::PipeOpLearner$new(
-    learner = lrn("classif.svm", type = "C-classification"), 
+    learner = lrn("classif.svm"), 
     id = "classify_svm"),
   lasso = mlr3pipelines::PipeOpLearner$new(
     learner = lrn("classif.cv_glmnet"), 
@@ -188,7 +188,6 @@ po_learners <- list(
 # Create full graphs
 
 graphs_full <- lapply(po_learners, function(i) graph_preproc %>>% i)
-plot(graphs_full$forest, html = FALSE)
 
 # Create graph_learners
 
@@ -203,51 +202,44 @@ names(graph_learners) <- names(po_learners)
 
 # BENCHMARK LEARNERS -----------------------------------------------------------
 
+# Define search spaces
+
+invisible(lapply(
+  graph_learners,
+  function(i) {
+    i$param_set$values$extract_topics_stm.K <- paradox::to_tune(5L, 10L)
+    i$param_set$values$make_glove_embeddings.dimension <- 
+      paradox::to_tune(5L, 10L)}))
+
+graph_learners$forest$param_set$values$classify_forest.mtry <- 
+  paradox::to_tune(7L, 30L)
+
+graph_learners$svm$param_set$values$classify_svm.type <- "C-classification"
+graph_learners$svm$param_set$values$classify_svm.kernel <- 
+  paradox::to_tune(c("polynomial", "radial"))
+graph_learners$svm$param_set$values$classify_svm.gamma <- 
+  paradox::to_tune(1e-3, 1e-1)
+
+graph_learners$lasso$param_set$values$classify_lasso.alpha <- 
+  paradox::to_tune(1e-2, 1L)
+
 # Define tuning parameters
 
 resampling_inner <- mlr3::rsmp("cv", folds = 3L)
 measure_inner <- mlr3::msr("classif.acc")
 terminator <- mlr3tuning::trm("evals", n_evals = 3L)
-tuner <- mlr3tuning::tnr("grid_search", resolution = 10L)
-
-# Define search spaces
-
-param_set_base <- paradox::ParamSet$new(list(
-  paradox::ParamInt$new("extract_topics_stm.K"),
-  paradox::ParamInt$new("make_glove_embeddings.dimension")))
-param_set_base$values <- list(
-  extract_topics_stm.K = paradox::to_tune(5L, 10L),
-  make_glove_embeddings.dimension = paradox::to_tune(5L, 10L))
-
-param_set_forest <- param_set_base$clone()
-param_set_forest$add(paradox::ParamInt$new("classify_forest.mtry"))
-param_set_forest$values$classify_forest.mtry <- paradox::to_tune(7L, 30L)
-
-param_set_svm <- param_set_base$clone()
-param_set_svm$add(paradox::ParamSet$new(list(
-  paradox::ParamFct$new(
-    "classify_svm.kernel",
-    levels = c("polynomial", "radial")),
-  paradox::ParamDbl$new("classify_svm.gamma"))))
-param_set_svm$values$classify_svm.kernel <- paradox::to_tune()
-param_set_svm$values$classify_svm.gamma <- paradox::to_tune(1e-3, 1e-1)
-
-param_set_lasso <- param_set_base$clone()
-param_set_lasso$add(paradox::ParamDbl$new("classify_lasso.alpha"))
-param_set_lasso$values$classify_lasso.alpha <- paradox::to_tune(1e-2, 1L)
-
-param_sets <- list(param_set_forest, param_set_svm, param_set_lasso)
+tuner <- mlr3tuning::tnr("grid_search", resolution = 1L)
 
 # Define tuning learners
 
 auto_tuners <- lapply(
-  seq_along(graph_learners), 
+  graph_learners, 
   function(i) {
     mlr3tuning::AutoTuner$new(
-      learner = graph_learners[[i]],
+      learner = i,
       resampling = resampling_inner,
       measure = measure_inner,
-      search_space = param_sets[[i]]$search_space(),
+      search_space = i$param_set$search_space(),
       terminator = terminator,
       tuner = tuner)})
 
@@ -265,7 +257,7 @@ resampling_outer <- mlr3::rsmp("cv", folds = 3L)
 
 # Define benchmarking design
 
-bmr_design <- mlr3::benchmark_grid(
+benchmark_design <- mlr3::benchmark_grid(
   task$clone()$filter(train_set), 
   auto_tuners, 
   resampling_outer)
@@ -274,25 +266,31 @@ bmr_design <- mlr3::benchmark_grid(
 
 future::plan("multiprocess")
 set.seed(123L)
-bmr <- mlr3::benchmark(bmr_design)
+benchmark <- mlr3::benchmark(benchmark_design)
 
-benchmark_results <- data.table::as.data.table(bmr)
+benchmark_results <- data.table::as.data.table(benchmark)
 
 save_rdata_files(
   benchmark_results, 
   folder = "2_code/1_data/2_tmp_data",
   tmp = FALSE)
 
-perf_bmr <- bmr$score(msr("classif.acc", id = "accuracy"))
-winner <- which.max(perf_bmr$accuracy)
+perf_benchmark <- benchmark$score(msr("classif.acc", id = "accuracy"))
+winner <- which.max(perf_benchmark$accuracy)
 
 # EVALUATE PERFORMANCE OF SELECTED LEARNER -------------------------------------
 
-winning_learner <- benchmark_results$learner[[winner]]$learner
+winning_learner <- benchmark_results$learner[[winner]]
 winning_learner$train(task, row_ids = train_set)
-winning_learner$param_set
+winning_learner$param_set$values
 
-perf <- winning_learner$predict(task, row_ids = test_set)
+perf_selected_learner <- winning_learner$predict(task, row_ids = test_set)
 
-perf$confusion
-perf$score(msr("classif.acc"))
+perf_selected_learner$confusion
+perf_selected_learner$score(msr("classif.acc"))
+
+# TRAIN SELECTEDLEARNER ON ENTIRE DATA -----------------------------------------
+
+winning_learner$train(task)
+perf_new_data <- winning_learner$predict_newdata(data_unlabeled)
+table(perf_new_data$response)
