@@ -44,7 +44,7 @@ stopifnot(abs(
 
 # Define topic modeling type (parameters need to be set within if clause)
 
-topic_type <- c("stm", "keyword", "none")[3L]
+topic_type <- c("stm", "keyword", "none")[1L]
 
 if (topic_type == "stm") {
   
@@ -116,34 +116,6 @@ po_sel_embeddings_inv$param_set$values$selector <- switch(
   none = mlr3pipelines::selector_invert(
     mlr3pipelines::selector_name(c("text"))))
 
-# if (topic_type != "none") {
-#   
-#   po_sel_embeddings <- mlr3pipelines::PipeOpSelect$new(id = "select_embedding")
-#   
-#   po_sel_embeddings$param_set$values$selector <- 
-#     mlr3pipelines::selector_name(c("topic_label", "text"))
-#   
-#   po_sel_embeddings_inv <- mlr3pipelines::PipeOpSelect$new(id = "select_rest")
-#   
-#   po_sel_embeddings_inv$param_set$values$selector <- 
-#     mlr3pipelines::selector_invert(
-#       mlr3pipelines::selector_name(c("topic_label", "text")))
-#   
-# } else {
-#   
-#   po_sel_embeddings <- mlr3pipelines::PipeOpSelect$new(id = "select_embedding")
-#   
-#   po_sel_embeddings$param_set$values$selector <- 
-#     mlr3pipelines::selector_name(c("text"))
-#   
-#   po_sel_embeddings_inv <- mlr3pipelines::PipeOpSelect$new(id = "select_rest")
-#   
-#   po_sel_embeddings_inv$param_set$values$selector <- 
-#     mlr3pipelines::selector_invert(
-#       mlr3pipelines::selector_name(c("text")))
-#   
-# }
-
 # Define glove embedding pipeop
 
 po_embeddings <- PipeOpMakeGloveEmbeddings$new()
@@ -178,22 +150,6 @@ graph_preproc <- switch(
     po_topic_modeling,
   none = mlr3pipelines::Graph$new()$add_pipeop(
     mlr_pipeops$get("nop", id = "start")))
-
-# if (topic_type == "stm") {
-#   
-#   graph_preproc <- mlr3pipelines::Graph$new()$add_pipeop(po_topic_modeling)
-#   
-# } else if (topic_type == "keyword") {
-#   
-#   graph_preproc <- mlr3pipelines::Graph$new()$add_pipeop(po_stratify) %>>% 
-#     po_set_strata %>>% 
-#     po_topic_modeling
-#   
-# } else {
-#   
-#   graph_preproc <- mlr3pipelines::Graph$new()
-#   
-# }
 
 if (FALSE) {
   
