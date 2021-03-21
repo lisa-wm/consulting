@@ -107,16 +107,6 @@ PipeOpExtractTopicsSTM = R6::R6Class(
               prevalence = prevalence_formula),
             self$param_set$get_values(tags = "stm"))))
       
-      # stm_mod <- mlr3misc::invoke(
-      #   stm::stm, 
-      #   .args = c(
-      #     list(
-      #       documents = stm_obj$documents,
-      #       vocab = stm_obj$vocab,
-      #       data = stm_obj$meta,
-      #       prevalence = prevalence_formula),
-      #     self$param_set$get_values(tags = "stm")))
-      
       options(warn = warn_default)
       
       # Compute topic probabilities
@@ -159,13 +149,13 @@ PipeOpExtractTopicsSTM = R6::R6Class(
         dt_complete[
           , top_user_topic := which.max(tabulate(topic_label)),
           by = get(id_cols[1L])
-        ][, topic_label := ifelse(
-          is.na(topic_label),
-          top_user_topic,
-          topic_label)
-        ][, top_user_topic := NULL
-        ][, c(topic_cols) := NULL
-        ][, topic_doc_id := NULL]
+          ][, topic_label := ifelse(
+            is.na(topic_label),
+            top_user_topic,
+            topic_label)
+            ][, top_user_topic := NULL
+              ][, c(topic_cols) := NULL
+                ][, topic_doc_id := NULL]
         
         dt_incomplete[, topic_label := 0L]
         

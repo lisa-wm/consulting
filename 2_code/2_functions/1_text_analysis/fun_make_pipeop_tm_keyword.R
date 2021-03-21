@@ -73,8 +73,10 @@ PipeOpExtractTopicsKeyword = R6::R6Class(
         dfm,
         dict_keywords,
         levels = 1L:3L)
-
-      matches_dt <- convert_qtda_to_dt(matches_dfm, key = "doc_id")
+      
+      matches_dt <- data.table::setDT(
+        quanteda::convert(matches_dfm, to = "data.frame"),
+        key = "doc_id")
 
       # Compute topic label
 
@@ -91,7 +93,7 @@ PipeOpExtractTopicsKeyword = R6::R6Class(
           derivative_cols <- relevant_cols[
             endsWith(relevant_cols, "derivatives")]
 
-          dt <- copy(matches_dt)[, ..relevant_cols]
+          dt <- data.table::copy(matches_dt)[, ..relevant_cols]
 
           dt[
             , c(keyword_cols) := lapply(.SD, function(i) 3L * i),
@@ -159,11 +161,34 @@ PipeOpExtractTopicsKeyword = R6::R6Class(
         seq_along(data_raw), 
         function(i) sum(data_raw[seq_len(i)] == data_raw[i]))
       
-      count_cum_dt <- as.data.table(
+      count_cum_dt <- data.table::as.data.table(
         matrix(count_cum, ncol = ncol(data), byrow = TRUE))
-      setnames(count_cum_dt, names(data))
+      data.table::setnames(count_cum_dt, names(data))
       
       count_cum_dt > 1L
+      
+    },
+    
+    .remove_umlauts = function(text) {
+      
+      checkmate::assert_character(text)
+      
+      # This is necessary for R to convert all representations of umlauts 
+      # (of which there are several) to a single one that can then be reliably 
+      # detected 
+      
+      text <- stringi::stri_trans_general(text, "Any-Latin")
+      
+      stringr::str_replace_all(
+        text, 
+        c(
+          "\u00c4" = "Ae",
+          "\u00e4" = "ae",
+          "\u00d6" = "Oe",
+          "\u00f6" = "oe",
+          "\u00dc" = "Ue",
+          "\u00fc" = "ue",
+          "\u00df" = "ss"))
       
     },
     
@@ -171,7 +196,8 @@ PipeOpExtractTopicsKeyword = R6::R6Class(
       
       keywords <- lapply(
         keywords,
-        function(i) SnowballC::wordStem(remove_umlauts(i), language = "de"))
+        function(i) {
+          SnowballC::wordStem(private$.remove_umlauts(i), language = "de")})
       
       if (any(!unlist(keywords) %in% quanteda::featnames(fcm))) {
         warning(sprintf(
@@ -182,8 +208,7 @@ PipeOpExtractTopicsKeyword = R6::R6Class(
       
       # Re-convert to easy-to-handle dfm
       
-      fcm_red <- quanteda::as.dfm(fcm) %>% 
-        quanteda::dfm_select(unlist(keywords)) 
+      fcm_red <- quanteda::dfm_select(quanteda::as.dfm(fcm), unlist(keywords)) 
       
       keywords <- lapply(
         keywords,
@@ -234,7 +259,9 @@ PipeOpExtractTopicsKeyword = R6::R6Class(
         function(i) {
           
           this_fcm <- quanteda::dfm_select(fcm, i)
-          this_dt <- convert_qtda_to_dt(this_fcm, key = NULL)
+          this_dt <- data.table::setDT(
+            quanteda::convert(this_fcm, to = "data.frame"),
+            key = "doc_id")
           
           this_dt[
             , names(this_dt)[-1L] := lapply(

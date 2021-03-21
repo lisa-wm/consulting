@@ -44,7 +44,7 @@ stopifnot(abs(
 
 # Define topic modeling type (parameters need to be set within if clause)
 
-topic_type <- c("stm", "keyword")[1L]
+topic_type <- c("stm", "keyword")[2L]
 
 if (topic_type == "stm") {
   
@@ -65,8 +65,10 @@ if (topic_type == "stm") {
 } else if (topic_type == "keyword") {
   
   keywords <- list(
-    corona = c("corona", "pandemie", "virus", "krise"),
-    klima = c("klima", "umwelt"))
+    corona = c("corona", "pandemie", "virus", "krise")
+    ,
+    test = c("menschen", "europa", "demokratie")
+    )
   
   po_stratify <- PipeOpStratifyKeywords$new()
   
@@ -76,7 +78,7 @@ if (topic_type == "stm") {
     stopwords = make_stopwords(),
     keywords = keywords)
 
-  po_set_strata <- mlr3pipelines::PipeOpColRoles$new()
+  po_set_strata <- mlr3pipelines::PipeOpColRoles$new(id = "set_strata")
   
   strata <- as.list(rep("stratum", length(keywords)))
   names(strata) <- sprintf("stratum_%s", seq_along(keywords))
@@ -93,11 +95,6 @@ if (topic_type == "stm") {
     n_byterms = 10L)
   
 }
-
-# graph_preproc <- mlr3pipelines::Graph$new()$add_pipeop(po_sk)
-# res_preproc <- graph_preproc$train(task)[[1]]
-# res_preproc$data()
-# table(res_preproc$data()$is_match_any)
 
 # Define selector pipeop for features to be piped into embedding extraction
 
@@ -122,7 +119,6 @@ po_embeddings$param_set$values$stopwords <- make_stopwords()
 po_nop <- mlr3pipelines::PipeOpNOP$new(id = "pipe_along")
 
 # Define selector pipeop for features to be piped into classification
-# TODO tailor to learners (e.g., cart could handle factors)
 
 po_sel_sentiment_analysis <- 
   mlr3pipelines::PipeOpSelect$new(id = "select_sentiment_analysis")
@@ -151,8 +147,13 @@ if (topic_type == "stm") {
   
 }
 
-# res_tm_train <- graph_preproc$train(task$clone()$filter(train_set))[[1]]
-# res_tm_test <- graph_preproc$predict(task$clone()$filter(test_set))[[1]]
+if (FALSE) {
+  
+  res_tm_train <- graph_preproc$train(task$clone()$filter(train_set))[[1]]
+  res_tm_test <- graph_preproc$predict(task$clone()$filter(test_set))[[1]]
+  res_tm_test$data()
+  
+}
 
 graph_preproc <- graph_preproc %>>%
   gunion(list(
@@ -165,10 +166,12 @@ graph_preproc <- graph_preproc %>>%
   po_sel_sentiment_analysis %>>%
   po_set_colroles
 
-plot(graph_preproc, html = FALSE)
-
-# res_tm_train <- graph_preproc$train(task$clone()$filter(train_set))[[1]]
-# res_tm_train$col_roles
+if (FALSE) {
+  
+  plot(graph_preproc, html = FALSE)
+  res_tm_train <- graph_preproc$train(task$clone()$filter(train_set))[[1]]
+  
+}
 
 # CREATE GRAPH LEARNERS --------------------------------------------------------
 
@@ -196,21 +199,25 @@ graph_learners <- lapply(
   function(i) GraphLearner$new(graphs_full[[i]], id = names(po_learners)[i]))
 names(graph_learners) <- names(po_learners)
 
-# graph_learners[[1]]$train(task, row_ids = train_set)
-# res <- graph_learners[[1]]$predict(task, row_ids = test_set)
-# res$confusion
-
 # BENCHMARK LEARNERS -----------------------------------------------------------
 
 # Define search spaces
 
+if (topic_type == "stm") {
+  
+  invisible(lapply(
+    graph_learners,
+    function(i) {
+      i$param_set$values$extract_topics_stm.K <- paradox::to_tune(5L, 10L)}))
+  
+}
+
 invisible(lapply(
   graph_learners,
   function(i) {
-    i$param_set$values$extract_topics_stm.K <- paradox::to_tune(5L, 10L)
     i$param_set$values$make_glove_embeddings.dimension <- 
       paradox::to_tune(5L, 10L)}))
-
+  
 graph_learners$forest$param_set$values$classify_forest.mtry <- 
   paradox::to_tune(7L, 30L)
 
@@ -223,12 +230,14 @@ graph_learners$svm$param_set$values$classify_svm.gamma <-
 graph_learners$lasso$param_set$values$classify_lasso.alpha <- 
   paradox::to_tune(1e-2, 1L)
 
+for (i in graph_learners) print(i$param_set$search_space())
+
 # Define tuning parameters
 
-resampling_inner <- mlr3::rsmp("cv", folds = 3L)
+resampling_inner <- mlr3::rsmp("cv", folds = 2L)
 measure_inner <- mlr3::msr("classif.acc")
-terminator <- mlr3tuning::trm("evals", n_evals = 3L)
-tuner <- mlr3tuning::tnr("grid_search", resolution = 1L)
+terminator <- mlr3tuning::trm("evals", n_evals = 2L)
+tuner <- mlr3tuning::tnr("grid_search", resolution = 2L)
 
 # Define tuning learners
 
@@ -243,17 +252,17 @@ auto_tuners <- lapply(
       terminator = terminator,
       tuner = tuner)})
 
-# auto_tuners[[1]]$train(task, row_ids = train_set)
-# res_cart <- auto_tuners[[1]]$predict(task, row_ids = test_set)
-# res_cart$confusion
-
-# auto_tuners[[2]]$train(task, row_ids = train_set)
-# res_glmnet <- auto_tuners[[2]]$predict(task, row_ids = test_set)
-# res_glmnet$confusion
+if (FALSE) {
+  
+  auto_tuners[[1]]$train(task, row_ids = train_set)
+  res_cart <- auto_tuners[[1]]$predict(task, row_ids = test_set)
+  res_cart$confusion
+  
+}
 
 # Define benchmarking parameters
 
-resampling_outer <- mlr3::rsmp("cv", folds = 3L)
+resampling_outer <- mlr3::rsmp("cv", folds = 2L)
 
 # Define benchmarking design
 

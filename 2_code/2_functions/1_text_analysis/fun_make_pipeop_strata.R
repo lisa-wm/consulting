@@ -30,7 +30,7 @@ PipeOpStratifyKeywords = R6::R6Class(
         id = id, 
         param_set = ps, 
         param_vals = param_vals,
-        packages = c("quanteda"))
+        packages = c("quanteda", "SnowballC", "stringi", "stringr"))
       
     }
   ),
@@ -56,14 +56,15 @@ PipeOpStratifyKeywords = R6::R6Class(
       
       keywords <- lapply(
         self$param_set$values$keywords,
-        function(i) SnowballC::wordStem(remove_umlauts(i), language = "de"))
+        function(i) {
+          SnowballC::wordStem(private$.remove_umlauts(i), language = "de")})
       
       dict <- quanteda::dictionary(keywords)
       
-      mtch <- convert_qtda_to_dt(
-        quanteda::dfm_lookup(dfm, dict),
+      mtch <- data.table::setDT(
+        quanteda::convert(quanteda::dfm_lookup(dfm, dict), to = "data.frame"),
         key = "doc_id")
-      
+
       mtch_cols <- names(keywords)
       
       mtch <- mtch[
@@ -77,7 +78,6 @@ PipeOpStratifyKeywords = R6::R6Class(
       mtch <- mtch[, ..cols_to_keep]
       
       dt_new <- data.table::copy(dt)
-      
       dt_new <- mtch[dt_new, on = "doc_id"]
       
       dt_new
@@ -109,6 +109,29 @@ PipeOpStratifyKeywords = R6::R6Class(
 
       tkns_topics
 
+    },
+    
+    .remove_umlauts = function(text) {
+      
+      checkmate::assert_character(text)
+      
+      # This is necessary for R to convert all representations of umlauts 
+      # (of which there are several) to a single one that can then be reliably 
+      # detected 
+      
+      text <- stringi::stri_trans_general(text, "Any-Latin")
+      
+      stringr::str_replace_all(
+        text, 
+        c(
+          "\u00c4" = "Ae",
+          "\u00e4" = "ae",
+          "\u00d6" = "Oe",
+          "\u00f6" = "oe",
+          "\u00dc" = "Ue",
+          "\u00fc" = "ue",
+          "\u00df" = "ss"))
+      
     }
   )
 )
