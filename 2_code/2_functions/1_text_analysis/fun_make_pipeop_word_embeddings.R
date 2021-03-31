@@ -64,7 +64,7 @@ PipeOpMakeGloveEmbeddings = R6::R6Class(
             .args = c(
               list(
                 text = dt_subsets[[i]]$text, 
-                stopwords = self$param_set$values$dimension,
+                stopwords = self$param_set$values$stopwords,
                 dimension = self$param_set$values$dimension), 
               self$param_set$get_values(tags = "glove")))})
       
