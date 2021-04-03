@@ -156,10 +156,11 @@ Convert ratings to numeric:
 
 Now we have everything we need and can store the data in an R-friendly object.
 
-We will use a `data.table` here. Some people may be more familiar with `data.frame` objects but `data.table` is rather more powerful and substantially faster for large data sets, which is why we use it a lot in our code (note that the syntax is a bit different).
+We will use a `data.frame` here. If you need to handle large data, you might want to consider using `data.table` instead, a powerful and very fast package for general data handling (its syntax is a bit different though).
+
 
 ```{r create_df}
-imdb_scraped_data <- data.table::data.table(
+imdb_scraped_data <- data.frame(
   ranking = rank_data_clean,
   title   = title_data,
   year    = year_data_clean,

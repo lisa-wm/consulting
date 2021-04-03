@@ -11,6 +11,7 @@
 
 <meta name="author" content="Asmik &amp; Lisa – for Intro to NLP" />
 
+<meta name="date" content="2021-04-30" />
 
 <title>Web Scraping – Example</title>
 
@@ -166,6 +167,7 @@ pre code {
 
 <h1 class="title toc-ignore">Web Scraping – Example</h1>
 <h4 class="author">Asmik &amp; Lisa – for Intro to NLP</h4>
+<h4 class="date">30 April 2021</h4>
 
 </div>
 
@@ -176,8 +178,8 @@ library(&quot;tidyverse&quot;)
 library(&quot;rvest&quot;)
 library(&quot;stringr&quot;)
 library(&quot;xml2&quot;)</code></pre>
-<div id="web-scraping-from-the-imdb-website" class="section level1">
-<h1>Web Scraping from the IMDb website</h1>
+<div id="web-scraping-from-the-imdb-website" class="section level2">
+<h2>Web Scraping from the IMDb website</h2>
 <div id="get-contents" class="section level3">
 <h3>Get contents</h3>
 <p>Specify URL for desired website to be scraped (<a href="http://www.imdb.com/chart/top?ref_=nv_mv_250_6" class="uri">http://www.imdb.com/chart/top?ref_=nv_mv_250_6</a>) and parse website contents:</p>
@@ -233,11 +235,11 @@ library(&quot;xml2&quot;)</code></pre>
 ## [136] 2004 1950 1995 2001 2013 1963 2006 2007 2009 1998 1961 1980 1988 1948 1954
 ## [151] 2010 2017 1974 2005 1925 2007 2005 2015 1982 1980 1957 1999 2011 1993 2019
 ## [166] 1996 1998 1939 2003 1979 1957 2003 2003 1982 1957 1996 2014 1953 2015 2008
-## [181] 1949 1954 1978 2021 1993 2009 1995 2014 2002 2014 2016 2013 1966 1924 2018
+## [181] 1949 1954 1978 1993 2021 2009 1995 2014 2002 2014 2016 2013 1966 1924 2018
 ## [196] 1998 1942 1975 1926 2010 2019 2013 1996 1978 1939 2015 1989 1971 2004 2011
 ## [211] 1986 1976 1959 2009 2016 1967 2017 1986 1953 2007 2013 1995 1979 1959 1928
 ## [226] 2015 2004 2012 2018 2000 1966 2020 2001 1976 1984 1940 1988 2004 2000 1955
-## [241] 2006 1984 2013 2019 1934 2019 2013 2004 2015 2016</code></pre>
+## [241] 2006 1984 2019 2013 1934 2019 2013 2004 2016 1966</code></pre>
 </div>
 <div id="get-rankings" class="section level3">
 <h3>Get rankings</h3>
@@ -309,21 +311,21 @@ head(rating_data)</code></pre>
 <div id="store-scraped-data-in-a-data-table" class="section level3">
 <h3>Store scraped data in a data table</h3>
 <p>Now we have everything we need and can store the data in an R-friendly object.</p>
-<p>We will use a <code>data.table</code> here. Some people may be more familiar with <code>data.frame</code> objects but <code>data.table</code> is rather more powerful and substantially faster for large data sets, which is why we use it a lot in our code (note that the syntax is a bit different).</p>
-<pre class="r"><code>imdb_scraped_data &lt;- data.table::data.table(
+<p>We will use a <code>data.frame</code> here. If you need to handle large data, you might want to consider using <code>data.table</code> instead, a powerful and very fast package for general data handling (its syntax is a bit different though).</p>
+<pre class="r"><code>imdb_scraped_data &lt;- data.frame(
   ranking = rank_data_clean,
   title   = title_data,
   year    = year_data_clean,
   rating  = rating_data_clean)
 
 head(imdb_scraped_data)</code></pre>
-<pre><code>##    ranking                  title year rating
-## 1:       1       Die Verurteilten 1994    9.2
-## 2:       2               Der Pate 1972    9.1
-## 3:       3             Der Pate 2 1974    9.0
-## 4:       4        The Dark Knight 2008    9.0
-## 5:       5 Die zwölf Geschworenen 1957    8.9
-## 6:       6       Schindlers Liste 1993    8.9</code></pre>
+<pre><code>##   ranking                  title year rating
+## 1       1       Die Verurteilten 1994    9.2
+## 2       2               Der Pate 1972    9.1
+## 3       3             Der Pate 2 1974    9.0
+## 4       4        The Dark Knight 2008    9.0
+## 5       5 Die zwölf Geschworenen 1957    8.9
+## 6       6       Schindlers Liste 1993    8.9</code></pre>
 <p><strong>Nice, now we can use the movie data just like any other R object.</strong> <img src="data:image/jpeg;base64,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" /></p>
 </div>
 </div>
