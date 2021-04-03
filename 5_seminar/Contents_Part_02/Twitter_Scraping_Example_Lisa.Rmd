@@ -1,0 +1,178 @@
+---
+title: "Scraping Twitter Data -- Example"
+author: "Asmik & Lisa -- for Intro to NLP"
+date: "30 April 2021"
+output:
+  html_document: default
+  pdf_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+# Setup 
+consumer_key <- "wc37jEDaiiNxcmj7Ot8nS7U2u"
+consumer_secret <- "BlEbL1Wd96EKh1Kgonrp7StJD8L7mbcZ736R00S3EFTclaTdU0"
+access_token <- "1244208984724209665-GWNgwnJnPdFIIgV9X8Gio07Re8w82v"
+access_secret <- "CJC9BtdlNpv6GIGovENTMDQUgjWzLljyp4WYepreo7xpF"
+```
+
+
+```{r setup_packages, message=FALSE, warning=FALSE}
+# Load required packages
+
+library("rtweet")
+library("stringr")
+library("tidytext")
+library("tidyverse")
+```
+
+### Set up API access
+
+We need to set up our API token prior to executing the following code.
+Note that you need to define your personal `consumer_key`, `consumer_secret`, `access_token`, and `access_secret`.
+
+```{r cars}
+
+personal_token <- rtweet::create_token(
+  consumer_key = consumer_key,
+  consumer_secret = consumer_secret,
+  access_token = access_token,
+  access_secret = access_secret)
+
+```
+
+### Extract relevant tweets
+
+We search for tweets with hashtag *#merkel*. `rtweet` conveniently returns a `data.frame` object to which we add a `query` column:
+
+```{r title}
+scraped_tweets_merkel <- rtweet::search_tweets(
+  "#merkel", # i.e.: match exact phrase, # for hashtag, @ for mentions)
+  n = 1000, # cap to 1k hits (max: 18k)
+  lang = "de", # set account language
+  include_rts = FALSE, # exclude retweets
+  type = "recent", # alternatively, "popular" or "mixed"
+  token = personal_token)
+
+scraped_tweets_merkel$query <- "Merkel"
+
+```
+Now, search for tweets with hashtag *AfD*:
+
+```{r title_1}
+scraped_tweets_afd <- rtweet::search_tweets(
+  "#AfD",
+  n = 1000,
+  lang = "de", 
+  include_rts = FALSE, 
+  type = "recent",
+  token = personal_token)
+
+scraped_tweets_afd$query <- "AfD"
+```
+
+Combine both:
+
+```{r year}
+combined_tweets <- dplyr::bind_rows(scraped_tweets_merkel, scraped_tweets_afd)
+
+head(combined_tweets)
+```
+
+We can also conduct multiple independent search queries. The following examples gives us a `list`, each of whose entries is a `data.frame` as in the previous examples. In order to coerce the entries to a single `data.frame`, we call `rbind` on the `list` elements afterwards: 
+
+```{r throwserror, include = FALSE}
+# tweets_multiple <- Map(
+#   "search_tweets",
+#   c("afd", "corona OR merkel"),
+#   n = 100,
+#   lang = "de")
+```
+
+```{r year_1}
+
+# Combine multiple search queries
+
+tweets_multiple <- lapply(
+  c("#afd", "#corona OR #merkel"),
+  function(i) {rtweet::search_tweets(
+    q = i, 
+    n = 100,
+    lang = "de", 
+    token = personal_token)})
+
+# Use rtweet's wrapper around do.call(rbind, ...)
+
+tweets_multiple_df <- rtweet::do_call_rbind(tweets_multiple) 
+
+head(tweets_multiple_df)
+
+```
+
+We can also search for users:
+
+```{r user}
+scraped_tweets_lauterbach <- rtweet::get_timeline (
+  "Karl_Lauterbach",
+  n = 100,
+  lang = "de", 
+  include_rts = FALSE, 
+  type = "popular",
+  token = personal_token)
+
+head(scraped_tweets_lauterbach)
+
+```
+
+`rtweet` provides some other useful functionalities. For instance, analyzing tweets might require extraction of emojis:
+
+```{r emojis}
+head(rtweet::emojis)
+```
+
+### Explore scraped data
+
+Tweets' timeline -- frequency of tweets over time: 
+
+```{r year_clean}
+summary(combined_tweets$created_at)
+```
+
+```{r rank}
+combined_tweets %>%
+  dplyr::group_by(query) %>%
+  rtweet::ts_plot( "hours", cex = 0.8) +
+  labs(x = NULL, y = NULL,
+       title = "Frequency of tweets",
+       # subtitle = paste0(format(min(combined_tweets$created_at), "%d %B %Y"), " to ", format(max(combined_tweets$created_at),"%d %B %Y")),
+       caption = "Data collected from Twitter's REST API via rtweet") +
+  theme_minimal() 
+```
+
+Most retweeted tweet: 
+
+```{r rank_1}
+most_retweeted_tweet <- combined_tweets %>% 
+  dplyr::arrange(-retweet_count) %>%
+  dplyr::slice(1) %>% 
+  dplyr::select(created_at, screen_name, text, retweet_count, status_id)
+
+print(most_retweeted_tweet$text)
+```
+
+Top hashtags: 
+
+```{r rank_clean}
+
+combined_tweets %>% 
+  tidytext::unnest_tokens(hashtag, text, "tweets", to_lower = FALSE) %>%
+  dplyr::filter(
+    stringr::str_detect(hashtag, "^#"),
+    hashtag != "#Merkel",
+    hashtag != "#AfD") %>%
+  count(hashtag, sort = TRUE) %>%
+  top_n(5)
+```
+
+**The limitations on time period and number of tweets might be prohibitive, depending on the goal of the analysis, but otherwise, `rtweet` is quite powerful and convenient to handle.**
