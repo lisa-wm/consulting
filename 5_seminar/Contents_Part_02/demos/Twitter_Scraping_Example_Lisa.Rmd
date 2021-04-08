@@ -170,11 +170,9 @@ Top hashtags:
 combined_tweets %>% 
   tidytext::unnest_tokens(hashtag, text, "tweets", to_lower = FALSE) %>%
   dplyr::filter(
-    stringr::str_detect(hashtag, "^#"),
-    hashtag != "#Merkel",
-    hashtag != "#AfD") %>%
-  count(hashtag, sort = TRUE) %>%
-  top_n(5)
+    stringr::str_detect(hashtag, "^#")) %>%
+  dplyr::count(hashtag) %>%
+  dplyr::slice_max(n, n = 5)
 ```
 
 **The limitations on time period and number of tweets might be prohibitive, depending on the goal of the analysis, but otherwise, `rtweet` is quite powerful and convenient to handle.**

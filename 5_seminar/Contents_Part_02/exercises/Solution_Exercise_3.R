@@ -30,5 +30,7 @@ sum(stringr::str_detect(string = text, pattern = "favorite"))
 # Create a regular expression that will match the mobile numbers as commonly written in Germany.
 
 x <- c("0176-33665544", "(123)456-7890", "(123) 456-7890", "1235-2351")
-stringr::str_view(x, "\\d\\d\\d\\d[[:punct:]]\\d\\d\\d\\d\\d\\d\\d\\d")
-str_detect(string = x, pattern = "\\d\\d\\d\\d[[:punct:]]\\d\\d\\d\\d\\d\\d\\d\\d")
+pattern <- "01\\d\\d[[:punct:]](\\d)+"
+stringr::str_view(x, pattern)
+# stringr::str_view(x, "\\d\\d\\d\\d[[:punct:]]\\d\\d\\d\\d\\d\\d\\d\\d")
+str_detect(string = x, pattern = pattern)
