@@ -1,0 +1,142 @@
+## Recap
+```{r, include=FALSE, cache=FALSE}
+ap = adjust_path(paste0(getwd(), "/figure"))
+```
+
+__Where we are right now:__
+
+- Words can be repesented as dense, low-dimensional vectors \hfill $\checkmark$
+- Easy to capture similarity between words \hfill $\checkmark$
+- Additive Compositionality of word vectors \hfill $\checkmark$
+- Documents can be represented as dense, low-dimensional vectors \hfill $\checkmark$
+
+__Looking for further problems:__
+
+- What about rare words?
+- What about unseen words $\rightarrow$ out-of-vocabulary (oov) problem?
+- What about ambiguity?
+- What about coreferences?
+
+## What if ..
+
+- we encounter a word which was not observed during training?!  
+  $\rightarrow$ __Word2Vec will not be able to handle this__
+  
+\vspace{1cm}
+
+- a new document contains a word that was not observed during training?!  
+  $\rightarrow$ __This word cannot contribute to learning the document representation__
+
+## Side Note
+
+__Character-level models:__
+
+- There are approaches that work on the character level
+- "Vocabulary" size (i.e. dimension of the projection layer) is  
+  __much lower__
+- Networks are generally deeper and more complex in order to  
+  form meaningful compositions of the characters
+- Avoids of course the oov problem, as everything can be represented
+
+__But__: _We will not cover these types of models today_
+
+## An example of a rare word
+  
+__dissimulate:__ _hide under false appearance_
+
+- Assume we have observed the word _"simulate"_ during training
+- Additionally, we observed words like _"disappear"_, _"dislike"_, etc.
+- If we had an extra embedding for the prefix _"dis-"_,  
+  we were able to represent __"dissimulate"__:
+  $$w_{dis} + w_{simulate} \approx w_{dissimulate}$$
+  
+## FastText 
+
+__Literature:__
+
+- Methodology: _Enriching word vectors with subword information_  
+  \href{https://arxiv.org/pdf/1607.04606.pdf}{\beamergotobutton{Bojanowski et al. (2016)}}
+- Application in text classification: _Bag of Tricks_  
+  \href{https://arxiv.org/pdf/1607.01759.pdf}{\beamergotobutton{Joulin et al. (2016)}}
+    
+## Augmentation of Word2Vec    
+
+__What is the input of the Skip-gram model?__
+
+- In Word2Vec, every word is represented as a discrete unit
+- This neglects the internal structure of words
+
+__What is the input of FastText?__
+
+- Every word represented as _bag-of-character-n-grams_
+- The word itself is additionally included as well
+- Additional boundary symbols for pre- & suffixes
+
+## FastText input representation
+
+__Assume, we want to represent the word _example_:__
+
+- Character n-grams (n = 3):  
+  \vspace{-.5cm}
+  $$\text{<ex, exa, xam, amp, mpl, ple, le>, <example>}$$
+
+__In practice, we don't set $n = a$ but rather $a \leq n \leq b$:__
+
+- Character n-grams ($2 \leq n \leq 4$):
+\vspace{-.5cm}  
+  \begin{align*}
+    & \text{<e, ex, xa, am, mp, pl, le, e>,} \\
+    & \text{<ex, exa, xam, amp, mpl, ple, le>,} \\
+    & \text{<exa, exam, xamp, ampl, mple, ple>, <example>}
+  \end{align*}
+
+__Note, that the 4-gram _exam_ is different from the word $<$exam$>$.__
+
+## Modification of the objective function
+
+__Remember the objective function of Skip-gram:__
+\vspace{-.25cm}  
+  \begin{align*}
+\ell(s(w_{in}, w_{out})) + \sum_{i = 1}^{k} \mathds{E}_{w_i \sim P_n(w)} \left[\ell(-s(w_{in}, w_{i}))\right]
+  \end{align*}
+  
+with scoring-function $s(\cdot)$ as the dot product in our case.  
+(_Note:_ We replace $\log(\sigma(\cdot))$ by $\ell(\cdot)$ for convenience)
+
+__Replacing the scoring function:__
+\vspace{-.25cm}  
+  \begin{align*}
+s(w_{in}, w_{out}) = \sum_{g \in \mathcal{G}_w} \mathbf{z_g}^{\intercal}\mathbf{v'_{out}}
+  \end{align*}
+
+with $\mathcal{G}_w$ as the set of n-grams appearing in word $w$.
+
+## Benefit of FastText
+
+__Sharing of n-gram representations:__
+
+- The learned embeddings for the n-grams are shares across words
+- Words represented as sum of the embeddings of their n-grams
+
+__Why this is beneficial:__
+
+- Allows us to learn more reliable representations for _rare_ words  
+  (Why is that? Do you get the intuition?)
+- Allows us to obtain representations for previously _unseen_ word  
+  (By combining the n-gram embeddings)
+
+## Architecture of FastText
+
+__Remember CBOW?__
+
+- One type of Word2Vec model architecture
+- Multiple words from the context as input
+- _FastText is basically the same, but with a larger "vocabulary"_  
+- _Nevertheless:_ Native FastText is a Skip-gram like architecture  
+  (as actually only one word serves as input)
+- _But_: In the ``gensim`` implementation, CBOW is also possible
+
+__This means:__
+
+- I will spare you the matrix representation of the model
+- FastText uses the same computational tricks as Word2Vec & Doc2Vec

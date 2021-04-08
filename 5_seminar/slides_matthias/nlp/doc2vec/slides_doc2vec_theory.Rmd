@@ -1,0 +1,236 @@
+## Recap
+```{r, include=FALSE, cache=FALSE}
+ap = adjust_path(paste0(getwd(), "/figure"))
+```
+
+__Where we are right now:__
+
+- Words can be represented as dense, low-dimensional vectors \hfill $\checkmark$
+- Easy to capture similarity between words \hfill $\checkmark$
+- Additive Compositionality of word vectors \hfill $\checkmark$
+- Documents can be represented as a vector of word occurrences
+- These BoW-representations are high-dimensional and inefficient
+
+## The problem with Bag-of-words representations
+
+__Similiar problems as in the word-level example:__
+
+\begin{align*}
+document_1 = [0,0,2,0,1,0,0,1,0,2,0,0,0,0,1]\\document_2 = [0,1,0,0,0,0,0,0,0,0,0,0,3,0,1]
+\end{align*}
+
+__Two major problems:__
+
+- The dimensionality of Bag-of-words representations
+- Only exact agreement of word occurences can contribute to similarity
+  
+__Could we try to build on the concept of word embeddings?__
+
+## The difficulty with word embeddings
+
+__How should we aggregate from the word to the document/paragraph level?__
+
+- Build a matrix of word embeddings  
+  $\rightarrow$ Problem: Documents vary in length; no fixed dimension
+- Average the word embeddings  
+  $\rightarrow$ Loss of word order; loss of information
+
+__The solution:__
+
+- Modify the word2vec approach in order to learn representations of whole documents
+
+## Doc2Vec \href{https://cs.stanford.edu/~quocle/paragraph_vector.pdf}{\beamergotobutton{Mikolov and Le (2014)}}
+
+__Key contributions of this model:__
+
+- Extend the idea of Mikolov et al. (2013a)
+- Add input layer weights for document representations
+- _Keep the computational tricks_
+
+__Proposal of two different architectures:__
+
+- A distributed memory model (PV-DM)
+- A distributed Bag-of-words model (PV-DBOW)
+
+## Distributed memory model
+
+__The architecture:__
+
+\begin{figure}
+\centering
+\includegraphics[width = 9cm]{`r ap("pv-dm.JPG")`}\\ 
+\footnotesize{Source:} \href{https://cs.stanford.edu/~quocle/paragraph_vector.pdf}{\footnotesize Mikolov and Le (2014)}
+\end{figure}
+
+## Distributed memory model -- Explained
+
+__The "Fake Task":__
+
+- _Training objective:_ Given a context, predict the center word
+- _Context:_ Surrounding word + paragraph ID
+- Architecture corresponds roughly to the CBOW model
+- Paragraph vector _"acts as a memory that remembers what is missing from the current context"_ (Mikolov and Le, 2014)  
+  $\rightarrow$ __"Distributed Memory"__
+
+## Distributed memory model -- Broken down
+
+__Input-Layer:__
+
+\begin{align*}
+& avg \left(
+\underbrace{
+\begin{bmatrix}
+0 & \cellcolor{cyan}{1} & \cellcolor{cyan}{1} & .. | & \cellcolor{cyan}{1} & .. & 0 \\
+\end{bmatrix}
+}_{\substack{\text{Indicator vector for the}\\\text{surrounding words}\\\text{and the document IDs}}} \times
+\underbrace{
+\begin{bmatrix}
+v_{1,1} & v_{1,2} & .. & v_{1,dim}\\
+v_{2,1} & v_{2,2} & .. & v_{2,dim} \\
+v_{3,1} & v_{3,2} & .. & v_{3,dim} \\
+\vdots & \vdots & .. & \vdots \\
+v_{|V|+N,1} & v_{|V|+N,2} & .. & v_{|V|+N,dim}
+\end{bmatrix}
+}_{\text{Projection layer weights}}
+\right) & \\ & \text{results in:} & \\
+& \qquad\qquad avg \left(
+\mathbf{v_2}, \mathbf{v_3}, \mathbf{v_{|V|+1}}
+\right) = 
+\begin{bmatrix}
+\rowcolor{cyan}
+v_{avg,1} & v_{avg,2} & .. & v_{avg, dim}
+\end{bmatrix} = \mathbf{v_{avg}}&
+\end{align*}
+
+## Distributed memory model -- Broken down
+
+__Hidden- & Ouput-Layer:__
+
+\begin{align*}
+& \begin{bmatrix}
+\rowcolor{cyan}
+v_{avg,1} & v_{avg,2} & .. & v_{avg, dim}
+\end{bmatrix} \times 
+\begin{bmatrix}
+v'_{1,1} & v'_{1,2} & \cellcolor{red!80}{v'_{1,3}} & .. & v'_{1,|V|}\\
+v'_{2,1} & v'_{2,2} & \cellcolor{red!80}{v'_{2,3}} & .. & v'_{2,|V|} \\
+v'_{3,1} & v'_{3,2} & \cellcolor{red!80}{v'_{3,3}} & .. & v'_{3,|V|} \\
+\vdots & \vdots & \cellcolor{red!80}{\vdots} & .. & \vdots \\
+v'_{dim,1} & v'_{dim,2} & \cellcolor{red!80}{v'_{dim,3}} & .. & v'_{dim,|V|}
+\end{bmatrix} & \\ & \text{results in:} & \\ && \\
+& \begin{bmatrix}
+\mathbf{v_{avg}}^\intercal\mathbf{v'_{1}} & \mathbf{v_{avg}}^\intercal\mathbf{v'_{2}} & \cellcolor{blue!20}{\mathbf{v_{avg}}^\intercal\mathbf{v'_{3}}} & .. & \mathbf{v_{avg}}^\intercal\mathbf{v'_{3}} 
+\end{bmatrix} \qquad \Rightarrow \qquad
+\underbrace{
+\dfrac{e^x}{\sum e^x}
+}_{\substack{\text{Softmax}\\\text{classifier}}} &
+\end{align*}
+
+## Distributed Bag-of-words model
+
+__The architecture:__
+
+\begin{figure}
+\centering
+\includegraphics[width = 9cm]{`r ap("pv-dbow.JPG")`}\\ 
+\footnotesize{Source:} \href{https://cs.stanford.edu/~quocle/paragraph_vector.pdf}{\footnotesize Mikolov and Le (2014)}
+\end{figure}
+
+## Distributed Bag-of-words model -- Explained
+
+__The "Fake Task":__
+
+- _Training objective:_ Given a document, predict the words inside
+- Architecture corresponds roughly to the Skip-gram model
+- Conceptually somewhat simpler than PV-DM
+- Lower number of weights to train (compared to PV-DM)
+
+## Distributed Bag-of-words model
+
+__The architecture:__
+\vspace{-1cm}
+\begin{eqnarray*}
+\underbrace{
+\begin{bmatrix}
+0 & 1 & 0 & .. & 0 \\
+\end{bmatrix}
+}_{\substack{\text{One-hot vector}\\\text{for the document}}} \qquad \times \qquad
+\underbrace{
+\begin{bmatrix}
+v_{1,1} & v_{1,2} & .. & v_{1,dim}\\
+v_{2,1} & v_{2,2} & .. & v_{2,dim} \\
+v_{3,1} & v_{3,2} & .. & v_{3,dim} \\
+\vdots & \vdots & .. & \vdots \\
+v_{N,1} & v_{N,2} & .. & v_{N,dim}
+\end{bmatrix}
+}_{\substack{\text{Projection layer weights}\\\text{($\hat{=}$ document vectors)}}} \\ \times \qquad
+\underbrace{
+\begin{bmatrix}
+v'_{1,1} & v'_{1,2} & v'_{1,3} & .. & v'_{1,|V|}\\
+v'_{2,1} & v'_{2,2} & v'_{2,3} & .. & v'_{2,|V|} \\
+v'_{3,1} & v'_{3,2} & v'_{3,3} & .. & v'_{3,|V|} \\
+\vdots & \vdots & .. & \vdots \\
+v'_{dim,1} & v'_{dim,2} & v'_{dim,3} & .. & v'_{dim,|V|}
+\end{bmatrix}
+}_{\substack{\text{Output layer weights}\\\text{for the words}}}  \qquad \Rightarrow \qquad
+\underbrace{
+\dfrac{e^x}{\sum e^x}
+}_{\substack{\text{Softmax}\\\text{classifier}}}
+\end{eqnarray*}
+
+## Distributed Bag-of-words model -- Broken down
+
+__Input-Layer:__
+\vspace{-.2cm}
+\begin{align*}
+& \underbrace{
+\begin{bmatrix}
+0 & \cellcolor{cyan}{1} & 0 & .. & 0 \\
+\end{bmatrix}
+}_{\substack{\text{One-hot vector}\\\text{for the document}}} \qquad \times \qquad
+\underbrace{
+\begin{bmatrix}
+v_{1,1} & v_{1,2} & .. & v_{1,dim}\\
+v_{2,1} & v_{2,2} & .. & v_{2,dim} \\
+v_{3,1} & v_{3,2} & .. & v_{3,dim} \\
+\vdots & \vdots & .. & \vdots \\
+v_{N,1} & v_{N,2} & .. & v_{N,dim}
+\end{bmatrix}
+}_{\substack{\text{Projection layer weights}\\\text{for the words ($\hat{=}$ document vectors)}}} & \\ = & \qquad
+\begin{bmatrix}
+0 & 0 & .. & 0\\
+\rowcolor{cyan}
+v_{2,1} & v_{2,2} & .. & v_{2,dim} \\
+0 & 0 & .. & 0\\
+\vdots & \vdots & .. & \vdots \\
+0 & 0 & .. & 0\\
+\end{bmatrix} \qquad = \qquad
+\begin{bmatrix}
+\rowcolor{cyan}
+v_{2,1} & v_{2,2} & .. & v_{2,dim} 
+\end{bmatrix} &
+\end{align*}
+
+## Distributed Bag-of-words model -- Broken down
+
+__Hidden- & Ouput-Layer:__
+
+\begin{align*}
+ & \begin{bmatrix}
+\rowcolor{cyan}
+v_{2,1} & v_{2,2} & .. & v_{2,dim} 
+\end{bmatrix} \qquad \times \qquad
+\begin{bmatrix}
+v'_{1,1} & v'_{1,2} & \cellcolor{red!80}{v'_{1,3}} & .. & v'_{1,|V|}\\
+v'_{2,1} & v'_{2,2} & \cellcolor{red!80}{v'_{2,3}} & .. & v'_{2,|V|} \\
+v'_{3,1} & v'_{3,2} & \cellcolor{red!80}{v'_{3,3}} & .. & v'_{3,|V|} \\
+\vdots & \vdots & \cellcolor{red!80}{\vdots} & .. & \vdots \\
+v'_{dim,1} & v'_{dim,2} & \cellcolor{red!80}{v'_{dim,3}} & .. & v'_{dim,|V|}
+\end{bmatrix} & \\ & \text{results in:} & \\ && \\
+& \begin{bmatrix}
+\mathbf{v_{2}}^\intercal\mathbf{v'_{1}} & \mathbf{v_{2}}^\intercal\mathbf{v'_{2}} & \cellcolor{blue!20}{\mathbf{v_{2}}^\intercal\mathbf{v'_{3}}} & .. & \mathbf{v_{2}}^\intercal\mathbf{v'_{|V|}} 
+\end{bmatrix} \qquad \Rightarrow \qquad
+\underbrace{
+\dfrac{e^x}{\sum e^x}
+}_{\substack{\text{Softmax}\\\text{classifier}}} &
+\end{align*}

@@ -1,0 +1,201 @@
+## Before Transfer Learning
+```{r, include=FALSE, cache=FALSE}
+ap = adjust_path(paste0(getwd(), "/figure"))
+```
+
+__Where we are right now:__
+
+- We got to know methods for representing
+    - word, subwords, tokens (Word2Vec, FastText)
+    - paragraphs, documents (Doc2Vec)  
+in a nice and efficient way
+  
+\vspace{.3cm}
+  
+- We have learned about architectures
+    - perfectly suited for the sequential structure of text (RNNs),
+    - mechanisms for improving them (Attention)
+    - and mechanisms for completely replacing them (Self-Attention).
+
+    
+## What is Transfer Learning?
+
+- Wikipedia says:  
+    "_Transfer learning is a research problem in machine learning that focuses on storing knowledge gained while solving one problem and applying it to a different but related problem._"
+  
+\vspace{.3cm}
+    
+- Acutally, we already did this:
+    - We trained word2vec on some "fake task"
+    - The stored knowledge (a.k.a. embedding) was extracted
+    - A different (supervised) task was performed using them
+
+
+## Transfer Learning
+
+__Embedding Idea $+$ more complex architectures:__
+
+- _Naive approach:_  
+  Standard embeddings (like word2vec) are "_context-free_"
+- _Better:_ 
+    - Additional embedding-layer in front of a more complex network,
+    where the embeddings are trainable parameters of the model
+    - Model learns _context sensitive_ embeddings 
+    - We already encountered this in the Transformer
+
+
+## Transfer Learning
+
+__Questions/Problems:__
+
+- Where in this (deep) model do we achieve contextuality?  
+  (For sure _not_ in the lowest layer!)   
+  $\rightarrow$ Not straightforward to extract them
+- The deeper the network ..  
+    - .. the more expensive to train
+    - .. the more data we need   
+    
+  $\rightarrow$ You cannot just train them at home
+    
+    
+## Transfer Learning
+
+__TRANSFER LEARNING__
+
+- Train such an architecture on ..
+    - .. a fairly _general_ task
+    - .. that does not require any labels ("_self-supervised_")
+    - .. using _large_ amounts of data
+    
+\vspace{.3cm}
+    
+- Do not extract static embeddings, but use the whole __*pre-trained architecture*__
+
+\vspace{.3cm}
+    
+- Replace the final layer used for the _general_ task by a different layer for a _specific_ task at hand
+
+
+## Four types of transfer learning (cf. \href{https://ruder.io/thesis/}{\beamergotobutton{Ruder, 2019}})
+
+__Transductive Transfer learning__
+
+- Domain adaptation:  
+  $\rightarrow$ "_Transfer knowledge learned from performing task A on labeled data from domain X to performing task A in domain Y._"
+  
+- Cross-lingual learning:  
+  $\rightarrow$ "_Transfer knowledge learned from performing task A on labeled data from language X to performing task A in language Y._"
+  
+\vspace{.3cm}
+  
+- _Important:_ No labeled data in target domain/language _Y_.
+
+
+## Four types of transfer learning (cf. \href{https://ruder.io/thesis/}{\beamergotobutton{Ruder, 2019}})
+
+__Inductive Transfer learning__
+
+- Multi-task learning:  
+  $\rightarrow$ "_Transfer knowledge learned from performing task A on data from domain X to performing multiple (simultaneous) tasks B, C, D, .. in domain Y._"
+  
+- Sequential transfer learning:  
+  $\rightarrow$ "_Transfer knowledge learned from performing task A on data from domain X to performing multiple (sequential) tasks B, C, D, .. in domain Y._"
+  
+\vspace{.3cm}
+  
+- _Important:_ Labeled data only for task(s) from target domain _Y_.
+
+
+## Feature-based transfer learning
+
+__Again: Word Embeddings__
+
+- The stored knowledge from the pre-trained model is extracted \textbf{as is} and is not further adapted to the actual domain/task of interest.
+- _Difficulties:_
+    + Source \& target domain/task might be pretty different
+		+ No representations for domain-/task-specific words
+		+ No contextualization
+
+\textbf{Enhancement:} \textit{\textbf{E}mbeddings from \textbf{L}anguage \textbf{Mo}dels (ELMo)}
+
+\begin{figure}
+		\centering
+		\includegraphics[width = 3cm]{`r ap("elmo.jpg")`}
+\end{figure}
+
+
+## Fine-tuning approach
+
+\textbf{Shortcomings of ELMo:}
+
+- Pre-trained on a general domain corpus, embeddings are not adapted to the domain/task at hand
+- Sequential nature of LSTMs:
+    + Not fully parallelizable (compared to Transformers)
+		+ Fail to capture long-range dependency during contextualization
+		
+\vspace{.3cm}
+	
+\textbf{Alleviations/Alternatives:}
+
+- ULMFiT \href{https://www.aclweb.org/anthology/P18-1031.pdf}{\beamergotobutton{Howard and Ruder, 2018}} is a uni-directional LSTM which is fine-tuned as a whole model on data from the target domain/task.
+- GPT \href{https://s3-us-west-2.amazonaws.com/openai-assets/research-covers/language-unsupervised/language_understanding_paper.pdf}{\beamergotobutton{Radford et al., 2018}} is a Transformer (decoder) which is fine-tuned as a whole model on data from the target domain/task.
+
+
+## GPT -- Architectural Details
+
+- Transformer decoder as backbone of the architecture
+    + 12-layer-decoder with masked attention heads
+		+ 40k BPE vocabulary
+		+ Learned positional embeddings (compared to sinusoidal versions)
+- \textbf{Fine-tuning:}
+    + Linear output layer with softmax activation on top
+		+ Auxiliary language modeling objective during fine-tuning  
+			$\rightarrow$ Improves generalization  
+			$\rightarrow$ Accelerates convegence
+		+ Task-specific input transformations
+		
+
+## Side note: Transfer learning in Computer Vision
+
+__ImageNet:__ \href{https://www.researchgate.net/profile/Li_Jia_Li/publication/221361415_ImageNet_a_Large-Scale_Hierarchical_Image_Database/links/00b495388120dbc339000000/ImageNet-a-Large-Scale-Hierarchical-Image-Database.pdf}{\beamergotobutton{Deng et al., 2009}} 
+
+- Large-scale data set ($\approx$ 50 million labeled images)
+- Hierarchical data set structured in synsets
+- "_Diverse coverage of the image world._" (Deng et al., 2009)
+
+__How it changed learning:__
+
+- Quasi-standard to use a model pre-trained on ImageNet
+- Achieved SOTA results in various computer vision tasks
+- Enable the use of large models to small (labeled) data sets
+
+## Learning objectives
+
+__Self-Supervision:__
+
+- Special case of unsupervised learning
+- Labels are generated from the data itself
+
+\vspace{.3cm}
+
+__Self-supervised objectives:__
+
+- Skip-gram objective (cf. word2vec \href{https://arxiv.org/pdf/1301.3781.pdf}{\beamergotobutton{Mikolov et al. (2013a)}})
+- Language modeling objective (cf. \href{http://www.jmlr.org/papers/volume3/bengio03a/bengio03a.pdf}{\beamergotobutton{Bengio et al. (2003)}})
+- _Masked language modeling (MLM)_ objective (cf. next chapter)  
+  $\rightarrow$ Replace words by a \texttt{[MASK]} token and train the model to predict them
+  
+  
+## Transfer Learning -- Summary
+
+__Pros:__
+
+- New and deep architectures enable better representation learning 
+- Leverage favorable properties of language to create self-supervised tasks
+- Use ubiquitous large amounts of unlabeled data available on the web
+
+__Cons:__
+
+- Pre-Training _extremely_ costly
+- Models will have up to over a billion parameters 
+- Only works well for high-resource languages

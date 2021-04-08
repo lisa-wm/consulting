@@ -1,0 +1,39 @@
+## Bag-of-words model
+```{r, include=FALSE, cache=FALSE}
+ap = adjust_path(paste0(getwd(), "/figure"))
+```
+
+__Issues/Limitations?__
+
+- Capturing phrases and context not possible
++ _"Not bad, actually quite nice"_
++ _"Not nice, actually quite bad"_
+- Dimensionality of the DTM
++ Lemmatization helps
++ Removal of stopwords
+- Raw counts don't necessarily depict the importance of words
+
+## N-grams
+
+- N-grams are sequences of $n$ consecutive items from a sample of text or speech
+- Leads to features that better capture context
+- Consider the following sentence: _"this is an example sentence"_
+- Unigrams (n = 1):  
+  \vspace{-.6cm}
+  $$\text{(this),(is),(an),(example),(sentence)}$$
+- Bigrams (n = 2):  
+  \vspace{-.6cm}
+  $$\text{(this; is),(is; an),(an; example),(example; sentence)}$$
+- Trigrams (n = 3):  
+  \vspace{-.6cm}
+  $$\text{(this; is; an),(is; an; example),(an; example; sentence)}$$
+
+## Bag-of-n-grams
+
+- Creating the DTM works in a similary fashion like for the Bag-of-words model
+- Additional preprocessing step: Manipulation of the corpus
+- In practice, we often consider multiple n-grams simultaneously (e.g. uni- \& bigrams)
+- __Trade-off:__  
+  Risk to blow up the dimensionality of the DTM  
+  __vs.__  
+  Ability to capture local contexts

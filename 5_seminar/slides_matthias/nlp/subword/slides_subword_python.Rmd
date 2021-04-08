@@ -1,0 +1,159 @@
+## FastText in Python
+```{r, include=FALSE, cache=FALSE}
+ap = adjust_path(paste0(getwd(), "/figure"))
+```
+
+__Train your own embeddings using the gensim module:__
+
+- _Step 1:_ Set up the model parameters  
+(Model is still uninitialized)
+
+- _Step 2:_ Feed your data (list of sentences) to the model  
+(Model is now initialized)
+
+- _Step 3:_ Train the model
+
+## FastText in Python
+
+__Set up the model parameters:__
+
+```{python, include = T, eval = F}
+from gensim.models.fasttext import FastText
+
+ft_model = FastText(sg = 0,
+                    cbow_mean = 1,
+                    size = 100,
+                    alpha = 0.025, 
+                    min_alpha = 0.0001, 
+                    window = 5,
+                    min_count = 5,
+                    sample = 0.001, 
+                    negative = 5,
+                    ...,
+                    min_n = 3,
+                    max_n = 6)
+```
+
+- _\href{https://radimrehurek.com/gensim/models/fasttext.html}{Online documentation of gensim's FastText}_
+
+## FastText in Python
+
+__Structure of the corpus (similar to Word2Vec):__ 
+
+```{python, include = T, eval = T}
+from nltk import word_tokenize
+
+my_sentences = ["we are eager to learn about nlp",
+                "neural networks are fun",
+                "python is my favourite language"]
+                
+my_corpus = [word_tokenize(doc) for doc in my_sentences]
+
+my_corpus[0]
+```
+
+## FastText in Python
+
+__Initialize the model with data:__ 
+
+```{python, include = T, eval = F}
+ft_model.build_vocab(sentences = my_corpus,
+                     update = False,
+                     progress_per = 10000)
+```
+  
+__Train your embeddings:__
+
+```{python, include = T, eval = F}
+ft_model.train(sentences = my_corpus,
+               total_examples = ft_model.corpus_count,
+               epochs = 20)
+```
+
+## FastText in Python
+
+__Using the original FastText C++ code:__
+
+- Source: _\href{https://fasttext.cc/}{https://fasttext.cc/}_
+
+```{python, include = T, eval = F}
+import fasttext
+
+# skip-gram
+sg_model = fasttext.train_unsupervised("path/to/data.txt", 
+                                       model = "skipgram")
+
+# or cbow
+cbow_model = fasttext.train_unsupervised("path/to/data.txt", 
+                                         model = "cbow")
+```
+
+- _\href{https://fasttext.cc/docs/en/python-module.html}{Online documentation of FastText}_
+
+## FastText in Python
+
+__Check, whether the word is in the vocabulary:__
+
+```{python, include = T, eval = F}
+"example" in ft_model.wv.vocab
+
+# True
+```
+
+__Query the trained model for an embedding:__
+
+```{python, include = T, eval = F}
+ft_model.wv["example"]
+
+# array([-2.9408352, -2.9448547, -0.0644585,  2.5617635, 0.11626738,
+#        0.9916419 , -0.982047 , -0.3674653,  2.282364 , 4.807505  ,
+#        ....
+#        0.14457057, 1.6736019, -2.932189 , -1.2620611, -0.7192462],
+#      dtype=float32)
+```
+  
+## FastText in Python
+
+__Check, whether the word is in the vocabulary:__
+
+```{python, include = T, eval = F}
+"examples" in ft_model.wv.vocab
+
+# False
+```
+
+__Query the trained model for an embedding:__
+
+```{python, include = T, eval = F}
+ft_model.wv["examples"]
+
+# array([-2.8457567, -3.048547 , -0.02345685 , 1.9343505, 0.0034538,
+#        1.02848374, -1.234859 , -0.5348593,  1.9847583 , 5.068398 ,
+#        ....
+#        0.3438574, 1.4568264 , -3.1285746, -1.4386759, -0.8573628],
+#      dtype=float32)
+```
+
+__The n-gram embeddings are summed up to generate the word embedding.__
+
+## FastText in Python
+
+__Functionality exactly alike to Word2Vec:__
+
+- Plain embeddings:
+
+```{python, include = T, eval = F}
+ft_model.wv[]
+```
+
+- Calculating similarity:
+
+```{python, include = T, eval = F}
+ft_model.wv.similarity()
+```
+
+- Obtaining (most) similar embeddings:
+
+```{python, include = T, eval = F}
+ft_model.wv.most_similar()
+```

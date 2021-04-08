@@ -1,0 +1,508 @@
+## Data quality is crucial
+```{r, include=FALSE, cache=FALSE}
+ap = adjust_path(paste0(getwd(), "/figure"))
+```
+
+<!-- \begin{figure}
+\centering
+\includegraphics[width = 11cm]{`r ap("medium.png")`}
+\footnotesize Source: \href{https://medium.com/nyc-design/gigo-garbage-in-garbage-out-concept-for-ux-research-7e3f50695b82}{https://medium.com}
+\end{figure} -->
+
+\centering \Huge GARBAGE _IN_  
+GARBAGE __OUT__
+
+## Preprocessing -- Possible Steps
+
+- Tokenization (+ every word to lowercase)
+    + Break the documents into its pieces
+- Spell-checking
+    + Correct errors in (informal) text/documents
+- Contraction expansion
+    + Expand abbreviations
+- Stopword removal:
+    + Remove words that are assumed to be uninformative
+- Stemming
+    + Reduce word to their "stem" (smaller vocabulary)
+- Lemmatization
+    + Transform word to their "lemma"
+- Removal of special characters
+
+## Preprocessing -- Resources
+
+- NLTK
+    + Short for __Natural Language Toolkit__
+    + Contains many lexical resources and corpora
+    + Pre-built functions for common preprocessing steps
+    + Great for teaching \& research due to its variety of options
+    + [**_Documentation_**](https://www.nltk.org/) and corresponding [**_Book_**](http://www.nltk.org/book/) available
+    
+- spaCy
+    + Works more "Out-of-the-box" compared to NLTK  
+    due to fewer options and more defaults
+    + Constructed mainly for usage in production
+    + [**_Quote of the author:_**](https://www.quora.com/What-are-the-advantages-of-Spacy-vs-NLTK)  
+    _"spaCy is written to help you get things done. It's minimal and opinionated. We want to provide you with exactly one way to do it --- the right way."_
+
+
+## Preprocessing -- Resources
+
+__Runtime comparison of spaCy and NLTK for selected tasks:__  
+
+\centering 
+_\href{https://blog.thedataincubator.com/wp-content/uploads/2016/04/timing.png}{https://blog.thedataincubator.com}_
+
+
+## Tokenization
+
+- Text often occurs as a long string of characters separated by whitespace and/or punctuation
+- _Tokenizing_ a text means breaking it up into its basic components
+- This could mean:
+    + Split up words into characters
+    + Split up sentences (or documents) into words
+    + Split up documents into sentences
+- But most of the time it refers to splitting documents into words
+
+
+## Tokenization -- An example
+
+- The \texttt{split()}-function produces a list of tokens, splitting the string by a given pattern:
+
+```{python}
+text = """In this course we're going to learn basic concepts of 
+natural language processing. On day 1 we'll cover basic concepts, 
+while day 2 will deal with more complex topics."""
+
+from pprint import pprint
+pprint(text.split(" "), width = 65, compact = True)
+```
+
+
+## Tokenization -- An example
+
+- Using the \texttt{nltk}-module for word tokenization:
+
+```{python}
+text = """In this course we're going to learn basic concepts of 
+natural language processing. On day 1 we'll cover basic concepts, 
+while day 2 will deal with more complex topics."""
+
+import nltk
+from pprint import pprint
+
+pprint(nltk.word_tokenize(text), width = 65, compact = True)
+```
+
+
+## Tokenization -- An example
+
+- Using the \texttt{nltk}-module for sentence tokenization:
+
+```{python}
+text = """In this course we're going to learn basic concepts of 
+natural language processing. On day 1 we'll cover basic concepts, 
+while day 2 will deal with more complex topics."""
+
+import nltk
+from pprint import pprint
+
+pprint(nltk.sent_tokenize(text), width = 65, compact = True)
+```
+
+## Convert to lowercase
+
+```{python}
+text = "This IS an Example Text"
+text.lower()
+```
+
+- What __won't__ work:
+
+```{python, eval = F}
+texts = ["This IS an Example Text", "Another STRING"]
+texts.lower()
+```
+
+- But instead:
+
+```{python}
+texts = ["This IS an Example Text", "Another STRING"]
+[text.lower() for text in texts]
+```
+
+
+## Spell-checking
+
+- Often makes sense when working with dirty/noisy data
+    + Twitter data
+    + Customer feedback (e.g. amazon reviews)
+    + Data from discussion boards like reddit, quora, etc.
+- Formal texts often don't require this step
+    + Form 10-Ks (annual financial performance reports)
+    + Data from Wikipedia
+- One example for an open-source available spell-checker:
+    + [**_Peter Norvigs spell-checker (2007)_**](http://norvig.com/spell-correct.html)
+    + Python implementation: [**_pyspellchecker_**](https://pypi.org/project/pyspellchecker/)
+
+
+## Contraction expansion
+
+- In case of abbreviations/contractions simple whitespace tokenization is not enough
+- Parts of the text are treated as single tokens, despite they actually contain multiple tokens
+- Different tokenizers produce different errors
+- Examples: _I'm, aren't, wouldn't, let's_
+
+## Stopword removal
+
+- **_Words that have little (or no) significant contribution for the task at hand_**
+- Are removed from the data during preprocessing  
+- Common as well as task-specific stopwords have to be considered
+- Examples of common stopwords:
+    + _the, my, you, a, and, or_, etc.
+- Examples of task-specific stopwords (e.g. for multimedia):
+    + _app, smartphone, touchscreen, install_, etc.
+
+
+## Lemmatization and Stemming
+
+- <u>Lemmatization</u>
+    + Another (optional) step in the preprocessing pipeline
+    + Every word is reduced to its _lemma_
+    + The _lemma_ always is a real existing word (contrary to the _stem_, see below)
+    + E.g. _goes, went, gone_ get lemmatized to __go__
+    + Information on the POS-tag are also included
+
+- <u>Stemming</u>
+    + Essentially just a simpler version of Lemmatization
+    + Cuts suffixes in order to reduce words to their _stem_
+    + The _Stem_ is in most cases no real existing word
+    + No use of POS-tags
+
+
+## Lemmatization and Stemming
+
+__Out-of-the-box solutions available:__
+
+```{python, eval = F}
+import nltk
+nltk.download("wordnet")
+
+from nltk.stem import WordNetLemmatizer 
+lemmatizer = WordNetLemmatizer()
+
+lemmatizer.lemmatize("goes")
+
+## 'go'
+
+lemmatizer.lemmatize("women")
+ 
+## 'woman'
+
+```
+
+
+## Lemmatization and Stemming
+
+__Out-of-the-box solutions available:__
+
+```{python, eval = F}
+stemmer = porter.PorterStemmer()
+stemmer.stem("goes")
+
+## 'goe'
+
+stemmer.stem("women")
+## 'women'
+```
+
+-  https://tartarus.org/martin/PorterStemmer/
+
+## Removal of special characters
+
+- Special characters such as ".:,;!?+-_#" often don't play a crucial role
+- Depending on the task, they are also oftentimes removed
+- Should be done __after__ expanding contractions (due to the apostrophes)
+
+## Preprocessing -- Regular Expressions
+
+__What is a regular expression (regex)?__
+
+- Language used in text processing programs
+- Particularly helpful for specifying string patterns
+- _Aim:_ Search/Substitute/Split on these patterns
+
+__Resources:__
+
+- _\href{https://docs.python.org/3/library/re.html}{Help page for the python ``re``-module}_
+- _\href{https://docs.python.org/3/howto/regex.html\#regex-howto}{Regular Expression HOWTO}_
+
+## Preprocessing -- Regular Expressions
+
+__Metacharacters:__
+
+- Set of characters that have a special meaning in the context of regex
+- If you want to match them by a regex, they have to be _escaped_
+- _Escaping:_ Precede the metacharacter with a backslash removes its special meaning
+
+__Complete list of the metacharacters:__
+
+```{python, eval = F}
+.  ^  $  *  +  ?  {  }  [  ]  \  |  (  )
+```
+
+## Preprocessing -- Regular Expressions
+
+__Explaining the metacharacters:__
+
+- __.__ is the so called _wildcard_ (matches any character)  
+```{python, eval = F}
+r"number ."
+```  
+
+- __^__ matches the start of a string
+```{python, eval = F}
+r"^hello"
+```  
+
+- __$__ matches the end of a string  
+```{python, eval = F}
+r"goodbye$"
+```
+
+## Preprocessing -- Regular Expressions
+
+__Explaining the metacharacters:__
+
+- * matches _zero or more_ repetitions of a regex  
+```{python, eval = F}
+r"The solution is 42*"
+```  
+
+- __+__ matches _one or more_ repetitions of a regex  
+```{python, eval = F}
+r"he+llo"
+```  
+
+- __?__ matches _zero or one_ repetitions of a regex  
+```{python, eval = F}
+r"The solution is 42?"
+```
+
+## Preprocessing -- Regular Expressions
+
+__Explaining the metacharacters:__
+
+- __{x}__ matches _exactly x_ repetitions of a regex  
+```{python, eval = F}
+r"he{5}llo"
+```  
+
+- __{x,y}__ matches _from x to y_ repetitions of a regex  
+```{python, eval = F}
+r"he{5,10}llo"
+```  
+
+- __&#91; &#93;__ indicates a set of characters
+```{python, eval = F}
+r"[hello]"
+```
+
+## Preprocessing -- Regular Expressions
+
+__Explaining the metacharacters:__
+
+- __( )__ define a _group_  
+```{python, eval = F}
+r"(abc)"
+```  
+
+- __&#92;__ escapes any metacharacter
+```{python, eval = F}
+r"\("
+```  
+
+- __|__ between to regex means _either or_  
+```{python, eval = F}
+r"hello|goodbye"
+```  
+
+## Preprocessing -- Regular Expressions
+
+__Functionality of the__ ``re`` __-module:__
+
+- Find all occurrences of a regex pattern
+```{python, eval = F}
+re.findall(pattern, string)
+```  
+
+- Split a string on all occurrences of a regex
+```{python, eval = F}
+re.split(pattern, string, maxsplit)
+```  
+
+- Subsitute all occurrences of a regex by a specified string
+```{python, eval = F}
+re.sub(pattern, replacement, string, count)
+```  
+
+- Check, whether a regex matches the beginning of a string
+```{python, eval = F}
+re.match(pattern, string)
+```  
+
+## Preprocessing -- Regular Expressions
+
+__Let's get back to our text from before:__
+
+```{python, eval = F}
+text = """In this course we're going to learn basic concepts of 
+natural language processing. On day 1 we'll cover basic concepts, 
+while day 2 will deal with more complex topics."""
+
+import re
+
+re.findall(r"[b-df-hj-np-tv-z]+[a-z]+", text)
+
+re.findall(r"[a-z]+l ", text)
+
+```
+
+\vspace{.5cm}
+
+__What are we searching for with the regex above?__
+
+## Preprocessing -- Regular Expressions
+
+```{python, eval = F}
+text = """In this course we're going to learn basic concepts of 
+natural language processing. On day 1 we'll cover basic concepts, 
+while day 2 will deal with more complex topics."""
+
+import re
+from pprint import pprint
+
+pprint(re.findall(r"[b-df-hj-np-tv-z]+[a-z]+", text), 
+        width = 65, compact = True))
+
+## ['this', 'course', 'we', 're', 'going', 'to', 'learn', 'basic', 
+## 'concepts', 'natural', 'language', 'processing', 'day', 'we', 
+## 'll', 'cover', 'basic', 'concepts', 'while', 'day', 'will', 'deal', 
+##  'with', 'more', 'complex', 'topics']
+
+pprint(re.findall(r"[a-z]+l ", text), width = 65, compact = True)))
+
+## ['natural ', 'll ', 'will ', 'deal ']
+
+```
+
+## Preprocessing -- Regular Expressions
+
+__Replacing digits in our text:__
+
+```{python, eval = F}
+text = """In this course we're going to learn basic concepts of 
+natural language processing. On day 1 we'll cover basic concepts, 
+while day 2 will deal with more complex topics."""
+
+import re
+from pprint import pprint
+
+pprint(re.sub(r"[0-9]", "digit", text), 
+        width = 65, compact = True)))
+        
+## "In this course we're going to learn basic concepts of natural 
+## language processing. On day digit we'll cover basic concepts, 
+## while day digit will deal with more complex topics."
+
+```
+
+## Preprocessing -- Regular Expressions
+
+__Splitting our text by an arbitrary pattern:__
+
+```{python, eval = F}
+text = """In this course we're going to learn basic concepts of 
+natural language processing. On day 1 we'll cover basic concepts, 
+while day 2 will deal with more complex topics."""
+
+import re
+from pprint import pprint
+
+pprint(re.split(r"day [0-9]", text), 
+        width = 65, compact = True)))
+        
+## ["In this course we're going to learn basic concepts of natural 
+## language processing. On ",
+## " we'll cover basic concepts, while ",
+## " will deal with more complex topics."]
+
+```
+
+## Preprocessing -- Regular Expressions
+
+__Finding matches of arbitrary patterns in our text:__
+
+```{python, eval = F}
+text = """In this course we're going to learn basic concepts of 
+natural language processing. On day 1 we'll cover basic concepts, 
+while day 2 will deal with more complex topics."""
+
+import re
+
+re.match(r"on", text)
+
+re.match(r"at", text)
+
+re.match(r"in", text)
+
+re.match(r"In", text)
+ 
+## <_sre.SRE_Match object; span=(0, 2), match='In'>
+
+```
+
+## Preprocessing -- Regular Expressions
+
+__Using regex to remove stopwords in our text:__
+
+```{python, eval = F}
+text = """In this course we're going to learn basic concepts of 
+natural language processing. On day 1 we'll cover basic concepts, 
+while day 2 will deal with more complex topics."""
+
+import re
+from pprint import pprint
+
+stop_list = [" the", "my", "you", "a", "of", "in", "on", "to "]
+
+pprint(re.sub(r" | ".join(stop_list), " ", text), 
+        width = 65, compact = True)))
+ 
+## "In this course we're going learn basic concepts natural language 
+## processing. On day 1 we'll cover basic concepts, while day 2 will 
+## deal with more complex topics."
+
+```
+
+__Why are "In" \& "On" not removed?__
+
+## Preprocessing -- Regular Expressions
+
+__Expand contractions:__
+
+```{python, eval = F}
+text = """In this course we're going to learn basic concepts of 
+natural language processing. On day 1 we'll cover basic concepts, 
+while day 2 will deal with more complex topics."""
+
+import re
+from pprint import pprint
+
+pprint(re.sub(r"we're", "we are", text), 
+        width = 65, compact = True)))
+
+## "In this course we are going to learn basic concepts of natural 
+## language processing. On day 1 we'll cover basic concepts, while 
+## day 2 will deal with more complex topics."
+
+```

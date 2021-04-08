@@ -1,0 +1,55 @@
+## TF-IDF weighting in Python
+```{r, include=FALSE, cache=FALSE}
+ap = adjust_path(paste0(getwd(), "/figure"))
+```
+
+__(Default) Implementation in ``sklearn.TfidfVectorizer``:__
+
+- $idf(word_i)$ slightly augmented  
+$$idf(word_i) = \log(\frac{1 + n}{1 + \sum_{d|w_i \in d} 1}) + 1$$
+  
+  \vspace{.5cm}
+
+- Euclidean normalization per document:  
+  $$\frac{v}{||v||_2}$$
+  
+## TF-IDF weighting in Python
+  
+__We will use the exemplary corpus from before:__
+
+```{python, eval = F}
+a = "i like watching football on tv"
+b = "football players play football every saturday"
+corpus = [a, b]
+```  
+
+__Initialize the model:__
+
+```{python, eval = F}
+from sklearn.feature_extraction.text import TfidfVectorizer
+
+vectorizer = TfidfVectorizer(norm = "l2", use_idf = True,
+                             smooth_idf = True, sublinear_tf = False, 
+                             ...)
+```
+
+__Accepts arguments of the ``CountVectorizer`` as well__
+
+## TF-IDF weighting in Python
+
+__Create the DTM:__
+
+```{python, eval = F}
+dtm = vectorizer.fit_transform(corpus)
+
+dtm.toarray()
+
+## array([[0., 0.33518, 0.47108, 0.47108, 0., 0., 0., 0.47108, 0.47108],
+##        [0.40740, 0.57974, 0., 0., 0.40740, 0.40740, 0.40740, 0., 0.]])
+```
+
+\vspace{.5cm}
+
+__Questions:__  
+Why do so many entries have the same weights?  
+  Why do the weights of words with single occurences differ between the first and the second document?

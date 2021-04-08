@@ -1,0 +1,93 @@
+## Recap
+```{r, include=FALSE, cache=FALSE}
+ap = adjust_path(paste0(getwd(), "/figure"))
+```
+
+__Where we are right now:__
+
+- Words can be represented as dense, low-dimensional vectors \hfill $\checkmark$
+- Easy to capture similarity between words \hfill $\checkmark$
+- Additive Compositionality of word vectors \hfill $\checkmark$
+- Documents can be represented as a vector of word occurrences
+- These BoW-representations are high-dimensional and inefficient
+
+## The problem with Bag-of-words representations
+
+__Similiar problems as in the word-level example:__
+
+\begin{align*}
+document_1 = [0,0,2,0,1,0,0,1,0,2,0,0,0,0,1]\\document_2 = [0,1,0,0,0,0,0,0,0,0,0,0,3,0,1]
+\end{align*}
+
+__Two major problems:__
+
+- The dimensionality of Bag-of-words representations
+- Only exact agreement of word occurences can contribute to similarity
+  
+__Could we try to build on the concept of word embeddings?__
+
+## The difficulty with word embeddings
+
+__How should we aggregate from the word to the document/paragraph level?__
+
+- Build a matrix of word embeddings  
+  $\rightarrow$ Problem: Documents vary in length; no fixed dimension
+- Average the word embeddings  
+  $\rightarrow$ Loss of word order; loss of information
+
+__The solution:__
+
+- Modify the word2vec approach in order to learn representations of whole documents
+
+## Doc2Vec \href{https://cs.stanford.edu/~quocle/paragraph_vector.pdf}{\beamergotobutton{Mikolov and Le (2014)}}
+
+__Key contributions of this model:__
+
+- Extend the idea of Mikolov et al. (2013a)
+- Add input layer weights for document representations
+- _Keep the computational tricks_
+
+__Proposal of two different architectures:__
+
+- A distributed memory model (PV-DM)
+- A distributed Bag-of-words model (PV-DBOW)
+
+## Distributed memory model
+
+__The architecture:__
+
+\begin{figure}
+\centering
+\includegraphics[width = 9cm]{`r ap("pv-dm.JPG")`}\\ 
+\footnotesize{Source:} \href{https://cs.stanford.edu/~quocle/paragraph_vector.pdf}{\footnotesize Mikolov and Le (2014)}
+\end{figure}
+
+## Distributed memory model -- Explained
+
+__The "Fake Task":__
+
+- _Training objective:_ Given a context, predict the center word
+- _Context:_ Surrounding word + paragraph ID
+- Architecture corresponds roughly to the CBOW model
+- Paragraph vector _"acts as a memory that remembers what is missing from the current context"_ (Mikolov and Le, 2014)  
+  $\rightarrow$ __"Distributed Memory"__
+
+
+## Distributed Bag-of-words model
+
+__The architecture:__
+
+\begin{figure}
+\centering
+\includegraphics[width = 9cm]{`r ap("pv-dbow.JPG")`}\\ 
+\footnotesize{Source:} \href{https://cs.stanford.edu/~quocle/paragraph_vector.pdf}{\footnotesize Mikolov and Le (2014)}
+\end{figure}
+
+## Distributed Bag-of-words model -- Explained
+
+__The "Fake Task":__
+
+- _Training objective:_ Given a document, predict the words inside
+- Architecture corresponds roughly to the Skip-gram model
+- Conceptually somewhat simpler than PV-DM
+- Lower number of weights to train (compared to PV-DM)

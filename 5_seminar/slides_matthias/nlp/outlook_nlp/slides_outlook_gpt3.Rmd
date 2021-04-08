@@ -1,0 +1,65 @@
+## Outlook: GPT-3
+```{r, include=FALSE, cache=FALSE}
+ap = adjust_path(paste0(getwd(), "/figure"))
+```
+
+__"Classical" Pre-training--Fine-tuning paradigm:__
+
+\begin{figure}
+\centering
+\includegraphics[width = 9cm]{`r ap("gpt3-classic.png")`}\\ 
+\footnotesize{Source:} \href{https://arxiv.org/pdf/2005.14165.pdf}{\footnotesize Brown et al. (2020)}
+\end{figure}
+
+
+## Outlook: GPT-3
+
+__Zero-shot learning:__
+
+\begin{figure}
+\centering
+\includegraphics[width = 11cm]{`r ap("gpt3-zero.png")`}\\ 
+\footnotesize{Source:} \href{https://arxiv.org/pdf/2005.14165.pdf}{\footnotesize Brown et al. (2020)}
+\end{figure}
+
+
+## Outlook: GPT-3
+
+__One-shot learning:__
+
+\begin{figure}
+\centering
+\includegraphics[width = 10cm]{`r ap("gpt3-one.png")`}\\ 
+\footnotesize{Source:} \href{https://arxiv.org/pdf/2005.14165.pdf}{\footnotesize Brown et al. (2020)}
+\end{figure}
+
+
+## Outlook: GPT-3
+
+__Few-shot learning:__
+
+\begin{figure}
+\centering
+\includegraphics[width = 9cm]{`r ap("gpt3-few.png")`}\\ 
+\footnotesize{Source:} \href{https://arxiv.org/pdf/2005.14165.pdf}{\footnotesize Brown et al. (2020)}
+\end{figure}
+
+
+## Outlook: GPT-3
+
+\begin{figure}
+\centering
+\includegraphics[width = 13cm]{`r ap("gpt3-inner-outer.png")`}\\ 
+\footnotesize{Source:} \href{https://arxiv.org/pdf/2005.14165.pdf}{\footnotesize Brown et al. (2020)}
+\end{figure}
+
+
+## Outlook: GPT-3
+
+__Performance:__
+
+\begin{figure}
+\centering
+\includegraphics[width = 11cm]{`r ap("gpt3-superglue.png")`}\\ 
+\footnotesize{Source:} \href{https://arxiv.org/pdf/2005.14165.pdf}{\footnotesize Brown et al. (2020)}
+\end{figure}

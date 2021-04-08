@@ -1,0 +1,149 @@
+## What's next?
+```{r, include=FALSE, cache=FALSE}
+ap = adjust_path(paste0(getwd(), "/figure"))
+```
+
+__The world's largest Tech companies are investing heavily:__
+
+- fb ai research, google ai, microsoft research have own NLP groups
+- Leading researchers like Geoffrey Hinton (Google) or Yann LeCun (Facebook) start working for the industry
+- In Munich/Germany: Projects like the _\href{https://mcml.ai/}{MCML-Cluster}_ (Munich Center for Machine Learning)
+
+## What's next?
+\centering
+\Large __Deep Learning__
+
+
+## Deep Learning Timeline - 1
+
+\hbox{\hspace{-6.5em} \includegraphics[width=14cm,page=1]{`r ap("dl_history1.pdf")`}}
+
+## Deep Learning Timeline - 1
+
+\hbox{\hspace{-6.5em} \includegraphics[width=14cm,page=2]{`r ap("dl_history1.pdf")`}}
+\addtocounter{framenumber}{-1}
+
+## Deep Learning Timeline - 1
+
+\hbox{\hspace{-6.5em} \includegraphics[width=14cm,page=3]{`r ap("dl_history1.pdf")`}}
+\addtocounter{framenumber}{-1}
+
+## Deep Learning Timeline - 1
+
+\hbox{\hspace{-6.5em} \includegraphics[width=14cm,page=4]{`r ap("dl_history1.pdf")`}}
+\addtocounter{framenumber}{-1}
+
+## Deep Learning Timeline - 1
+
+\hbox{\hspace{-6.5em} \includegraphics[width=14cm,page=5]{`r ap("dl_history1.pdf")`}}
+\addtocounter{framenumber}{-1}
+
+## Deep Learning Timeline - 2
+
+\hbox{\hspace{-6.5em} \includegraphics[width=14cm,page=1]{`r ap("dl_history2.pdf")`}}
+
+## Deep Learning Timeline - 2
+
+\hbox{\hspace{-6.5em} \includegraphics[width=14cm,page=2]{`r ap("dl_history2.pdf")`}}
+\addtocounter{framenumber}{-1}
+
+## Deep Learning Timeline - 2
+
+\hbox{\hspace{-6.5em} \includegraphics[width=14cm,page=3]{`r ap("dl_history2.pdf")`}}
+\addtocounter{framenumber}{-1}
+
+## Deep Learning Timeline - 2
+
+\hbox{\hspace{-6.5em} \includegraphics[width=14cm,page=4]{`r ap("dl_history2.pdf")`}}
+\addtocounter{framenumber}{-1}
+
+## Deep Learning Timeline - 2
+
+\hbox{\hspace{-6.5em} \includegraphics[width=14cm,page=5]{`r ap("dl_history2.pdf")`}}
+\addtocounter{framenumber}{-1}
+
+## Deep Learning Timeline - 3
+
+\hbox{\hspace{-6.5em} \includegraphics[width=14cm,page=1]{`r ap("dl_history3.pdf")`}}
+
+## Deep Learning Timeline - 3
+
+\hbox{\hspace{-6.5em} \includegraphics[width=14cm,page=2]{`r ap("dl_history3.pdf")`}}
+\addtocounter{framenumber}{-1}
+
+## Deep Learning Timeline - 3
+
+\hbox{\hspace{-6.5em} \includegraphics[width=14cm,page=3]{`r ap("dl_history3.pdf")`}}
+\addtocounter{framenumber}{-1}
+
+## Deep Learning Timeline - 3
+
+\hbox{\hspace{-6.5em} \includegraphics[width=14cm,page=4]{`r ap("dl_history3.pdf")`}}
+\addtocounter{framenumber}{-1}
+
+## Deep Learning Timeline - 3
+
+\hbox{\hspace{-6.5em} \includegraphics[width=14cm,page=5]{`r ap("dl_history3.pdf")`}}
+\addtocounter{framenumber}{-1}
+
+
+## End-to-end trainable models
+
+__Naive approach (works well):__
+
+- Learn embeddings with a prefered algorithm
+- Embeddings can be used for further tasks
+- Plug them into a subsequent model for the actual task
+
+\vspace{0.5cm}
+
+__Better: Train models end-to-end__
+
+- _Input:_ Sequences of words
+- _Hidden:_ Deep neural networks
+- _Output:_ E.g. a classification (positive/negative)
+
+
+## Context-free Embeddings
+
+__1st Generation of neural embeddings are _"context-free"___
+
+- Breakthrough paper by Mikolov et al, 2013 (Word2Vec)
+- Followed by Pennington et al, 2014 (GloVe)
+- Extension of Word2Vec by Bojanowski et al, 2016 (FastText)
+
+__Why "Context-free"?__
+
+- Models learn _one single_ embedding for each word
+- Why could this possibly be problematic?
+    + "The _default_ setting of the function is xyz."
+    + "The probability of _default_ is rather high."
+
+- Would be nice to have different embeddings for these two occurrences
+
+
+## Contextual Embeddings
+
+__"Contextual" embeddings?__
+
+- Model makes further use of the context a word appears in
+- Embeddings depend on the context around a word
+- Requires us to process sequences $\rightarrow$ RNNs/LSTMs
+- Distinguish between:
+    + Unidirectional
+    + Bidirectional
+    
+    
+## Transfer learning
+
+__Transfer learning in Image Analysis:__
+
+- Use a huge pre-trained deep neural network (e.g. on ImageNet)
+- Stack individual task-specific layers on top of this model
+- Fine-tune the resulting model on your own data
+
+__Developments in NLP:__
+
+- Trend towards deeper pre-training models for word embeddings  
+- Gives rise to transfer learning  
+- One speaks of "NLP's ImageNet moment" (http://ruder.io/nlp-imagenet/)

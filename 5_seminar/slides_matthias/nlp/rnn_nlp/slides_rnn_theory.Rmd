@@ -1,0 +1,269 @@
+## Different kinds of networks
+```{r, include=FALSE, cache=FALSE}
+ap = adjust_path(paste0(getwd(), "/figure"))
+```
+
+- There are different kinds of "families" of neural networks
+- Some are more suited for specific types of data than others
+
+- __*Fully Connected neural networks:*__
+    - Most general architecture
+    - Mostly used for tabular data
+    - Can also be part of larger, more complex structures
+- __*Convolutional neural networks (CNNs):*__  
+    - Can operate on inputs with multiple dimensions
+    - Most useful for processing images or videos
+- __*Recurrent neural networks (RNNs):*__
+    - Take sequences (e.g. time series) as inputs
+    - But also: Sequences of characters, words or tokens
+    - Different special types of recurrent neural networks
+    
+    
+## Side Note: Convolutional neural networks
+
+__How CNNs extract features from the input data:__
+
+\vspace{.2cm}
+
+\begin{figure}
+\centering
+\includegraphics[width = 8cm]{`r ap("conv_sobel.png")`}
+\end{figure}
+
+
+## Recurrent neural networks
+
+__Processing one part of the input at a time:__
+
+\vspace{.2cm}
+
+\begin{figure}
+\centering
+\includegraphics[width = 10cm]{`r ap("rnn.png")`}
+\end{figure}
+
+\centering _An unrolled recurrent neural network_
+
+## Recurrent neural networks -- Definition
+
+__Notation:__
+
+- $x_t$: Input at time step $t$
+- $h_t$: Hidden state at time step $t$
+- $o_t$: Output at time step $t$
+- $y_t$: True value of the target
+- $\theta = [\theta_{hidden}, \theta_{out}]$: Parameters of the network
+- $\sigma$: An arbitrary function (e.g. $tanh$)
+
+__Definition of the network:__
+
+\vspace{-.25cm}
+
+\begin{align*}
+h_t &= \sigma(h_{t-1}; x_t; \theta_{hidden})\\
+o_t &= \sigma(h_t; \theta_{out})
+\end{align*}
+
+
+## Recurrent neural networks -- Remarks
+
+__A note on the input:__  
+
+The input $x_t$ can have various forms:
+    
+- It can be a scalar (e.g. for time-series) ..
+- .. or it can be a vector:
+    - One-hot vector: $$x_t = [0,0,1,0, ..,0]$$
+    - Embedding: $$x_t = [-0.23,0.05, .., 1.42]$$
+
+
+__Computation of the output:__
+
+- Sometimes computed at each timestep  
+- Sometimes only computed after the final hidden state
+
+
+## Recurrent neural networks -- Remarks
+
+__Two crucial questions:__
+
+- _What does $h_t$ depend on (& why might it be "problematic")?_
+    - Current input $x_t$
+    - All previous inputs $x_1, .., x_{t-1}$
+    - Initialization of the hidden state $h_0$
+    - Model parameters
+    
+- _Model parameters are shared. What are the implications?_
+    - Parsimonious structure
+    - Better generalization with respect to length & position
+    
+
+## Recurrent neural networks -- Problems
+
+__Backpropagation through time:__
+
+- _Remember:_ 
+    - Information flows through the net from input to output nodes
+    - Weights are updated through gradient descent by backprop
+
+- _How does this transfer to recurrent neural networks?_  
+  $\rightarrow$ Error has to travel a long way "back in time"
+  
+__Vanishing/Exploding Gradient problem__  
+
+- Model parameters are shared along the time axis  
+- Parameters are multiplied over and over again  
+  $\rightarrow$ Small values of the parameters: __Vanishing__  
+  $\rightarrow$ Large values of the parameters: __Exploding__
+
+
+## Recurrent neural networks -- Possible solutions
+
+__Against Exploding Gradients:__
+
+- Truncated Backpropagation
+- Gradient Clipping
+- Penalize large gradients
+
+\vspace{.3cm}
+
+__Against Vanishing Gradients:__
+
+- Careful initialization of the weights
+- Special architectures (GRUs/__LSTMs__)
+
+
+## LSTMs (Hochreiter and Schmidhuber, 1997)
+
+__More complex computations inside the network:__
+
+\vspace{.2cm}
+
+\begin{figure}
+\centering
+\includegraphics[width = 11.5cm]{`r ap("lstm.png")`}\\ 
+\footnotesize{Source:} \href{https://colah.github.io/posts/2015-08-Understanding-LSTMs/}{\footnotesize colah's blog}
+\end{figure}
+
+## A note on GRUs (Cho et al, 2014)
+
+- Proposed as an alternative to LSTMs
+- Some subtle differences $+$ fewer \#parameters
+- Similiar performance to LSTMs on some tasks
+- In General: Outperformed by LSTMs
+- Not used as frequently as LSTMs
+
+
+## Bidirectionality
+
+__Why bidirectionality?__
+
+- Vanilla RNNs/LSTMs just capture the left hand context 
+- This might make sense when considering the language modelling objective (cf. Bengio et al, 2003)
+- _Counterexample:_ Machine Translation  
+  $\rightarrow$ Translation of a word might also depend on the right hand context  
+ 
+\vspace{.3cm}
+  
+__How can we incorporate this in recurrent architectures?__
+
+- biRNNs
+- biLSTMs
+- biGRUs
+
+
+## Bidirectionality
+
+__Simultaneously running a backward RNN:__
+
+\vspace{.2cm}
+
+\begin{figure}
+\centering
+\includegraphics[width = 10cm]{`r ap("bilstm.png")`}
+\end{figure}
+
+\centering _An unrolled bidirectional recurrent neural network_
+
+
+## Encoder-Decoder architectures
+
+__Encoder:__
+
+- Takes the input, transforms it to representation (vector/tensor)
+- Can be an arbitrary network (FCNN, CNN, RNN, etc.)
+- _RNN:_ Representation is the last hidden state of the network  
+  (In case of biRNNs: Concatenation of last hidden states)
+
+\vspace{.15cm}
+
+__Decoder:__
+
+- Takes the representation outputed by the encoder 
+- Can be an arbitrary network (usually similar to the encoder)
+
+\vspace{.15cm}
+
+__Training:__
+
+- Encoder and Decoder are trained in conjunction 
+- Unsupervised (pure reconstruction) or supervised (e.g. translation)
+
+
+## Encoder-Decoder architectures
+
+__Graphical illustration:__
+
+\vspace{.2cm}
+
+\begin{figure}
+\centering
+\includegraphics[width = 10cm]{`r ap("enc-dec.png")`}
+\end{figure}
+
+\centering _An unrolled (unidirectional) encoder-decoder RNN_
+
+
+## RNNs in Python
+
+__Using Keras:__
+
+```{python, include = T, eval = F}
+# load required modules
+from keras.layers import Embedding, GRU, LSTM, Bidirectional
+
+# define model architecture
+model = Sequential()
+model.add(Embedding(input_dim = 30000, output_dim = 128, 
+                    input_length = 256))
+model.add(Bidirectional(LSTM(units = 64, ativation = "tanh")))
+model.add(Dense(1, activation='sigmoid'))
+```
+    
+- _\href{https://keras.io/layers/recurrent/}{Online documentation of Recurrent layers in Keras}_
+
+## Example -- RNN for Classification
+
+__Exemplary recurrent architecture for classification:__
+
+\vspace{.2cm}
+
+\begin{figure}
+\centering
+\includegraphics[width = 10cm]{`r ap("rnn-classif.png")`}
+\end{figure}
+
+
+## Example -- RNN for Neural Machine Translation (NMT)
+
+__Graphical illustration:__
+
+\vspace{.2cm}
+
+\begin{figure}
+\centering
+\includegraphics[width = 10cm]{`r ap("enc-dec.png")`}
+\end{figure}
+
+- Encoder-Decoder architectures typically used for NMT
+- Often also including bidirectionality

@@ -1,0 +1,108 @@
+## ``scikit-learn`` package
+```{r, include=FALSE, cache=FALSE}
+ap = adjust_path(paste0(getwd(), "/figure"))
+```
+
+- Standard Python library for Machine Learning
+- Many algorithms for Classification, Regression, Clustering, etc.
+- __Preprocessing functionality:__  
+Feature extraction and normalization (e.g. for text data)
+- Modules:  
+  + ``sklearn.feature_extraction``
++ ``sklearn.preprocessing``
+- __Documentation:__  
+https://scikit-learn.org/stable/documentation.html
+
+## Bag-of-words in Python
+
+__Create a Document-Term-Matrix using__ ``scikit-learn``__:__
+
+- _Step 1:_ Set up your corpus as a list of strings
+- _Step 2:_ Inialize the ``CountVectorizer`` with the model parameters
+- _Step 3:_ Apply the ``.fit_transform()``-function of the ``CountVectorizer`` to your corpus
+
+## Bag-of-words in Python
+
+__We will use the exemplary corpus from before:__
+
+```{python}
+a = "i like watching football on tv"
+b = "football players play football every saturday"
+corpus = [a, b]
+```  
+
+__Initialize the model:__
+
+```{python}
+from sklearn.feature_extraction.text import CountVectorizer
+
+vectorizer = CountVectorizer(lowercase = True, 
+                    stop_words = None, analyzer = "word", max_df = 1.0, 
+                    min_df = 1, max_features = None, binary = False)
+```
+
+## Bag-of-words in Python
+
+__Create the DTM:__
+
+```{python, eval = F}
+dtm = vectorizer.fit_transform(corpus)
+
+dtm.toarray()
+
+## array([[0, 1, 1, 1, 0, 0, 0, 1, 1],
+##       [1, 2, 0, 0, 1, 1, 1, 0, 0]], dtype=int64)
+```
+
+\vspace{.5cm}
+
+__Side note:__  
+``.fit()`` just learns the vocabulary without returning the DTM    
+
+\vspace{.5cm}
+
+__Question:__  
+How do we know the ordering of the vocabulary in the columns? 
+  
+## Bag-of-words in Python
+  
+  __Query the columns names of the DTM:__
+
+
+```{python, eval = F}
+vectorizer.get_feature_names()
+
+## ['every',
+## 'football',
+## 'like',
+## 'on',
+## 'play',
+## 'players',
+## 'saturday',
+## 'tv',
+## 'watching']
+```
+
+## Bag-of-words in Python
+
+__Get the Bag-of-word representation for a new document:__
+
+```{python, eval = F}
+new_sentence = ["i am watching football players live"]
+
+new_vector = vectorizer.transform([new_sentence])
+
+new_vector.toarray()
+
+## array([[0, 1, 0, 0, 0, 1, 0, 0, 1]], dtype=int64)
+```
+
+## A note on stopwords   
+
+- Multiple arguments for stopword removal in the ``CountVectorizer()``
++ ``stop_words``: Directly specify a list
++ ``max_df``: Words which occur too often
++ ``min_df``: Words which occur too seldom
++ ``max_features``: Only _n_ most frequent terms 
+- Either explicitely specify the words to be removed
+- Or use the latter implicit ways to remove certain words

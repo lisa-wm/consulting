@@ -1,0 +1,107 @@
+## Some remarks
+```{r, include=FALSE, cache=FALSE}
+ap = adjust_path(paste0(getwd(), "/figure"))
+```
+
+* The world's largest companies are investing heavily in NLP:  
+  Google, Facebook, Amazon, Apple, Microsoft, ...
+* But still: a lot of (yet) unsolved problems and challenges
+* Innovations are more and more open-sourced
+* There's a variety of different applications of NLP  
+  in everyday life you might not be aware of
+* Once you see them, it soon becomes obvious
+
+## Neural Machine Translation
+
+\begin{figure}
+\centering
+\includegraphics[width = 10cm]{`r ap("machine-translation.png")`}
+\end{figure}
+
+* Two different NLP tasks are hiding in this picture..
+* __Underlying task__: Text generation
+
+## A brief History of Machine Translation
+
+* __Rule-Based Machine Translation__ (50s -- 80s)
+    + Dictionaries + Grammatical Rules
+* __Example-Based Machine Translation__ (80s -- 90s)
+    + First suggested by Makoto Nagao (1984)
+    + Based on bilingual text corpora
+* __Statistical Machine Translation__ (90s -- 10s)
+    + Driven by IBM guys
+* __Neural Machine Translation__ (last few years)
+    + Based on neural networks (LSTMs, Transformers)
+
+## Auto Completion
+
+\begin{figure}
+\centering
+\includegraphics[width = 10cm]{`r ap("auto-completion.png")`}
+\end{figure}
+
+* You might also know this from your smartphone keyboard
+* __Underlying task__: Predict the next word given the previous words (+ individual browsing history)
+
+## Spam filters
+
+\begin{figure}
+\centering
+\includegraphics[width = 10cm]{`r ap("spam-detection.png")`}
+\end{figure}
+
+* Indeed, spam filters are often surprisingly simple systems
+* __Underlying task__: Document classification (Naive Bayes or Logistic Regression)
+
+## Argument Mining
+
+\begin{figure}
+\centering
+\includegraphics[width = 10cm]{`r ap("argument-mining_small.png")`}
+\end{figure}
+ 
+* Detection and ranking of arguments pro/contra a certain topic
+*  __Underlying task__: Document classification and/or Sequence tagging
+
+## Chatbots
+
+\begin{figure}
+\centering
+\includegraphics[width = 9cm]{`r ap("chatbots_small.png")`}
+\end{figure}
+
+* We experience chatbots on a growing number of websites
+* __Underlying task__: Natural language understanding / Text generation
+ 
+## Information Retrieval
+ 
+ <center>
+ 
+ *Alexa, what is the capital of Australia?*  
+ 
+ </center>
+ 
+* __Underlying task__: Question Answering / Information extraction
+ 
+## (Some) Further examples
+
+* __Sentiment analysis__ / __Text classification__
+    + Determine, whether a document is positive/neutral/negative
+* __Text Generation__
+    + Example: [*OpenAI GPT2*](https://openai.com/blog/better-language-models/)
+* __Named Entity Recognition__
+    + Search for certain entities (e.g. person, location, etc.)
+* __Image Captioning__
+    + Hybrid task (Computer Vision + NLP)
+* __Dependency Parsing__
+    + Determine the grammatical structure of text
+* __Part-of-speech tagging__
+    + Tagging words according to their role in a text
+
+## Unsolved Challenges: Multitask learning
+
+\begin{figure}
+\centering
+\includegraphics[width = 11cm]{`r ap("decanlp.png")`}
+\href{https://decanlp.com/}{https://decanlp.com/}
+\end{figure}

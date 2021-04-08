@@ -1,0 +1,58 @@
+## Measuring similarity
+```{r, include=FALSE, cache=FALSE}
+ap = adjust_path(paste0(getwd(), "/figure"))
+```
+
+
+__Euclidean dot product formula:__
+\vspace{-.35cm}
+\begin{align*}
+\mathbf{A} \cdot \mathbf{B} = ||\mathbf{A}|| \cdot ||\mathbf{B}|| \cdot \cos(\theta)
+\end{align*}
+
+__Cosine similarity:__
+\vspace{-.35cm}
+\begin{align*}
+similarity = \cos(\theta) &= \frac{\mathbf{A} \cdot \mathbf{B}}{||\mathbf{A}|| \cdot ||\mathbf{B}||} \\
+&= \frac{\sum_{i=1}^{n} A_iB_i}{\sqrt{\sum_{i=1}^{n} A_i^2}\sqrt{\sum_{i=1}^{n} B_i^2}}
+\end{align*}
+
+
+## Additive Compositionality
+
+__Most famous example:__
+
+- $v_{king} - v_{man} + v_{woman} \approx v_{queen}$
+  
+__Other examples:__
+
+- _Present/past tense:_  
+$v_{went} - v_{go} + v_{stand} \approx v_{stood}$
+  
+- _Country/Capital:_  
+$v_{Germany} - v_{Berlin} + v_{Paris} \approx v_{France}$
+  
+- _Something funny at the end:_
+$v_{bicycle} - v_{road} + v_{ocean} \approx v_{surfboard}$
+
+
+## Word2Vec and Bigrams
+
+__Additive Compositionality__ sometimes doesn't work so well:
+
+- E.g. $v_{new} + v_{york} \stackrel{?}{\approx} v_{new\_york}$
+- Or: $v_{larry} + v_{page} \stackrel{?}{\approx} v_{larry\_page}$
+
+
+## Word2Vec and Bigrams
+
+__Pointwise mutual information:__
+
+$$pmi(x;y) = \log\left( \frac{p(x,y)}{p(x) \cdot p(y)} \right)$$
+
+__Use of PMI:__
+
+- Measure of association in information theory and statistics
+- Higher values indicate a higher association between words
+- (Co-)occurrence counts are used to approximate the probabilities
+- Normalization (NPMI) to obtain a fixed range of values between -1 \& +1.

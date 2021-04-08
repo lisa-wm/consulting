@@ -1,0 +1,6 @@
+## {.plain}
+```{r, include=FALSE, cache=FALSE}
+ap = adjust_path(paste0(getwd(), "/figure"))
+```
+
+\centering \Huge Exercise I

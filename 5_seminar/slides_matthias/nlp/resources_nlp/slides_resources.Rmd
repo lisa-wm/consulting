@@ -1,0 +1,384 @@
+## Where to start?
+```{r, include=FALSE, cache=FALSE}
+ap = adjust_path(paste0(getwd(), "/figure"))
+```
+
+__What we will talk about:__
+
+- Architectures to train yourself  
+  $\rightarrow$ Static embeddings  
+  $\rightarrow$ "Ordinary" deep neural networks
+- Pre-trained architectures  
+  $\rightarrow$ Only fine-tuning computationally feasible
+
+\vspace{.3cm}
+
+- Different languages
+- Benchmark data sets
+- (Pre-training resources)
+
+
+## Architectures to (pre-)train yourself
+
+__Shallow methods:__
+
+- word2vec, GloVe, doc2vec, fastText, and so on  
+  $\rightarrow$ Low computational complexity  
+  $\rightarrow$ Easy & convenient way to obtain static representations
+- Stable implementations in the \texttt{gensim} module
+- Possible to train them on ordinary CPU machines
+- Inference time poses no problem
+- Pre-trained static embeddings available on the web  
+  $\rightarrow$ For word2vec: e.g. _\href{https://drive.google.com/file/d/0B7XkCwpI5KDYNlNUTTlSS21pQmM/edit}{GoogleNews-vectors}_  
+  $\rightarrow$ For GLoVe: available at _\href{https://nlp.stanford.edu/projects/glove/}{Stanford NLP}_
+
+
+## Architectures to (pre-)train yourself
+
+__Deeper architectures:__
+
+- \href{https://keras.io/}{Keras} as a convenient framework to train deep models  
+  $\rightarrow$ multiple backends available: Tensorflow, Theano, CNTK
+- \texttt{Embedding} layer to incorporate this idea into deeper nets  
+  $\rightarrow$ Different options:  
+  (1) Initialize with external embeddings & keep them fixed  
+  (2) Initialize with external embeddings & continue training them  
+  (3) Initialize randomly & train them
+- Important recurrent layers: \texttt{keras.layers.< >}  
+  \texttt{LSTM}, \texttt{GRU}, \texttt{Bidirectional}
+  
+  
+## Training an architecture in Keras
+
+- Numerous examples in the  \href{https://keras.io/examples/}{Keras Documentation}
+- Famous \href{https://www.imdb.com/interfaces/}{IMDB data set} comes as part of the Keras module
+
+\vspace{.3cm}
+
+- Example: \href{https://keras.io/examples/imdb_bidirectional_lstm/}{BiLSTM for classification}
+- Architecture: 
+    - 1-layer bidirectional 64-dimensional LSTM network
+    - Complemented by a 128-dimensional embedding layer
+    - Binary Classification layer on top
+- Training performed on a _Core i7_ CPU: $\sim$ 150s/epoch
+
+
+## Pre-trained architectures
+
+__Native implementations:__
+
+- BERT: \href{https://github.com/google-research/bert}{https://github.com/google-research/bert}
+- RoBERTa: \small\href{https://github.com/pytorch/fairseq/tree/master/examples/roberta}{https://github.com/pytorch/fairseq/tree/master/examples/roberta}\normalsize
+- ALBERT: \href{https://github.com/google-research/ALBERT}{https://github.com/google-research/ALBERT}
+- XLNET: \href{https://github.com/zihangdai/xlnet/}{https://github.com/zihangdai/xlnet/}
+- T5: \footnotesize\href{https://github.com/google-research/text-to-text-transfer-transformer}{https://github.com/google-research/text-to-text-transfer-transformer}\normalsize
+
+__Drawbacks:__
+
+- Different frameworks use for the implementations
+- Different programming styles  
+  $\rightarrow$ Adaption of different models to custom problems can sometimes lead to a lot of redundant work
+  
+## Example: Fine-tune BERT on MRPC
+
+```{python, include = T, eval = F}
+!python run_classifier.py \
+  --task_name=MRPC \
+  --do_train=true \
+  --do_eval=true \
+  --data_dir=$GLUE_DIR/MRPC \
+  --vocab_file=$BERT_BASE_DIR/vocab.txt \
+  --bert_config_file=$BERT_BASE_DIR/bert_config.json \
+  --init_checkpoint=$BERT_BASE_DIR/bert_model.ckpt \
+  --max_seq_length=128 \
+  --train_batch_size=32 \
+  --learning_rate=2e-5 \
+  --num_train_epochs=3.0 \
+  --output_dir=/tmp/mrpc_output/
+```
+
+
+## Pre-trained architectures @ \texttt{transformers}
+
+__Unified API for state-of-the-art architectures:__
+
+- 32+ pre-trained architectures (as of `r format(Sys.time(), '%B %d, %Y')`)
+- Models in 100+ languages available (as of `r format(Sys.time(), '%B %d, %Y')`)
+- Implementations in PyTorch as well as TensorFlow 2.0
+- Unified naming model parts and fine-tuning procedures
+- Docs: \href{https://huggingface.co/transformers/index.html}{https://huggingface.co/transformers/index.html}
+
+\vspace{.3cm}
+
+__Which different building blocks available?__
+
+- Model architecture
+- Custom tokenizers for each architecture
+- (Sets of) Pre-trained weights for an architecture
+- Pre-defined heads for fine-tuning on common tasks
+
+
+## Pre-trained architectures @ \texttt{transformers}
+
+__Pre-trained weights:__
+
+```{python, include = T, eval = F}
+<model name>-<version>-<cased/uncased>
+```
+
+__Load tokenizer & tokenize a sentence:__
+
+```{python, include = T, eval = F}
+from transformers import BertTokenizer
+tokenizer = BertTokenizer.from_pretrained("bert-base-cased")
+sentence = "Hello guys, welcome to the course."
+
+ids = tokenizer.encode(sentence, add_special_tokens = True)
+ids
+
+# [101, 8667, 3713, 117, 7236, 1106, 1103, 1736, 119, 102]
+
+[tokenizer.convert_ids_to_tokens(id) for id in ids]
+
+# ['[CLS]', 'Hello', 'guys', ',', 'welcome', 'to', 'the', 
+#  'course', '.', '[SEP]']
+```
+
+
+## Pre-trained architectures @ \texttt{transformers}
+
+__Tokenization all in one:__
+
+- BERT requires inputs of fixed length $\rightarrow$ Padding
+- \texttt{[PAD]} tokens should not receive Attention weights
+
+```{python, include = T, eval = F}
+tokenizer.encode_plus(sentence, 
+                      add_special_tokens = True,
+                      max_length = 12,          
+                      pad_to_max_length = True,
+                      return_attention_mask = True,   
+                      return_tensors = 'pt'
+                   )
+                   
+# {'input_ids': tensor([[ 101, 8667, 3713,  117, 7236, 
+#                      1106, 1103, 1736,  119,  102,    0,    0]]),
+# 'token_type_ids': tensor([[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]]),
+# 'attention_mask': tensor([[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0]])}
+```
+
+
+## Pre-trained architectures @ \texttt{transformers}
+
+__Load a model architecture:__
+
+```{python, include = T, eval = F}
+from transformers import BertForSequenceClassification
+mod = BertForSequenceClassification.from_pretrained("bert-base-cased",
+                                                    num_labels = 3)
+```
+
+__Inspect the dimensionality of the model:__
+
+```{python, include = T, eval = F}
+params = list(mod.parameters())
+
+## size of the embedding layer
+params[0].shape
+
+# torch.Size([28996, 768])
+
+## size of the classification layer
+params[200].shape
+
+# torch.Size([3])
+```
+
+
+## Pipelines @ \texttt{transformers}
+
+__Pipelines:__
+
+- Extremely high-level API included in \texttt{transformers}
+- Available for a couple of different downstream tasks
+- Ingredients of a pipeline:  
+    - _Encoding:_ Tokenization of the inputs 
+    - Inferency by a chosen model
+    - _Decoding:_ Use model output to generate target values
+    
+```{python, include = T, eval = F}
+from transformers import pipeline
+
+pipeline(<task name>, model = <model name>, 
+         tokenizer = <tokenizer name>)
+```
+
+- \texttt{model} and \texttt{tokenizer} are optional arguments  
+  $\rightarrow$ If not provided, some internal defaults are used
+
+
+## Pipelines @ \texttt{transformers}
+
+__Available tasks (as of `r format(Sys.time(), '%B %d, %Y')`):__
+
+- Sentiment Analysis (\texttt{"sentiment-analysis"})
+- Named entity recognition (\texttt{"ner"})
+- Question Answering (\texttt{"question-answering"})
+- \texttt[MASK]-filling (\texttt{"fill-mask"})
+- Summarization (\texttt{"summarization"})
+- Translation (\texttt{"translation-xx-to-yy"})  
+  $\rightarrow$ Only T5 for \texttt{en\_to\_fr}, \texttt{en\_to\_de} and \texttt{en\_to\_ro}
+- Feature Extraction (\texttt{feature-extraction})
+
+
+## Pipelines @ \texttt{transformers}
+
+__Exemplary task (with default model):__
+    
+```{python, include = T, eval = F}
+from transformers import pipeline
+
+pipe_classif = pipeline("sentiment-analysis")
+pipe_classif(sentence)
+
+# [{'label': 'POSITIVE', 'score': 0.99960136}]
+
+pipe_classif("I absolutely hate this!")
+
+# [{'label': 'NEGATIVE', 'score': 0.9992645}]
+```
+
+__Default:__
+
+- DistilBERT model
+- \texttt{base, uncased}
+- Fine-tuned on SST-2 data set
+
+
+## Pipelines @ \texttt{transformers}
+
+__Use other models than the default:__
+    
+```{python, include = T, eval = F}
+pipe_fill = pipeline("fill-mask", 
+    model = "bert-large-cased", 
+    tokenizer = BertTokenizer.from_pretrained("bert-large-cased"))
+pipe_fill("I like " + pipe_fill.tokenizer.mask_token + "football.")
+
+# [{'sequence': '[CLS] I like playing football. [SEP]',
+#  'score': 0.4649055004119873,
+#  'token': 1773},
+# {'sequence': '[CLS] I like watching football. [SEP]',
+#  'score': 0.19629190862178802,
+#  'token': 2903},
+# {'sequence': '[CLS] I like the football. [SEP]',
+#  'score': 0.10121186822652817,
+#  'token': 1103},
+# {'sequence': '[CLS] I like American football. [SEP]',
+#  'score': 0.0536048598587513,
+#  'token': 1237}]
+```
+
+
+## Other languages than English
+
+__Multilingual models:__
+
+- BERT also available as multilingual model
+- Top 100 languages with the largest Wikipedias
+- Re-weighting of training data (favor low-resoure languages)
+- 110k shared WordPiece vocabulary
+- Released in a \texttt{base, cased} version
+- \footnotesize\href{https://github.com/google-research/bert/blob/master/multilingual.md}{https://github.com/google-research/bert/blob/master/multilingual.md}\normalsize
+
+__Monolingual models:__
+
+- Specifically trained for each language separately
+- Examples for German:  
+    - \href{https://deepset.ai/german-bert}{deepset.ai}
+    - \href{https://huggingface.co/dbmdz/bert-base-german-cased}{Bayerische Staatsbibliothek}
+
+
+## Other languages than English
+
+```{python, include = T, eval = F}
+pipe_fill_ger = pipeline("fill-mask", 
+    model="bert-base-german-cased", 
+    tokenizer=AutoTokenizer.from_pretrained("bert-base-german-cased"))
+pipe_fill_ger("Der Himmel ist " + pipe_fill.tokenizer.mask_token)
+
+# [{'sequence': '[CLS] Der Himmel ist blau [SEP]',
+#  'score': 0.18068572878837585,
+#  'token': 8516},
+# {'sequence': '[CLS] Der Himmel ist leer [SEP]',
+#  'score': 0.10186842083930969,
+#  'token': 12101},
+# {'sequence': '[CLS] Der Himmel ist frei [SEP]',
+#  'score': 0.04153556749224663,
+#  'token': 1409}]
+```
+
+
+## Pre-trained architectures @ \texttt{simpletransformers}
+
+__High-level wrapper for \texttt{transformers}:__
+
+- Facilitates training and evaluation of Transformer models
+- Only a couple of lines of code needed for  
+  (1) Initialization, (2) Training & (3) Evaluation
+  
+__(Truncated) Code snippet for classification:__
+
+```{python, include = T, eval = F}
+from simpletransformers.classification import ClassificationModel
+
+model = ClassificationModel(model_type = "bert", 
+                            model_name = "bert-large-cased")
+
+model.train_model(train_df)
+
+result, model_outputs, wrong_predictions = model.eval_model(eval_df)
+```
+
+
+## Pre-trained architectures @ \texttt{simpletransformers}
+
+__Building blocks:__
+
+- \texttt{model\_type}: _Type_ of the model.  
+  Currently available for classification  (as of `r format(Sys.time(), '%B %d, %Y')`):  
+  BERT, RoBERTa, XLNet, XLM, DistilBERT, ALBERT, ...
+  
+- \texttt{model\_name}: _Exact_ model to be used. Currently available:  
+  \href{https://huggingface.co/transformers/pretrained\_models.html}{https://huggingface.co/transformers/pretrained\_models.html}
+  
+- Complete manual:  
+  \href{https://github.com/ThilinaRajapakse/simpletransformers}{https://github.com/ThilinaRajapakse/simpletransformers}
+
+
+## Benchmark data sets
+
+__Commonly used benchmarks (\texttt{en}):__
+
+- GLUE Benchmark \href{https://gluebenchmark.com/}{\beamergotobutton{GLUE}}
+- SuperGLUE Benchmark \href{https://super.gluebenchmark.com/}{\beamergotobutton{SuperGLUE Benchmark}}
+- Stanford Question Answering Dataset  \href{https://rajpurkar.github.io/SQuAD-explorer/}{\beamergotobutton{SQuAD}}
+- Reading Comprehension Dataset \href{http://www.qizhexie.com/data/RACE_leaderboard.html}{\beamergotobutton{RACE}}
+
+## Pre-training resources
+
+__English:__
+
+- Wikipedia
+-  CommonCrawl
+- BooksCorpus (\href{https://yknzhu.wixsite.com/mbweb}{https://yknzhu.wixsite.com/mbweb})
+
+__German:__
+
+- \href{https://deepset.ai/german-bert}{deepset.ai}  
+    - German Wikipedia dump (6 GB)
+    - OpenLegalData dump (2.4 GB)
+    - news articles (3.6 GB)
+- \href{https://huggingface.co/dbmdz/bert-base-german-cased}{Bayerische Staatsbibliothek}  
+    - Wikipedia dump, EU Bookshop corpus, Open Subtitles, CommonCrawl, ParaCrawl and News Crawl
+    - In total: 16 GB of text

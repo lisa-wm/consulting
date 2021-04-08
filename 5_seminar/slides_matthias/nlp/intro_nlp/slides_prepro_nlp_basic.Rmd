@@ -1,0 +1,89 @@
+## Data quality is crucial
+```{r, include=FALSE, cache=FALSE}
+ap = adjust_path(paste0(getwd(), "/figure"))
+```
+
+<!-- \begin{figure}
+\centering
+\includegraphics[width = 11cm]{`r ap("medium.png")`}
+\footnotesize Source: \href{https://medium.com/nyc-design/gigo-garbage-in-garbage-out-concept-for-ux-research-7e3f50695b82}{https://medium.com}
+\end{figure} -->
+
+\centering \Huge GARBAGE _IN_  
+GARBAGE __OUT__
+
+## Preprocessing -- Possible Steps
+
+- Tokenization (+ every word to lowercase)
+    + Break the documents into its pieces
+- Spell-checking
+    + Correct errors in (informal) texts/documents
+- Contraction expansion
+    + Expand abbreviations
+- Stopword removal:
+    + Remove words that are assumed to be uninformative
+- Stemming
+    + Reduce word to their "stem" (smaller vocabulary)
+- Lemmatization
+    + Transform word to their "lemma"
+- Removal of special characters
+
+
+## Tokenization
+
+- Text often occurs as a long string of characters separated by whitespace and/or punctuation
+- _Tokenizing_ a text means breaking it up into its basic components
+- This could mean:
+    + Split up words into characters
+    + Split up sentences (or documents) into words
+    + Split up documents into sentences
+- But most of the time it refers to splitting documents into words
+
+
+## Spell-checking
+
+- Often makes sense when working with dirty/noisy data
+    + Twitter data
+    + Customer feedback (e.g. amazon reviews)
+    + Data from discussion boards like reddit, quora, etc.
+- Formal texts often don't require this step
+    + Form 10-Ks (annual financial performance reports)
+    + Data from Wikipedia
+- One example for an open-source available spell-checker:
+    + [**_Peter Norvigs spell-checker (2007)_**](http://norvig.com/spell-correct.html)
+    + Python implementation: [**_pyspellchecker_**](https://pypi.org/project/pyspellchecker/)
+
+
+## Contraction expansion
+
+- In case of abbreviations/contractions simple whitespace tokenization is not enough
+- Parts of the text are treated as single tokens, despite they actually contain multiple tokens
+- Different tokenizers produce different errors
+- Examples: _I'm, aren't, wouldn't, let's_
+
+## Stopword removal
+
+- **_Words that have little (or no) significant contribution for the task at hand_**
+- Are removed from the data during preprocessing  
+- Common as well as task-specific stopwords have to be considered
+- Examples of common stopwords:
+    + _the, my, you, a, and, or_, etc.
+- Examples of task-specific stopwords (e.g. for multimedia):
+    + _app, smartphone, touchscreen, install_, etc.
+
+
+## Lemmatization and Stemming
+
+- <u>Lemmatization</u>
+    + Another (optional) step in the preprocessing pipeline
+    + Every word is reduced to its _lemma_
+    + The _lemma_ always is a real existing word (contrary to the _stem_, see below)
+    + E.g. _goes, went, gone_ get lemmatized to __go__
+    + Information on the POS-tag are also included
+
+- <u>Stemming</u>
+    + Essentially just a simpler version of Lemmatization
+    + Cuts suffixes in order to reduce words to their _stem_
+    + The _Stem_ is in most cases no real existing word
+    + No use of POS-tags
+
