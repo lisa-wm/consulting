@@ -29,8 +29,8 @@ library("tidyverse")
 
 ### Set up API access
 
-We need to set up our API token prior to executing the following code.
-Note that you need to define your personal `consumer_key`, `consumer_secret`, `access_token`, and `access_secret`.
+We need to set up our API token prior to executing the following code, which we did in the background here so as to not make our credentials public.
+Note that you need to define your personal `consumer_key`, `consumer_secret`, `access_token`, and `access_secret` accordingly.
 
 ```{r cars}
 
@@ -142,11 +142,13 @@ summary(combined_tweets$created_at)
 ```{r rank}
 combined_tweets %>%
   dplyr::group_by(query) %>%
-  rtweet::ts_plot( "hours", cex = 0.8) +
-  labs(x = NULL, y = NULL,
-       title = "Frequency of tweets",
+  rtweet::ts_plot("hours", cex = 0.8) +
+  labs(
+    x = NULL, 
+    y = NULL,
+    title = "Frequency of tweets",
        # subtitle = paste0(format(min(combined_tweets$created_at), "%d %B %Y"), " to ", format(max(combined_tweets$created_at),"%d %B %Y")),
-       caption = "Data collected from Twitter's REST API via rtweet") +
+    caption = "Data collected from Twitter's REST API via rtweet") +
   theme_minimal() 
 ```
 

@@ -60,7 +60,7 @@ Using SelectorGadget once more, we find the movie titles to be stored in an elem
 
 ***
 
-Once we have found this (which might take a while if the website structure if nested, so prepare for some trial-and-error here), `rvest` makes the rest rather convenient:
+Once we have found this (which might take a while if the website structure is nested, so prepare for some trial-and-error here), `rvest` makes the rest rather convenient:
 
 ```{r title}
 title_data <- rvest::html_nodes(url, '.titleColumn a') %>% 
