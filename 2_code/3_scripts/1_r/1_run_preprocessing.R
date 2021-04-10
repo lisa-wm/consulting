@@ -52,6 +52,13 @@ tweets_raw <- unique(rbind(
 
 tweets_raw <- tweets_raw[created_at > "2017-09-24"]
 
+# Save for seminar
+
+data.table::fwrite(
+  tweets_raw[label != "none"],
+  here("5_seminar", "twitter_data.csv"),
+  sep = ";")
+
 # Add word count and date variables
 
 tweets_raw[, `:=` (
@@ -185,11 +192,12 @@ data_clean[, twitter_full_text := lapply(
   .I, function(i) {
     pattern_camelcase_hashtag <- "(#)(.)+([[:upper:]])([[:lower:]])+"
     pattern_split_camelcase <- "(?<=[[:lower:]])(?=[[:upper:]])"
-    components <- unlist(str_split(twitter_full_text[i], " "))
-    case_numbers <- which(str_detect(components, pattern_camelcase_hashtag))
+    components <- unlist(stringr::str_split(twitter_full_text[i], " "))
+    case_numbers <- which(
+      stringr::str_detect(components, pattern_camelcase_hashtag))
     cases <- components[case_numbers]
     solved_cases <- sapply(
-      str_split(cases, pattern_split_camelcase),
+      stringr::str_split(cases, pattern_split_camelcase),
       function(j) paste0(c(j), collapse = " "))
     components[case_numbers] <- solved_cases
     paste0(c(components), collapse = " ")})]  
