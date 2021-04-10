@@ -165,7 +165,7 @@ twitter_data[1:10]$full_text
 
 After handling standard text cleaning issues we remove the Twitter-specific sequences from the plain text, namely
 
-* emojis,
+* emojis (the corresponding unicode list of emojis is available [here](https://github.com/today-is-a-good-day/emojis/blob/master/emDict.csv)),
 * hashtags, and
 * tags.
 
@@ -177,8 +177,10 @@ First, specify patterns with regex:
 
 # Specify emoji pattern (using external data)
 
+path <- "2_code/1_data/1_training_data/emojis_unicode.csv"
+
 emojis_unicode <- data.table::fread(
-  "2_code/1_data/1_training_data/emojis_unicode.csv",
+  path,
   encoding = "UTF-8",
   sep = ";")
 
@@ -297,6 +299,13 @@ twitter_corpus
 ```{r corpus_2}
 
 head(quanteda::docvars(twitter_corpus))
+```
+
+```{r corpus_3}
+
+# Save corpus object for further analysis
+
+saveRDS(twitter_corpus, "5_seminar/twitter_corpus.RDS")
 ```
 
 **With this, we have solid base to work on.**
