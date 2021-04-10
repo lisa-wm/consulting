@@ -298,3 +298,5 @@ twitter_corpus
 
 head(quanteda::docvars(twitter_corpus))
 ```
+
+**With this, we have solid base to work on.**
