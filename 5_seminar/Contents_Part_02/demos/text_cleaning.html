@@ -290,7 +290,7 @@ twitter_data[, full_text := stringr::str_replace_all(
 
 # Inspect
 
-twitter_data[1:10]$full_text</code></pre>
+head(twitter_data, 10L)$full_text</code></pre>
 <pre><code>##  [1] &quot;Habe mir das #GroKo-Sondierungspapier zu #Klima nochmal genau angeschaut. Krass: De facto wird sogar das Kyoto-Protokoll, der Meilenstein der #Klimadiplomatie fuer nichtig erklaert! Frau #Merkel, das geht so nicht! Nachbessern! #kohleausstieg https://t.co/tWIuwjAbUd&quot;                                               
 ##  [2] &quot;Auch weltweit sieht man, dass Angela #Merkel s  #GroKo 3.0 nicht klimatauglich ist, sondern vielmehr das Pariser Abkommen unterlaeuft. Auch aussenpolitisch fatal. Daher  Klimasofortprogramm jetzt auflegen! https://t.co/LH73sSW5gU&quot;                                                                                    
 ##  [3] &quot;Der groessten globalen Herausforderung, der #Klimakrise, 30 Sek. von 1 Std #Regierungserklaerung zu widmen, unterstreicht die groesste Leerstelle im #Koalitionsvertrag. Auch sozialpolitisch wird uns das auf die Fuesse fallen. Unter den Klimafolgen leiden gerade die aermsten am meisten.&quot;                           
@@ -341,7 +341,7 @@ twitter_data[, full_text := stringr::str_squish(full_text)]
 
 # Inspect
 
-twitter_data[1:10]$full_text</code></pre>
+head(twitter_data, 10L)$full_text</code></pre>
 <pre><code>##  [1] &quot;Habe mir das #GroKo-Sondierungspapier zu #Klima nochmal genau angeschaut. Krass: De facto wird sogar das Kyoto-Protokoll, der Meilenstein der #Klimadiplomatie fuer nichtig erklaert! Frau #Merkel, das geht so nicht! Nachbessern! #kohleausstieg&quot;                                            
 ##  [2] &quot;Auch weltweit sieht man, dass Angela #Merkel s #GroKo 3.0 nicht klimatauglich ist, sondern vielmehr das Pariser Abkommen unterlaeuft. Auch aussenpolitisch fatal. Daher Klimasofortprogramm jetzt auflegen!&quot;                                                                                   
 ##  [3] &quot;Der groessten globalen Herausforderung, der #Klimakrise, 30 Sek. von 1 Std #Regierungserklaerung zu widmen, unterstreicht die groesste Leerstelle im #Koalitionsvertrag. Auch sozialpolitisch wird uns das auf die Fuesse fallen. Unter den Klimafolgen leiden gerade die aermsten am meisten.&quot;
@@ -465,7 +465,7 @@ twitter_data[, full_text := lapply(
 
 # Inspect
 
-twitter_data[1:10]$full_text</code></pre>
+head(twitter_data, 10L)$full_text</code></pre>
 <pre><code>## [[1]]
 ## [1] &quot;Habe mir das #Gro Ko-Sondierungspapier zu #Klima nochmal genau angeschaut. Krass: De facto wird sogar das Kyoto-Protokoll, der Meilenstein der #Klimadiplomatie fuer nichtig erklaert! Frau #Merkel, das geht so nicht! Nachbessern! #kohleausstieg&quot;
 ## 
@@ -509,7 +509,7 @@ twitter_data[, full_text := stringr::str_squish(full_text)]
 
 # Inspect
 
-twitter_data[1:10]$full_text</code></pre>
+head(twitter_data, 10L)$full_text</code></pre>
 <pre><code>##  [1] &quot;Habe mir das Gro Ko-Sondierungspapier zu Klima nochmal genau angeschaut. Krass: De facto wird sogar das Kyoto-Protokoll, der Meilenstein der Klimadiplomatie fuer nichtig erklaert! Frau Merkel, das geht so nicht! Nachbessern! kohleausstieg&quot;                                             
 ##  [2] &quot;Auch weltweit sieht man, dass Angela Merkel s GroKo 3.0 nicht klimatauglich ist, sondern vielmehr das Pariser Abkommen unterlaeuft. Auch aussenpolitisch fatal. Daher Klimasofortprogramm jetzt auflegen!&quot;                                                                                  
 ##  [3] &quot;Der groessten globalen Herausforderung, der Klimakrise, 30 Sek. von 1 Std Regierungserklaerung zu widmen, unterstreicht die groesste Leerstelle im Koalitionsvertrag. Auch sozialpolitisch wird uns das auf die Fuesse fallen. Unter den Klimafolgen leiden gerade die aermsten am meisten.&quot;

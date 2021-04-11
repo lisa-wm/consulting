@@ -179,18 +179,20 @@ library(&quot;data.table&quot;)
 library(&quot;quanteda&quot;)
 library(&quot;stringi&quot;)
 library(&quot;stringr&quot;)</code></pre>
-<div id="include" class="section level3">
-<h3>Include</h3>
+<div id="scope" class="section level3">
+<h3>Scope</h3>
+<p>We will extract a set of static features that have been shown to work well for sentiment analysis in general, including:</p>
 <ul>
-<li>Polarity clues (other dictionary for exercise)</li>
-<li>Number of emojis (hashtags for exercise)</li>
-<li>Intensification (negation for exercise)</li>
+<li>Polarity clues</li>
+<li>Number of emojis</li>
+<li>Negations</li>
+<li>Character unigrams</li>
 <li>POS tags</li>
 </ul>
 </div>
 <div id="create-tokens-object" class="section level3">
 <h3>Create <code>tokens</code> object</h3>
-<p>The following analyses all revolve around the presence/absence or number of specific text <strong>tokens</strong> across documents. Therefore, we convert our <code>corpus</code> object from before to a <code>tokens</code>, where documents are represented by single tokens rather than a fluent text.</p>
+<p>The following analyses all revolve around the presence/absence or number of specific text <strong>tokens</strong> across documents. Therefore, we convert our <code>corpus</code> object from before to a <code>tokens</code>, where documents are represented by single tokens rather than a fluent text, and along the way omit casing.</p>
 <pre class="r"><code>path &lt;- &quot;5_seminar/twitter_corpus.RDS&quot;
 
 twitter_corpus &lt;- readRDS(path)</code></pre>
@@ -202,9 +204,9 @@ twitter_corpus &lt;- readRDS(path)</code></pre>
   remove_separators = TRUE, # not relevant
   remove_punct = TRUE, # not relevant
   split_hyphens = TRUE, # sometimes useful with German language
-  lowercase = TRUE, # omit cases
-  include_docvars = TRUE) # keep additional variables</code></pre>
-<pre><code>## Warning: lowercase argument is not used.</code></pre>
+  include_docvars = TRUE) # keep additional variables
+
+twitter_tokens &lt;- quanteda::tokens_tolower(twitter_tokens)</code></pre>
 <p>On the occasion, we perform <strong>stemming</strong> on our tokens to increase their congruency across documents (remember, we want to have our documents represented by as many common tokens as possible). <code>quanteda</code> has a built-in functionality that in turn calls <code>SnowballC</code>’s <code>wordStem</code> function:</p>
 <pre class="r"><code>twitter_tokens &lt;- quanteda::tokens_wordstem(
   twitter_tokens, 
@@ -213,39 +215,39 @@ twitter_corpus &lt;- readRDS(path)</code></pre>
 twitter_tokens</code></pre>
 <pre><code>## Tokens consisting of 1,215 documents and 13 docvars.
 ## ABaerbock15156546001 :
-##  [1] &quot;Hab&quot;             &quot;mir&quot;             &quot;das&quot;             &quot;Gro&quot;            
-##  [5] &quot;Ko&quot;              &quot;Sondierungspapi&quot; &quot;zu&quot;              &quot;Klima&quot;          
-##  [9] &quot;nochmal&quot;         &quot;genau&quot;           &quot;angeschaut&quot;      &quot;Krass&quot;          
+##  [1] &quot;hab&quot;             &quot;mir&quot;             &quot;das&quot;             &quot;gro&quot;            
+##  [5] &quot;ko&quot;              &quot;sondierungspapi&quot; &quot;zu&quot;              &quot;klima&quot;          
+##  [9] &quot;nochmal&quot;         &quot;genau&quot;           &quot;angeschaut&quot;      &quot;krass&quot;          
 ## [ ... and 22 more ]
 ## 
 ## ABaerbock15210084001 :
-##  [1] &quot;Auch&quot;      &quot;weltweit&quot;  &quot;sieht&quot;     &quot;man&quot;       &quot;dass&quot;      &quot;Angela&quot;   
-##  [7] &quot;Merkel&quot;    &quot;s&quot;         &quot;GroKo&quot;     &quot;nicht&quot;     &quot;klimataug&quot; &quot;ist&quot;      
+##  [1] &quot;auch&quot;      &quot;weltweit&quot;  &quot;sieht&quot;     &quot;man&quot;       &quot;dass&quot;      &quot;angela&quot;   
+##  [7] &quot;merkel&quot;    &quot;s&quot;         &quot;groko&quot;     &quot;nicht&quot;     &quot;klimataug&quot; &quot;ist&quot;      
 ## [ ... and 13 more ]
 ## 
 ## ABaerbock15216341401 :
-##  [1] &quot;Der&quot;               &quot;groesst&quot;           &quot;global&quot;           
-##  [4] &quot;Herausforder&quot;      &quot;der&quot;               &quot;Klimakris&quot;        
-##  [7] &quot;Sek&quot;               &quot;von&quot;               &quot;Std&quot;              
-## [10] &quot;Regierungserklaer&quot; &quot;zu&quot;                &quot;widm&quot;             
+##  [1] &quot;der&quot;               &quot;groesst&quot;           &quot;global&quot;           
+##  [4] &quot;herausforder&quot;      &quot;der&quot;               &quot;klimakris&quot;        
+##  [7] &quot;sek&quot;               &quot;von&quot;               &quot;std&quot;              
+## [10] &quot;regierungserklaer&quot; &quot;zu&quot;                &quot;widm&quot;             
 ## [ ... and 24 more ]
 ## 
 ## ABaerbock15252349801 :
-##  [1] &quot;Wir&quot;           &quot;brauch&quot;        &quot;ein&quot;           &quot;and&quot;          
-##  [5] &quot;Verkehrspolit&quot; &quot;weg&quot;           &quot;von&quot;           &quot;Benzin&quot;       
-##  [9] &quot;und&quot;           &quot;Diesel&quot;        &quot;hin&quot;           &quot;zu&quot;           
+##  [1] &quot;wir&quot;           &quot;brauch&quot;        &quot;ein&quot;           &quot;and&quot;          
+##  [5] &quot;verkehrspolit&quot; &quot;weg&quot;           &quot;von&quot;           &quot;benzin&quot;       
+##  [9] &quot;und&quot;           &quot;diesel&quot;        &quot;hin&quot;           &quot;zu&quot;           
 ## [ ... and 25 more ]
 ## 
 ## ABaerbock15256297201 :
-##  [1] &quot;Das&quot;        &quot;ist&quot;        &quot;die&quot;        &quot;Leistung&quot;   &quot;von&quot;       
-##  [6] &quot;Hundert&quot;    &quot;Wahlkaempf&quot; &quot;und&quot;        &quot;Polit&quot;      &quot;im&quot;        
-## [11] &quot;Land&quot;       &quot;die&quot;       
+##  [1] &quot;das&quot;        &quot;ist&quot;        &quot;die&quot;        &quot;leistung&quot;   &quot;von&quot;       
+##  [6] &quot;hundert&quot;    &quot;wahlkaempf&quot; &quot;und&quot;        &quot;polit&quot;      &quot;im&quot;        
+## [11] &quot;land&quot;       &quot;die&quot;       
 ## [ ... and 27 more ]
 ## 
 ## ABaerbock15283779001 :
-##  [1] &quot;Luis&quot;            &quot;Amtsberg&quot;        &quot;hat&quot;             &quot;heut&quot;           
+##  [1] &quot;luis&quot;            &quot;amtsberg&quot;        &quot;hat&quot;             &quot;heut&quot;           
 ##  [5] &quot;all&quot;             &quot;gesagt&quot;          &quot;was&quot;             &quot;es&quot;             
-##  [9] &quot;zum&quot;             &quot;Familiennachzug&quot; &quot;zu&quot;              &quot;sag&quot;            
+##  [9] &quot;zum&quot;             &quot;familiennachzug&quot; &quot;zu&quot;              &quot;sag&quot;            
 ## [ ... and 28 more ]
 ## 
 ## [ reached max_ndoc ... 1,209 more documents ]</code></pre>
@@ -280,19 +282,463 @@ twitter_tokens</code></pre>
 
 clean_and_stem(c(&quot;Döner&quot;, &quot;Bereicherung&quot;, &quot;kulinarischer&quot;, &quot;Angebote&quot;))</code></pre>
 <pre><code>## [1] &quot;Doener&quot;       &quot;Bereicherung&quot; &quot;kulinarisch&quot;  &quot;Angebot&quot;</code></pre>
+<p>Seems to do the job (but also note the limitations of stemming).</p>
+<p>Now, create a clean stopwords list:</p>
+<pre class="r"><code># Create stopwords list
+
+stopwords &lt;- clean_and_stem(quanteda::stopwords(language = &quot;de&quot;))
+
+# Remove potential duplicates and empty instances induced by stemming
+
+stopwords &lt;- unique(stopwords)
+stopwords &lt;- stopwords[nchar(stopwords) &gt; 0]
+
+# Inspect
+
+sort(stopwords)</code></pre>
+<pre><code>##   [1] &quot;aber&quot;      &quot;al&quot;        &quot;all&quot;       &quot;allem&quot;     &quot;allen&quot;     &quot;aller&quot;    
+##   [7] &quot;also&quot;      &quot;am&quot;        &quot;an&quot;        &quot;ander&quot;     &quot;anderem&quot;   &quot;anderen&quot;  
+##  [13] &quot;anderm&quot;    &quot;andern&quot;    &quot;anderr&quot;    &quot;au&quot;        &quot;auch&quot;      &quot;auf&quot;      
+##  [19] &quot;bei&quot;       &quot;bi&quot;        &quot;bin&quot;       &quot;bist&quot;      &quot;da&quot;        &quot;damit&quot;    
+##  [25] &quot;dann&quot;      &quot;dass&quot;      &quot;dasselb&quot;   &quot;dazu&quot;      &quot;de&quot;        &quot;dein&quot;     
+##  [31] &quot;deinem&quot;    &quot;deinen&quot;    &quot;deiner&quot;    &quot;dem&quot;       &quot;demselben&quot; &quot;den&quot;      
+##  [37] &quot;denn&quot;      &quot;denselben&quot; &quot;der&quot;       &quot;derer&quot;     &quot;derselb&quot;   &quot;derselben&quot;
+##  [43] &quot;desselben&quot; &quot;dessen&quot;    &quot;di&quot;        &quot;dich&quot;      &quot;die&quot;       &quot;dies&quot;     
+##  [49] &quot;dieselb&quot;   &quot;dieselben&quot; &quot;diesem&quot;    &quot;diesen&quot;    &quot;dieser&quot;    &quot;dir&quot;      
+##  [55] &quot;doch&quot;      &quot;dort&quot;      &quot;du&quot;        &quot;durch&quot;     &quot;e&quot;         &quot;ein&quot;      
+##  [61] &quot;einem&quot;     &quot;einen&quot;     &quot;einer&quot;     &quot;einig&quot;     &quot;einigem&quot;   &quot;einigen&quot;  
+##  [67] &quot;einmal&quot;    &quot;er&quot;        &quot;etwa&quot;      &quot;euch&quot;      &quot;euer&quot;      &quot;eur&quot;      
+##  [73] &quot;eurem&quot;     &quot;euren&quot;     &quot;eurer&quot;     &quot;fuer&quot;      &quot;gegen&quot;     &quot;gewesen&quot;  
+##  [79] &quot;hab&quot;       &quot;habe&quot;      &quot;haben&quot;     &quot;hat&quot;       &quot;hatt&quot;      &quot;hatten&quot;   
+##  [85] &quot;hier&quot;      &quot;hin&quot;       &quot;hinter&quot;    &quot;ich&quot;       &quot;ihm&quot;       &quot;ihn&quot;      
+##  [91] &quot;ihnen&quot;     &quot;ihr&quot;       &quot;ihrem&quot;     &quot;ihren&quot;     &quot;ihrer&quot;     &quot;im&quot;       
+##  [97] &quot;in&quot;        &quot;indem&quot;     &quot;ist&quot;       &quot;jede&quot;      &quot;jedem&quot;     &quot;jeden&quot;    
+## [103] &quot;jeder&quot;     &quot;jene&quot;      &quot;jenem&quot;     &quot;jenen&quot;     &quot;jener&quot;     &quot;jetzt&quot;    
+## [109] &quot;kann&quot;      &quot;kein&quot;      &quot;keinem&quot;    &quot;keinen&quot;    &quot;keiner&quot;    &quot;koennen&quot;  
+## [115] &quot;koennt&quot;    &quot;machen&quot;    &quot;man&quot;       &quot;manch&quot;     &quot;manchem&quot;   &quot;manchen&quot;  
+## [121] &quot;mancher&quot;   &quot;mein&quot;      &quot;meinem&quot;    &quot;meinen&quot;    &quot;meiner&quot;    &quot;mich&quot;     
+## [127] &quot;mir&quot;       &quot;mit&quot;       &quot;muss&quot;      &quot;musst&quot;     &quot;nach&quot;      &quot;nicht&quot;    
+## [133] &quot;noch&quot;      &quot;nun&quot;       &quot;nur&quot;       &quot;ob&quot;        &quot;oder&quot;      &quot;ohn&quot;      
+## [139] &quot;sehr&quot;      &quot;sein&quot;      &quot;seinem&quot;    &quot;seinen&quot;    &quot;seiner&quot;    &quot;selbst&quot;   
+## [145] &quot;sich&quot;      &quot;sie&quot;       &quot;sind&quot;      &quot;so&quot;        &quot;solch&quot;     &quot;solchem&quot;  
+## [151] &quot;solchen&quot;   &quot;solcher&quot;   &quot;soll&quot;      &quot;sollt&quot;     &quot;sondern&quot;   &quot;sonst&quot;    
+## [157] &quot;ueber&quot;     &quot;um&quot;        &quot;un&quot;        &quot;und&quot;       &quot;uns&quot;       &quot;unsem&quot;    
+## [163] &quot;unsen&quot;     &quot;unser&quot;     &quot;unter&quot;     &quot;viel&quot;      &quot;vom&quot;       &quot;von&quot;      
+## [169] &quot;vor&quot;       &quot;wa&quot;        &quot;waehrend&quot;  &quot;war&quot;       &quot;waren&quot;     &quot;warst&quot;    
+## [175] &quot;weg&quot;       &quot;weil&quot;      &quot;weiter&quot;    &quot;welch&quot;     &quot;welchem&quot;   &quot;welchen&quot;  
+## [181] &quot;welcher&quot;   &quot;wenn&quot;      &quot;werd&quot;      &quot;werden&quot;    &quot;wie&quot;       &quot;wieder&quot;   
+## [187] &quot;will&quot;      &quot;wir&quot;       &quot;wird&quot;      &quot;wirst&quot;     &quot;wo&quot;        &quot;wollen&quot;   
+## [193] &quot;wollt&quot;     &quot;wuerd&quot;     &quot;wuerden&quot;   &quot;zu&quot;        &quot;zum&quot;       &quot;zur&quot;      
+## [199] &quot;zwar&quot;      &quot;zwischen&quot;</code></pre>
+<p>Words indicating negation seem too important to discard for the sentiment analysis task. We cross them from the stopwords list and remove the remaining stopwords from our <code>tokens</code>:</p>
+<pre class="r"><code># Deselect negation words
+
+stopwords &lt;- stringr::str_remove_all(
+  stopwords,
+  &quot;kein(.)*|nicht&quot;)
+
+# Remove from tokens
+
+twitter_tokens &lt;- quanteda::tokens_remove(twitter_tokens, stopwords)
+
+# Inspect
+
+twitter_tokens</code></pre>
+<pre><code>## Tokens consisting of 1,215 documents and 13 docvars.
+## ABaerbock15156546001 :
+##  [1] &quot;das&quot;             &quot;gro&quot;             &quot;ko&quot;              &quot;sondierungspapi&quot;
+##  [5] &quot;klima&quot;           &quot;nochmal&quot;         &quot;genau&quot;           &quot;angeschaut&quot;     
+##  [9] &quot;krass&quot;           &quot;facto&quot;           &quot;sogar&quot;           &quot;das&quot;            
+## [ ... and 13 more ]
+## 
+## ABaerbock15210084001 :
+##  [1] &quot;weltweit&quot;  &quot;sieht&quot;     &quot;angela&quot;    &quot;merkel&quot;    &quot;s&quot;         &quot;groko&quot;    
+##  [7] &quot;nicht&quot;     &quot;klimataug&quot; &quot;sond&quot;      &quot;vielmehr&quot;  &quot;das&quot;       &quot;paris&quot;    
+## [ ... and 7 more ]
+## 
+## ABaerbock15216341401 :
+##  [1] &quot;groesst&quot;           &quot;global&quot;            &quot;herausforder&quot;     
+##  [4] &quot;klimakris&quot;         &quot;sek&quot;               &quot;std&quot;              
+##  [7] &quot;regierungserklaer&quot; &quot;widm&quot;              &quot;unterstreicht&quot;    
+## [10] &quot;groesst&quot;           &quot;leerstell&quot;         &quot;koalitionsvertrag&quot;
+## [ ... and 10 more ]
+## 
+## ABaerbock15252349801 :
+##  [1] &quot;brauch&quot;        &quot;and&quot;           &quot;verkehrspolit&quot; &quot;benzin&quot;       
+##  [5] &quot;diesel&quot;        &quot;emissionsarm&quot;  &quot;mobilitaet&quot;    &quot;das&quot;          
+##  [9] &quot;sozial&quot;        &quot;frag&quot;          &quot;unt&quot;           &quot;schlecht&quot;     
+## [ ... and 8 more ]
+## 
+## ABaerbock15256297201 :
+##  [1] &quot;das&quot;        &quot;leistung&quot;   &quot;hundert&quot;    &quot;wahlkaempf&quot; &quot;polit&quot;     
+##  [6] &quot;land&quot;       &quot;drauss&quot;     &quot;gezeigt&quot;    &quot;dicht&quot;      &quot;was&quot;       
+## [11] &quot;mensch&quot;     &quot;umtreibt&quot;  
+## [ ... and 8 more ]
+## 
+## ABaerbock15283779001 :
+##  [1] &quot;luis&quot;            &quot;amtsberg&quot;        &quot;heut&quot;            &quot;gesagt&quot;         
+##  [5] &quot;was&quot;             &quot;es&quot;              &quot;familiennachzug&quot; &quot;sag&quot;            
+##  [9] &quot;gibt&quot;            &quot;wer&quot;             &quot;integration&quot;     &quot;gefluechtet&quot;    
+## [ ... and 14 more ]
+## 
+## [ reached max_ndoc ... 1,209 more documents ]</code></pre>
+<p>Apparently, some very short word stumps result from our cleaning operations, which we will also discard:</p>
+<pre class="r"><code>twitter_tokens &lt;- quanteda::tokens_select(twitter_tokens, min_nchar = 3)
+
+twitter_tokens</code></pre>
+<pre><code>## Tokens consisting of 1,215 documents and 13 docvars.
+## ABaerbock15156546001 :
+##  [1] &quot;das&quot;             &quot;gro&quot;             &quot;sondierungspapi&quot; &quot;klima&quot;          
+##  [5] &quot;nochmal&quot;         &quot;genau&quot;           &quot;angeschaut&quot;      &quot;krass&quot;          
+##  [9] &quot;facto&quot;           &quot;sogar&quot;           &quot;das&quot;             &quot;kyoto&quot;          
+## [ ... and 12 more ]
+## 
+## ABaerbock15210084001 :
+##  [1] &quot;weltweit&quot;  &quot;sieht&quot;     &quot;angela&quot;    &quot;merkel&quot;    &quot;groko&quot;     &quot;nicht&quot;    
+##  [7] &quot;klimataug&quot; &quot;sond&quot;      &quot;vielmehr&quot;  &quot;das&quot;       &quot;paris&quot;     &quot;abkomm&quot;   
+## [ ... and 6 more ]
+## 
+## ABaerbock15216341401 :
+##  [1] &quot;groesst&quot;           &quot;global&quot;            &quot;herausforder&quot;     
+##  [4] &quot;klimakris&quot;         &quot;sek&quot;               &quot;std&quot;              
+##  [7] &quot;regierungserklaer&quot; &quot;widm&quot;              &quot;unterstreicht&quot;    
+## [10] &quot;groesst&quot;           &quot;leerstell&quot;         &quot;koalitionsvertrag&quot;
+## [ ... and 10 more ]
+## 
+## ABaerbock15252349801 :
+##  [1] &quot;brauch&quot;        &quot;and&quot;           &quot;verkehrspolit&quot; &quot;benzin&quot;       
+##  [5] &quot;diesel&quot;        &quot;emissionsarm&quot;  &quot;mobilitaet&quot;    &quot;das&quot;          
+##  [9] &quot;sozial&quot;        &quot;frag&quot;          &quot;unt&quot;           &quot;schlecht&quot;     
+## [ ... and 8 more ]
+## 
+## ABaerbock15256297201 :
+##  [1] &quot;das&quot;        &quot;leistung&quot;   &quot;hundert&quot;    &quot;wahlkaempf&quot; &quot;polit&quot;     
+##  [6] &quot;land&quot;       &quot;drauss&quot;     &quot;gezeigt&quot;    &quot;dicht&quot;      &quot;was&quot;       
+## [11] &quot;mensch&quot;     &quot;umtreibt&quot;  
+## [ ... and 8 more ]
+## 
+## ABaerbock15283779001 :
+##  [1] &quot;luis&quot;            &quot;amtsberg&quot;        &quot;heut&quot;            &quot;gesagt&quot;         
+##  [5] &quot;was&quot;             &quot;familiennachzug&quot; &quot;sag&quot;             &quot;gibt&quot;           
+##  [9] &quot;wer&quot;             &quot;integration&quot;     &quot;gefluechtet&quot;     &quot;perspektiv&quot;     
+## [ ... and 13 more ]
+## 
+## [ reached max_ndoc ... 1,209 more documents ]</code></pre>
+<p>There is still a variety of tokens we could probably remove. In a real application you should dedicate some time to this sub-task to make sure your tokens representation is not contaminated by such noise.</p>
 </div>
 <div id="create-dfm-object" class="section level3">
 <h3>Create <code>dfm</code> object</h3>
-<p>document-feature matrix</p>
+<p>Now we have characterized our documents by tokens, we want to put some numbers on it: how often do the present tokens occur in each document?</p>
+<p>This is where the <strong>document-feature matrix</strong> (<code>dfm</code>) comes in:</p>
+<pre class="r"><code>twitter_dfm &lt;- quanteda::dfm(twitter_tokens)
+
+twitter_dfm</code></pre>
+<pre><code>## Document-feature matrix of: 1,215 documents, 7,586 features (99.8% sparse) and 13 docvars.
+##                       features
+## docs                   das gro sondierungspapi klima nochmal genau angeschaut
+##   ABaerbock15156546001   3   1               1     1       1     1          1
+##   ABaerbock15210084001   1   0               0     0       0     0          0
+##   ABaerbock15216341401   1   0               0     0       0     0          0
+##   ABaerbock15252349801   1   0               0     0       0     0          0
+##   ABaerbock15256297201   1   0               0     0       0     0          0
+##   ABaerbock15283779001   2   0               0     0       0     1          0
+##                       features
+## docs                   krass facto sogar
+##   ABaerbock15156546001     1     1     1
+##   ABaerbock15210084001     0     0     0
+##   ABaerbock15216341401     0     0     0
+##   ABaerbock15252349801     0     0     0
+##   ABaerbock15256297201     0     0     0
+##   ABaerbock15283779001     0     0     0
+## [ reached max_ndoc ... 1,209 more documents, reached max_nfeat ... 7,576 more features ]</code></pre>
 </div>
 <div id="find-polarity-clues" class="section level3">
 <h3>Find polarity clues</h3>
+<p>Time for some feature extraction at last.</p>
 <p>The first static feature we will extract is the number of (positive or negative) <strong>polarity clues</strong> in the data.</p>
-<p>Polarity clues are sentiment-bearing words like “grauenhaft”. There is a variety of open-source lists for these; we will use the <strong>Global Polarity Clues</strong> collection available <a href="http://www.ulliwaltinger.de/sentiment/">here</a>.</p>
-<p><code>quanteda</code> offers <code>dictionary</code> objects which allow for convenient look-up.</p>
-<pre class="r"><code>path &lt;- &quot;5_seminar/twitter_corpus.RDS&quot;
+<p>Polarity clues are sentiment-bearing words like “grauenhaft”. There is a variety of open-source lists for these; we will use the <strong>Global Polarity Clues</strong> collection available <a href="http://www.ulliwaltinger.de/sentiment/">here</a> (already somewhat processed to only include relevant columns).</p>
+<pre class="r"><code>list_gpc &lt;- readRDS(&quot;5_seminar/global_polarity_clues.RDS&quot;)
 
-twitter_corpus &lt;- readRDS(path)</code></pre>
+list(head(list_gpc$positive), head(list_gpc$negative))</code></pre>
+<pre><code>## [[1]]
+## [1] &quot;Abfangschirm&quot;      &quot;Abgeklärtheit&quot;     &quot;Abgeschlossenheit&quot;
+## [4] &quot;Abgleich&quot;          &quot;Abgott&quot;            &quot;Abhilfe&quot;          
+## 
+## [[2]]
+## [1] &quot;Abandon&quot; &quot;Abart&quot;   &quot;Abbau&quot;   &quot;Abbaue&quot;  &quot;Abbauen&quot; &quot;Abbaues&quot;</code></pre>
+<p><code>quanteda</code> offers dedicated <code>dictionary</code> objects which allow for convenient look-up of <code>dfm</code>’s, so we convert the GPC to such a format:</p>
+<pre class="r"><code>dictionary_gpc &lt;- quanteda::dictionary(
+  list(
+    positive = list_gpc$positive,
+    negative = list_gpc$negative))
+
+dictionary_gpc</code></pre>
+<pre><code>## Dictionary object with 2 key entries.
+## - [positive]:
+##   - abfangschirm, abgeklärtheit, abgeschlossenheit, abgleich, abgott, abhilfe, abhilfemaßnahme, abkomme, abkommen, abkühlung, ableger, ablösen, ablösung, abmachung, abmachungen, abschirmung, abschluss, abschluß, abschlußes, abschlußs [ ... and 17,607 more ]
+## - [negative]:
+##   - abandon, abart, abbau, abbaue, abbauen, abbaues, abbaus, abbildungsfehler, abbildverzerrung, abblendung, abbohrung, abbruch, abbruches, abbruchs, abbruchstelle, abbrüche, abbrüchen, abdampf, abdankung, abdankungen [ ... and 19,942 more ]</code></pre>
+<p>Perform the look-up:</p>
+<pre class="r"><code># Look up polarities
+
+twitter_polarities &lt;- quanteda::dfm_lookup(twitter_dfm, dictionary_gpc)
+
+# Convert resulting dfm object to data.table (via data.frame as quanteda does not yet support conversion to data.table)
+
+twitter_polarities &lt;- quanteda::convert(twitter_polarities, to = &quot;data.frame&quot;)
+
+twitter_polarities &lt;- data.table::as.data.table(
+  twitter_polarities,
+  key = &quot;doc_id&quot;)
+
+# Inspect
+
+head(twitter_polarities)</code></pre>
+<pre><code>##                  doc_id positive negative
+## 1: ABaerbock15156546001        2        3
+## 2: ABaerbock15210084001        0        2
+## 3: ABaerbock15216341401        1        3
+## 4: ABaerbock15252349801        1        5
+## 5: ABaerbock15256297201        2        1
+## 6: ABaerbock15283779001        2        3</code></pre>
+</div>
+<div id="get-number-of-emojis-used" class="section level3">
+<h3>Get number of emojis used</h3>
+<p>The next feature we are going to extract is the number of <strong>emojis</strong> (there are also online sources for associating them with polarities).</p>
+<p>Good thing we did the emoji extraction before:</p>
+<pre class="r"><code># For this, we cannot operate on the texts but need to get the docvars of our corpus object where all non-text variables are stored
+
+twitter_docvars &lt;- data.table::as.data.table(
+  cbind(
+    doc_id = quanteda::docid(twitter_corpus),
+    quanteda::docvars(twitter_corpus)), 
+  key = &quot;doc_id&quot;)
+
+# Count emojis (stored as list objects, so we take the length of these lists)
+
+twitter_emojis &lt;- twitter_docvars[
+  , .(doc_id, emojis)
+  ][, n_emojis := lengths(emojis)
+      ][, emojis := NULL]
+
+list(
+  head(twitter_emojis),
+  table(twitter_emojis$n_emojis))</code></pre>
+<pre><code>## [[1]]
+##                  doc_id n_emojis
+## 1: ABaerbock15156546001        0
+## 2: ABaerbock15210084001        0
+## 3: ABaerbock15216341401        0
+## 4: ABaerbock15252349801        0
+## 5: ABaerbock15256297201        0
+## 6: ABaerbock15283779001        0
+## 
+## [[2]]
+## 
+##    0    1    2    3    5    7 
+## 1113   77   15    7    2    1</code></pre>
+</div>
+<div id="detect-negation" class="section level3">
+<h3>Detect negation</h3>
+<p><strong>Negation</strong> handling with the bag-of-words assumption is difficult. There are more sophisticated approaches, but for the moment, we will simply note whether or not an expression of negation is present.</p>
+<p>First, define negation indicators (and don’t forget to clean):</p>
+<pre class="r"><code>tokens_negation &lt;- clean_and_stem(c(
+    &quot;nicht&quot;, 
+    &quot;nie&quot;, 
+    &quot;niemals&quot;, 
+    &quot;nein&quot;, 
+    &quot;niemand&quot;, 
+    &quot;nix&quot;, 
+    &quot;nirgends&quot;, 
+    &quot;kein&quot;))</code></pre>
+<p>Then, again use a <code>dictionary</code> to count for each document how often one of the above tokens occurs:</p>
+<pre class="r"><code># Create dictionary
+
+dictionary_negation &lt;- quanteda::dictionary(list(negation = tokens_negation))
+
+# Match tokens
+
+twitter_negation &lt;- quanteda::dfm_lookup(twitter_dfm, dictionary_negation)
+
+# Convert resulting dfm object to data.table (via data.frame as quanteda does not yet support conversion to data.table)
+
+twitter_negation &lt;- quanteda::convert(twitter_negation, to = &quot;data.frame&quot;)
+
+twitter_negation &lt;- data.table::as.data.table(
+  twitter_negation,
+  key = &quot;doc_id&quot;)
+
+# Inspect
+
+head(twitter_negation)</code></pre>
+<pre><code>##                  doc_id negation
+## 1: ABaerbock15156546001        1
+## 2: ABaerbock15210084001        1
+## 3: ABaerbock15216341401        0
+## 4: ABaerbock15252349801        1
+## 5: ABaerbock15256297201        0
+## 6: ABaerbock15283779001        1</code></pre>
+</div>
+<div id="get-character-unigrams" class="section level3">
+<h3>Get character unigrams</h3>
+<p>Due to the sheer variety of words that exist in a language a simple tokens representation will typically contain a huge number of features:</p>
+<pre class="r"><code>quanteda::nfeat(twitter_dfm)</code></pre>
+<pre><code>## [1] 7586</code></pre>
+<p>This is an overwhelmingly large number for any machine learning classifier (particularly so if we have more features than observations).</p>
+<p>We will therefore streamline our tokens further. Most applications include some kind of <strong>n-grams</strong>. Interestingly, character unigrams seem to work quite well, i.e., rather than entire words or even concatenations, we simply count occurrences of single letters.</p>
+<p>Thereby, we effectively coerce our texts to a set of merely 26 features:</p>
+<pre class="r"><code># Create a new tokens object, this time consisting of single characters
+
+twitter_tokens_char &lt;- quanteda::tokens(
+  twitter_corpus,
+  what = &quot;character&quot;,
+  remove_punct = TRUE,
+  remove_symbols = TRUE,
+  remove_numbers = TRUE,
+  remove_separators = TRUE,
+  split_hyphens = TRUE) 
+
+# Convert to dfm
+
+twitter_char_unigrams &lt;-  quanteda::dfm(twitter_tokens_char)
+
+# Convert resulting dfm object to data.table (via data.frame as quanteda does not yet support conversion to data.table)
+
+twitter_char_unigrams &lt;- quanteda::convert(twitter_char_unigrams, to = &quot;data.frame&quot;)
+
+twitter_char_unigrams &lt;- data.table::as.data.table(
+  twitter_char_unigrams,
+  key = &quot;doc_id&quot;)
+
+data.table::setcolorder(twitter_char_unigrams, c(&quot;doc_id&quot;, letters))
+
+# Inspect
+
+head(twitter_char_unigrams)</code></pre>
+<pre><code>##                  doc_id  a b c  d  e f  g  h  i j k  l  m  n  o p q  r  s  t  u
+## 1: ABaerbock15156546001 19 2 6  9 22 3  8  8 14 0 9 10  7 11 14 4 0 16 15 11  7
+## 2: ABaerbock15210084001 19 1 5  4 18 4  5  8 11 1 5 11  9  9  8 3 0 11 12 13  7
+## 3: ABaerbock15216341401 15 1 3 13 40 5 10  4 18 0 6 15  7 17 10 1 0 21 20 13 11
+## 4: ABaerbock15252349801 10 4 6 10 38 2  4 11 22 0 4  8  3 24  7 1 0 16 15 11  8
+## 5: ABaerbock15256297201 13 4 2 14 29 1  4  8 19 0 8  8  8 24  6 3 0  8 15 11  9
+## 6: ABaerbock15283779001 20 6 6  6 35 7 12  9 18 0 2 10 10 19  3 2 0 11 14 16 12
+##    v w x y z
+## 1: 0 1 0 1 1
+## 2: 1 2 0 0 1
+## 3: 2 2 0 0 2
+## 4: 3 3 0 0 3
+## 5: 1 8 0 0 1
+## 6: 1 4 0 0 4</code></pre>
+</div>
+<div id="get-pos-tags" class="section level3">
+<h3>Get POS tags</h3>
+<p>The last set of features we are going to extract are <strong>part-of-speech (POS) tags</strong>.</p>
+<p>We use the <code>spacyR</code> package, a wrapper around Python’s <code>spaCy</code> package that is nicely integrated with <code>quanteda</code> (well, they have the same author after all). This <a href="https://cran.r-project.org/web/packages/spacyr/vignettes/using_spacyr.html">vignette</a> provides a quick intro.</p>
+<p>Note that setting this up can be a serious pain – getting R and Python to work hand in hand on your local machine is hard sometimes. When in doubt, resort to some clean environment such as Google Colab.</p>
+<pre class="r"><code># Install spacyr and get the relevant model for German language
+
+spacyr::spacy_install()
+spacyr::spacy_download_langmodel(&quot;de&quot;)
+
+# Run POS tagger
+
+spacyr::spacy_initialize(model = &quot;de_core_news_sm&quot;)
+  
+twitter_pos_tags &lt;- data.table::as.data.table(
+  spacyr::spacy_parse(
+    twitter_corpus,
+    lemma = FALSE, # do not include lemmatized tokens
+    entity = FALSE), # do not include named entities
+  key = &quot;doc_id&quot;)</code></pre>
+<pre class="r"><code>head(twitter_pos_tags, 10L)</code></pre>
+<pre><code>##                   doc_id sentence_id token_id                token   pos
+##  1: ABaerbock15156546001           1        1                 Habe   AUX
+##  2: ABaerbock15156546001           1        2                  mir  PRON
+##  3: ABaerbock15156546001           1        3                  das   DET
+##  4: ABaerbock15156546001           1        4                  Gro PROPN
+##  5: ABaerbock15156546001           1        5 Ko-Sondierungspapier  NOUN
+##  6: ABaerbock15156546001           1        6                   zu   ADP
+##  7: ABaerbock15156546001           1        7                Klima  NOUN
+##  8: ABaerbock15156546001           1        8              nochmal   ADV
+##  9: ABaerbock15156546001           1        9                genau   ADJ
+## 10: ABaerbock15156546001           1       10           angeschaut  VERB</code></pre>
+<p>Looking good already! For the POS tags to be admissible in sentiment analysis, however, we need to convert them from <em>long</em> to <em>wide</em> format:</p>
+<pre class="r"><code># Count occurrences per document and POS tag
+
+twitter_pos_tags &lt;- twitter_pos_tags[
+  , .(doc_id, pos)
+  ][, aux := 1L
+    ][, n_tags := sum(aux), by = list(doc_id, pos)
+      ][, aux := NULL]
+
+head(twitter_pos_tags)</code></pre>
+<pre><code>##                  doc_id   pos n_tags
+## 1: ABaerbock15156546001   AUX      2
+## 2: ABaerbock15156546001  PRON      2
+## 3: ABaerbock15156546001   DET      4
+## 4: ABaerbock15156546001 PROPN      2
+## 5: ABaerbock15156546001  NOUN      8
+## 6: ABaerbock15156546001   ADP      1</code></pre>
+<pre class="r"><code># Convert to wide format
+
+twitter_pos_tags &lt;- data.table::dcast(
+  unique(twitter_pos_tags),
+  doc_id ~ pos,
+  value.var = &quot;n_tags&quot;,
+  fun.aggregate = sum)
+
+head(twitter_pos_tags)</code></pre>
+<pre><code>##                  doc_id ADJ ADP ADV AUX CCONJ DET INTJ NOUN NUM PART PRON PROPN
+## 1: ABaerbock15156546001   4   1   3   2     0   4    0    8   0    1    2     2
+## 2: ABaerbock15210084001   5   0   5   1     1   1    0    2   1    1    1     4
+## 3: ABaerbock15216341401   4   4   2   1     0   6    0   10   2    2    3     0
+## 4: ABaerbock15252349801   5   4   3   1     2   4    0    9   0    1    5     0
+## 5: ABaerbock15256297201   2   4   1   5     3   2    0   10   0    0    5     2
+## 6: ABaerbock15283779001   2   4   2   2     0   4    0    8   0    2    5     3
+##    PUNCT SCONJ VERB X
+## 1:     7     0    3 2
+## 2:     5     1    3 1
+## 3:     7     0    4 0
+## 4:     6     0    3 0
+## 5:     6     1    4 0
+## 6:     6     0    9 0</code></pre>
+</div>
+<div id="collect-all-static-features" class="section level3">
+<h3>Collect all static features</h3>
+<p>In a final step, we put everything together:</p>
+<pre class="r"><code># Collect all features
+
+twitter_features_static &lt;- twitter_pos_tags[
+  twitter_negation
+  ][twitter_char_unigrams,
+    ][twitter_emojis,
+      ][twitter_polarities, ]
+
+saveRDS(twitter_features_static, &quot;5_seminar/twitter_features_static.RDS&quot;)
+
+head(twitter_features_static)</code></pre>
+<pre><code>##                  doc_id ADJ ADP ADV AUX CCONJ DET INTJ NOUN NUM PART PRON PROPN
+## 1: ABaerbock15156546001   4   1   3   2     0   4    0    8   0    1    2     2
+## 2: ABaerbock15210084001   5   0   5   1     1   1    0    2   1    1    1     4
+## 3: ABaerbock15216341401   4   4   2   1     0   6    0   10   2    2    3     0
+## 4: ABaerbock15252349801   5   4   3   1     2   4    0    9   0    1    5     0
+## 5: ABaerbock15256297201   2   4   1   5     3   2    0   10   0    0    5     2
+## 6: ABaerbock15283779001   2   4   2   2     0   4    0    8   0    2    5     3
+##    PUNCT SCONJ VERB X negation  a b c  d  e f  g  h  i j k  l  m  n  o p q  r
+## 1:     7     0    3 2        1 19 2 6  9 22 3  8  8 14 0 9 10  7 11 14 4 0 16
+## 2:     5     1    3 1        1 19 1 5  4 18 4  5  8 11 1 5 11  9  9  8 3 0 11
+## 3:     7     0    4 0        0 15 1 3 13 40 5 10  4 18 0 6 15  7 17 10 1 0 21
+## 4:     6     0    3 0        1 10 4 6 10 38 2  4 11 22 0 4  8  3 24  7 1 0 16
+## 5:     6     1    4 0        0 13 4 2 14 29 1  4  8 19 0 8  8  8 24  6 3 0  8
+## 6:     6     0    9 0        1 20 6 6  6 35 7 12  9 18 0 2 10 10 19  3 2 0 11
+##     s  t  u v w x y z n_emojis positive negative
+## 1: 15 11  7 0 1 0 1 1        0        2        3
+## 2: 12 13  7 1 2 0 0 1        0        0        2
+## 3: 20 13 11 2 2 0 0 2        0        1        3
+## 4: 15 11  8 3 3 0 0 3        0        1        5
+## 5: 15 11  9 1 8 0 0 1        0        2        1
+## 6: 14 16 12 1 4 0 0 4        0        2        3</code></pre>
+<p><strong>This provides us with a solid foundation for sentiment analysis! Of course we can think of many more features to include here – we will see some more in the exercise; in general, be creative and see how classification can be improved by adding different explanatory variables.</strong></p>
 </div>
 
 

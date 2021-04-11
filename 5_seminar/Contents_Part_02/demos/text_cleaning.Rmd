@@ -110,7 +110,7 @@ twitter_data[, full_text := stringr::str_replace_all(
 
 # Inspect
 
-twitter_data[1:10]$full_text
+head(twitter_data, 10L)$full_text
 
 ```
 
@@ -157,7 +157,7 @@ twitter_data[, full_text := stringr::str_squish(full_text)]
 
 # Inspect
 
-twitter_data[1:10]$full_text
+head(twitter_data, 10L)$full_text
 
 ```
 
@@ -252,7 +252,7 @@ twitter_data[, full_text := lapply(
 
 # Inspect
 
-twitter_data[1:10]$full_text
+head(twitter_data, 10L)$full_text
 
 ```
 
@@ -273,7 +273,7 @@ twitter_data[, full_text := stringr::str_squish(full_text)]
 
 # Inspect
 
-twitter_data[1:10]$full_text
+head(twitter_data, 10L)$full_text
 ```
 
 ### Create `corpus` object
