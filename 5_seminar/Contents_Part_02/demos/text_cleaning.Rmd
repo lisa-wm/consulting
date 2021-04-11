@@ -177,7 +177,7 @@ First, specify patterns with regex:
 
 # Specify emoji pattern (using external data)
 
-path <- "2_code/1_data/1_training_data/emojis_unicode.csv"
+path <- "5_seminar/emojis_unicode.csv"
 
 emojis_unicode <- data.table::fread(
   path,

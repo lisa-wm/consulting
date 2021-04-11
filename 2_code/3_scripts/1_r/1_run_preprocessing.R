@@ -162,7 +162,7 @@ data.table::setattr(
 #   collapse = "|")
 
 emojis_unicode <- data.table::fread(
-  here("2_code/1_data/1_training_data", "emojis_unicode.csv"),
+  here("2_code/1_data/0_external_data", "emojis_unicode.csv"),
   encoding = "UTF-8",
   sep = ";")
 
