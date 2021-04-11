@@ -163,7 +163,7 @@ twitter_tokens
 
 ```
 
-There is still a variety of tokens we could probably remove.
+There is still a variety of tokens we could probably remove (there are more extensive stopwords lists to be found online, the built-in one from `quanteda` is not too good tbh).
 In a real application you should dedicate some time to this sub-task to make sure your tokens representation is not contaminated by such noise.
 
 ### Create `dfm` object
@@ -187,7 +187,7 @@ Time for some feature extraction at last.
 The first static feature we will extract is the number of (positive or negative) **polarity clues** in the data.
 
 Polarity clues are sentiment-bearing words like "grauenhaft".
-There is a variety of open-source lists for these; we will use the **Global Polarity Clues** collection available [here](http://www.ulliwaltinger.de/sentiment/) (already somewhat processed to only include relevant columns).
+There is a variety of open-source lists for these; we will use the *Global Polarity Clues* collection available [here](http://www.ulliwaltinger.de/sentiment/) (already somewhat processed to only include relevant columns).
 
 ```{r get_dict, include=FALSE}
 
@@ -215,9 +215,17 @@ saveRDS(dict_list, "5_seminar/global_polarity_clues.RDS")
 
 ```{r get_dict_2}
 
+# Get polarities
+
 list_gpc <- readRDS("5_seminar/global_polarity_clues.RDS")
 
-list(head(list_gpc$positive), head(list_gpc$negative))
+# Clean
+
+list_gpc <- lapply(list_gpc, clean_and_stem)
+
+# Inspect
+
+str(list_gpc)
 
 ```
 
@@ -273,12 +281,18 @@ twitter_docvars <- data.table::as.data.table(
     quanteda::docvars(twitter_corpus)), 
   key = "doc_id")
 
+head(twitter_docvars)
+
+```
+
+```{r emojis_2}
+
 # Count emojis (stored as list objects, so we take the length of these lists)
 
 twitter_emojis <- twitter_docvars[
   , .(doc_id, emojis)
   ][, n_emojis := lengths(emojis)
-      ][, emojis := NULL]
+    ][, emojis := NULL]
 
 list(
   head(twitter_emojis),
@@ -387,6 +401,7 @@ head(twitter_char_unigrams)
 ### Get POS tags
 
 The last set of features we are going to extract are **part-of-speech (POS) tags**.
+Note that tagging must take place over the original documents, not some tokens representation agnostic to grammatical structures.
 
 We use the `spacyR` package, a wrapper around Python's `spaCy` package that is nicely integrated with `quanteda` (well, they have the same author after all).
 This [vignette](https://cran.r-project.org/web/packages/spacyr/vignettes/using_spacyr.html) provides a quick intro.

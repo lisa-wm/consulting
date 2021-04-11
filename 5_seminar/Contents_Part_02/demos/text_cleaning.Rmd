@@ -238,9 +238,9 @@ stringr::str_split(camel, pattern_split_camelcase)
 # Find and split cases in Twitter data
 
 twitter_data[, full_text := lapply(
-  .I, 
+  .I, # apply to each row
   function(i) {
-    components <- unlist(stringr::str_split(full_text[i], " ")) # split text into single tokens
+    components <- unlist(stringr::str_split(full_text[i], " ")) # split text into single tokens separated by space
     case_numbers <- which(stringr::str_detect(
       components, pattern_camelcase_hashtag)) # find camel case
     cases <- components[case_numbers] # collect cases

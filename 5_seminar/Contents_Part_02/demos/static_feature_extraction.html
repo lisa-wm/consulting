@@ -424,7 +424,7 @@ twitter_tokens</code></pre>
 ## [ ... and 13 more ]
 ## 
 ## [ reached max_ndoc ... 1,209 more documents ]</code></pre>
-<p>There is still a variety of tokens we could probably remove. In a real application you should dedicate some time to this sub-task to make sure your tokens representation is not contaminated by such noise.</p>
+<p>There is still a variety of tokens we could probably remove (there are more extensive stopwords lists to be found online, the built-in one from <code>quanteda</code> is not too good tbh). In a real application you should dedicate some time to this sub-task to make sure your tokens representation is not contaminated by such noise.</p>
 </div>
 <div id="create-dfm-object" class="section level3">
 <h3>Create <code>dfm</code> object</h3>
@@ -456,16 +456,21 @@ twitter_dfm</code></pre>
 <h3>Find polarity clues</h3>
 <p>Time for some feature extraction at last.</p>
 <p>The first static feature we will extract is the number of (positive or negative) <strong>polarity clues</strong> in the data.</p>
-<p>Polarity clues are sentiment-bearing words like “grauenhaft”. There is a variety of open-source lists for these; we will use the <strong>Global Polarity Clues</strong> collection available <a href="http://www.ulliwaltinger.de/sentiment/">here</a> (already somewhat processed to only include relevant columns).</p>
-<pre class="r"><code>list_gpc &lt;- readRDS(&quot;5_seminar/global_polarity_clues.RDS&quot;)
+<p>Polarity clues are sentiment-bearing words like “grauenhaft”. There is a variety of open-source lists for these; we will use the <em>Global Polarity Clues</em> collection available <a href="http://www.ulliwaltinger.de/sentiment/">here</a> (already somewhat processed to only include relevant columns).</p>
+<pre class="r"><code># Get polarities
 
-list(head(list_gpc$positive), head(list_gpc$negative))</code></pre>
-<pre><code>## [[1]]
-## [1] &quot;Abfangschirm&quot;      &quot;Abgeklärtheit&quot;     &quot;Abgeschlossenheit&quot;
-## [4] &quot;Abgleich&quot;          &quot;Abgott&quot;            &quot;Abhilfe&quot;          
-## 
-## [[2]]
-## [1] &quot;Abandon&quot; &quot;Abart&quot;   &quot;Abbau&quot;   &quot;Abbaue&quot;  &quot;Abbauen&quot; &quot;Abbaues&quot;</code></pre>
+list_gpc &lt;- readRDS(&quot;5_seminar/global_polarity_clues.RDS&quot;)
+
+# Clean
+
+list_gpc &lt;- lapply(list_gpc, clean_and_stem)
+
+# Inspect
+
+str(list_gpc)</code></pre>
+<pre><code>## List of 2
+##  $ positive: chr [1:17627] &quot;Abfangschirm&quot; &quot;Abgeklaertheit&quot; &quot;Abgeschlossenheit&quot; &quot;Abgleich&quot; ...
+##  $ negative: chr [1:19962] &quot;Abandon&quot; &quot;Abart&quot; &quot;Abbau&quot; &quot;Abbaue&quot; ...</code></pre>
 <p><code>quanteda</code> offers dedicated <code>dictionary</code> objects which allow for convenient look-up of <code>dfm</code>’s, so we convert the GPC to such a format:</p>
 <pre class="r"><code>dictionary_gpc &lt;- quanteda::dictionary(
   list(
@@ -475,9 +480,9 @@ list(head(list_gpc$positive), head(list_gpc$negative))</code></pre>
 dictionary_gpc</code></pre>
 <pre><code>## Dictionary object with 2 key entries.
 ## - [positive]:
-##   - abfangschirm, abgeklärtheit, abgeschlossenheit, abgleich, abgott, abhilfe, abhilfemaßnahme, abkomme, abkommen, abkühlung, ableger, ablösen, ablösung, abmachung, abmachungen, abschirmung, abschluss, abschluß, abschlußes, abschlußs [ ... and 17,607 more ]
+##   - abfangschirm, abgeklaertheit, abgeschlossenheit, abgleich, abgott, abhilf, abhilfemassnahm, abkomm, abkommen, abkuehlung, ableger, abloesen, abloesung, abmachung, abmachungen, abschirmung, abschluss, abschlusss, abschluess, abschluessen [ ... and 11,514 more ]
 ## - [negative]:
-##   - abandon, abart, abbau, abbaue, abbauen, abbaues, abbaus, abbildungsfehler, abbildverzerrung, abblendung, abbohrung, abbruch, abbruches, abbruchs, abbruchstelle, abbrüche, abbrüchen, abdampf, abdankung, abdankungen [ ... and 19,942 more ]</code></pre>
+##   - abandon, abart, abbau, abbaue, abbauen, abbildungsfehl, abbildverzerrung, abblendung, abbohrung, abbruch, abbruchstel, abbruech, abbruechen, abdampf, abdankung, abdankungen, abdaempfung, abdaempfungen, abenteuerlichkeit, abenteuerpolitik [ ... and 14,061 more ]</code></pre>
 <p>Perform the look-up:</p>
 <pre class="r"><code># Look up polarities
 
@@ -495,12 +500,12 @@ twitter_polarities &lt;- data.table::as.data.table(
 
 head(twitter_polarities)</code></pre>
 <pre><code>##                  doc_id positive negative
-## 1: ABaerbock15156546001        2        3
-## 2: ABaerbock15210084001        0        2
-## 3: ABaerbock15216341401        1        3
-## 4: ABaerbock15252349801        1        5
-## 5: ABaerbock15256297201        2        1
-## 6: ABaerbock15283779001        2        3</code></pre>
+## 1: ABaerbock15156546001        3        3
+## 2: ABaerbock15210084001        1        2
+## 3: ABaerbock15216341401        3        4
+## 4: ABaerbock15252349801        3        5
+## 5: ABaerbock15256297201        3        0
+## 6: ABaerbock15283779001        2        2</code></pre>
 </div>
 <div id="get-number-of-emojis-used" class="section level3">
 <h3>Get number of emojis used</h3>
@@ -514,12 +519,41 @@ twitter_docvars &lt;- data.table::as.data.table(
     quanteda::docvars(twitter_corpus)), 
   key = &quot;doc_id&quot;)
 
-# Count emojis (stored as list objects, so we take the length of these lists)
+head(twitter_docvars)</code></pre>
+<pre><code>##                  doc_id     name_matching  username available
+## 1: ABaerbock15156546001 Annalena Baerbock ABaerbock      TRUE
+## 2: ABaerbock15210084001 Annalena Baerbock ABaerbock      TRUE
+## 3: ABaerbock15216341401 Annalena Baerbock ABaerbock      TRUE
+## 4: ABaerbock15252349801 Annalena Baerbock ABaerbock      TRUE
+## 5: ABaerbock15256297201 Annalena Baerbock ABaerbock      TRUE
+## 6: ABaerbock15283779001 Annalena Baerbock ABaerbock      TRUE
+##             created_at retweet_count favorite_count followers_count    location
+## 1: 2018-01-11 07:10:00           111            233          107693 Brandenburg
+## 2: 2018-03-14 06:20:00            24             96          107693 Brandenburg
+## 3: 2018-03-21 12:09:00            39            153          107693 Brandenburg
+## 4: 2018-05-02 04:23:00            49            213           94139 Brandenburg
+## 5: 2018-05-06 18:02:00            39            301          107693 Brandenburg
+## 6: 2018-06-07 13:25:00            23            115          107693 Brandenburg
+##       label           topic emojis
+## 1: negative    Klimapolitik       
+## 2: negative    Klimapolitik       
+## 3: negative    Klimapolitik       
+## 4: negative Verkehrspolitik       
+## 5: positive Kommunalpolitik       
+## 6: negative     Integration       
+##                                                      hashtags tags
+## 1:      #GroKo,#Klima,#Klimadiplomatie,#Merkel,#kohleausstieg     
+## 2:                                             #Merkel,#GroKo     
+## 3:       #Klimakrise,#Regierungserklaerung,#Koalitionsvertrag     
+## 4:                                                                
+## 5:                                 #kwsh,#kow18,#Kommunalwahl     
+## 6: #Amtsberg,#Familiennachzug,#Integration,#Grundrecht,#GroKo</code></pre>
+<pre class="r"><code># Count emojis (stored as list objects, so we take the length of these lists)
 
 twitter_emojis &lt;- twitter_docvars[
   , .(doc_id, emojis)
   ][, n_emojis := lengths(emojis)
-      ][, emojis := NULL]
+    ][, emojis := NULL]
 
 list(
   head(twitter_emojis),
@@ -632,7 +666,7 @@ head(twitter_char_unigrams)</code></pre>
 </div>
 <div id="get-pos-tags" class="section level3">
 <h3>Get POS tags</h3>
-<p>The last set of features we are going to extract are <strong>part-of-speech (POS) tags</strong>.</p>
+<p>The last set of features we are going to extract are <strong>part-of-speech (POS) tags</strong>. Note that tagging must take place over the original documents, not some tokens representation agnostic to grammatical structures.</p>
 <p>We use the <code>spacyR</code> package, a wrapper around Python’s <code>spaCy</code> package that is nicely integrated with <code>quanteda</code> (well, they have the same author after all). This <a href="https://cran.r-project.org/web/packages/spacyr/vignettes/using_spacyr.html">vignette</a> provides a quick intro.</p>
 <p>Note that setting this up can be a serious pain – getting R and Python to work hand in hand on your local machine is hard sometimes. When in doubt, resort to some clean environment such as Google Colab.</p>
 <pre class="r"><code># Install spacyr and get the relevant model for German language
@@ -732,12 +766,12 @@ head(twitter_features_static)</code></pre>
 ## 5:     6     1    4 0        0 13 4 2 14 29 1  4  8 19 0 8  8  8 24  6 3 0  8
 ## 6:     6     0    9 0        1 20 6 6  6 35 7 12  9 18 0 2 10 10 19  3 2 0 11
 ##     s  t  u v w x y z n_emojis positive negative
-## 1: 15 11  7 0 1 0 1 1        0        2        3
-## 2: 12 13  7 1 2 0 0 1        0        0        2
-## 3: 20 13 11 2 2 0 0 2        0        1        3
-## 4: 15 11  8 3 3 0 0 3        0        1        5
-## 5: 15 11  9 1 8 0 0 1        0        2        1
-## 6: 14 16 12 1 4 0 0 4        0        2        3</code></pre>
+## 1: 15 11  7 0 1 0 1 1        0        3        3
+## 2: 12 13  7 1 2 0 0 1        0        1        2
+## 3: 20 13 11 2 2 0 0 2        0        3        4
+## 4: 15 11  8 3 3 0 0 3        0        3        5
+## 5: 15 11  9 1 8 0 0 1        0        3        0
+## 6: 14 16 12 1 4 0 0 4        0        2        2</code></pre>
 <p><strong>This provides us with a solid foundation for sentiment analysis! Of course we can think of many more features to include here – we will see some more in the exercise; in general, be creative and see how classification can be improved by adding different explanatory variables.</strong></p>
 </div>
 
