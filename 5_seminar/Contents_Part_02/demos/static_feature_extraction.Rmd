@@ -33,11 +33,15 @@ We will extract a set of static features that have been shown to work well for s
 The following analyses all revolve around the presence/absence or number of specific text **tokens** across documents.
 Therefore, we convert our `corpus` object from before to a `tokens`, where documents are represented by single tokens rather than a fluent text, and along the way omit casing.
 
+```{r path, include = FALSE}
+path <- "5_seminar"
+```
+
+
 ```{r read}
+# path <- ... (individual file location)
 
-path <- "5_seminar/twitter_corpus.RDS"
-
-twitter_corpus <- readRDS(path)
+twitter_corpus <- readRDS(sprintf("%s/twitter_corpus.RDS", path))
 
 ```
 
@@ -217,7 +221,7 @@ saveRDS(dict_list, "5_seminar/global_polarity_clues.RDS")
 
 # Get polarities
 
-list_gpc <- readRDS("5_seminar/global_polarity_clues.RDS")
+list_gpc <- readRDS(sprintf("%s/global_polarity_clues.RDS", path))
 
 # Clean
 
@@ -488,10 +492,12 @@ twitter_features_static <- twitter_pos_tags[
     ][twitter_emojis,
       ][twitter_polarities, ]
 
-saveRDS(twitter_features_static, "5_seminar/twitter_features_static.RDS")
+saveRDS(twitter_features_static, sprintf("%s/twitter_features_static.RDS", path))
 
 head(twitter_features_static)
 
 ```
 
 **This provides us with a solid foundation for sentiment analysis! Of course we can think of many more features to include here -- we will see some more in the exercise; in general, be creative and see how classification can be improved by adding different explanatory variables.**
+
+![](screenshot_creative.svg.jpg)

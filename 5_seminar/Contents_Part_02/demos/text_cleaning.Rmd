@@ -35,15 +35,18 @@ This [vignette](https://cran.r-project.org/web/packages/data.table/vignettes/dat
 
 Assuming we have concluded the initial step of scraping the data and storing them as a `.csv` file, we now **import** the data into R.
 
-```{r import_data, message=FALSE, warning=FALSE}
-# Specify path to data location (to be modified according to individual file structure)
+```{r path, include = FALSE}
+path <- "5_seminar"
+```
 
-path <- "5_seminar/twitter_data.csv"
+```{r import_data, message=FALSE, warning=FALSE}
+
+# path <- ... (individual file location)
 
 # Read data
 
 twitter_data <- data.table::fread(
-  path,
+  sprintf("%s/twitter_data.csv", path),
   encoding = "UTF-8", # standard encoding
   sep = ";") # standard for German-locale CSV files
 
@@ -177,10 +180,8 @@ First, specify patterns with regex:
 
 # Specify emoji pattern (using external data)
 
-path <- "5_seminar/emojis_unicode.csv"
-
 emojis_unicode <- data.table::fread(
-  path,
+  sprintf("%s/emojis_unicode.csv", path),
   encoding = "UTF-8",
   sep = ";")
 
@@ -240,7 +241,7 @@ stringr::str_split(camel, pattern_split_camelcase)
 twitter_data[, full_text := lapply(
   .I, # apply to each row
   function(i) {
-    components <- unlist(stringr::str_split(full_text[i], " ")) # split text into single tokens separated by space
+    components <- unlist(stringr::str_split(full_text[i], " ")) # split text into tokens separated by space
     case_numbers <- which(stringr::str_detect(
       components, pattern_camelcase_hashtag)) # find camel case
     cases <- components[case_numbers] # collect cases
@@ -252,7 +253,7 @@ twitter_data[, full_text := lapply(
 
 # Inspect
 
-head(twitter_data, 10L)$full_text
+tail(twitter_data, 5L)$full_text
 
 ```
 

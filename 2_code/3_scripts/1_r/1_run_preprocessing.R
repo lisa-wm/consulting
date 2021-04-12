@@ -52,13 +52,6 @@ tweets_raw <- unique(rbind(
 
 tweets_raw <- tweets_raw[created_at > "2017-09-24"]
 
-# Save for seminar
-
-data.table::fwrite(
-  tweets_raw[label != "none"],
-  here("5_seminar", "twitter_data.csv"),
-  sep = ";")
-
 # Add word count and date variables
 
 tweets_raw[, `:=` (
@@ -66,12 +59,6 @@ tweets_raw[, `:=` (
   year = data.table::year(created_at),
   month = data.table::month(created_at),
   week = data.table::week(created_at))]
-
-# Remove umlauts and non-informative symbols
-
-tweets_raw[
-  , full_text := remove_noisy_symbols(remove_umlauts(full_text))
-  ][, name_matching := remove_noisy_symbols(remove_umlauts(name_matching))]
 
 # Prefix column names and save
 
@@ -144,6 +131,50 @@ data.table::setattr(
   data_clean$meta_party, 
   "levels",
   c("afd", "gruene", "cdu_csu", "linke", "fdp", "fraktionslos", "spd"))
+
+# Save for seminar
+
+if (FALSE) {
+  
+  data_seminar <- data_clean[label != "none"]
+  
+  cols_to_keep <- c(
+    "meta_last_name",
+    "meta_first_name",
+    "meta_wahlkreis_name",
+    "meta_party",
+    "meta_bundesland",
+    "meta_unemployment_rate",
+    "meta_share_pop_migration",
+    "twitter_username",
+    "twitter_followers_count",
+    "twitter_created_at",
+    "twitter_full_text",
+    "twitter_favorite_count",
+    "twitter_retweet_count")
+    
+  data_seminar <- data_seminar[, ..cols_to_keep]
+  
+  new_colnames <- stringr::str_remove_all(
+    cols_to_keep, 
+    "^(meta_|twitter_)")
+  
+  data.table::setnames(data_seminar, new_colnames)
+  
+  data.table::fwrite(
+    data_seminar,
+    here("5_seminar", "twitter_data.csv"),
+    sep = ";")
+  
+}
+
+# Remove umlauts and non-informative symbols
+
+data_clean[
+  , twitter_full_text := remove_noisy_symbols(
+    remove_umlauts(twitter_full_text))
+  ][, meta_name_matching := remove_noisy_symbols(
+    remove_umlauts(meta_name_matching))]
 
 # data_clean <- data_clean[meta_party != "fraktionslos"]
 
