@@ -306,7 +306,7 @@ head(quanteda::docvars(twitter_corpus))
 
 # Save corpus object for further analysis
 
-saveRDS(twitter_corpus, "5_seminar/twitter_corpus.RDS")
+saveRDS(twitter_corpus, sprintf("%s/twitter_corpus.RDS", path))
 ```
 
 **With this, we have solid base to work on.**

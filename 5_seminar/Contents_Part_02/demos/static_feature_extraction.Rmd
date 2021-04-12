@@ -182,6 +182,8 @@ twitter_dfm <- quanteda::dfm(twitter_tokens)
 
 twitter_dfm
 
+saveRDS(twitter_dfm, sprintf("%s/twitter_dfm.RDS", path))
+
 ```
 
 ### Find polarity clues

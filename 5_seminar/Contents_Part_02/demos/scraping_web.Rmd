@@ -154,7 +154,7 @@ Convert ratings to numeric:
 ```
 
 
-### Store scraped data in a data table
+### Store scraped data
 
 Now we have everything we need and can store the data in an R-friendly object.
 
