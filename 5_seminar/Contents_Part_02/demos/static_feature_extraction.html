@@ -747,14 +747,15 @@ head(twitter_pos_tags)</code></pre>
 </div>
 <div id="collect-all-static-features" class="section level3">
 <h3>Collect all static features</h3>
-<p>In a final step, we put everything together:</p>
+<p>In a final step, we put everything together (starting the join operation with a list of all document IDs so we lose nothing):</p>
 <pre class="r"><code># Collect all features
 
-twitter_features_static &lt;- twitter_pos_tags[
-  twitter_negation
-  ][twitter_char_unigrams,
-    ][twitter_emojis,
-      ][twitter_polarities, ]
+twitter_features_static &lt;- twitter_docvars[, .(doc_id)
+  ][twitter_pos_tags,
+    ][twitter_negation,
+      ][twitter_char_unigrams,
+        ][twitter_emojis,
+          ][twitter_polarities, ]
 
 saveRDS(twitter_features_static, sprintf(&quot;%s/twitter_features_static.RDS&quot;, path))
 
