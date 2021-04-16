@@ -9,6 +9,12 @@ output:
 
 ![](../../Logo_Consulting.JPG)
 
+## Cleaning text
+
+This demo is about **basic text cleaning**.
+
+We show how to remove unwanted character sequences, handle Twitter-specific tokens, and create a basic `corpus` object.
+
 ```{r setup_packages, message=FALSE, warning=FALSE}
 # Load required packages
 

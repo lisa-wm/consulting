@@ -1,5 +1,5 @@
 ---
-title: "Web Scraping -- Example"
+title: "Web Scraping"
 author: "Asmik & Lisa -- for Intro to NLP"
 date: "30 April 2021"
 output:
@@ -14,6 +14,12 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ```
 
+## Web Scraping from the IMDb website
+
+This demo is about basic **web scraping**.
+
+We show how to parse (static) HTML content, extract relevant information, and store it in an R-friendly manner.
+
 ```{r setup_packages, message=FALSE, warning=FALSE}
 # Load required packages
 
@@ -22,8 +28,6 @@ library("rvest")
 library("stringr")
 library("xml2")
 ```
-
-## Web Scraping from the IMDb website
 
 ### Get contents
 

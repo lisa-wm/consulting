@@ -1,5 +1,5 @@
 ---
-title: "Scraping Twitter Data -- Example"
+title: "Scraping Twitter Data"
 author: "Asmik & Lisa -- for Intro to NLP"
 date: "30 April 2021"
 output:
@@ -19,6 +19,11 @@ access_token <- "1244208984724209665-GWNgwnJnPdFIIgV9X8Gio07Re8w82v"
 access_secret <- "CJC9BtdlNpv6GIGovENTMDQUgjWzLljyp4WYepreo7xpF"
 ```
 
+## Scraping Twitter
+
+This demo is about **scraping data from Twitter**.
+
+We show how to get Twitter contents using R via different queries and some basic analytic tools.
 
 ```{r setup_packages, message=FALSE, warning=FALSE}
 # Load required packages

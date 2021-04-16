@@ -9,6 +9,12 @@ output:
 
 ![](../../Logo_Consulting.JPG)
 
+## Extracting static features
+
+This demo is about **static feature extraction**.
+
+We show how to extract several features deemed useful for sentiment analysis. *Static* refers to these features being independent across documents (unlike, for instance, word embeddings).
+
 ```{r setup_packages, message=FALSE, warning=FALSE}
 # Load required packages
 

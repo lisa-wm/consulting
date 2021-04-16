@@ -1,5 +1,5 @@
 ---
-title: "Regular Expression - Examples"
+title: "Regular Expressions"
 author: "Asmik & Lisa - for Intro to NLP"
 date: "30 April 2021"
 output:
@@ -8,6 +8,12 @@ output:
 ---
 
 ![](../../Logo_Consulting.JPG)
+
+## Handling regular expressions
+
+This demo is about **regular expressions (regex)**.
+
+We show how to perform several basic text mining operations using the systematic regex syntax.
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)

@@ -1,0 +1,170 @@
+---
+title: "Topic Modeling -- STM"
+author: "Asmik & Lisa -- for Intro to NLP"
+date: "30 April 2021"
+output:
+  html_document: default
+  pdf_document: default
+---
+
+![](../../Logo_Consulting.JPG)
+
+## Modeling topics with an STM
+
+This demo is about **topic modeling with a structural topic model (STM)**.
+
+We show how to prepare the data for fitting an STM, conduct the modeling process, and analyze the results.
+
+
+```{r setup_packages, message=FALSE, warning=FALSE}
+# Load required packages
+
+library("data.table")
+library("quanteda")
+library("stm")
+```
+
+### Create `dfm` object
+
+As in the static feature extraction demo, we convert our data to a `dfm`. 
+However, we focus on slightly different tokens this time as we are now interested in identifying topical relations.
+
+First, we get the **data** (the `path` variable again requiring individual adaptation):
+
+```{r path, include = FALSE}
+path <- "5_seminar"
+```
+
+
+```{r read}
+# path <- ... (individual file location)
+
+twitter_corpus <- readRDS(sprintf("%s/twitter_corpus.RDS", path))
+
+twitter_corpus
+
+```
+
+Now let's **tokenize** our corpus in a way appropriate for topic modeling. 
+
+We assume that topical information is mostly carried by nouns and choose to remove all other words for document representation, attempting to eliminate noise that might distract our topic model.
+This is, of course, a simplification, but that's life (of an analyst). 
+
+Luckily, nouns are pretty easy to identify by their leading capital letters in German (implicitly relying on MPs' grammar skills and/or auto-correct, and accepting that this will also include non-nouns from the beginning of a sentence):
+
+```{r tokenize}
+
+# First, tokenize as usual
+
+twitter_tokens <- quanteda::tokens(
+  twitter_corpus,
+  what = "word",
+  remove_symbols = TRUE,
+  remove_numbers = TRUE,
+  remove_separators = TRUE,
+  split_hyphens = TRUE,
+  include_docvars = TRUE)
+
+```
+
+```{r stem}
+
+# Stem
+
+twitter_tokens <- quanteda::tokens_wordstem(
+  twitter_tokens, 
+  language = "german")
+
+```
+
+```{r keep}
+
+# Keep only tokens starting with a capital letter
+
+twitter_tokens <- quanteda::tokens_keep(
+  twitter_tokens,
+  pattern = c("[:upper:]([:lower:])+"),
+  valuetype = "regex",
+  case_insensitive = FALSE)
+
+# Lowercase afterwards
+
+twitter_tokens <- quanteda::tokens_tolower(twitter_tokens)
+
+```
+
+```{r clean_stem, include=FALSE}
+
+clean_and_stem <- function(text) {
+  
+  # Convert to uniform encoding
+  
+  text <-  stringi::stri_trans_general(text, "Any-Latin")
+  
+  # Replace umlauts and litigate s
+  
+  text <- stringr::str_replace_all(
+    text,
+      c("\u00c4" = "Ae",
+      "\u00e4" = "ae",
+      "\u00d6" = "Oe",
+      "\u00f6" = "oe",
+      "\u00dc" = "Ue",
+      "\u00fc" = "ue",
+      "\u00df" = "ss"))
+  
+  # Stem
+  
+  text <- SnowballC::wordStem(text)
+  
+  text
+
+}
+
+clean_and_stem(c("Döner", "Bereicherung", "kulinarischer", "Angebote"))
+
+```
+
+```{r stopwords}
+
+# Remove stopwords using our cleaning function from earlier
+
+stopwords <- clean_and_stem(quanteda::stopwords(language = "de"))
+stopwords <- unique(stopwords)
+stopwords <- stopwords[nchar(stopwords) > 0]
+
+twitter_tokens <- quanteda::tokens_remove(
+  twitter_tokens,
+  pattern = stopwords)
+
+# Inspect
+
+twitter_tokens
+
+```
+
+Looking good, so convert to `dfm`:
+
+```{r dfm}
+
+twitter_dfm <- quanteda::dfm(twitter_tokens)
+
+twitter_dfm
+
+```
+
+Unfortunately, as the above output tells us, our `dfm` is extremely **sparse** -- tokens are not at all common across documents, which will pose a challenge to any topic model.
+This is actually not too surprising when we recall the extreme brevity of our Twitter documents.
+
+Therefore, we make another simplifying concession: we **pool** documents to create larger entities that should share more common tokens.
+
+Documents are pooled per user per month. 
+It is not terribly plausible to assume users sticking to one topic for the duration of one calendar month and then turning to the next, but a viable alternative has been lacking.
+
+So until you help us out with a better suggestion, here goes:
+
+```{r pool}
+
+head(quanteda::docvars(twitter_dfm))
+
+```
