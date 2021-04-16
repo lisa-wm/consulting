@@ -158,13 +158,43 @@ This is actually not too surprising when we recall the extreme brevity of our Tw
 
 Therefore, we make another simplifying concession: we **pool** documents to create larger entities that should share more common tokens.
 
-Documents are pooled per user per month. 
-It is not terribly plausible to assume users sticking to one topic for the duration of one calendar month and then turning to the next, but a viable alternative has been lacking.
+In this demo, we pool very coarsely and concatenate all tweets by one user to a single document.
+Of course, it is not terribly plausible to assume users sticking to exactly one topic, but our toy data here are somewhat limited.
 
-So until you help us out with a better suggestion, here goes:
+In a real application you would try and find a more suitable way of pooling documents, e.g., taking into account the date of creation (and probably do it as little as possible).
 
-```{r pool}
+Using the pooling variable, we can reshape the `dfm` by **grouping** it:
 
-head(quanteda::docvars(twitter_dfm))
+```{r group}
+
+# Group dfm
+
+twitter_dfm_grouped <- quanteda::dfm_group(
+  twitter_dfm, 
+  quanteda::docvars(twitter_dfm)$username)
+
+# In addition, eliminate less common features
+
+twitter_dfm_grouped <- quanteda::dfm_select(
+  twitter_dfm_grouped,
+  names(quanteda::topfeatures(twitter_dfm_grouped, n = 300)))
+
+twitter_dfm_grouped
 
 ```
+
+### Create `stm` object
+
+We will now convert our `dfm` to an `stm` object we can use in the structural topic model.
+This is super simple with `quanteda`:
+
+```{r stm}
+
+twitter_stm <- quanteda::convert(twitter_dfm_grouped, to = "stm")
+
+str(twitter_stm)
+
+```
+
+
+
