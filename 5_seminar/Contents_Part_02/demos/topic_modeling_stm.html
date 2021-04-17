@@ -176,10 +176,11 @@ pre code {
 <div id="modeling-topics-with-an-stm" class="section level2">
 <h2>Modeling topics with an STM</h2>
 <p>This demo is about <strong>topic modeling with a structural topic model (STM)</strong>.</p>
-<p>We show how to prepare the data for fitting an STM, conduct the modeling process, and analyze the results.</p>
+<p>We show how to prepare the data for fitting an STM (<a href="https://scholar.princeton.edu/sites/default/files/bstewart/files/a_model_of_text_for_experimentation_in_the_social_sciences.pdf">Roberts et al., 2016</a>), conduct the modeling process, and analyze the results.</p>
 <pre class="r"><code># Load required packages
 
 library(&quot;data.table&quot;)
+library(&quot;ggplot2&quot;)
 library(&quot;quanteda&quot;)
 library(&quot;stm&quot;)</code></pre>
 <div id="create-dfm-object" class="section level3">
@@ -336,15 +337,51 @@ twitter_dfm_grouped</code></pre>
 ##   akbulutgokay      0    0      0     0         0      0   1    0    0      0
 ## [ reached max_ndoc ... 250 more documents, reached max_nfeat ... 290 more features ]</code></pre>
 </div>
+<div id="create-prevalence-formula" class="section level3">
+<h3>Create prevalence formula</h3>
+<p>The special trait of the STM is its making use of s document-level <strong>meta data</strong>, so we need to specify which information to use here. In the <code>stm</code> function the corresponding argument is called <code>prevalence</code> and must be stated as a formula.</p>
+<p>We will use the following meta variables (smooth effects defaulting to B-splines):</p>
+<ul>
+<li><code>party</code> as a categorical variable</li>
+<li><code>bundesland</code> as a categorical variable</li>
+<li><code>unemployment_rate</code> as a smooth effect with 5 degrees of freedom</li>
+<li><code>share_pop_migration</code> as a smooth effect with 5 degrees of freedom</li>
+</ul>
+<p>The resulting formula, <code>~ party + bundesland + s(unemployment_rate, df = 5) + s(share_pop_migration, df = 5)</code>, is perfectly disputable – this decision is up to domain knowledge and some trial-and-error, and we do not claim to use the ideal formula in this demo.</p>
+<pre class="r"><code>prevalence_formula &lt;- as.formula(paste(
+  &quot;&quot;, 
+  &quot;party + bundesland + s(unemployment_rate, df = 5) + s(share_pop_migration, df = 5)&quot;, 
+  sep = &quot;~&quot;))
+
+print(prevalence_formula)</code></pre>
+<pre><code>## ~party + bundesland + s(unemployment_rate, df = 5) + s(share_pop_migration, 
+##     df = 5)</code></pre>
+<p>Now we have one thing to pay attention to: the <code>stm</code> implementation cannot handle <strong>missing data</strong> in its prevalence variables. We must therefore exclude non-complete observations (alternatively, we could impute the missing values if it made sense and we had a meaningful imputation mechanism):</p>
+<pre class="r"><code>twitter_dfm_grouped &lt;- quanteda::dfm_subset(
+  twitter_dfm_grouped,
+  !is.na(party) &amp; !is.na(bundesland) &amp; !is.na(unemployment_rate) &amp; !is.na(share_pop_migration))
+
+twitter_dfm_grouped</code></pre>
+<pre><code>## Document-feature matrix of: 245 documents, 300 features (94.8% sparse) and 8 docvars.
+##                features
+## docs            klima frau merkel groko klimakris diesel das frag luft strass
+##   A_Gloeckner       0    0      0     0         0      0   0    0    0      0
+##   ABaerbock         2    5      2     3         1      1   7    1    1      3
+##   achim_p           0    0      0     0         0      0   0    0    0      0
+##   AfDNbg            0    0      0     0         0      0   0    0    0      0
+##   agnieszka_mdb     0    1      0     0         0      0   0    0    0      0
+##   akbulutgokay      0    0      0     0         0      0   1    0    0      0
+## [ reached max_ndoc ... 239 more documents, reached max_nfeat ... 290 more features ]</code></pre>
+</div>
 <div id="create-stm-object" class="section level3">
 <h3>Create <code>stm</code> object</h3>
-<p>We will now convert our <code>dfm</code> to an <code>stm</code> object we can use in the structural topic model. This is super simple with <code>quanteda</code>:</p>
+<p>We then convert our <code>dfm</code> to an <code>stm</code> object we can use in the structural topic model. This is super simple with <code>quanteda</code>:</p>
 <pre class="r"><code>twitter_stm &lt;- quanteda::convert(twitter_dfm_grouped, to = &quot;stm&quot;)</code></pre>
 <pre><code>## Warning in dfm2stm(x, docvars, omit_empty = TRUE): Dropped empty document(s):
 ## Jacobi_AfD, korkmazgt</code></pre>
 <pre class="r"><code>str(twitter_stm)</code></pre>
 <pre><code>## List of 3
-##  $ documents:List of 254
+##  $ documents:List of 243
 ##   ..$ A_Gloeckner    : int [1:2, 1:8] 20 1 55 1 64 1 70 1 71 1 ...
 ##   ..$ ABaerbock      : int [1:2, 1:59] 12 1 17 1 22 1 24 1 29 1 ...
 ##   ..$ achim_p        : int [1:2, 1:10] 17 1 53 1 70 1 73 2 84 1 ...
@@ -353,7 +390,6 @@ twitter_dfm_grouped</code></pre>
 ##   ..$ akbulutgokay   : int [1:2, 1:27] 12 2 28 1 46 1 66 1 70 2 ...
 ##   ..$ alexandersneu  : int [1:2, 1:2] 36 1 175 1
 ##   ..$ alexmuellerfdp : int [1:2, 1:3] 53 1 265 1 296 1
-##   ..$ alice_weidel   : int [1:2, 1:14] 4 2 32 1 35 1 46 1 50 2 ...
 ##   ..$ AndiScheuer    : int [1:2, 1:12] 16 1 53 2 63 1 70 1 71 2 ...
 ##   ..$ AndreasBleckMdB: int [1:2, 1:23] 4 1 15 1 37 2 43 6 53 1 ...
 ##   ..$ andreassteier  : int [1:2, 1:2] 37 2 279 1
@@ -401,10 +437,8 @@ twitter_dfm_grouped</code></pre>
 ##   ..$ EnricoKomning  : int [1:2, 1:11] 3 2 4 2 35 1 53 1 57 1 ...
 ##   ..$ Erhard_Grundl  : int [1:2, 1:19] 43 1 48 1 70 1 73 1 89 1 ...
 ##   ..$ ernst_klaus    : int [1:2, 1] 46 1
-##   ..$ erwin_rueddel  : int [1:2, 1:5] 45 1 105 1 119 1 131 1 207 1
 ##   ..$ EskenSaskia    : int [1:2, 1:31] 8 1 12 1 17 2 25 1 26 1 ...
 ##   ..$ f_schaeffler   : int [1:2, 1:3] 35 1 164 1 224 1
-##   ..$ Fabiodemasi    : int [1:2, 1:2] 46 1 133 1
 ##   ..$ falkomohrs     : int [1:2, 1:2] 165 1 241 1
 ##   ..$ fbrantner      : int [1:2, 1:20] 17 1 46 1 52 2 61 1 67 1 ...
 ##   ..$ felixschreiner : int [1:2, 1:14] 17 1 24 1 50 1 86 1 87 1 ...
@@ -421,8 +455,6 @@ twitter_dfm_grouped</code></pre>
 ##   ..$ groehe         : int [1:2, 1:14] 20 1 35 1 37 1 43 1 45 1 ...
 ##   ..$ GruenClaudia   : int [1:2, 1:12] 7 1 46 1 53 1 70 1 132 1 ...
 ##   ..$ GrueneBeate    : int [1:2, 1:35] 15 1 16 1 17 2 19 1 26 1 ...
-##   ..$ gtzfrmming     : int [1:2, 1:4] 46 1 94 1 110 1 156 1
-##   ..$ gydej          : int [1:2, 1:5] 45 1 85 1 101 1 208 1 298 1
 ##   ..$ hahnflo        : int [1:2, 1:13] 24 1 41 1 59 1 64 1 86 1 ...
 ##   ..$ HajdukBundestag: int [1:2, 1:8] 34 1 38 1 70 1 71 1 113 1 ...
 ##   ..$ HeikeHaensel   : int [1:2, 1:48] 1 1 2 1 9 1 10 2 30 1 ...
@@ -444,17 +476,44 @@ twitter_dfm_grouped</code></pre>
 ##   ..$ JBrandenburgFDP: int [1:2, 1:13] 36 1 43 2 46 1 63 1 68 1 ...
 ##   ..$ jensbeeck      : int [1:2, 1:3] 46 1 175 1 294 1
 ##   ..$ jenskoeppen    : int [1:2, 1:8] 86 1 105 1 119 1 206 1 213 1 ...
+##   ..$ JensMaierAfD   : int [1:2, 1:32] 2 1 4 3 22 1 25 1 27 1 ...
+##   ..$ jensspahn      : int [1:2, 1:17] 20 1 45 1 46 1 63 1 68 1 ...
+##   ..$ JM_Luczak      : int [1:2, 1:45] 4 1 25 2 33 1 35 1 37 1 ...
+##   ..$ Jochen_Haug    : int [1:2, 1:5] 4 2 37 1 70 1 180 1 254 1
+##   ..$ JoernKoenigAfD : int [1:2, 1:8] 4 3 72 1 103 1 107 2 169 1 ...
 ##   .. [list output truncated]
 ##  $ vocab    : chr [1:300] &quot;abgeordnet&quot; &quot;abschiebung&quot; &quot;af&quot; &quot;afd&quot; ...
-##  $ meta     :&#39;data.frame&#39;:   254 obs. of  8 variables:
-##   ..$ last_name          : chr [1:254] &quot;Glöckner&quot; &quot;Baerbock&quot; &quot;Post (Minden)&quot; &quot;Sichert&quot; ...
-##   ..$ first_name         : chr [1:254] &quot;Angelika&quot; &quot;Annalena&quot; &quot;Achim&quot; &quot;Martin&quot; ...
-##   ..$ wahlkreis_name     : chr [1:254] &quot;Pirmasens&quot; &quot;Potsdam – Potsdam-Mittelmark II – Teltow-Fläming II&quot; &quot;Minden-Lübbecke I&quot; &quot;Nürnberg-Nord&quot; ...
-##   ..$ party              : chr [1:254] &quot;spd&quot; &quot;gruene&quot; &quot;spd&quot; &quot;afd&quot; ...
-##   ..$ bundesland         : chr [1:254] &quot;Rheinland-Pfalz&quot; &quot;Brandenburg&quot; &quot;Nordrhein-Westfalen&quot; &quot;Bayern&quot; ...
-##   ..$ unemployment_rate  : num [1:254] 6.6 6 5.3 6.3 3 5.7 5.2 4.8 NA 4.2 ...
-##   ..$ share_pop_migration: num [1:254] 13.7 6.3 23.9 36.4 20.1 36.4 22.1 17.8 NA 12.7 ...
-##   ..$ username           : chr [1:254] &quot;A_Gloeckner&quot; &quot;ABaerbock&quot; &quot;achim_p&quot; &quot;AfDNbg&quot; ...</code></pre>
+##  $ meta     :&#39;data.frame&#39;:   243 obs. of  8 variables:
+##   ..$ last_name          : chr [1:243] &quot;Glöckner&quot; &quot;Baerbock&quot; &quot;Post (Minden)&quot; &quot;Sichert&quot; ...
+##   ..$ first_name         : chr [1:243] &quot;Angelika&quot; &quot;Annalena&quot; &quot;Achim&quot; &quot;Martin&quot; ...
+##   ..$ wahlkreis_name     : chr [1:243] &quot;Pirmasens&quot; &quot;Potsdam – Potsdam-Mittelmark II – Teltow-Fläming II&quot; &quot;Minden-Lübbecke I&quot; &quot;Nürnberg-Nord&quot; ...
+##   ..$ party              : chr [1:243] &quot;spd&quot; &quot;gruene&quot; &quot;spd&quot; &quot;afd&quot; ...
+##   ..$ bundesland         : chr [1:243] &quot;Rheinland-Pfalz&quot; &quot;Brandenburg&quot; &quot;Nordrhein-Westfalen&quot; &quot;Bayern&quot; ...
+##   ..$ unemployment_rate  : num [1:243] 6.6 6 5.3 6.3 3 5.7 5.2 4.8 4.2 5.3 ...
+##   ..$ share_pop_migration: num [1:243] 13.7 6.3 23.9 36.4 20.1 36.4 22.1 17.8 12.7 20.6 ...
+##   ..$ username           : chr [1:243] &quot;A_Gloeckner&quot; &quot;ABaerbock&quot; &quot;achim_p&quot; &quot;AfDNbg&quot; ...</code></pre>
+</div>
+<div id="fit-stm" class="section level3">
+<h3>Fit STM</h3>
+<p>Time to fit the actual <strong>model</strong>.</p>
+<p>While models learn all necessary <em>parameters</em> during training, <em>hyperparameters</em> need to be specified upfront. The most critical hyperparameter here is the number of topics, <em>K</em>. So how to find <em>K</em>?</p>
+<p>Topic modeling being an unsupervised task (i.e., we do not have access to the ground truth), the quality of model output must ultimately be judged by human interpretability. We can seek some help from the data: <code>stm</code> offers a function that searches for the optimal <em>K</em> (still requiring a range of potential values!). Exactly what optimal means can be somewhat steered by the user. We will use the <em>held-out likelihood</em> option which creates an artificial supervised task: we mask a certain part of some of the documents and ask the model to complete them (note that the ground truth is known now). The more predictive power our model has, the higher the likelihood for the held-out words should be (for details see <a href="http://dirichlet.net/pdf/wallach09evaluation.pdf">Wallach et al., 2009</a>:</p>
+<pre class="r"><code># Conduct hyperparameter search
+
+hyperparameter_search &lt;- stm::searchK(
+  documents = twitter_stm$documents,
+  vocab = twitter_stm$vocab,
+  data = twitter_stm$meta,
+  K = c(3:10),
+  prevalence = prevalence_formula,
+  heldout.seed = 1, # seed for reproducibility
+  max.em.its = 5, # number of iterations
+  init.type = &quot;Spectral&quot;)</code></pre>
+<pre class="r"><code># Fix optimal number of topics
+
+(n_topics &lt;- as.numeric(hyperparameter_search$results[
+  which.max(hyperparameter_search$results[, &quot;heldout&quot;]), &quot;K&quot;]))</code></pre>
+<pre><code>## [1] 8</code></pre>
 </div>
 </div>
 

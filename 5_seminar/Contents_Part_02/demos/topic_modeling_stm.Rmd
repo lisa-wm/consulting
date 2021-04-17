@@ -13,13 +13,14 @@ output:
 
 This demo is about **topic modeling with a structural topic model (STM)**.
 
-We show how to prepare the data for fitting an STM, conduct the modeling process, and analyze the results.
+We show how to prepare the data for fitting an STM ([Roberts et al., 2016](https://scholar.princeton.edu/sites/default/files/bstewart/files/a_model_of_text_for_experimentation_in_the_social_sciences.pdf)), conduct the modeling process, and analyze the results.
 
 
 ```{r setup_packages, message=FALSE, warning=FALSE}
 # Load required packages
 
 library("data.table")
+library("ggplot2")
 library("quanteda")
 library("stm")
 ```
@@ -183,9 +184,46 @@ twitter_dfm_grouped
 
 ```
 
+### Create prevalence formula
+
+The special trait of the STM is its making use of s document-level **meta data**, so we need to specify which information to use here. In the `stm` function the corresponding argument is called `prevalence` and must be stated as a formula.
+
+We will use the following meta variables (smooth effects defaulting to B-splines):
+
+* `party` as a categorical variable
+* `bundesland` as a categorical variable
+* `unemployment_rate` as a smooth effect with 5 degrees of freedom
+* `share_pop_migration` as a smooth effect with 5 degrees of freedom
+
+The resulting formula, `~ party + bundesland + s(unemployment_rate, df = 5) + s(share_pop_migration, df = 5)`, is perfectly disputable -- this decision is up to domain knowledge and some trial-and-error, and we do not claim to use the ideal formula in this demo.
+
+```{r prevalence}
+
+prevalence_formula <- as.formula(paste(
+  "", 
+  "party + bundesland + s(unemployment_rate, df = 5) + s(share_pop_migration, df = 5)", 
+  sep = "~"))
+
+print(prevalence_formula)
+
+```
+
+Now we have one thing to pay attention to: the `stm` implementation cannot handle **missing data** in its prevalence variables.
+We must therefore exclude non-complete observations (alternatively, we could impute the missing values if it made sense and we had a meaningful imputation mechanism):
+
+```{r missings}
+
+twitter_dfm_grouped <- quanteda::dfm_subset(
+  twitter_dfm_grouped,
+  !is.na(party) & !is.na(bundesland) & !is.na(unemployment_rate) & !is.na(share_pop_migration))
+
+twitter_dfm_grouped
+
+```
+
 ### Create `stm` object
 
-We will now convert our `dfm` to an `stm` object we can use in the structural topic model.
+We then convert our `dfm` to an `stm` object we can use in the structural topic model.
 This is super simple with `quanteda`:
 
 ```{r stm}
@@ -196,5 +234,43 @@ str(twitter_stm)
 
 ```
 
+### Fit STM
 
+Time to fit the actual **model**.
 
+While models learn all necessary *parameters* during training, *hyperparameters* need to be specified upfront.
+The most critical hyperparameter here is the number of topics, *K*. 
+So how to find *K*?
+
+Topic modeling being an unsupervised task (i.e., we do not have access to the ground truth), the quality of model output must ultimately be judged by human interpretability.
+We can seek some help from the data: `stm` offers a function that searches for the optimal *K* (still requiring a range of potential values!).
+Exactly what optimal means can be somewhat steered by the user.
+We will use the *held-out likelihood* option which creates an artificial supervised task: we mask a certain part of some of the documents and ask the model to complete them (note that the ground truth is known now).
+The more predictive power our model has, the higher the likelihood for the held-out words should be (for details see [Wallach et al., 2009](http://dirichlet.net/pdf/wallach09evaluation.pdf):
+
+```{r searchk, results='hide'}
+
+# Conduct hyperparameter search
+
+hyperparameter_search <- stm::searchK(
+  documents = twitter_stm$documents,
+  vocab = twitter_stm$vocab,
+  data = twitter_stm$meta,
+  K = c(3:10),
+  prevalence = prevalence_formula,
+  heldout.seed = 1, # seed for reproducibility
+  max.em.its = 5, # number of iterations
+  init.type = "Spectral")
+
+```
+
+```{r findk}
+
+# Fix optimal number of topics
+
+(n_topics <- as.numeric(hyperparameter_search$results[
+  which.max(hyperparameter_search$results[, "heldout"]), "K"]))
+
+```
+
+Seems 8 topics are a good choice, so let's fit the actual **model** now:
