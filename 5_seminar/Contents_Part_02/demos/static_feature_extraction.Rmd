@@ -123,7 +123,7 @@ clean_and_stem(c("Döner", "Bereicherung", "kulinarischer", "Angebote"))
 
 Seems to do the job (but also note the limitations of stemming).
 
-Now, create a clean stopwords list:
+We create a clean stopwords list, which we again wrap in a function we can re-use:
 
 ```{r stopwords}
 
@@ -168,6 +168,9 @@ Apparently, some very short word stumps result from our cleaning operations, whi
 ```{r stopwords_3}
 
 twitter_tokens <- quanteda::tokens_select(twitter_tokens, min_nchar = 3)
+twitter_tokens <- quanteda::tokens_remove(
+  twitter_tokens, 
+  c("der", "die", "das", "was", "wer", "wie", "ich", "sie", "wir", "ihr"))
 
 twitter_tokens
 

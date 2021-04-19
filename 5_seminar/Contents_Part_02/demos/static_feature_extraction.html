@@ -287,7 +287,7 @@ twitter_tokens</code></pre>
 clean_and_stem(c(&quot;Döner&quot;, &quot;Bereicherung&quot;, &quot;kulinarischer&quot;, &quot;Angebote&quot;))</code></pre>
 <pre><code>## [1] &quot;Doener&quot;       &quot;Bereicherung&quot; &quot;kulinarisch&quot;  &quot;Angebot&quot;</code></pre>
 <p>Seems to do the job (but also note the limitations of stemming).</p>
-<p>Now, create a clean stopwords list:</p>
+<p>We create a clean stopwords list, which we again wrap in a function we can re-use:</p>
 <pre class="r"><code># Create stopwords list
 
 stopwords &lt;- clean_and_stem(quanteda::stopwords(language = &quot;de&quot;))
@@ -388,44 +388,48 @@ twitter_tokens</code></pre>
 ## [ reached max_ndoc ... 1,209 more documents ]</code></pre>
 <p>Apparently, some very short word stumps result from our cleaning operations, which we will also discard:</p>
 <pre class="r"><code>twitter_tokens &lt;- quanteda::tokens_select(twitter_tokens, min_nchar = 3)
+twitter_tokens &lt;- quanteda::tokens_remove(
+  twitter_tokens, 
+  c(&quot;der&quot;, &quot;die&quot;, &quot;das&quot;, &quot;was&quot;, &quot;wer&quot;, &quot;wie&quot;, &quot;ich&quot;, &quot;sie&quot;, &quot;wir&quot;, &quot;ihr&quot;))
 
 twitter_tokens</code></pre>
 <pre><code>## Tokens consisting of 1,215 documents and 15 docvars.
 ## ABaerbock15156546001 :
-##  [1] &quot;das&quot;             &quot;gro&quot;             &quot;sondierungspapi&quot; &quot;klima&quot;          
-##  [5] &quot;nochmal&quot;         &quot;genau&quot;           &quot;angeschaut&quot;      &quot;krass&quot;          
-##  [9] &quot;facto&quot;           &quot;sogar&quot;           &quot;das&quot;             &quot;kyoto&quot;          
-## [ ... and 12 more ]
+##  [1] &quot;gro&quot;             &quot;sondierungspapi&quot; &quot;klima&quot;           &quot;nochmal&quot;        
+##  [5] &quot;genau&quot;           &quot;angeschaut&quot;      &quot;krass&quot;           &quot;facto&quot;          
+##  [9] &quot;sogar&quot;           &quot;kyoto&quot;           &quot;protokoll&quot;       &quot;meilenstein&quot;    
+## [ ... and 9 more ]
 ## 
 ## ABaerbock15210084001 :
-##  [1] &quot;weltweit&quot;  &quot;sieht&quot;     &quot;angela&quot;    &quot;merkel&quot;    &quot;groko&quot;     &quot;nicht&quot;    
-##  [7] &quot;klimataug&quot; &quot;sond&quot;      &quot;vielmehr&quot;  &quot;das&quot;       &quot;paris&quot;     &quot;abkomm&quot;   
-## [ ... and 6 more ]
+##  [1] &quot;weltweit&quot;    &quot;sieht&quot;       &quot;angela&quot;      &quot;merkel&quot;      &quot;groko&quot;      
+##  [6] &quot;nicht&quot;       &quot;klimataug&quot;   &quot;sond&quot;        &quot;vielmehr&quot;    &quot;paris&quot;      
+## [11] &quot;abkomm&quot;      &quot;unterlaeuft&quot;
+## [ ... and 5 more ]
 ## 
 ## ABaerbock15216341401 :
 ##  [1] &quot;groesst&quot;           &quot;global&quot;            &quot;herausforder&quot;     
 ##  [4] &quot;klimakris&quot;         &quot;sek&quot;               &quot;std&quot;              
 ##  [7] &quot;regierungserklaer&quot; &quot;widm&quot;              &quot;unterstreicht&quot;    
 ## [10] &quot;groesst&quot;           &quot;leerstell&quot;         &quot;koalitionsvertrag&quot;
-## [ ... and 10 more ]
+## [ ... and 9 more ]
 ## 
 ## ABaerbock15252349801 :
 ##  [1] &quot;brauch&quot;        &quot;and&quot;           &quot;verkehrspolit&quot; &quot;benzin&quot;       
-##  [5] &quot;diesel&quot;        &quot;emissionsarm&quot;  &quot;mobilitaet&quot;    &quot;das&quot;          
-##  [9] &quot;sozial&quot;        &quot;frag&quot;          &quot;unt&quot;           &quot;schlecht&quot;     
-## [ ... and 8 more ]
+##  [5] &quot;diesel&quot;        &quot;emissionsarm&quot;  &quot;mobilitaet&quot;    &quot;sozial&quot;       
+##  [9] &quot;frag&quot;          &quot;unt&quot;           &quot;schlecht&quot;      &quot;luft&quot;         
+## [ ... and 7 more ]
 ## 
 ## ABaerbock15256297201 :
-##  [1] &quot;das&quot;        &quot;leistung&quot;   &quot;hundert&quot;    &quot;wahlkaempf&quot; &quot;polit&quot;     
-##  [6] &quot;land&quot;       &quot;drauss&quot;     &quot;gezeigt&quot;    &quot;dicht&quot;      &quot;was&quot;       
-## [11] &quot;mensch&quot;     &quot;umtreibt&quot;  
-## [ ... and 8 more ]
+##  [1] &quot;leistung&quot;   &quot;hundert&quot;    &quot;wahlkaempf&quot; &quot;polit&quot;      &quot;land&quot;      
+##  [6] &quot;drauss&quot;     &quot;gezeigt&quot;    &quot;dicht&quot;      &quot;mensch&quot;     &quot;umtreibt&quot;  
+## [11] &quot;konkret&quot;    &quot;beweis&quot;    
+## [ ... and 6 more ]
 ## 
 ## ABaerbock15283779001 :
 ##  [1] &quot;luis&quot;            &quot;amtsberg&quot;        &quot;heut&quot;            &quot;gesagt&quot;         
-##  [5] &quot;was&quot;             &quot;familiennachzug&quot; &quot;sag&quot;             &quot;gibt&quot;           
-##  [9] &quot;wer&quot;             &quot;integration&quot;     &quot;gefluechtet&quot;     &quot;perspektiv&quot;     
-## [ ... and 13 more ]
+##  [5] &quot;familiennachzug&quot; &quot;sag&quot;             &quot;gibt&quot;            &quot;integration&quot;    
+##  [9] &quot;gefluechtet&quot;     &quot;perspektiv&quot;      &quot;zusammenleb&quot;     &quot;famili&quot;         
+## [ ... and 9 more ]
 ## 
 ## [ reached max_ndoc ... 1,209 more documents ]</code></pre>
 <p>There is still a variety of tokens we could probably remove (there are more extensive stopwords lists to be found online, the built-in one from <code>quanteda</code> is not too good tbh). In a real application you should dedicate some time to this sub-task to make sure your tokens representation is not contaminated by such noise.</p>
@@ -437,24 +441,24 @@ twitter_tokens</code></pre>
 <pre class="r"><code>twitter_dfm &lt;- quanteda::dfm(twitter_tokens)
 
 twitter_dfm</code></pre>
-<pre><code>## Document-feature matrix of: 1,215 documents, 7,586 features (99.8% sparse) and 15 docvars.
+<pre><code>## Document-feature matrix of: 1,215 documents, 7,583 features (99.8% sparse) and 15 docvars.
 ##                       features
-## docs                   das gro sondierungspapi klima nochmal genau angeschaut
-##   ABaerbock15156546001   3   1               1     1       1     1          1
-##   ABaerbock15210084001   1   0               0     0       0     0          0
-##   ABaerbock15216341401   1   0               0     0       0     0          0
-##   ABaerbock15252349801   1   0               0     0       0     0          0
-##   ABaerbock15256297201   1   0               0     0       0     0          0
-##   ABaerbock15283779001   2   0               0     0       0     1          0
+## docs                   gro sondierungspapi klima nochmal genau angeschaut krass
+##   ABaerbock15156546001   1               1     1       1     1          1     1
+##   ABaerbock15210084001   0               0     0       0     0          0     0
+##   ABaerbock15216341401   0               0     0       0     0          0     0
+##   ABaerbock15252349801   0               0     0       0     0          0     0
+##   ABaerbock15256297201   0               0     0       0     0          0     0
+##   ABaerbock15283779001   0               0     0       0     1          0     0
 ##                       features
-## docs                   krass facto sogar
+## docs                   facto sogar kyoto
 ##   ABaerbock15156546001     1     1     1
 ##   ABaerbock15210084001     0     0     0
 ##   ABaerbock15216341401     0     0     0
 ##   ABaerbock15252349801     0     0     0
 ##   ABaerbock15256297201     0     0     0
 ##   ABaerbock15283779001     0     0     0
-## [ reached max_ndoc ... 1,209 more documents, reached max_nfeat ... 7,576 more features ]</code></pre>
+## [ reached max_ndoc ... 1,209 more documents, reached max_nfeat ... 7,573 more features ]</code></pre>
 <pre class="r"><code>saveRDS(twitter_dfm, sprintf(&quot;%s/twitter_dfm.RDS&quot;, path))</code></pre>
 </div>
 <div id="find-polarity-clues" class="section level3">
@@ -629,7 +633,7 @@ head(twitter_negation)</code></pre>
 <h3>Get character unigrams</h3>
 <p>Due to the sheer variety of words that exist in a language a simple tokens representation will typically contain a huge number of features:</p>
 <pre class="r"><code>quanteda::nfeat(twitter_dfm)</code></pre>
-<pre><code>## [1] 7586</code></pre>
+<pre><code>## [1] 7583</code></pre>
 <p>This is an overwhelmingly large number for any machine learning classifier (particularly so if we have more features than observations).</p>
 <p>We will therefore streamline our tokens further. Most applications include some kind of <strong>n-grams</strong>. Interestingly, character unigrams seem to work quite well, i.e., rather than entire words or even concatenations, we simply count occurrences of single letters.</p>
 <p>Thereby, we effectively coerce our texts to a set of merely 26 features:</p>

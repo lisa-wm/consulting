@@ -118,7 +118,7 @@ clean_and_stem <- function(text) {
   
   text <- SnowballC::wordStem(text)
   
-  text
+  unique(text)
 
 }
 
@@ -126,17 +126,26 @@ clean_and_stem(c("Döner", "Bereicherung", "kulinarischer", "Angebote"))
 
 ```
 
+For stopwords removal we retrace the steps taken in the static feature extraction:
+
 ```{r stopwords}
 
 # Remove stopwords using our cleaning function from earlier
 
 stopwords <- clean_and_stem(quanteda::stopwords(language = "de"))
-stopwords <- unique(stopwords)
 stopwords <- stopwords[nchar(stopwords) > 0]
+stopwords <- stringr::str_remove_all(
+  stopwords,
+  "kein(.)*|nicht")
+stopwords <- c(
+  stopwords, 
+  c("der", "die", "das", "was", "wer", "wie", "ich", "sie", "wir", "ihr"))
 
 twitter_tokens <- quanteda::tokens_remove(
   twitter_tokens,
   pattern = stopwords)
+
+twitter_tokens <- quanteda::tokens_select(twitter_tokens, min_nchar = 3)
 
 # Inspect
 
@@ -274,3 +283,121 @@ hyperparameter_search <- stm::searchK(
 ```
 
 Seems 8 topics are a good choice, so let's fit the actual **model** now:
+
+```{r fitstm, results='hide'}
+
+# Fit STM
+
+topic_model <- stm::stm(
+    documents = twitter_stm$documents,
+    vocab = twitter_stm$vocab,
+    data = twitter_stm$meta,
+    K = n_topics,
+    prevalence = prevalence_formula,
+    gamma.prior = "L1",
+    seed = 1,
+    max.em.its = 15,
+    init.type = "Spectral")
+
+```
+
+We can inspect the results of the modeling process in various ways.
+For one, we may call `stm`'s `labelTopics` function which returns the top terms per topic according to different metrics (for details, best check the function documentation):
+
+* Highest probability: which words are most likely to occur in a document of the given topic?
+* FREX: which words occur both frequently and exclusively, i.e., serve to characterize and distinguish topics? 
+* Lift: which words occur most frequently if weighted by the inverse of their relative empirical frequency across the entire corpus?
+* Score: which words show the largest difference between their (log) frequency in topic *k* and their average (log) frequency across all topics?
+
+The `n` argument allows to specify how many words should be displayed. 
+We go for 10:
+
+```{r fitstm_2}
+
+# Inspect results
+
+(result_topic_modeling <- stm::labelTopics(topic_model, n = 10))
+
+```
+
+We can also access the word lists directly if we are particularly interested in results w.r.t a specific metric:
+
+```{r fitstm_3}
+
+(top_words_frex <- t(result_topic_modeling$frex))
+
+```
+
+### Assign documents to topics
+
+Fine, `stm` has thrown a lot of words at us, but which documents actually belong to which topic? 
+The model output provides us with a vector of topic probabilities for each document, meaning we can **label** the tweets by picking the topic for which they have the highest respective probability:
+
+```{r assigntopics}
+
+# Extract topic probabilities together with topic IDs and discard docnum
+
+topic_probs <- stm::make.dt(topic_model)[
+  , topic_docid := names(twitter_stm$documents)
+  ][, docnum := NULL]
+
+head(topic_probs)
+
+```
+
+```{r assigntopics_2}
+
+# Get topic with highest score per document
+
+topic_cols <- names(topic_probs)[startsWith(names(topic_probs), "Topic")]
+
+topic_probs[
+  , topic_label := which.max(.SD),
+  .SDcols = topic_cols,
+  by = topic_docid]
+
+head(topic_probs)
+
+```
+
+For mapping the topic labels back to the original tweets, we have to undo the pooling operation:
+
+```{r assigntopics_3}
+
+# Extract docvars
+
+twitter_docvars <- data.table::as.data.table(
+  cbind(
+    doc_id = quanteda::docid(twitter_corpus),
+    quanteda::docvars(twitter_corpus)), 
+  key = "doc_id")
+
+# Append topic labels and remove irrelevant columns
+
+twitter_docvars <- topic_probs[
+  twitter_docvars, on = c("topic_docid" = "username")
+  ][, topic_docid := NULL
+    ][, c(topic_cols) := NULL]
+
+twitter_docvars[sample(twitter_docvars[, .I], 10)]
+
+```
+
+### Interpret results
+
+The tricky thing about unsupervised topic modeling, as with an STM, is the **interpretation** part.
+Statistical computations yield the results that best fit the data according to model assumptions, but whether the found topics are considered meaningful is up to the human analyst.
+
+NB: Our results here are not very glorious.
+We have already seen the extreme sparsity of the `dfm`, and with documents that are pretty dissimilar a topic model can only do so much.
+This is also a consequence of our training data design: we have labels for relatively few, extremely short documents from a bunch of different authors; even pooling all by author does not help too much.
+In reality, scraping gives us access to much larger amounts of data.
+
+So, consider this a technical demo, the interpretation part cannot be showcased anyway -- we just pretend to find a lot of sense in the topics output by our STM.
+
+Besides displaying lists top terms per topic, we can
+
+* print the most representative document for a given topic,
+* and generate a variety of visualizations.
+
+

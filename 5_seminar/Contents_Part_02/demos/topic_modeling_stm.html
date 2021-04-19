@@ -241,24 +241,32 @@ twitter_tokens &lt;- quanteda::tokens_keep(
 # Lowercase afterwards
 
 twitter_tokens &lt;- quanteda::tokens_tolower(twitter_tokens)</code></pre>
+<p>For stopwords removal we retrace the steps taken in the static feature extraction:</p>
 <pre class="r"><code># Remove stopwords using our cleaning function from earlier
 
 stopwords &lt;- clean_and_stem(quanteda::stopwords(language = &quot;de&quot;))
-stopwords &lt;- unique(stopwords)
 stopwords &lt;- stopwords[nchar(stopwords) &gt; 0]
+stopwords &lt;- stringr::str_remove_all(
+  stopwords,
+  &quot;kein(.)*|nicht&quot;)
+stopwords &lt;- c(
+  stopwords, 
+  c(&quot;der&quot;, &quot;die&quot;, &quot;das&quot;, &quot;was&quot;, &quot;wer&quot;, &quot;wie&quot;, &quot;ich&quot;, &quot;sie&quot;, &quot;wir&quot;, &quot;ihr&quot;))
 
 twitter_tokens &lt;- quanteda::tokens_remove(
   twitter_tokens,
   pattern = stopwords)
+
+twitter_tokens &lt;- quanteda::tokens_select(twitter_tokens, min_nchar = 3)
 
 # Inspect
 
 twitter_tokens</code></pre>
 <pre><code>## Tokens consisting of 1,215 documents and 15 docvars.
 ## ABaerbock15156546001 :
-##  [1] &quot;gro&quot;             &quot;ko&quot;              &quot;sondierungspapi&quot; &quot;klima&quot;          
-##  [5] &quot;krass&quot;           &quot;kyoto&quot;           &quot;protokoll&quot;       &quot;meilenstein&quot;    
-##  [9] &quot;klimadiplomati&quot;  &quot;frau&quot;            &quot;merkel&quot;          &quot;nachbess&quot;       
+##  [1] &quot;gro&quot;             &quot;sondierungspapi&quot; &quot;klima&quot;           &quot;krass&quot;          
+##  [5] &quot;kyoto&quot;           &quot;protokoll&quot;       &quot;meilenstein&quot;     &quot;klimadiplomati&quot; 
+##  [9] &quot;frau&quot;            &quot;merkel&quot;          &quot;nachbess&quot;       
 ## 
 ## ABaerbock15210084001 :
 ## [1] &quot;angela&quot;              &quot;merkel&quot;              &quot;groko&quot;              
@@ -272,42 +280,40 @@ twitter_tokens</code></pre>
 ## 
 ## ABaerbock15252349801 :
 ## [1] &quot;verkehrspolit&quot; &quot;benzin&quot;        &quot;diesel&quot;        &quot;mobilitaet&quot;   
-## [5] &quot;das&quot;           &quot;frag&quot;          &quot;luft&quot;          &quot;wohnung&quot;      
-## [9] &quot;strass&quot;       
+## [5] &quot;frag&quot;          &quot;luft&quot;          &quot;wohnung&quot;       &quot;strass&quot;       
 ## 
 ## ABaerbock15256297201 :
-##  [1] &quot;das&quot;          &quot;leistung&quot;     &quot;hundert&quot;      &quot;wahlkaempf&quot;   &quot;polit&quot;       
-##  [6] &quot;land&quot;         &quot;mensch&quot;       &quot;konkret&quot;      &quot;polit&quot;        &quot;kommunalwahl&quot;
+## [1] &quot;leistung&quot;     &quot;hundert&quot;      &quot;wahlkaempf&quot;   &quot;polit&quot;        &quot;land&quot;        
+## [6] &quot;mensch&quot;       &quot;konkret&quot;      &quot;polit&quot;        &quot;kommunalwahl&quot;
 ## 
 ## ABaerbock15283779001 :
-##  [1] &quot;luis&quot;            &quot;amtsberg&quot;        &quot;familiennachzug&quot; &quot;wer&quot;            
-##  [5] &quot;integration&quot;     &quot;gefluechtet&quot;     &quot;perspektiv&quot;      &quot;zusammenleb&quot;    
-##  [9] &quot;famili&quot;          &quot;das&quot;             &quot;grundrecht&quot;      &quot;famili&quot;         
-## [ ... and 1 more ]
+##  [1] &quot;luis&quot;            &quot;amtsberg&quot;        &quot;familiennachzug&quot; &quot;integration&quot;    
+##  [5] &quot;gefluechtet&quot;     &quot;perspektiv&quot;      &quot;zusammenleb&quot;     &quot;famili&quot;         
+##  [9] &quot;grundrecht&quot;      &quot;famili&quot;          &quot;groko&quot;          
 ## 
 ## [ reached max_ndoc ... 1,209 more documents ]</code></pre>
 <p>Looking good, so convert to <code>dfm</code>:</p>
 <pre class="r"><code>twitter_dfm &lt;- quanteda::dfm(twitter_tokens)
 
 twitter_dfm</code></pre>
-<pre><code>## Document-feature matrix of: 1,215 documents, 4,953 features (99.8% sparse) and 15 docvars.
+<pre><code>## Document-feature matrix of: 1,215 documents, 4,923 features (99.8% sparse) and 15 docvars.
 ##                       features
-## docs                   gro ko sondierungspapi klima krass kyoto protokoll
-##   ABaerbock15156546001   1  1               1     1     1     1         1
-##   ABaerbock15210084001   0  0               0     0     0     0         0
-##   ABaerbock15216341401   0  0               0     0     0     0         0
-##   ABaerbock15252349801   0  0               0     0     0     0         0
-##   ABaerbock15256297201   0  0               0     0     0     0         0
-##   ABaerbock15283779001   0  0               0     0     0     0         0
+## docs                   gro sondierungspapi klima krass kyoto protokoll
+##   ABaerbock15156546001   1               1     1     1     1         1
+##   ABaerbock15210084001   0               0     0     0     0         0
+##   ABaerbock15216341401   0               0     0     0     0         0
+##   ABaerbock15252349801   0               0     0     0     0         0
+##   ABaerbock15256297201   0               0     0     0     0         0
+##   ABaerbock15283779001   0               0     0     0     0         0
 ##                       features
-## docs                   meilenstein klimadiplomati frau
-##   ABaerbock15156546001           1              1    1
-##   ABaerbock15210084001           0              0    0
-##   ABaerbock15216341401           0              0    0
-##   ABaerbock15252349801           0              0    0
-##   ABaerbock15256297201           0              0    0
-##   ABaerbock15283779001           0              0    0
-## [ reached max_ndoc ... 1,209 more documents, reached max_nfeat ... 4,943 more features ]</code></pre>
+## docs                   meilenstein klimadiplomati frau merkel
+##   ABaerbock15156546001           1              1    1      1
+##   ABaerbock15210084001           0              0    0      1
+##   ABaerbock15216341401           0              0    0      0
+##   ABaerbock15252349801           0              0    0      0
+##   ABaerbock15256297201           0              0    0      0
+##   ABaerbock15283779001           0              0    0      0
+## [ reached max_ndoc ... 1,209 more documents, reached max_nfeat ... 4,913 more features ]</code></pre>
 <p>Unfortunately, as the above output tells us, our <code>dfm</code> is extremely <strong>sparse</strong> – tokens are not at all common across documents, which will pose a challenge to any topic model. This is actually not too surprising when we recall the extreme brevity of our Twitter documents.</p>
 <p>Therefore, we make another simplifying concession: we <strong>pool</strong> documents to create larger entities that should share more common tokens.</p>
 <p>In this demo, we pool very coarsely and concatenate all tweets by one user to a single document. Of course, it is not terribly plausible to assume users sticking to exactly one topic, but our toy data here are somewhat limited.</p>
@@ -326,15 +332,15 @@ twitter_dfm_grouped &lt;- quanteda::dfm_select(
   names(quanteda::topfeatures(twitter_dfm_grouped, n = 300)))
 
 twitter_dfm_grouped</code></pre>
-<pre><code>## Document-feature matrix of: 256 documents, 300 features (95.0% sparse) and 8 docvars.
+<pre><code>## Document-feature matrix of: 256 documents, 300 features (95.3% sparse) and 8 docvars.
 ##                features
-## docs            klima frau merkel groko klimakris diesel das frag luft strass
-##   A_Gloeckner       0    0      0     0         0      0   0    0    0      0
-##   ABaerbock         2    5      2     3         1      1   7    1    1      3
-##   achim_p           0    0      0     0         0      0   0    0    0      0
-##   AfDNbg            0    0      0     0         0      0   0    0    0      0
-##   agnieszka_mdb     0    1      0     0         0      0   0    0    0      0
-##   akbulutgokay      0    0      0     0         0      0   1    0    0      0
+## docs            klima frau merkel groko klimakris diesel frag luft strass polit
+##   A_Gloeckner       0    0      0     0         0      0    0    0      0     0
+##   ABaerbock         2    5      2     3         1      1    1    1      3     3
+##   achim_p           0    0      0     0         0      0    0    0      0     0
+##   AfDNbg            0    0      0     0         0      0    0    0      0     0
+##   agnieszka_mdb     0    1      0     0         0      0    0    0      0     1
+##   akbulutgokay      0    0      0     0         0      0    0    0      0     0
 ## [ reached max_ndoc ... 250 more documents, reached max_nfeat ... 290 more features ]</code></pre>
 </div>
 <div id="create-prevalence-formula" class="section level3">
@@ -362,15 +368,15 @@ print(prevalence_formula)</code></pre>
   !is.na(party) &amp; !is.na(bundesland) &amp; !is.na(unemployment_rate) &amp; !is.na(share_pop_migration))
 
 twitter_dfm_grouped</code></pre>
-<pre><code>## Document-feature matrix of: 245 documents, 300 features (94.8% sparse) and 8 docvars.
+<pre><code>## Document-feature matrix of: 245 documents, 300 features (95.1% sparse) and 8 docvars.
 ##                features
-## docs            klima frau merkel groko klimakris diesel das frag luft strass
-##   A_Gloeckner       0    0      0     0         0      0   0    0    0      0
-##   ABaerbock         2    5      2     3         1      1   7    1    1      3
-##   achim_p           0    0      0     0         0      0   0    0    0      0
-##   AfDNbg            0    0      0     0         0      0   0    0    0      0
-##   agnieszka_mdb     0    1      0     0         0      0   0    0    0      0
-##   akbulutgokay      0    0      0     0         0      0   1    0    0      0
+## docs            klima frau merkel groko klimakris diesel frag luft strass polit
+##   A_Gloeckner       0    0      0     0         0      0    0    0      0     0
+##   ABaerbock         2    5      2     3         1      1    1    1      3     3
+##   achim_p           0    0      0     0         0      0    0    0      0     0
+##   AfDNbg            0    0      0     0         0      0    0    0      0     0
+##   agnieszka_mdb     0    1      0     0         0      0    0    0      0     1
+##   akbulutgokay      0    0      0     0         0      0    0    0      0     0
 ## [ reached max_ndoc ... 239 more documents, reached max_nfeat ... 290 more features ]</code></pre>
 </div>
 <div id="create-stm-object" class="section level3">
@@ -378,120 +384,120 @@ twitter_dfm_grouped</code></pre>
 <p>We then convert our <code>dfm</code> to an <code>stm</code> object we can use in the structural topic model. This is super simple with <code>quanteda</code>:</p>
 <pre class="r"><code>twitter_stm &lt;- quanteda::convert(twitter_dfm_grouped, to = &quot;stm&quot;)</code></pre>
 <pre><code>## Warning in dfm2stm(x, docvars, omit_empty = TRUE): Dropped empty document(s):
-## Jacobi_AfD, korkmazgt</code></pre>
+## ernst_klaus, Jacobi_AfD, korkmazgt, TErndl, tobiaslindner</code></pre>
 <pre class="r"><code>str(twitter_stm)</code></pre>
 <pre><code>## List of 3
-##  $ documents:List of 243
-##   ..$ A_Gloeckner    : int [1:2, 1:8] 20 1 55 1 64 1 70 1 71 1 ...
-##   ..$ ABaerbock      : int [1:2, 1:59] 12 1 17 1 22 1 24 1 29 1 ...
-##   ..$ achim_p        : int [1:2, 1:10] 17 1 53 1 70 1 73 2 84 1 ...
-##   ..$ AfDNbg         : int [1:2, 1:10] 4 1 70 1 79 1 90 1 96 3 ...
-##   ..$ agnieszka_mdb  : int [1:2, 1:26] 10 1 15 1 17 1 34 1 42 1 ...
-##   ..$ akbulutgokay   : int [1:2, 1:27] 12 2 28 1 46 1 66 1 70 2 ...
-##   ..$ alexandersneu  : int [1:2, 1:2] 36 1 175 1
-##   ..$ alexmuellerfdp : int [1:2, 1:3] 53 1 265 1 296 1
-##   ..$ AndiScheuer    : int [1:2, 1:12] 16 1 53 2 63 1 70 1 71 2 ...
-##   ..$ AndreasBleckMdB: int [1:2, 1:23] 4 1 15 1 37 2 43 6 53 1 ...
-##   ..$ andreassteier  : int [1:2, 1:2] 37 2 279 1
-##   ..$ AndrejHunko    : int [1:2, 1:42] 8 1 16 1 18 1 19 1 23 1 ...
-##   ..$ AnjaKarliczek  : int [1:2, 1:4] 71 1 83 1 292 1 299 1
-##   ..$ anked          : int [1:2, 1:12] 29 1 35 1 37 1 38 1 41 2 ...
-##   ..$ annachristmann : int [1:2, 1:11] 31 2 55 1 61 1 64 1 85 2 ...
-##   ..$ Axel_Fischer   : int [1:2, 1:12] 25 1 30 1 37 1 45 1 46 1 ...
-##   ..$ b_riexinger    : int [1:2, 1:49] 4 3 5 2 17 1 26 1 34 2 ...
-##   ..$ badulrichmartha: int [1:2, 1:12] 34 1 35 1 45 1 60 1 85 1 ...
-##   ..$ Beatrix_vStorch: int [1:2, 1:144] 1 1 2 1 3 1 4 13 10 1 ...
-##   ..$ berlinliebich  : int [1:2, 1:9] 30 1 113 1 155 1 169 1 176 1 ...
-##   ..$ BetMueller     : int [1:2, 1:11] 32 1 41 2 45 3 60 1 87 1 ...
-##   ..$ BriHasselmann  : int [1:2, 1:82] 1 1 4 2 5 1 7 1 21 1 ...
-##   ..$ brunnerganzohr : int [1:2, 1:12] 4 1 6 1 7 1 39 1 43 2 ...
-##   ..$ Buettner_MdB   : int [1:2, 1:18] 4 1 32 1 34 1 41 1 61 1 ...
-##   ..$ CanselK        : int [1:2, 1:27] 5 1 10 2 14 1 16 1 17 1 ...
-##   ..$ CarenLay       : int [1:2, 1:48] 4 2 5 1 16 1 17 1 23 1 ...
-##   ..$ carina_konrad  : int [1:2, 1:9] 41 1 46 1 83 1 110 1 139 2 ...
-##   ..$ cem_oezdemir   : int [1:2, 1:26] 5 1 11 1 18 1 31 1 46 2 ...
-##   ..$ ch_buchholz    : int [1:2, 1:17] 4 1 35 2 46 1 64 1 67 1 ...
-##   ..$ ChrisKuehn_mdb : int [1:2, 1:8] 7 1 63 1 134 1 148 1 241 1 ...
-##   ..$ christianduerr : int [1:2, 1:7] 17 1 34 2 72 2 85 1 158 1 ...
-##   ..$ christianhirte : int [1:2, 1:4] 53 1 70 1 265 1 282 1
-##   ..$ ChristophFDP   : int [1:2, 1] 46 1
-##   ..$ conni_moehring : int [1:2, 1:5] 65 1 68 1 70 1 132 1 190 1
-##   ..$ DagmarFreitag13: int [1:2, 1:3] 18 1 50 1 88 1
-##   ..$ danielakolbe   : int [1:2, 1:15] 4 1 19 1 70 1 76 1 78 1 ...
-##   ..$ DaniLudwigMdB  : int [1:2, 1:3] 38 2 42 1 297 1
-##   ..$ derdanyal      : int [1:2, 1:18] 14 1 23 1 25 1 29 1 38 1 ...
-##   ..$ DerLenzMdB     : int [1:2, 1:10] 35 1 38 1 41 3 46 1 53 1 ...
-##   ..$ dfoest         : int [1:2, 1:23] 34 1 36 1 37 1 43 1 46 1 ...
-##   ..$ Diether_Dehm   : int [1:2, 1:8] 26 1 47 1 117 1 133 1 144 1 ...
-##   ..$ DietmarBartsch : int [1:2, 1:72] 4 1 9 1 12 1 14 1 21 2 ...
-##   ..$ DirkSpaniel    : int [1:2, 1:78] 3 8 4 16 14 1 17 1 25 3 ...
-##   ..$ DJanecek       : int [1:2, 1:24] 20 1 23 1 25 1 35 1 41 4 ...
-##   ..$ Doro_Martin    : int [1:2, 1:5] 85 2 87 1 156 1 186 1 295 1
-##   ..$ DoroBaer       : int [1:2, 1:3] 41 1 45 1 182 1
-##   ..$ Dr_Rainer_Kraft: int [1:2, 1:26] 4 2 13 6 34 1 46 1 53 1 ...
-##   ..$ DrAndreasNick  : int [1:2, 1:2] 186 1 267 1
-##   ..$ DrHollnagel    : int [1:2, 1:9] 46 2 53 1 70 1 71 2 96 1 ...
-##   ..$ ebner_sha      : int [1:2, 1:6] 48 1 125 2 230 1 232 1 285 2 ...
-##   ..$ edrossmann     : int [1:2, 1:6] 99 1 115 1 131 1 132 1 189 1 ...
-##   ..$ ekindeligoez   : int [1:2, 1:2] 40 1 186 1
-##   ..$ EnricoKomning  : int [1:2, 1:11] 3 2 4 2 35 1 53 1 57 1 ...
-##   ..$ Erhard_Grundl  : int [1:2, 1:19] 43 1 48 1 70 1 73 1 89 1 ...
-##   ..$ ernst_klaus    : int [1:2, 1] 46 1
-##   ..$ EskenSaskia    : int [1:2, 1:31] 8 1 12 1 17 2 25 1 26 1 ...
-##   ..$ f_schaeffler   : int [1:2, 1:3] 35 1 164 1 224 1
-##   ..$ falkomohrs     : int [1:2, 1:2] 165 1 241 1
-##   ..$ fbrantner      : int [1:2, 1:20] 17 1 46 1 52 2 61 1 67 1 ...
-##   ..$ felixschreiner : int [1:2, 1:14] 17 1 24 1 50 1 86 1 87 1 ...
-##   ..$ filizgreen     : int [1:2, 1:32] 27 1 34 1 35 2 36 1 37 1 ...
-##   ..$ florianpronold : int [1:2, 1:4] 68 1 72 1 186 1 236 1
-##   ..$ Frank_Magnitz  : int [1:2, 1:20] 4 2 13 1 39 1 46 1 61 1 ...
-##   ..$ Frank_Pasemann : int [1:2, 1:5] 125 1 134 1 160 1 187 1 209 1
-##   ..$ FrankSchwabe   : int [1:2, 1:51] 4 1 10 2 25 1 37 1 41 1 ...
-##   ..$ frohnmaier_afd : int [1:2, 1:17] 4 1 32 1 34 3 48 1 53 1 ...
-##   ..$ FrStraetmanns  : int [1:2, 1:31] 15 2 22 1 26 1 27 1 35 1 ...
-##   ..$ gitta_connemann: int [1:2, 1:8] 10 1 25 1 50 1 74 1 118 1 ...
-##   ..$ GoeringEckardt : int [1:2, 1:36] 8 1 9 1 24 1 45 1 51 1 ...
-##   ..$ GregorGysi     : int [1:2, 1:9] 11 1 17 2 34 1 46 1 71 2 ...
-##   ..$ groehe         : int [1:2, 1:14] 20 1 35 1 37 1 43 1 45 1 ...
-##   ..$ GruenClaudia   : int [1:2, 1:12] 7 1 46 1 53 1 70 1 132 1 ...
-##   ..$ GrueneBeate    : int [1:2, 1:35] 15 1 16 1 17 2 19 1 26 1 ...
-##   ..$ hahnflo        : int [1:2, 1:13] 24 1 41 1 59 1 64 1 86 1 ...
-##   ..$ HajdukBundestag: int [1:2, 1:8] 34 1 38 1 70 1 71 1 113 1 ...
-##   ..$ HeikeHaensel   : int [1:2, 1:48] 1 1 2 1 9 1 10 2 30 1 ...
-##   ..$ HeikoMaas      : int [1:2, 1:64] 4 1 6 1 9 2 10 1 11 2 ...
-##   ..$ helgelindh     : int [1:2, 1:13] 12 1 41 1 50 1 78 1 103 1 ...
-##   ..$ HellmichMdB    : int [1:2, 1:6] 54 1 58 1 121 1 141 1 188 1 ...
-##   ..$ HHirte         : int [1:2, 1:25] 6 1 9 1 28 1 29 1 33 1 ...
-##   ..$ HildeMattheis  : int [1:2, 1:23] 19 2 48 1 53 1 66 1 68 1 ...
-##   ..$ HoffmannForest : int [1:2, 1:23] 22 1 34 1 41 1 46 1 70 1 ...
-##   ..$ HohmannMdb     : int [1:2, 1:2] 115 1 268 1
-##   ..$ HuberMdB       : int [1:2, 1:26] 4 3 6 1 27 1 29 1 32 1 ...
-##   ..$ hubertus_heil  : int [1:2, 1:10] 30 1 70 1 85 1 100 1 131 1 ...
-##   ..$ ingrid_remmers : int [1:2, 1:2] 75 1 292 1
-##   ..$ IreneMihalic   : int [1:2, 1:15] 10 1 15 1 21 1 33 1 46 1 ...
-##   ..$ Jan_Nolte_AfD  : int [1:2, 1:6] 53 1 58 1 133 1 171 1 204 1 ...
-##   ..$ JanaSchimke    : int [1:2, 1] 112 1
-##   ..$ jankortemdb    : int [1:2, 1:18] 47 1 53 1 70 1 76 2 131 1 ...
-##   ..$ janoschdahmen  : int [1:2, 1:2] 26 1 175 1
-##   ..$ JBrandenburgFDP: int [1:2, 1:13] 36 1 43 2 46 1 63 1 68 1 ...
-##   ..$ jensbeeck      : int [1:2, 1:3] 46 1 175 1 294 1
-##   ..$ jenskoeppen    : int [1:2, 1:8] 86 1 105 1 119 1 206 1 213 1 ...
-##   ..$ JensMaierAfD   : int [1:2, 1:32] 2 1 4 3 22 1 25 1 27 1 ...
-##   ..$ jensspahn      : int [1:2, 1:17] 20 1 45 1 46 1 63 1 68 1 ...
-##   ..$ JM_Luczak      : int [1:2, 1:45] 4 1 25 2 33 1 35 1 37 1 ...
-##   ..$ Jochen_Haug    : int [1:2, 1:5] 4 2 37 1 70 1 180 1 254 1
-##   ..$ JoernKoenigAfD : int [1:2, 1:8] 4 3 72 1 103 1 107 2 169 1 ...
+##  $ documents:List of 240
+##   ..$ A_Gloeckner    : int [1:2, 1:6] 20 1 54 1 63 1 70 1 118 1 ...
+##   ..$ ABaerbock      : int [1:2, 1:54] 11 1 17 1 22 1 24 1 30 1 ...
+##   ..$ achim_p        : int [1:2, 1:9] 17 1 52 1 70 2 81 1 95 1 ...
+##   ..$ AfDNbg         : int [1:2, 1:9] 3 1 76 1 87 1 93 3 128 1 ...
+##   ..$ agnieszka_mdb  : int [1:2, 1:25] 9 1 14 1 17 1 35 1 42 1 ...
+##   ..$ akbulutgokay   : int [1:2, 1:23] 11 2 29 1 65 1 74 1 79 1 ...
+##   ..$ alexandersneu  : int [1:2, 1:2] 37 1 175 1
+##   ..$ alexmuellerfdp : int [1:2, 1:3] 52 1 266 1 296 1
+##   ..$ AndiScheuer    : int [1:2, 1:10] 15 1 52 2 62 1 102 1 116 1 ...
+##   ..$ AndreasBleckMdB: int [1:2, 1:22] 3 1 14 1 38 2 43 6 52 1 ...
+##   ..$ andreassteier  : int [1:2, 1:2] 38 2 280 1
+##   ..$ AndrejHunko    : int [1:2, 1:38] 7 1 15 1 18 1 19 1 23 1 ...
+##   ..$ AnjaKarliczek  : int [1:2, 1:3] 80 1 291 1 299 1
+##   ..$ anked          : int [1:2, 1:11] 16 3 30 1 36 1 38 1 39 1 ...
+##   ..$ annachristmann : int [1:2, 1:11] 32 2 54 1 60 1 63 1 82 2 ...
+##   ..$ Axel_Fischer   : int [1:2, 1:11] 26 1 31 1 38 1 45 1 52 1 ...
+##   ..$ b_riexinger    : int [1:2, 1:47] 3 3 4 2 17 1 27 1 35 2 ...
+##   ..$ badulrichmartha: int [1:2, 1:13] 35 1 36 1 45 1 59 1 82 1 ...
+##   ..$ Beatrix_vStorch: int [1:2, 1:138] 1 1 2 1 3 13 9 1 12 1 ...
+##   ..$ berlinliebich  : int [1:2, 1:9] 31 1 110 1 155 1 169 1 176 1 ...
+##   ..$ BetMueller     : int [1:2, 1:11] 33 1 41 2 45 3 59 1 84 1 ...
+##   ..$ BriHasselmann  : int [1:2, 1:81] 1 1 3 2 4 1 6 1 21 1 ...
+##   ..$ brunnerganzohr : int [1:2, 1:11] 3 1 5 1 6 1 40 1 43 2 ...
+##   ..$ Buettner_MdB   : int [1:2, 1:16] 3 1 33 1 35 1 41 1 60 1 ...
+##   ..$ CanselK        : int [1:2, 1:26] 4 1 9 2 13 1 15 1 17 1 ...
+##   ..$ CarenLay       : int [1:2, 1:47] 3 2 4 1 15 1 17 1 23 1 ...
+##   ..$ carina_konrad  : int [1:2, 1:8] 41 1 80 1 107 1 137 2 209 1 ...
+##   ..$ cem_oezdemir   : int [1:2, 1:25] 4 1 10 1 18 1 32 1 48 1 ...
+##   ..$ ch_buchholz    : int [1:2, 1:16] 3 1 36 2 63 1 66 1 76 1 ...
+##   ..$ ChrisKuehn_mdb : int [1:2, 1:9] 6 1 62 1 131 1 138 3 148 1 ...
+##   ..$ christianduerr : int [1:2, 1:6] 17 1 35 2 69 2 82 1 158 1 ...
+##   ..$ christianhirte : int [1:2, 1:3] 52 1 266 1 283 1
+##   ..$ ChristophFDP   : int [1:2, 1] 189 1
+##   ..$ conni_moehring : int [1:2, 1:5] 64 1 67 1 129 1 191 1 198 1
+##   ..$ DagmarFreitag13: int [1:2, 1:3] 18 1 49 1 85 1
+##   ..$ danielakolbe   : int [1:2, 1:14] 3 1 19 1 73 1 75 1 166 1 ...
+##   ..$ DaniLudwigMdB  : int [1:2, 1:3] 39 2 42 1 297 1
+##   ..$ derdanyal      : int [1:2, 1:18] 13 1 23 1 25 1 26 1 30 1 ...
+##   ..$ DerLenzMdB     : int [1:2, 1:9] 36 1 39 1 41 3 52 1 174 1 ...
+##   ..$ dfoest         : int [1:2, 1:23] 35 1 37 1 38 1 43 1 48 1 ...
+##   ..$ Diether_Dehm   : int [1:2, 1:8] 27 1 46 1 114 1 130 1 143 1 ...
+##   ..$ DietmarBartsch : int [1:2, 1:72] 3 1 8 1 11 1 13 1 21 2 ...
+##   ..$ DirkSpaniel    : int [1:2, 1:76] 3 16 13 1 17 1 26 3 33 2 ...
+##   ..$ DJanecek       : int [1:2, 1:23] 16 1 20 1 23 1 26 1 36 1 ...
+##   ..$ Doro_Martin    : int [1:2, 1:5] 82 2 84 1 156 1 186 1 295 1
+##   ..$ DoroBaer       : int [1:2, 1:4] 16 1 41 1 45 1 182 1
+##   ..$ Dr_Rainer_Kraft: int [1:2, 1:25] 3 2 12 6 35 1 52 1 83 1 ...
+##   ..$ DrAndreasNick  : int [1:2, 1:2] 186 1 268 1
+##   ..$ DrHollnagel    : int [1:2, 1:6] 52 1 93 1 178 1 209 2 248 1 ...
+##   ..$ ebner_sha      : int [1:2, 1:6] 47 1 122 2 198 1 231 1 233 1 ...
+##   ..$ edrossmann     : int [1:2, 1:6] 96 1 112 1 128 1 129 1 190 1 ...
+##   ..$ ekindeligoez   : int [1:2, 1] 186 1
+##   ..$ EnricoKomning  : int [1:2, 1:9] 3 2 36 1 52 1 56 1 107 3 ...
+##   ..$ Erhard_Grundl  : int [1:2, 1:18] 43 1 47 1 70 1 86 1 114 1 ...
+##   ..$ EskenSaskia    : int [1:2, 1:32] 7 1 11 1 17 2 25 1 26 1 ...
+##   ..$ f_schaeffler   : int [1:2, 1:3] 36 1 164 1 225 1
+##   ..$ falkomohrs     : int [1:2, 1:2] 165 1 242 1
+##   ..$ fbrantner      : int [1:2, 1:19] 17 1 51 2 60 1 66 1 70 1 ...
+##   ..$ felixschreiner : int [1:2, 1:13] 17 1 24 1 49 1 83 1 84 1 ...
+##   ..$ filizgreen     : int [1:2, 1:32] 28 1 35 1 36 2 37 1 38 1 ...
+##   ..$ florianpronold : int [1:2, 1:4] 67 1 69 1 186 1 237 1
+##   ..$ Frank_Magnitz  : int [1:2, 1:18] 3 2 12 1 40 1 60 1 68 1 ...
+##   ..$ Frank_Pasemann : int [1:2, 1:5] 122 1 131 1 160 1 187 1 210 1
+##   ..$ FrankSchwabe   : int [1:2, 1:49] 3 1 9 2 25 1 26 1 38 1 ...
+##   ..$ frohnmaier_afd : int [1:2, 1:17] 3 1 33 1 35 3 47 1 52 1 ...
+##   ..$ FrStraetmanns  : int [1:2, 1:29] 14 2 22 1 27 1 28 1 36 1 ...
+##   ..$ gitta_connemann: int [1:2, 1:8] 9 1 26 1 49 1 71 1 115 1 ...
+##   ..$ GoeringEckardt : int [1:2, 1:34] 7 1 8 1 24 1 45 1 50 1 ...
+##   ..$ GregorGysi     : int [1:2, 1:7] 10 1 17 2 35 1 208 1 214 1 ...
+##   ..$ groehe         : int [1:2, 1:13] 20 1 36 1 38 1 43 1 45 1 ...
+##   ..$ GruenClaudia   : int [1:2, 1:10] 6 1 52 1 129 1 137 1 164 1 ...
+##   ..$ GrueneBeate    : int [1:2, 1:33] 14 1 15 1 17 2 19 1 27 1 ...
+##   ..$ hahnflo        : int [1:2, 1:13] 24 1 41 1 58 1 63 1 83 1 ...
+##   ..$ HajdukBundestag: int [1:2, 1:6] 35 1 39 1 110 1 148 1 163 1 ...
+##   ..$ HeikeHaensel   : int [1:2, 1:48] 1 1 2 1 8 1 9 2 25 1 ...
+##   ..$ HeikoMaas      : int [1:2, 1:60] 3 1 5 1 8 2 9 1 10 2 ...
+##   ..$ helgelindh     : int [1:2, 1:13] 11 1 41 1 49 1 75 1 100 1 ...
+##   ..$ HellmichMdB    : int [1:2, 1:6] 53 1 57 1 118 1 140 1 188 1 ...
+##   ..$ HHirte         : int [1:2, 1:23] 5 1 8 1 29 1 30 1 34 1 ...
+##   ..$ HildeMattheis  : int [1:2, 1:23] 19 2 25 1 47 1 52 1 65 1 ...
+##   ..$ HoffmannForest : int [1:2, 1:21] 22 1 35 1 41 1 70 1 78 1 ...
+##   ..$ HohmannMdb     : int [1:2, 1:2] 112 1 269 1
+##   ..$ HuberMdB       : int [1:2, 1:23] 3 3 5 1 28 1 30 1 33 1 ...
+##   ..$ hubertus_heil  : int [1:2, 1:9] 31 1 82 1 97 1 128 1 130 1 ...
+##   ..$ ingrid_remmers : int [1:2, 1:2] 72 1 291 1
+##   ..$ IreneMihalic   : int [1:2, 1:14] 9 1 14 1 21 1 34 1 51 1 ...
+##   ..$ Jan_Nolte_AfD  : int [1:2, 1:5] 52 1 57 1 130 1 171 1 205 1
+##   ..$ JanaSchimke    : int [1:2, 1] 109 1
+##   ..$ jankortemdb    : int [1:2, 1:16] 46 1 52 1 73 2 128 1 144 1 ...
+##   ..$ janoschdahmen  : int [1:2, 1:2] 27 1 175 1
+##   ..$ JBrandenburgFDP: int [1:2, 1:12] 37 1 43 2 62 1 67 1 140 1 ...
+##   ..$ jensbeeck      : int [1:2, 1:2] 175 1 294 1
+##   ..$ jenskoeppen    : int [1:2, 1:8] 83 1 102 1 116 1 207 1 214 1 ...
+##   ..$ JensMaierAfD   : int [1:2, 1:29] 2 1 3 3 22 1 26 1 28 1 ...
+##   ..$ jensspahn      : int [1:2, 1:15] 20 1 45 1 62 1 67 1 95 1 ...
+##   ..$ JM_Luczak      : int [1:2, 1:45] 3 1 26 2 34 1 36 1 38 1 ...
+##   ..$ Jochen_Haug    : int [1:2, 1:4] 3 2 38 1 180 1 255 1
+##   ..$ JoernKoenigAfD : int [1:2, 1:8] 3 3 69 1 100 1 104 2 169 1 ...
+##   ..$ josteiniger    : int [1:2, 1:4] 3 1 82 1 139 1 216 1
 ##   .. [list output truncated]
-##  $ vocab    : chr [1:300] &quot;abgeordnet&quot; &quot;abschiebung&quot; &quot;af&quot; &quot;afd&quot; ...
-##  $ meta     :&#39;data.frame&#39;:   243 obs. of  8 variables:
-##   ..$ last_name          : chr [1:243] &quot;Glöckner&quot; &quot;Baerbock&quot; &quot;Post (Minden)&quot; &quot;Sichert&quot; ...
-##   ..$ first_name         : chr [1:243] &quot;Angelika&quot; &quot;Annalena&quot; &quot;Achim&quot; &quot;Martin&quot; ...
-##   ..$ wahlkreis_name     : chr [1:243] &quot;Pirmasens&quot; &quot;Potsdam – Potsdam-Mittelmark II – Teltow-Fläming II&quot; &quot;Minden-Lübbecke I&quot; &quot;Nürnberg-Nord&quot; ...
-##   ..$ party              : chr [1:243] &quot;spd&quot; &quot;gruene&quot; &quot;spd&quot; &quot;afd&quot; ...
-##   ..$ bundesland         : chr [1:243] &quot;Rheinland-Pfalz&quot; &quot;Brandenburg&quot; &quot;Nordrhein-Westfalen&quot; &quot;Bayern&quot; ...
-##   ..$ unemployment_rate  : num [1:243] 6.6 6 5.3 6.3 3 5.7 5.2 4.8 4.2 5.3 ...
-##   ..$ share_pop_migration: num [1:243] 13.7 6.3 23.9 36.4 20.1 36.4 22.1 17.8 12.7 20.6 ...
-##   ..$ username           : chr [1:243] &quot;A_Gloeckner&quot; &quot;ABaerbock&quot; &quot;achim_p&quot; &quot;AfDNbg&quot; ...</code></pre>
+##  $ vocab    : chr [1:300] &quot;abgeordnet&quot; &quot;abschiebung&quot; &quot;afd&quot; &quot;alle&quot; ...
+##  $ meta     :&#39;data.frame&#39;:   240 obs. of  8 variables:
+##   ..$ last_name          : chr [1:240] &quot;Glöckner&quot; &quot;Baerbock&quot; &quot;Post (Minden)&quot; &quot;Sichert&quot; ...
+##   ..$ first_name         : chr [1:240] &quot;Angelika&quot; &quot;Annalena&quot; &quot;Achim&quot; &quot;Martin&quot; ...
+##   ..$ wahlkreis_name     : chr [1:240] &quot;Pirmasens&quot; &quot;Potsdam – Potsdam-Mittelmark II – Teltow-Fläming II&quot; &quot;Minden-Lübbecke I&quot; &quot;Nürnberg-Nord&quot; ...
+##   ..$ party              : chr [1:240] &quot;spd&quot; &quot;gruene&quot; &quot;spd&quot; &quot;afd&quot; ...
+##   ..$ bundesland         : chr [1:240] &quot;Rheinland-Pfalz&quot; &quot;Brandenburg&quot; &quot;Nordrhein-Westfalen&quot; &quot;Bayern&quot; ...
+##   ..$ unemployment_rate  : num [1:240] 6.6 6 5.3 6.3 3 5.7 5.2 4.8 4.2 5.3 ...
+##   ..$ share_pop_migration: num [1:240] 13.7 6.3 23.9 36.4 20.1 36.4 22.1 17.8 12.7 20.6 ...
+##   ..$ username           : chr [1:240] &quot;A_Gloeckner&quot; &quot;ABaerbock&quot; &quot;achim_p&quot; &quot;AfDNbg&quot; ...</code></pre>
 </div>
 <div id="fit-stm" class="section level3">
 <h3>Fit STM</h3>
@@ -514,6 +520,237 @@ hyperparameter_search &lt;- stm::searchK(
 (n_topics &lt;- as.numeric(hyperparameter_search$results[
   which.max(hyperparameter_search$results[, &quot;heldout&quot;]), &quot;K&quot;]))</code></pre>
 <pre><code>## [1] 8</code></pre>
+<p>Seems 8 topics are a good choice, so let’s fit the actual <strong>model</strong> now:</p>
+<pre class="r"><code># Fit STM
+
+topic_model &lt;- stm::stm(
+    documents = twitter_stm$documents,
+    vocab = twitter_stm$vocab,
+    data = twitter_stm$meta,
+    K = n_topics,
+    prevalence = prevalence_formula,
+    gamma.prior = &quot;L1&quot;,
+    seed = 1,
+    max.em.its = 15,
+    init.type = &quot;Spectral&quot;)</code></pre>
+<p>We can inspect the results of the modeling process in various ways. For one, we may call <code>stm</code>’s <code>labelTopics</code> function which returns the top terms per topic according to different metrics (for details, best check the function documentation):</p>
+<ul>
+<li>Highest probability: which words are most likely to occur in a document of the given topic?</li>
+<li>FREX: which words occur both frequently and exclusively, i.e., serve to characterize and distinguish topics?</li>
+<li>Lift: which words occur most frequently if weighted by the inverse of their relative empirical frequency across the entire corpus?</li>
+<li>Score: which words show the largest difference between their (log) frequency in topic <em>k</em> and their average (log) frequency across all topics?</li>
+</ul>
+<p>The <code>n</code> argument allows to specify how many words should be displayed. We go for 10:</p>
+<pre class="r"><code># Inspect results
+
+(result_topic_modeling &lt;- stm::labelTopics(topic_model, n = 10))</code></pre>
+<pre><code>## Topic 1 Top Words:
+##       Highest Prob: dank, europa, gesellschaft, glueckwunsch, tat, herzlich, hetz, respekt, wissenschaft, leb 
+##       FREX: dank, herzlich, europa, tat, respekt, glueckwunsch, wissenschaft, teil, hetz, gesellschaft 
+##       Lift: teil, herzlich, gespraech, respekt, wissenschaft, dank, tat, europa, monat, hetz 
+##       Score: teil, dank, europa, glueckwunsch, herzlich, gesellschaft, tat, hetz, zusammenarbeit, respekt 
+## Topic 2 Top Words:
+##       Highest Prob: deutschland, land, seehof, jahr, schluss, laend, problem, gefaehrd, nazis, jed 
+##       FREX: deutschland, gefaehrd, schluss, seehof, land, problem, nazis, mitarbeit, fahrverbot, mind 
+##       Lift: fahrverbot, mind, gefaehrd, mitarbeit, deutschland, nazis, schluss, problem, lini, seehof 
+##       Score: fahrverbot, deutschland, land, schluss, seehof, gefaehrd, jahr, laend, jed, mind 
+## Topic 3 Top Words:
+##       Highest Prob: bundestag, mensch, csu, zeit, recht, red, seit, rassismus, probl, dim 
+##       FREX: rassismus, bundestag, seit, csu, dim, red, verfassungsschutz, terror, probl, noafd 
+##       Lift: terror, rassismus, macht, verfassungsschutz, seit, nazi, migration, dim, noafd, bundestag 
+##       Score: terror, bundestag, rassismus, zeit, mensch, csu, dim, red, seit, staat 
+## Topic 4 Top Words:
+##       Highest Prob: demokrati, groko, zukunft, menschenrecht, gesetz, ergebnis, tag, heut, antwort, fall 
+##       FREX: gesetz, zukunft, groko, demokrati, signal, ergebnis, menschenrecht, bild, aufgab, katastroph 
+##       Lift: signal, bild, gerad, gesetz, katastroph, digitalisier, forder, zukunft, ergebnis, groko 
+##       Score: signal, demokrati, zukunft, groko, menschenrecht, gesetz, ergebnis, tag, heut, parlament 
+## Topic 5 Top Words:
+##       Highest Prob: afd, cdu, merkel, gruen, kind, geld, euro, miet, gewalt, mehr 
+##       FREX: gruen, geld, afd, miet, migrant, merkel, cdu, maass, dafu, chemnitz 
+##       Lift: maass, taet, gefahr, migrant, erst, dafu, chemnitz, straftat, miet, gruen 
+##       Score: maass, afd, cdu, merkel, gruen, geld, kind, miet, medi, euro 
+## Topic 6 Top Words:
+##       Highest Prob: corona, polit, arbeit, klimaschutz, zeit, wort, kein, jahr, antifa, famili 
+##       FREX: corona, sozialismus, polit, stadt, hanau, antifa, famili, faschist, wort, arbeit 
+##       Lift: hanau, sozialismus, wohnungsbau, panik, stadt, journalist, corona, faschist, famili, antifa 
+##       Score: hanau, corona, polit, zeit, panik, antifa, sozialismus, klimaschutz, stadt, kein 
+## Topic 7 Top Words:
+##       Highest Prob: mensch, bundesregier, polizei, erdogan, buerg, tuerkei, schritt, krieg, loesung, bundeswehr 
+##       FREX: buerg, erdogan, bundesregier, krieg, loesung, tuerkei, russland, bundeswehr, schritt, polizei 
+##       Lift: buerg, argument, erdogan, russland, bundesregier, interess, krieg, loesung, endlich, bundeswehr 
+##       Score: buerg, bundesregier, mensch, erdogan, tuerkei, polizei, russland, bundeswehr, krieg, schritt 
+## Topic 8 Top Words:
+##       Highest Prob: frau, jahr, regier, mio, gut, verantwort, debatt, ende, kris, trump 
+##       FREX: verantwort, frau, mio, trump, debatt, regier, deal, ende, herr, skandal 
+##       Lift: botschaft, job, verantwort, app, trump, skandal, deal, mio, frau, herr 
+##       Score: botschaft, frau, regier, jahr, mio, debatt, mrd, ende, verantwort, gut</code></pre>
+<p>We can also access the word lists directly if we are particularly interested in results w.r.t a specific metric:</p>
+<pre class="r"><code>(top_words_frex &lt;- t(result_topic_modeling$frex))</code></pre>
+<pre><code>##       [,1]           [,2]          [,3]                [,4]           
+##  [1,] &quot;dank&quot;         &quot;deutschland&quot; &quot;rassismus&quot;         &quot;gesetz&quot;       
+##  [2,] &quot;herzlich&quot;     &quot;gefaehrd&quot;    &quot;bundestag&quot;         &quot;zukunft&quot;      
+##  [3,] &quot;europa&quot;       &quot;schluss&quot;     &quot;seit&quot;              &quot;groko&quot;        
+##  [4,] &quot;tat&quot;          &quot;seehof&quot;      &quot;csu&quot;               &quot;demokrati&quot;    
+##  [5,] &quot;respekt&quot;      &quot;land&quot;        &quot;dim&quot;               &quot;signal&quot;       
+##  [6,] &quot;glueckwunsch&quot; &quot;problem&quot;     &quot;red&quot;               &quot;ergebnis&quot;     
+##  [7,] &quot;wissenschaft&quot; &quot;nazis&quot;       &quot;verfassungsschutz&quot; &quot;menschenrecht&quot;
+##  [8,] &quot;teil&quot;         &quot;mitarbeit&quot;   &quot;terror&quot;            &quot;bild&quot;         
+##  [9,] &quot;hetz&quot;         &quot;fahrverbot&quot;  &quot;probl&quot;             &quot;aufgab&quot;       
+## [10,] &quot;gesellschaft&quot; &quot;mind&quot;        &quot;noafd&quot;             &quot;katastroph&quot;   
+##       [,5]       [,6]          [,7]           [,8]        
+##  [1,] &quot;gruen&quot;    &quot;corona&quot;      &quot;buerg&quot;        &quot;verantwort&quot;
+##  [2,] &quot;geld&quot;     &quot;sozialismus&quot; &quot;erdogan&quot;      &quot;frau&quot;      
+##  [3,] &quot;afd&quot;      &quot;polit&quot;       &quot;bundesregier&quot; &quot;mio&quot;       
+##  [4,] &quot;miet&quot;     &quot;stadt&quot;       &quot;krieg&quot;        &quot;trump&quot;     
+##  [5,] &quot;migrant&quot;  &quot;hanau&quot;       &quot;loesung&quot;      &quot;debatt&quot;    
+##  [6,] &quot;merkel&quot;   &quot;antifa&quot;      &quot;tuerkei&quot;      &quot;regier&quot;    
+##  [7,] &quot;cdu&quot;      &quot;famili&quot;      &quot;russland&quot;     &quot;deal&quot;      
+##  [8,] &quot;maass&quot;    &quot;faschist&quot;    &quot;bundeswehr&quot;   &quot;ende&quot;      
+##  [9,] &quot;dafu&quot;     &quot;wort&quot;        &quot;schritt&quot;      &quot;herr&quot;      
+## [10,] &quot;chemnitz&quot; &quot;arbeit&quot;      &quot;polizei&quot;      &quot;skandal&quot;</code></pre>
+</div>
+<div id="assign-documents-to-topics" class="section level3">
+<h3>Assign documents to topics</h3>
+<p>Fine, <code>stm</code> has thrown a lot of words at us, but which documents actually belong to which topic? The model output provides us with a vector of topic probabilities for each document, meaning we can <strong>label</strong> the tweets by picking the topic for which they have the highest respective probability:</p>
+<pre class="r"><code># Extract topic probabilities together with topic IDs and discard docnum
+
+topic_probs &lt;- stm::make.dt(topic_model)[
+  , topic_docid := names(twitter_stm$documents)
+  ][, docnum := NULL]
+
+head(topic_probs)</code></pre>
+<pre><code>##        Topic1     Topic2     Topic3     Topic4     Topic5     Topic6     Topic7
+## 1: 0.11588022 0.04805645 0.12212800 0.32533377 0.16022642 0.11368147 0.01936523
+## 2: 0.10608586 0.06895161 0.09066029 0.12271219 0.07164782 0.28347620 0.04643906
+## 3: 0.35406197 0.08769354 0.06613128 0.16018071 0.03909132 0.10795999 0.08701669
+## 4: 0.02135056 0.03236647 0.07113672 0.05011124 0.59281985 0.05295807 0.05850403
+## 5: 0.23635085 0.05863464 0.08201114 0.10863049 0.07405784 0.17585334 0.08535193
+## 6: 0.02845599 0.15223204 0.10426766 0.14912397 0.05361112 0.06462644 0.19864054
+##        Topic8   topic_docid
+## 1: 0.09532845   A_Gloeckner
+## 2: 0.21002697     ABaerbock
+## 3: 0.09786450       achim_p
+## 4: 0.12075307        AfDNbg
+## 5: 0.17910978 agnieszka_mdb
+## 6: 0.24904224  akbulutgokay</code></pre>
+<pre class="r"><code># Get topic with highest score per document
+
+topic_cols &lt;- names(topic_probs)[startsWith(names(topic_probs), &quot;Topic&quot;)]
+
+topic_probs[
+  , topic_label := which.max(.SD),
+  .SDcols = topic_cols,
+  by = topic_docid]
+
+head(topic_probs)</code></pre>
+<pre><code>##        Topic1     Topic2     Topic3     Topic4     Topic5     Topic6     Topic7
+## 1: 0.11588022 0.04805645 0.12212800 0.32533377 0.16022642 0.11368147 0.01936523
+## 2: 0.10608586 0.06895161 0.09066029 0.12271219 0.07164782 0.28347620 0.04643906
+## 3: 0.35406197 0.08769354 0.06613128 0.16018071 0.03909132 0.10795999 0.08701669
+## 4: 0.02135056 0.03236647 0.07113672 0.05011124 0.59281985 0.05295807 0.05850403
+## 5: 0.23635085 0.05863464 0.08201114 0.10863049 0.07405784 0.17585334 0.08535193
+## 6: 0.02845599 0.15223204 0.10426766 0.14912397 0.05361112 0.06462644 0.19864054
+##        Topic8   topic_docid topic_label
+## 1: 0.09532845   A_Gloeckner           4
+## 2: 0.21002697     ABaerbock           6
+## 3: 0.09786450       achim_p           1
+## 4: 0.12075307        AfDNbg           5
+## 5: 0.17910978 agnieszka_mdb           1
+## 6: 0.24904224  akbulutgokay           8</code></pre>
+<p>For mapping the topic labels back to the original tweets, we have to undo the pooling operation:</p>
+<pre class="r"><code># Extract docvars
+
+twitter_docvars &lt;- data.table::as.data.table(
+  cbind(
+    doc_id = quanteda::docid(twitter_corpus),
+    quanteda::docvars(twitter_corpus)), 
+  key = &quot;doc_id&quot;)
+
+# Append topic labels and remove irrelevant columns
+
+twitter_docvars &lt;- topic_probs[
+  twitter_docvars, on = c(&quot;topic_docid&quot; = &quot;username&quot;)
+  ][, topic_docid := NULL
+    ][, c(topic_cols) := NULL]
+
+twitter_docvars[sample(twitter_docvars[, .I], 10)]</code></pre>
+<pre><code>##     topic_label                     doc_id  last_name     first_name
+##  1:           4 karl_lauterbach15751898401 Lauterbach Prof. Dr. Karl
+##  2:           5 Martin_Hess_AfD15344829001       Hess         Martin
+##  3:           4   BriHasselmann15694185001  Haßelmann         Britta
+##  4:           3    danielakolbe15892563001      Kolbe        Daniela
+##  5:           6 JuergenBraunAfD15973491001      Braun         Jürgen
+##  6:           7    FrankSchwabe15442731001    Schwabe          Frank
+##  7:           8   Erhard_Grundl15582743401     Grundl         Erhard
+##  8:           5     MBiadaczMdB15833280001    Biadacz           Marc
+##  9:           7      GregorGysi15550639801       Gysi     Dr. Gregor
+## 10:           7     AndrejHunko15526557601      Hunko         Andrej
+##               wahlkreis_name   party          bundesland unemployment_rate
+##  1:     Leverkusen – Köln IV     spd Nordrhein-Westfalen               8.5
+##  2:              Ludwigsburg     afd  Baden-Wuerttemberg               3.5
+##  3: Bielefeld – Gütersloh II  gruene Nordrhein-Westfalen               8.6
+##  4:                Leipzig I     spd             Sachsen               8.3
+##  5:               Waiblingen     afd  Baden-Wuerttemberg               3.4
+##  6:         Recklinghausen I     spd Nordrhein-Westfalen              10.5
+##  7:                Straubing  gruene              Bayern               4.1
+##  8:                Böblingen cdu_csu  Baden-Wuerttemberg               3.1
+##  9:  Berlin-Treptow-Köpenick   linke              Berlin               9.4
+## 10:                 Aachen I   linke Nordrhein-Westfalen               8.2
+##     share_pop_migration followers_count          created_at favorite_count
+##  1:                32.2          337001 2019-12-01 08:44:00            715
+##  2:                29.0            6574 2018-08-17 05:15:00             25
+##  3:                32.7           20299 2019-09-25 13:35:00            162
+##  4:                 8.1            8158 2020-05-12 04:05:00              0
+##  5:                24.8            3188 2020-08-13 20:05:00             33
+##  6:                20.1            6831 2018-12-08 12:45:00              3
+##  7:                10.7            1313 2019-05-19 13:59:00              0
+##  8:                30.8            1083 2020-03-04 13:20:00              2
+##  9:                24.1          395170 2019-04-12 10:13:00           1573
+## 10:                24.6            9259 2019-03-15 13:16:00             20
+##     retweet_count emojis
+##  1:            49       
+##  2:             5       
+##  3:            20       
+##  4:             0       
+##  5:            11       
+##  6:             3       
+##  7:             0       
+##  8:             0       
+##  9:           353       
+## 10:            10       
+##                                                               hashtags
+##  1:                                                                   
+##  2: #Tochter,#Mord,#Merkel,#OpenBorders,#Verantwortung,#Sicherheit,...
+##  3:                                     #Greta,#AlternativerNobelpreis
+##  4:                                                                   
+##  5:       #Latif,#Lauterbach,#ZDF,#Klimapanik,#Rekordhitze,#Lingen,...
+##  6:        #Antikorruptionstag,#Strenz,#Europarat,#Aserbaidschan,#PACE
+##  7:                                   #oevp,#steigbuegelhalter,#Europa
+##  8:               #Fachkraefteeinwanderungsgesetz,#Zuwanderung,#EU,#IT
+##  9:                                                     #Whistleblower
+## 10:                                             #Venezuela,#Sanktionen
+##                                      tags
+##  1:                                      
+##  2:                                      
+##  3:                                      
+##  4:                    @DB_Bahn,@gerald_e
+##  5:                                      
+##  6: @PiaRatz,@claudi,@NDRinfo,@Nordkurier
+##  7:                        @sebastiankurz
+##  8:                             @cducsubt
+##  9:                                      
+## 10:</code></pre>
+</div>
+<div id="interpret-results" class="section level3">
+<h3>Interpret results</h3>
+<p>The tricky thing about unsupervised topic modeling, as with an STM, is the <strong>interpretation</strong> part. Statistical computations yield the results that best fit the data according to model assumptions, but whether the found topics are considered meaningful is up to the human analyst.</p>
+<p>NB: Our results here are not very glorious. We have already seen the extreme sparsity of the <code>dfm</code>, and with documents that are pretty dissimilar a topic model can only do so much. This is also a consequence of our training data design: we have labels for relatively few, extremely short documents from a bunch of different authors; even pooling all by author does not help too much. In reality, scraping gives us access to much larger amounts of data.</p>
+<p>So, consider this a technical demo, the interpretation part cannot be showcased anyway – we just pretend to find a lot of sense in the topics output by our STM.</p>
+<p>Besides displaying lists top terms per topic, we can</p>
+<ul>
+<li>print the most representative document for a given topic,</li>
+<li>and generate a variety of visualizations.</li>
+</ul>
 </div>
 </div>
 
