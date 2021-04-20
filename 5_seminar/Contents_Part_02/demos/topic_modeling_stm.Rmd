@@ -449,4 +449,4 @@ quanteda::docvars(twitter_corpus) <- as.data.frame(twitter_docvars)
 
 ```
 
-**So that's how to model topics with an `stm`! Even though our training corpus is not easily clustered into topics, you hopefully got some idea how to handle this process code-wise. And then, we just do not always get lucky with such tasks in a sense that they can be expected to produce meaningful output all the time ¯\_(ツ)_/¯**
+**So that's how to model topics with an `stm`! Even though our training corpus is not easily clustered into topics, you hopefully got some idea how to handle this process code-wise. And then, we just do not always get lucky with such tasks in a sense that they can be expected to produce meaningful output all the time** ¯|_(ツ)_/¯
