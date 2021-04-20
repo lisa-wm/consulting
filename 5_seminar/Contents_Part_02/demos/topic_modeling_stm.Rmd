@@ -38,11 +38,20 @@ path <- "5_seminar"
 
 
 ```{r read}
+
 # path <- ... (individual file location)
 
 twitter_corpus <- readRDS(sprintf("%s/twitter_corpus.RDS", path))
 
 twitter_corpus
+
+```
+
+We furthermore store the document texts in the docvars (which poses a redundancy in the `corpus` object but ensures the texts are not lost during conversion for the `dfm`).
+
+```{r text}
+
+quanteda::docvars(twitter_corpus)$text <- quanteda::texts(twitter_corpus)
 
 ```
 
@@ -166,30 +175,29 @@ twitter_dfm
 Unfortunately, as the above output tells us, our `dfm` is extremely **sparse** -- tokens are not at all common across documents, which will pose a challenge to any topic model.
 This is actually not too surprising when we recall the extreme brevity of our Twitter documents.
 
-Therefore, we make another simplifying concession: we **pool** documents to create larger entities that should share more common tokens.
+*Side note*: if you run into this problem you might want to consider the option of pooling texts into larger documents (this can be achieved, for instance, calling `quanteda::dfm_group`).
+However, this is obviously a heavy simplification and leads to all documents that share the same grouping variable being assigned the same topic label.
 
-In this demo, we pool very coarsely and concatenate all tweets by one user to a single document.
-Of course, it is not terribly plausible to assume users sticking to exactly one topic, but our toy data here are somewhat limited.
+What we will do to alleviate the sparsity problem at least to some extent is to condense the `dfm` to the most prominent features: 
 
-In a real application you would try and find a more suitable way of pooling documents, e.g., taking into account the date of creation (and probably do it as little as possible).
+<!-- Therefore, we make another simplifying concession: we **pool** documents to create larger entities that should share more common tokens. -->
 
-Using the pooling variable, we can reshape the `dfm` by **grouping** it:
+<!-- In this demo, we pool very coarsely and concatenate all tweets by one user to a single document. -->
+<!-- Of course, it is not terribly plausible to assume users sticking to exactly one topic, but our toy data here are somewhat limited. -->
 
-```{r group}
+<!-- In a real application you would try and find a more suitable way of pooling documents, e.g., taking into account the date of creation (and probably do it as little as possible). -->
 
-# Group dfm
+<!-- Using the pooling variable, we can reshape the `dfm` by **grouping** it: -->
 
-twitter_dfm_grouped <- quanteda::dfm_group(
-  twitter_dfm, 
-  quanteda::docvars(twitter_dfm)$username)
+```{r condense}
 
-# In addition, eliminate less common features
+# Eliminate less common features
 
-twitter_dfm_grouped <- quanteda::dfm_select(
-  twitter_dfm_grouped,
-  names(quanteda::topfeatures(twitter_dfm_grouped, n = 300)))
+twitter_dfm <- quanteda::dfm_select(
+  twitter_dfm,
+  names(quanteda::topfeatures(twitter_dfm, n = 300)))
 
-twitter_dfm_grouped
+twitter_dfm
 
 ```
 
@@ -213,8 +221,6 @@ prevalence_formula <- as.formula(paste(
   "party + bundesland + s(unemployment_rate, df = 5) + s(share_pop_migration, df = 5)", 
   sep = "~"))
 
-print(prevalence_formula)
-
 ```
 
 Now we have one thing to pay attention to: the `stm` implementation cannot handle **missing data** in its prevalence variables.
@@ -222,11 +228,12 @@ We must therefore exclude non-complete observations (alternatively, we could imp
 
 ```{r missings}
 
-twitter_dfm_grouped <- quanteda::dfm_subset(
-  twitter_dfm_grouped,
-  !is.na(party) & !is.na(bundesland) & !is.na(unemployment_rate) & !is.na(share_pop_migration))
+twitter_dfm <- quanteda::dfm_subset(
+  twitter_dfm,
+  !is.na(party) & !is.na(bundesland) & !is.na(unemployment_rate) &
+    !is.na(share_pop_migration))
 
-twitter_dfm_grouped
+twitter_dfm
 
 ```
 
@@ -235,11 +242,11 @@ twitter_dfm_grouped
 We then convert our `dfm` to an `stm` object we can use in the structural topic model.
 This is super simple with `quanteda`:
 
-```{r stm}
+```{r stm, warning=FALSE}
 
-twitter_stm <- quanteda::convert(twitter_dfm_grouped, to = "stm")
+twitter_stm <- quanteda::convert(twitter_dfm, to = "stm")
 
-str(twitter_stm)
+summary(twitter_stm)
 
 ```
 
@@ -282,7 +289,7 @@ hyperparameter_search <- stm::searchK(
 
 ```
 
-Seems 8 topics are a good choice, so let's fit the actual **model** now:
+Seems `r toString(n_topics)` topics are a good choice, so let's fit the actual **model** now:
 
 ```{r fitstm, results='hide'}
 
@@ -301,8 +308,18 @@ topic_model <- stm::stm(
 
 ```
 
-We can inspect the results of the modeling process in various ways.
-For one, we may call `stm`'s `labelTopics` function which returns the top terms per topic according to different metrics (for details, best check the function documentation):
+### Interpret results
+
+The tricky thing about unsupervised topic modeling is the **interpretation** part.
+Statistical computations yield the results that best fit the data according to model assumptions but whether the found topics are considered meaningful is up to the human analyst.
+
+Let's see whether we can make any sense of the model output by
+
+* inspecting the most characteristic words for each topic,
+* printing the most representative document for a given topic, and
+* generating a variety of visualizations.
+
+For one, we can call `stm`'s `labelTopics` function which returns the top terms per topic according to different metrics (for details, best check the function documentation):
 
 * Highest probability: which words are most likely to occur in a document of the given topic?
 * FREX: which words occur both frequently and exclusively, i.e., serve to characterize and distinguish topics? 
@@ -324,13 +341,51 @@ We can also access the word lists directly if we are particularly interested in 
 
 ```{r fitstm_3}
 
-(top_words_frex <- t(result_topic_modeling$frex))
+t(result_topic_modeling$frex)
 
 ```
 
+NB: Our results here are not very glorious.
+We have already seen the extreme sparsity of the `dfm`, and with documents that are pretty dissimilar a topic model can only do so much.
+This is also a consequence of our training data design: we have labels for relatively few, extremely short documents from a bunch of different authors.
+In reality, scraping gives us access to much larger amounts of data.
+
+So, consider this a technical demo, the interpretation part cannot be showcased very well anyway -- we just pretend to find a lot of meaning in the topics output by our STM.
+
+Next, let's take another look at our topics by a more visually appealing means: 
+
+```{r int}
+
+plot(topic_model, type = "summary")
+
+```
+
+We can also plot **word clouds** displaying the most prominent words per topic (size indicating the probability of a word occurring in a document of the given topic):
+
+```{r int_2}
+
+invisible(lapply(seq_len(n_topics), function(i) stm::cloud(topic_model, topic = i)))
+
+```
+
+Finally, let's see the most representative documents for each topic, i.e., the tweets with the highest topic probability:
+
+```{r int_3}
+
+lapply(seq_len(n_topics), function(i) {
+  stm::findThoughts(
+    model = topic_model,
+    texts = twitter_stm$meta$text,
+    topics = i,
+    n = 2)$docs[[1]]})
+
+```
+
+Using this visual support (and probably playing around with, e.g., the number of features to include in the `dfm` and the number of topics) we would now try to give our topic some decent names.
+
 ### Assign documents to topics
 
-Fine, `stm` has thrown a lot of words at us, but which documents actually belong to which topic? 
+So `stm` has thrown a lot of words at us from which we are hopefully able to infer meaningful topics, but which documents actually belong to which topic? 
 The model output provides us with a vector of topic probabilities for each document, meaning we can **label** the tweets by picking the topic for which they have the highest respective probability:
 
 ```{r assigntopics}
@@ -338,10 +393,10 @@ The model output provides us with a vector of topic probabilities for each docum
 # Extract topic probabilities together with topic IDs and discard docnum
 
 topic_probs <- stm::make.dt(topic_model)[
-  , topic_docid := names(twitter_stm$documents)
+  , doc_id := names(twitter_stm$documents)
   ][, docnum := NULL]
 
-head(topic_probs)
+topic_probs[sample(topic_probs[, .I], 5)]
 
 ```
 
@@ -352,15 +407,17 @@ head(topic_probs)
 topic_cols <- names(topic_probs)[startsWith(names(topic_probs), "Topic")]
 
 topic_probs[
-  , topic_label := which.max(.SD),
+  , `:=` (
+    max_topic_score = max(.SD, na.rm = TRUE),
+    topic_label = which.max(.SD)),
   .SDcols = topic_cols,
-  by = topic_docid]
+  by = doc_id]
 
-head(topic_probs)
+topic_probs[sample(topic_probs[, .I], 5)]
 
 ```
 
-For mapping the topic labels back to the original tweets, we have to undo the pooling operation:
+For mapping the topic labels back to the original tweets append them to the docvars...
 
 ```{r assigntopics_3}
 
@@ -375,29 +432,21 @@ twitter_docvars <- data.table::as.data.table(
 # Append topic labels and remove irrelevant columns
 
 twitter_docvars <- topic_probs[
-  twitter_docvars, on = c("topic_docid" = "username")
-  ][, topic_docid := NULL
+  twitter_docvars, on = "doc_id"
     ][, c(topic_cols) := NULL]
 
-twitter_docvars[sample(twitter_docvars[, .I], 10)]
+twitter_docvars[sample(twitter_docvars[, .I], 5)]
 
 ```
 
-### Interpret results
+...and, lastly, feed this information back into the original corpus object to save it for further usage:
 
-The tricky thing about unsupervised topic modeling, as with an STM, is the **interpretation** part.
-Statistical computations yield the results that best fit the data according to model assumptions, but whether the found topics are considered meaningful is up to the human analyst.
+```{r assigntopics_4}
 
-NB: Our results here are not very glorious.
-We have already seen the extreme sparsity of the `dfm`, and with documents that are pretty dissimilar a topic model can only do so much.
-This is also a consequence of our training data design: we have labels for relatively few, extremely short documents from a bunch of different authors; even pooling all by author does not help too much.
-In reality, scraping gives us access to much larger amounts of data.
+# Insert info back into corpus
 
-So, consider this a technical demo, the interpretation part cannot be showcased anyway -- we just pretend to find a lot of sense in the topics output by our STM.
+quanteda::docvars(twitter_corpus) <- as.data.frame(twitter_docvars)
 
-Besides displaying lists top terms per topic, we can
+```
 
-* print the most representative document for a given topic,
-* and generate a variety of visualizations.
-
-
+**So that's how to model topics with an `stm`! Even though our training corpus is not easily clustered into topics, you hopefully got some idea how to handle this process code-wise. And then, we just do not always get lucky with such tasks in a sense that they can be expected to produce meaningful output all the time ¯\_(ツ)_/¯**
