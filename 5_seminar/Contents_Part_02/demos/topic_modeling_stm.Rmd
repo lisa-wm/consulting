@@ -19,10 +19,9 @@ We show how to prepare the data for fitting an STM ([Roberts et al., 2016](https
 ```{r setup_packages, message=FALSE, warning=FALSE}
 # Load required packages
 
-library("data.table")
-library("ggplot2")
-library("quanteda")
-library("stm")
+library(data.table)
+library(quanteda)
+library(stm)
 ```
 
 ### Create `dfm` object

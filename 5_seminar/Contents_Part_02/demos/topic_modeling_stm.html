@@ -179,10 +179,9 @@ pre code {
 <p>We show how to prepare the data for fitting an STM (<a href="https://scholar.princeton.edu/sites/default/files/bstewart/files/a_model_of_text_for_experimentation_in_the_social_sciences.pdf">Roberts et al., 2016</a>), conduct the modeling process, and analyze the results.</p>
 <pre class="r"><code># Load required packages
 
-library(&quot;data.table&quot;)
-library(&quot;ggplot2&quot;)
-library(&quot;quanteda&quot;)
-library(&quot;stm&quot;)</code></pre>
+library(data.table)
+library(quanteda)
+library(stm)</code></pre>
 <div id="create-dfm-object" class="section level3">
 <h3>Create <code>dfm</code> object</h3>
 <p>As in the static feature extraction demo, we convert our data to a <code>dfm</code>. However, we focus on slightly different tokens this time as we are now interested in identifying topical relations.</p>
