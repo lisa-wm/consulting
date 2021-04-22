@@ -263,7 +263,7 @@ Exactly what optimal means can be somewhat steered by the user.
 We will use the *held-out likelihood* option which creates an artificial supervised task: we mask a certain part of some of the documents and ask the model to complete them (note that the ground truth is known now).
 The more predictive power our model has, the higher the likelihood for the held-out words should be (for details see [Wallach et al., 2009](http://dirichlet.net/pdf/wallach09evaluation.pdf):
 
-```{r searchk, results='hide'}
+```{r searchk}
 
 # Conduct hyperparameter search
 
@@ -275,7 +275,8 @@ hyperparameter_search <- stm::searchK(
   prevalence = prevalence_formula,
   heldout.seed = 1, # seed for reproducibility
   max.em.its = 5, # number of iterations
-  init.type = "Spectral")
+  init.type = "Spectral",
+  verbose = FALSE)
 
 ```
 
@@ -295,15 +296,16 @@ Seems `r toString(n_topics)` topics are a good choice, so let's fit the actual *
 # Fit STM
 
 topic_model <- stm::stm(
-    documents = twitter_stm$documents,
-    vocab = twitter_stm$vocab,
-    data = twitter_stm$meta,
-    K = n_topics,
-    prevalence = prevalence_formula,
-    gamma.prior = "L1",
-    seed = 1,
-    max.em.its = 15,
-    init.type = "Spectral")
+  documents = twitter_stm$documents,
+  vocab = twitter_stm$vocab,
+  data = twitter_stm$meta,
+  K = n_topics,
+  prevalence = prevalence_formula,
+  gamma.prior = "L1",
+  seed = 1,
+  max.em.its = 15,
+  init.type = "Spectral",
+  verbose = FALSE)
 
 ```
 
