@@ -140,7 +140,7 @@ twitter_data[, full_text := stringr::str_replace_all(
 # Create pattern for symbols we want to discard altogether (including various types of quotes, sequences 
 # resulting from unicode conversion, hyperlinks, ...), concatenated with the logical OR operation
 
-pattern <- stringr::str_c(c(
+pattern <- c(
   "\U0022",
   "\U0027",
   "\U2018",
@@ -154,8 +154,7 @@ pattern <- stringr::str_c(c(
   "&gt;",
   "%",
   " http([^ ]*)",
-  "http([^ ]*)"),
-  collapse = "|")
+  "http([^ ]*)")
 
 twitter_data[, full_text := stringr::str_remove_all(full_text, pattern)]
 
@@ -173,7 +172,7 @@ head(twitter_data, 10)$full_text
 
 After handling standard text cleaning issues, we remove the **Twitter-specific sequences** from the plain text, namely
 
-* emojis (the corresponding unicode list of emojis is available [here](https://github.com/today-is-a-good-day/emojis/blob/master/emDict.csv)),
+* emojis (using the list `rtweet` provides),
 * hashtags, and
 * tags.
 
@@ -183,14 +182,7 @@ First, specify patterns with regex:
 
 ```{r patterns}
 
-# Specify emoji pattern (using external data)
-
-emojis_unicode <- data.table::fread(
-  sprintf("%s/emojis_unicode.csv", path),
-  encoding = "UTF-8",
-  sep = ";")
-
-pattern_emoji <- stringr::str_c(emojis_unicode$symbol, collapse = "|")
+pattern_emoji <- unlist(stringr::str_extract_all(rtweet::emojis$code, "[[:xdigit:]]"))
 
 # Specify hashtag pattern: # symbol, followed by anything alphanumeric
 

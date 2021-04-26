@@ -441,7 +441,7 @@ twitter_tokens</code></pre>
 <pre class="r"><code>twitter_dfm &lt;- quanteda::dfm(twitter_tokens)
 
 twitter_dfm</code></pre>
-<pre><code>## Document-feature matrix of: 1,215 documents, 7,583 features (99.8% sparse) and 15 docvars.
+<pre><code>## Document-feature matrix of: 1,215 documents, 7,536 features (99.8% sparse) and 15 docvars.
 ##                       features
 ## docs                   gro sondierungspapi klima nochmal genau angeschaut krass
 ##   ABaerbock15156546001   1               1     1       1     1          1     1
@@ -458,7 +458,7 @@ twitter_dfm</code></pre>
 ##   ABaerbock15252349801     0     0     0
 ##   ABaerbock15256297201     0     0     0
 ##   ABaerbock15283779001     0     0     0
-## [ reached max_ndoc ... 1,209 more documents, reached max_nfeat ... 7,573 more features ]</code></pre>
+## [ reached max_ndoc ... 1,209 more documents, reached max_nfeat ... 7,526 more features ]</code></pre>
 <pre class="r"><code>saveRDS(twitter_dfm, sprintf(&quot;%s/twitter_dfm.RDS&quot;, path))</code></pre>
 </div>
 <div id="find-polarity-clues" class="section level3">
@@ -585,8 +585,8 @@ list(
 ## 
 ## $distribution
 ## 
-##    0    1    2    3    5    7 
-## 1113   77   15    7    2    1</code></pre>
+##    0    1    2    3    4    5 
+## 1119   77   13    4    1    1</code></pre>
 </div>
 <div id="detect-negation" class="section level3">
 <h3>Detect negation</h3>
@@ -633,7 +633,7 @@ head(twitter_negation)</code></pre>
 <h3>Get character unigrams</h3>
 <p>Due to the sheer variety of words that exist in a language a simple tokens representation will typically contain a huge number of features:</p>
 <pre class="r"><code>quanteda::nfeat(twitter_dfm)</code></pre>
-<pre><code>## [1] 7583</code></pre>
+<pre><code>## [1] 7536</code></pre>
 <p>This is an overwhelmingly large number for any machine learning classifier (particularly so if we have more features than observations).</p>
 <p>We will therefore streamline our tokens further. Most applications include some kind of <strong>n-grams</strong>. Interestingly, character unigrams seem to work quite well, i.e., rather than entire words or even concatenations, we simply count occurrences of single letters.</p>
 <p>Thereby, we effectively coerce our texts to a set of merely 26 features:</p>
