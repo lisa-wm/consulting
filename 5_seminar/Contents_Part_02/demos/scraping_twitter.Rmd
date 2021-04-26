@@ -28,15 +28,15 @@ We show how to get Twitter contents using R via different queries and some basic
 ```{r setup_packages, message=FALSE, warning=FALSE}
 # Load required packages
 
-library("rtweet")
-library("stringr")
-library("tidytext")
-library("tidyverse")
+library(rtweet)
+library(stringr)
+library(tidytext)
+library(tidyverse)
 ```
 
 ### Set up API access
 
-We need to set up our API token prior to executing the following code, which we did in the background here so as to not make our credentials public.
+We need to set up our API token prior to executing the following code, which we did in the background here.
 Note that you need to define your personal `consumer_key`, `consumer_secret`, `access_token`, and `access_secret` accordingly.
 
 ```{r cars}
@@ -54,6 +54,7 @@ personal_token <- rtweet::create_token(
 We search for tweets with hashtag *#merkel*. `rtweet` conveniently returns a `data.frame` object to which we add a `query` column:
 
 ```{r title}
+
 scraped_tweets_merkel <- rtweet::search_tweets(
   "#merkel", # i.e.: match exact phrase, # for hashtag, @ for mentions)
   n = 1000, # cap to 1k hits (max: 18k)
@@ -65,9 +66,10 @@ scraped_tweets_merkel <- rtweet::search_tweets(
 scraped_tweets_merkel$query <- "Merkel"
 
 ```
-Now, search for tweets with hashtag *AfD*:
+Now, search for tweets with hashtag *#AfD*:
 
 ```{r title_1}
+
 scraped_tweets_afd <- rtweet::search_tweets(
   "#AfD",
   n = 1000,
@@ -77,25 +79,20 @@ scraped_tweets_afd <- rtweet::search_tweets(
   token = personal_token)
 
 scraped_tweets_afd$query <- "AfD"
+
 ```
 
 Combine both:
 
 ```{r year}
+
 combined_tweets <- dplyr::bind_rows(scraped_tweets_merkel, scraped_tweets_afd)
 
 head(combined_tweets)
+
 ```
 
-We can also conduct multiple independent search queries. The following examples gives us a `list`, each of whose entries is a `data.frame` as in the previous examples. In order to coerce the entries to a single `data.frame`, we call `rbind` on the `list` elements afterwards: 
-
-```{r throwserror, include = FALSE}
-# tweets_multiple <- Map(
-#   "search_tweets",
-#   c("afd", "corona OR merkel"),
-#   n = 100,
-#   lang = "de")
-```
+We can also conduct **multiple independent search queries**. The following examples gives us a `list`, each of whose entries is a `data.frame` as in the previous examples. In order to coerce the entries to a single `data.frame`, we call `rbind` on the `list` elements afterwards: 
 
 ```{r year_1}
 
@@ -117,9 +114,10 @@ head(tweets_multiple_df)
 
 ```
 
-We can also search for users:
+We can also search for **users**:
 
 ```{r user}
+
 scraped_tweets_lauterbach <- rtweet::get_timeline (
   "Karl_Lauterbach",
   n = 100,
@@ -132,21 +130,26 @@ head(scraped_tweets_lauterbach)
 
 ```
 
-`rtweet` provides some other useful functionalities. For instance, analyzing tweets might require extraction of emojis:
+`rtweet` provides some other useful functionalities. For instance, analyzing tweets might require extraction of **emojis**:
 
 ```{r emojis}
+
 head(rtweet::emojis)
+
 ```
 
 ### Explore scraped data
 
-Tweets' timeline -- frequency of tweets over time: 
+Exploring the data we have just scraped, we can, for instance, analyze the frequency of tweets over time: 
 
 ```{r year_clean}
+
 summary(combined_tweets$created_at)
+
 ```
 
 ```{r rank}
+
 combined_tweets %>%
   dplyr::group_by(query) %>%
   rtweet::ts_plot("hours", cex = 0.8) +
@@ -154,12 +157,12 @@ combined_tweets %>%
     x = NULL, 
     y = NULL,
     title = "Frequency of tweets",
-       # subtitle = paste0(format(min(combined_tweets$created_at), "%d %B %Y"), " to ", format(max(combined_tweets$created_at),"%d %B %Y")),
     caption = "Data collected from Twitter's REST API via rtweet") +
+  
   theme_minimal() 
 ```
 
-Most retweeted tweet: 
+We find the most retweeted tweet...
 
 ```{r rank_1}
 most_retweeted_tweet <- combined_tweets %>% 
@@ -170,7 +173,7 @@ most_retweeted_tweet <- combined_tweets %>%
 print(most_retweeted_tweet$text)
 ```
 
-Top hashtags: 
+... and, lastly, the top hashtags: 
 
 ```{r rank_clean}
 

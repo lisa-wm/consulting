@@ -9,7 +9,7 @@ output:
 
 ![](../../Logo_Consulting.JPG)
 
-## Extracting static features
+## Extracting Static Features
 
 This demo is about **static feature extraction**.
 
@@ -18,10 +18,10 @@ We show how to extract several features deemed useful for sentiment analysis. *S
 ```{r setup_packages, message=FALSE, warning=FALSE}
 # Load required packages
 
-library("data.table")
-library("quanteda")
-library("stringi")
-library("stringr")
+library(data.table)
+library(quanteda)
+library(stringi)
+library(stringr)
 ```
 
 ### Scope
@@ -67,7 +67,7 @@ twitter_tokens <- quanteda::tokens_tolower(twitter_tokens)
 
 ```
 
-On the occasion, we perform **stemming** on our tokens to increase their congruency across documents (remember, we want to have our documents represented by as many common tokens as possible).
+On the occasion, we perform **stemming** on our tokens to increase their congruency across documents (remember, we want our documents to be represented by as many common tokens as possible).
 `quanteda` has a built-in functionality that in turn calls `SnowballC`'s `wordStem` function:
 
 ```{r stem}
@@ -244,7 +244,7 @@ str(list_gpc)
 
 ```
 
-`quanteda` offers dedicated `dictionary` objects which allow for convenient look-up of `dfm`'s, so we convert the GPC to such a format:
+`quanteda` offers dedicated `dictionary` objects which allow for convenient look-up of `dfm`'s, so we convert the GPC to such a format (note that this operation also takes care of lowercasing):
 
 
 ```{r make_dict}
@@ -288,7 +288,7 @@ Good thing we did the emoji extraction before:
 
 ```{r emojis}
 
-# For this, we cannot operate on the texts but need to get the docvars of our corpus object where all non-text variables are stored
+# For this, we cannot operate on the texts but need to get the docvars where all non-text variables are stored
 
 twitter_docvars <- data.table::as.data.table(
   cbind(
@@ -310,15 +310,15 @@ twitter_emojis <- twitter_docvars[
     ][, emojis := NULL]
 
 list(
-  head(twitter_emojis),
-  table(twitter_emojis$n_emojis))
+  twitter_emojis = head(twitter_emojis),
+  distribution = table(twitter_emojis$n_emojis))
 
 ```
 
 ### Detect negation
 
 **Negation** handling with the bag-of-words assumption is difficult.
-There are more sophisticated approaches, but for the moment, we will simply note whether or not an expression of negation is present.
+There are more sophisticated approaches, but for this demo we will simply note whether or not an expression of negation is present.
 
 First, define negation indicators (and don't forget to clean):
 
@@ -418,7 +418,7 @@ head(twitter_char_unigrams)
 The last set of features we are going to extract are **part-of-speech (POS) tags**.
 Note that tagging must take place over the original documents, not some tokens representation agnostic to grammatical structures.
 
-We use the `spacyR` package, a wrapper around Python's `spaCy` package that is nicely integrated with `quanteda` (well, they have the same author after all).
+We use the `spacyR` package, a wrapper around Python's `spaCy` package that is nicely integrated with `quanteda` (well, they share the same author after all).
 This [vignette](https://cran.r-project.org/web/packages/spacyr/vignettes/using_spacyr.html) provides a quick intro.
 
 Note that setting this up can be a serious pain -- getting R and Python to work hand in hand on your local machine is hard sometimes.
@@ -454,7 +454,7 @@ twitter_pos_tags <- tweets_corpus_tagged[doc_id %in% twitter_docvars[, doc_id]]
 
 ```{r pos_3}
 
-head(twitter_pos_tags, 10L)
+head(twitter_pos_tags, 10)
 
 ```
 
@@ -510,6 +510,6 @@ head(twitter_features_static)
 
 ```
 
-**This provides us with a solid foundation for sentiment analysis! Of course we can think of many more features to include here -- we will see some more in the exercise; in general, be creative and see how classification can be improved by adding different explanatory variables.**
+**This provides us with a solid foundation for sentiment analysis! We now represent each document by a total of `r toString(ncol(twitter_features_static) - 1)` variables. Of course we can think of many more features to include here -- we will see some more in the exercise; in general, be creative and see how classification can be improved by adding different explanatory variables.**
 
 ![](screenshot_creative.svg.jpg)

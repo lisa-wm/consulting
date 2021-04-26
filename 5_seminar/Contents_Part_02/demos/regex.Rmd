@@ -1,6 +1,6 @@
 ---
 title: "Regular Expressions"
-author: "Asmik & Lisa - for Intro to NLP"
+author: "Asmik & Lisa -- for Intro to NLP"
 date: "30 April 2021"
 output:
   html_document: default
@@ -9,7 +9,7 @@ output:
 
 ![](../../Logo_Consulting.JPG)
 
-## Handling regular expressions
+## Handling Regular Expressions
 
 This demo is about **regular expressions (regex)**.
 
@@ -21,9 +21,11 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 
 ```{r setup_packages, message=FALSE}
+
 # Load required packages
 
-library("stringr")
+library(stringr)
+
 ```
 
 ### Disclaimer
@@ -35,9 +37,12 @@ You are free to use whatever works but it's certainly good practice to pick a st
 
 In any case do not hesitate to ask Google. Thanks to regex being present in many programming languages there is plenty of help out there.
 
-The [`stringr` vignette](https://cran.r-project.org/web/packages/stringr/vignettes/regular-expressions.html) provides a nice intro.
+The [`stringr` vignette](https://cran.r-project.org/web/packages/stringr/vignettes/regular-expressions.html) provides a nice intro, and the [R regex cheatsheet](https://www.rstudio.com/wp-content/uploads/2016/09/RegExCheatsheet.pdf) has all the important stuff nicely arranged at one glance.
 
 ### Identify
+
+We will work with `stringr` here as we consider it extensive and user-friendly.
+Most `stringr` functions take a character vector and a **pattern**.
 
 The most generic command to match regular patterns is probably `str_detect`, returning a boolean value indicating whether or not a string contains the specified pattern.
 
@@ -119,7 +124,7 @@ stringr::str_detect(
 ```{r identify_7}
 stringr::str_detect(
   string = "Wanna be my +1?", 
-  pattern = "\\+")
+  pattern = "\\+") # omitting the double backslashes will throw an error
 ```
 
 Now let's talk **repetitions**.
@@ -130,9 +135,9 @@ Basically, we have the following possibilities:
 * `*` repeat 0x or more
 * `+` repeat 1x or more
 * `{n}` repeat exactly n times
-* `{m,n}` repeat between m and n times
-* `{m,}` repeat at least m times
-* `{,n}` repeat at most n times
+* `{n,m}` repeat between n and m times
+* `{n,}` repeat at least n times
+* `{,m}` repeat at most m times
 
 Matches 3 p's in a row:
 
@@ -208,7 +213,7 @@ stringr::str_extract(
 
 ### Locate
 
-Besides detecting and extracting patterns, we sometimes need to know their exact location within a text.
+Besides detecting and extracting patterns, we sometimes need to know their exact **location** within a text.
 `str_locate` returns the beginning and end of the specified pattern (`NA` if the pattern is not detected).
 
 Make sure to allow for repetitions if needed:
@@ -232,9 +237,13 @@ In that case we use `str_locate_all` (`str_locate` only returns the location of 
 When in doubt, better go for `_all`.
 
 ```{r locate_3}
-stringr::str_locate_all(
-  string = c("I am Thorin son of Thrain son of Thror, King under the Mountain!"),
-  pattern = "of")
+
+string <- c("I am Thorin son of Thrain son of Thror, King under the Mountain!")
+
+list(
+  single = stringr::str_locate(string, pattern = "of"),
+  multiple = stringr::str_locate_all(string, pattern = "of"))
+
 ```
 
 ### Replace
@@ -243,7 +252,7 @@ Text cleaning will often require replacement of unwanted, leading or trailing se
 
 `^` and `$` are **anchors** indicating the beginning and end of a string, respectively.
 
-Replace leading 0's by an empty character (we could also use `str_remove_all` here): 
+Replace leading 0's by an empty character (note that we could also use `str_remove_all` here): 
 
 ```{r replace_1}
 
@@ -257,10 +266,12 @@ stringr::str_replace(
 Replace gender suffices by "x": 
 
 ```{r replace_2}
+
 stringr::str_replace(
-  string = c("Innenarchitektin", "Binnenschifffahrtskapitänin", "Professorinnen"),
-  pattern = "in(nen)?$",
+  string = c("Innenarchitektin", "Binnenschifffahrtskapitänin", "ProfessorInnen"),
+  pattern = "(I|i)n(nen)?$",
   replacement = "x")
+
 ```
 
 Besides the simple `^` and `$` there is another useful anchoring pattern, namely **look-arounds**. 
@@ -321,4 +332,4 @@ stringr::str_squish(
 ```
 
 
-**As you might have realized by now, handling regex is often simply trial-and-error (especially when you try to match more complex sequences). They will most certainly drive you crazy at some point or other, but they are a powerful and absolutely essential tool in text mining.**
+**As you might have realized by now, handling regex is often trial-and-error (especially when you try to match more complex sequences). They will most certainly drive you crazy at some point or other, but they are a powerful and absolutely essential tool in text mining.**

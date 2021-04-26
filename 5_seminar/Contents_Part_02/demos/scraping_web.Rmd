@@ -14,7 +14,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ```
 
-## Web Scraping from the IMDb website
+## Web Scraping from the IMDb Website
 
 This demo is about basic **web scraping**.
 
@@ -23,10 +23,10 @@ We show how to parse (static) HTML content, extract relevant information, and st
 ```{r setup_packages, message=FALSE, warning=FALSE}
 # Load required packages
 
-library("tidyverse")
-library("rvest")
-library("stringr")
-library("xml2")
+library(tidyverse)
+library(rvest)
+library(stringr)
+library(xml2)
 ```
 
 ### Get contents
@@ -41,11 +41,11 @@ Specify URL for desired website to be scraped (<http://www.imdb.com/chart/top?re
 
 ### Explore contents
 
-Website contents do not come in nice tabular form -- we need to access them using HTML nodes / CSS selectors.
+Website contents do not come in nice tabular form -- we need to access them using HTML nodes / CSS selectors (actual content is written in HTML, whereas CSS is responsible for style elements).
 
 HTML nodes can be found via the developer tab (F12) in Google Chrome or using helper tools like [SelectorGadget](https://selectorgadget.com/) (including video tutorial).
 
-Let's see what our IMDB website looks like using the developer tab.
+Let's see what our IMDb website looks like using the developer tab.
 Chrome offers a feature that lets us hover over the website and display the corresponding source code section.
 We inspect the title element "Top Rated Movies":
 
@@ -69,7 +69,7 @@ Using SelectorGadget once more, we find the movie titles to be stored in an elem
 Once we have found this (which might take a while if the website structure is nested, so prepare for some trial-and-error here), `rvest` makes the rest rather convenient:
 
 ```{r title}
-title_data <- rvest::html_nodes(url, '.titleColumn a') %>% 
+title_data <- rvest::html_nodes(url, ".titleColumn a") %>% 
   rvest::html_text()
 ```
 
@@ -84,7 +84,7 @@ In order to scrape the movies' year of release, we check again for the correspon
 ![](screenshot_devtool_2.PNG)
 
 ```{r year}
-year_data <- rvest::html_nodes(url, '.secondaryInfo') %>% 
+year_data <- rvest::html_nodes(url, ".secondaryInfo") %>% 
   rvest::html_text()
 ```
 
@@ -93,7 +93,7 @@ head(year_data)
 ```
 
 Most of the time, we will need to clean the data after scraping.
-Extract years without parentheses (more on regular expressions coming soon) and convert to numeric: 
+We extract the years without parentheses (more on regular expressions coming soon) and convert to numeric: 
 
 ```{r year_clean}
 
@@ -109,7 +109,7 @@ Now you know the selector drill, let's proceed to the movies' rankings.
 The rankings are stored within `.titleColumn` but the numbering does not have a separate selector.
 
 ```{r rank}
-rank_data <- rvest::html_nodes(url, '.titleColumn') %>% 
+rank_data <- rvest::html_nodes(url, ".titleColumn") %>% 
   rvest::html_text()
 ```
 
@@ -144,7 +144,7 @@ head(rank_data_clean)
 The ratings are easier to handle:
 
 ```{r rating}
-rating_data <- rvest::html_nodes(url, 'strong') %>% 
+rating_data <- rvest::html_nodes(url, "strong") %>% 
   rvest::html_text()
 
 head(rating_data)
@@ -168,9 +168,9 @@ We will use a `data.frame` here. If you need to handle large data, you might wan
 ```{r create_df}
 imdb_scraped_data <- data.frame(
   ranking = rank_data_clean,
-  title   = title_data,
-  year    = year_data_clean,
-  rating  = rating_data_clean)
+  title = title_data,
+  year = year_data_clean,
+  rating = rating_data_clean)
 
 head(imdb_scraped_data)
 ```
