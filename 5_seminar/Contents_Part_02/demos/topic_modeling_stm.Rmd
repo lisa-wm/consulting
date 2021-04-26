@@ -9,7 +9,7 @@ output:
 
 ![](../../Logo_Consulting.JPG)
 
-## Modeling topics with an STM
+## Modeling Topics with an STM
 
 This demo is about **topic modeling with a structural topic model (STM)**.
 
@@ -134,7 +134,7 @@ clean_and_stem(c("Döner", "Bereicherung", "kulinarischer", "Angebote"))
 
 ```
 
-For stopwords removal we retrace the steps taken in the static feature extraction:
+For **stopwords** removal we retrace the steps taken in the static feature extraction:
 
 ```{r stopwords}
 
@@ -206,12 +206,12 @@ The special trait of the STM is its making use of s document-level **meta data**
 
 We will use the following meta variables (smooth effects defaulting to B-splines):
 
-* `party` as a categorical variable
-* `bundesland` as a categorical variable
-* `unemployment_rate` as a smooth effect with 5 degrees of freedom
-* `share_pop_migration` as a smooth effect with 5 degrees of freedom
+* `party` as a categorical variable,
+* `bundesland` as a categorical variable,
+* `unemployment_rate` as a smooth effect with 5 degrees of freedom, and
+* `share_pop_migration` as a smooth effect with 5 degrees of freedom.
 
-The resulting formula, `~ party + bundesland + s(unemployment_rate, df = 5) + s(share_pop_migration, df = 5)`, is perfectly disputable -- this decision is up to domain knowledge and some trial-and-error, and we do not claim to use the ideal formula in this demo.
+The resulting formula, `~ party + bundesland + s(unemployment_rate, df = 5) + s(share_pop_migration, df = 5)`, is perfectly disputable -- this decision is up to domain knowledge and some trial-and-error.
 
 ```{r prevalence}
 
@@ -351,8 +351,6 @@ We have already seen the extreme sparsity of the `dfm`, and with documents that 
 This is also a consequence of our training data design: we have labels for relatively few, extremely short documents from a bunch of different authors.
 In reality, scraping gives us access to much larger amounts of data.
 
-So, consider this a technical demo, the interpretation part cannot be showcased very well anyway -- we just pretend to find a lot of meaning in the topics output by our STM.
-
 Next, let's take another look at our topics by a more visually appealing means: 
 
 ```{r int}
@@ -442,7 +440,7 @@ twitter_docvars[sample(twitter_docvars[, .I], 5)]
 
 ...and, lastly, feed this information back into the original corpus object to save it for further usage:
 
-```{r assigntopics_4}
+```{r assigntopics_4, eval = FALSE}
 
 # Insert info back into corpus
 
