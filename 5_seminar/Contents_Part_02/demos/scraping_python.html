@@ -16425,7 +16425,7 @@ div#notebook {
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[1]:</div>
+<div class="prompt input_prompt">In&nbsp;[33]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># Load libraries</span>
@@ -16450,7 +16450,8 @@ div#notebook {
 <span class="n">sys</span><span class="o">.</span><span class="n">setrecursionlimit</span><span class="p">(</span><span class="mi">100000</span><span class="p">)</span>
 
 <span class="kn">import</span> <span class="nn">selenium</span> <span class="c1"># chrome driver</span>
-<span class="kn">from</span> <span class="nn">selenium</span> <span class="kn">import</span> <span class="n">webdriver</span>
+<span class="kn">from</span> <span class="nn">selenium</span> <span class="kn">import</span> <span class="n">webdriver</span> <span class="c1"># chrome driver</span>
+<span class="kn">import</span> <span class="nn">selenium.common.exceptions</span> <span class="k">as</span> <span class="nn">selexcept</span> <span class="c1"># exception handling</span>
 </pre></div>
 
     </div>
@@ -16631,7 +16632,7 @@ div#notebook {
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[6]:</div>
+<div class="prompt input_prompt">In&nbsp;[9]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># Set up empty list</span>
@@ -16642,8 +16643,10 @@ div#notebook {
 
 <span class="k">for</span> <span class="n">link</span> <span class="ow">in</span> <span class="n">driver</span><span class="o">.</span><span class="n">find_element_by_class_name</span><span class="p">(</span><span class="s1">&#39;bt-list-holder&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">find_elements_by_tag_name</span><span class="p">(</span><span class="s1">&#39;li&#39;</span><span class="p">):</span>
     <span class="n">abg_df</span><span class="o">.</span><span class="n">append</span><span class="p">({</span>
-        <span class="s1">&#39;name&#39;</span><span class="p">:</span> <span class="n">link</span><span class="o">.</span><span class="n">find_element_by_class_name</span><span class="p">(</span><span class="s1">&#39;bt-teaser-person-text&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">find_element_by_tag_name</span><span class="p">(</span><span class="s1">&#39;h3&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">text</span><span class="p">,</span>
-        <span class="s1">&#39;party&#39;</span><span class="p">:</span> <span class="n">link</span><span class="o">.</span><span class="n">find_element_by_class_name</span><span class="p">(</span><span class="s1">&#39;bt-teaser-person-text&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">find_element_by_tag_name</span><span class="p">(</span><span class="s1">&#39;p&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">text</span><span class="p">,</span>
+        <span class="s1">&#39;name&#39;</span><span class="p">:</span> <span class="n">link</span><span class="o">.</span><span class="n">find_element_by_class_name</span><span class="p">(</span><span class="s1">&#39;bt-teaser-person-text&#39;</span><span class="p">)</span><span class="o">.</span>\
+        <span class="n">find_element_by_tag_name</span><span class="p">(</span><span class="s1">&#39;h3&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">text</span><span class="p">,</span>
+        <span class="s1">&#39;party&#39;</span><span class="p">:</span> <span class="n">link</span><span class="o">.</span><span class="n">find_element_by_class_name</span><span class="p">(</span><span class="s1">&#39;bt-teaser-person-text&#39;</span><span class="p">)</span><span class="o">.</span>\
+        <span class="n">find_element_by_tag_name</span><span class="p">(</span><span class="s1">&#39;p&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">text</span><span class="p">,</span>
     <span class="p">})</span>
     
 <span class="c1"># Convert to pandas dataframe    </span>
@@ -16658,7 +16661,7 @@ div#notebook {
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[7]:</div>
+<div class="prompt input_prompt">In&nbsp;[10]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># Separate names in first and last names</span>
@@ -16678,12 +16681,13 @@ div#notebook {
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[8]:</div>
+<div class="prompt input_prompt">In&nbsp;[11]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># Add columns for infors that will be scraped shortly</span>
+
 <span class="n">abg_df</span> <span class="o">=</span> <span class="n">abg_df</span><span class="o">.</span><span class="n">reindex</span><span class="p">(</span><span class="n">columns</span> <span class="o">=</span> <span class="n">abg_df</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span> <span class="o">+</span> 
-                        <span class="p">[</span><span class="s1">&#39;bundesland&#39;</span><span class="p">,</span> <span class="s1">&#39;wahlkreis_name&#39;</span><span class="p">,</span> <span class="s1">&#39;wahlkreis_nr&#39;</span><span class="p">,</span> <span class="s1">&#39;wahlkreis&#39;</span><span class="p">,</span> <span class="s1">&#39;twitter&#39;</span><span class="p">])</span>
+                        <span class="p">[</span><span class="s1">&#39;bundesland&#39;</span><span class="p">,</span> <span class="s1">&#39;wahlkreis_name&#39;</span><span class="p">,</span> <span class="s1">&#39;wahlkreis_nr&#39;</span><span class="p">,</span> <span class="s1">&#39;wahlkreis&#39;</span><span class="p">,</span> <span class="s1">&#39;username&#39;</span><span class="p">])</span>
 
 <span class="c1"># Inspect</span>
 
@@ -16700,7 +16704,7 @@ div#notebook {
 
 <div class="output_area">
 
-    <div class="prompt output_prompt">Out[8]:</div>
+    <div class="prompt output_prompt">Out[11]:</div>
 
 
 
@@ -16730,7 +16734,7 @@ div#notebook {
       <th>wahlkreis_name</th>
       <th>wahlkreis_nr</th>
       <th>wahlkreis</th>
-      <th>twitter</th>
+      <th>username</th>
     </tr>
   </thead>
   <tbody>
@@ -16818,7 +16822,7 @@ div#notebook {
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[9]:</div>
+<div class="prompt input_prompt">In&nbsp;[31]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># Create range to loop over</span>
@@ -16837,16 +16841,16 @@ div#notebook {
 
 <div class="output_area">
 
-    <div class="prompt output_prompt">Out[9]:</div>
+    <div class="prompt output_prompt">Out[31]:</div>
 
 
 
 
 <div class="output_text output_subarea output_execute_result">
-<pre>Int64Index([  0,   1,   2,   3,   4,   5,   6,   7,   8,   9,
+<pre>Int64Index([ 10,  11,  12,  13,  14,  15,  16,  17,  18,  19,
             ...
             733, 734, 735, 736, 737, 738, 739, 740, 741, 742],
-           dtype=&#39;int64&#39;, length=743)</pre>
+           dtype=&#39;int64&#39;, length=733)</pre>
 </div>
 
 </div>
@@ -16857,7 +16861,7 @@ div#notebook {
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[10]:</div>
+<div class="prompt input_prompt">In&nbsp;[34]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">for</span> <span class="n">abg</span> <span class="ow">in</span> <span class="n">abg_range</span><span class="p">:</span>
@@ -16865,39 +16869,48 @@ div#notebook {
     <span class="k">try</span><span class="p">:</span>
         
         <span class="c1"># (Re-)load list view (for all iterations)</span>
+        
         <span class="n">driver</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">website</span><span class="p">)</span>
         <span class="n">element</span> <span class="o">=</span> <span class="n">driver</span><span class="o">.</span><span class="n">find_element_by_class_name</span><span class="p">(</span><span class="s1">&#39;icon-list-bullet&#39;</span><span class="p">)</span>
         
         <span class="c1"># Click to change to list view</span>
+        
         <span class="n">webdriver</span><span class="o">.</span><span class="n">ActionChains</span><span class="p">(</span><span class="n">driver</span><span class="p">)</span><span class="o">.</span><span class="n">move_to_element</span><span class="p">(</span><span class="n">element</span><span class="p">)</span><span class="o">.</span><span class="n">click</span><span class="p">(</span><span class="n">element</span><span class="p">)</span><span class="o">.</span><span class="n">perform</span><span class="p">()</span> 
         
         <span class="c1"># Wait for list view to load</span>
+        
         <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">5</span><span class="p">))</span> 
         
         <span class="c1"># Click to open individual page</span>
-        <span class="n">driver</span><span class="o">.</span><span class="n">find_element_by_class_name</span><span class="p">(</span><span class="s1">&#39;bt-list-holder&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">find_elements_by_tag_name</span><span class="p">(</span><span class="s1">&#39;li&#39;</span><span class="p">)[</span><span class="n">abg</span><span class="p">]</span><span class="o">.</span><span class="n">click</span><span class="p">()</span>
+        
+        <span class="n">driver</span><span class="o">.</span><span class="n">find_element_by_class_name</span><span class="p">(</span><span class="s1">&#39;bt-list-holder&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">find_elements_by_tag_name</span><span class="p">(</span><span class="s1">&#39;li&#39;</span><span class="p">)</span>\
+        <span class="p">[</span><span class="n">abg</span><span class="p">]</span><span class="o">.</span><span class="n">click</span><span class="p">()</span>
         
         <span class="c1"># Wait for page to load</span>
+        
         <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">5</span><span class="p">))</span> 
         
         <span class="c1"># Convert page to soup</span>
+        
         <span class="n">soup</span> <span class="o">=</span> <span class="n">BeautifulSoup</span><span class="p">(</span><span class="n">driver</span><span class="o">.</span><span class="n">page_source</span><span class="p">,</span> <span class="s1">&#39;lxml&#39;</span><span class="p">)</span> 
 
         <span class="c1"># Extract state (bundesland) and electoral district (wahlkreis)</span>
+        
         <span class="n">bundesland</span> <span class="o">=</span> <span class="n">soup</span><span class="o">.</span><span class="n">find</span><span class="p">(</span>
             <span class="s1">&#39;div&#39;</span><span class="p">,</span> <span class="n">attrs</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;class&#39;</span><span class="p">:</span> <span class="s1">&#39;col-xs-12 col-sm-6 bt-standard-content&#39;</span><span class="p">})</span><span class="o">.</span><span class="n">h5</span><span class="o">.</span><span class="n">text</span>
         <span class="n">wahlkreis</span> <span class="o">=</span> <span class="n">soup</span><span class="o">.</span><span class="n">find</span><span class="p">(</span>
             <span class="s1">&#39;div&#39;</span><span class="p">,</span> <span class="n">attrs</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;class&#39;</span><span class="p">:</span> <span class="s1">&#39;col-xs-12 col-sm-6 bt-standard-content&#39;</span><span class="p">})</span><span class="o">.</span><span class="n">a</span><span class="o">.</span><span class="n">text</span> \
             <span class="k">if</span> <span class="n">soup</span><span class="o">.</span><span class="n">find</span><span class="p">(</span>
-            <span class="s1">&#39;div&#39;</span><span class="p">,</span> <span class="n">attrs</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;class&#39;</span><span class="p">:</span> <span class="s1">&#39;col-xs-12 col-sm-6 bt-standard-content&#39;</span><span class="p">})</span><span class="o">.</span><span class="n">a</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> \ 
+            <span class="s1">&#39;div&#39;</span><span class="p">,</span> <span class="n">attrs</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;class&#39;</span><span class="p">:</span> <span class="s1">&#39;col-xs-12 col-sm-6 bt-standard-content&#39;</span><span class="p">})</span><span class="o">.</span><span class="n">a</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> \
             <span class="k">else</span> <span class="s2">&quot;n.a.&quot;</span>
 
         <span class="c1"># Split wahlkreis in name and ID</span>
-        <span class="n">wahlkreis_name</span> <span class="o">=</span> <span class="n">wahlkreis</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;:&#39;</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s1">&#39; &#39;</span><span class="p">)</span> <span class="k">if</span> <span class="n">wahlkreis</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;n.a.&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> \ 
-            <span class="k">else</span> <span class="s2">&quot;&quot;</span>
+        
+        <span class="n">wahlkreis_name</span> <span class="o">=</span> <span class="n">wahlkreis</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;:&#39;</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s1">&#39; &#39;</span><span class="p">)</span> <span class="k">if</span> <span class="n">wahlkreis</span> \
+        <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;n.a.&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="k">else</span> <span class="s2">&quot;&quot;</span>
         <span class="n">wahlkreis_nr</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span>
-            <span class="n">wahlkreis</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;:&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s1">&#39;Wahlkreis&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">))</span> <span class="k">if</span> <span class="n">wahlkreis</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;n.a.&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> \ 
-            <span class="k">else</span> <span class="s2">&quot;&quot;</span>
+            <span class="n">wahlkreis</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;:&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s1">&#39;Wahlkreis&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">))</span> <span class="k">if</span> <span class="n">wahlkreis</span> \
+            <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;n.a.&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="k">else</span> <span class="s2">&quot;&quot;</span>
         
         <span class="c1"># Extract social media account</span>
         
@@ -16911,13 +16924,14 @@ div#notebook {
         <span class="n">abg_df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">abg</span><span class="p">,</span> <span class="s1">&#39;wahlkreis&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">wahlkreis</span>
         <span class="n">abg_df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">abg</span><span class="p">,</span> <span class="s1">&#39;wahlkreis_name&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">wahlkreis_name</span>
         <span class="n">abg_df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">abg</span><span class="p">,</span> <span class="s1">&#39;wahlkreis_nr&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">wahlkreis_nr</span>
-        <span class="n">abg_df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">abg</span><span class="p">,</span> <span class="s1">&#39;twitter&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">social_media</span><span class="p">[</span><span class="s1">&#39;Twitter&#39;</span><span class="p">]</span> <span class="k">if</span> <span class="s1">&#39;Twitter&#39;</span> <span class="ow">in</span> <span class="n">social_media</span> <span class="k">else</span> <span class="s2">&quot;&quot;</span>
+        <span class="n">abg_df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">abg</span><span class="p">,</span> <span class="s1">&#39;username&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">social_media</span><span class="p">[</span><span class="s1">&#39;Twitter&#39;</span><span class="p">]</span> <span class="k">if</span> <span class="s1">&#39;Twitter&#39;</span> <span class="ow">in</span> <span class="n">social_media</span> <span class="k">else</span> <span class="s2">&quot;&quot;</span>
         
         <span class="k">if</span> <span class="n">abg</span><span class="o">%</span><span class="k">20</span> == 0:
             <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Data for MP </span><span class="si">%s</span><span class="s1"> successfully retrieved&#39;</span> <span class="o">%</span><span class="k">abg</span>)
         
     <span class="c1"># In case of IndexError or AttributeError, which occurs if page fails to load, try again</span>
-    <span class="k">except</span> <span class="p">(</span><span class="ne">IndexError</span><span class="p">,</span> <span class="ne">AttributeError</span><span class="p">):</span>
+    
+    <span class="k">except</span> <span class="p">(</span><span class="ne">IndexError</span><span class="p">,</span> <span class="ne">AttributeError</span><span class="p">,</span> <span class="n">selexcept</span><span class="o">.</span><span class="n">NoSuchElementException</span><span class="p">):</span>
         <span class="n">abg_range</span> <span class="o">=</span> <span class="n">abg_df</span><span class="o">.</span><span class="n">index</span><span class="p">[</span><span class="n">abg_df</span><span class="p">[</span><span class="s1">&#39;bundesland&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">isnull</span><span class="p">()]</span>
         
 <span class="n">ctypes</span><span class="o">.</span><span class="n">windll</span><span class="o">.</span><span class="n">user32</span><span class="o">.</span><span class="n">MessageBoxW</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;MP data successfully scraped&quot;</span><span class="p">,</span> <span class="s2">&quot;Progress Report&quot;</span><span class="p">)</span>  
@@ -16937,36 +16951,42 @@ div#notebook {
 
 
 <div class="output_subarea output_stream output_stdout output_text">
-<pre>Data for MP 0 successfully retrieved
-Data for MP 20 successfully retrieved
-Data for MP 40 successfully retrieved
+<pre>Data for MP 20 successfully retrieved
 Data for MP 60 successfully retrieved
+Data for MP 100 successfully retrieved
+Data for MP 120 successfully retrieved
 Data for MP 140 successfully retrieved
 Data for MP 160 successfully retrieved
-Data for MP 200 successfully retrieved
+Data for MP 180 successfully retrieved
+Data for MP 220 successfully retrieved
+Data for MP 240 successfully retrieved
+Data for MP 260 successfully retrieved
 Data for MP 280 successfully retrieved
 Data for MP 300 successfully retrieved
 Data for MP 320 successfully retrieved
-Data for MP 380 successfully retrieved
+Data for MP 340 successfully retrieved
+Data for MP 360 successfully retrieved
 Data for MP 400 successfully retrieved
 Data for MP 420 successfully retrieved
 Data for MP 480 successfully retrieved
+Data for MP 500 successfully retrieved
 Data for MP 520 successfully retrieved
-Data for MP 540 successfully retrieved
 Data for MP 560 successfully retrieved
 Data for MP 580 successfully retrieved
 Data for MP 600 successfully retrieved
+Data for MP 620 successfully retrieved
+Data for MP 640 successfully retrieved
 Data for MP 660 successfully retrieved
+Data for MP 680 successfully retrieved
 Data for MP 700 successfully retrieved
 Data for MP 720 successfully retrieved
-Data for MP 740 successfully retrieved
 </pre>
 </div>
 </div>
 
 <div class="output_area">
 
-    <div class="prompt output_prompt">Out[10]:</div>
+    <div class="prompt output_prompt">Out[34]:</div>
 
 
 
@@ -16983,7 +17003,7 @@ Data for MP 740 successfully retrieved
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[11]:</div>
+<div class="prompt input_prompt">In&nbsp;[35]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">abg_df</span><span class="o">.</span><span class="n">head</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
@@ -16999,7 +17019,7 @@ Data for MP 740 successfully retrieved
 
 <div class="output_area">
 
-    <div class="prompt output_prompt">Out[11]:</div>
+    <div class="prompt output_prompt">Out[35]:</div>
 
 
 
@@ -17029,7 +17049,7 @@ Data for MP 740 successfully retrieved
       <th>wahlkreis_name</th>
       <th>wahlkreis_nr</th>
       <th>wahlkreis</th>
-      <th>twitter</th>
+      <th>username</th>
     </tr>
   </thead>
   <tbody>
@@ -17104,11 +17124,11 @@ Data for MP 740 successfully retrieved
       <td>Altenkamp</td>
       <td>Norbert</td>
       <td>CDU/CSU</td>
-      <td>NaN</td>
-      <td>NaN</td>
-      <td>NaN</td>
-      <td>NaN</td>
-      <td>NaN</td>
+      <td>Hessen</td>
+      <td>Main-Taunus</td>
+      <td>181</td>
+      <td>Wahlkreis 181: Main-Taunus</td>
+      <td></td>
     </tr>
     <tr>
       <th>7</th>
@@ -17187,7 +17207,7 @@ Data for MP 740 successfully retrieved
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[12]:</div>
+<div class="prompt input_prompt">In&nbsp;[36]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># Access party websites and convert into soups </span>
@@ -17229,7 +17249,7 @@ Data for MP 740 successfully retrieved
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[13]:</div>
+<div class="prompt input_prompt">In&nbsp;[37]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># For each party, find appropriate parent node in soup</span>
@@ -17274,7 +17294,7 @@ Data for MP 740 successfully retrieved
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[14]:</div>
+<div class="prompt input_prompt">In&nbsp;[38]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># Scrape accounts from soups </span>
@@ -17287,7 +17307,7 @@ Data for MP 740 successfully retrieved
     
     <span class="n">twitter</span> <span class="o">=</span> <span class="n">abg</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="n">class_</span> <span class="o">=</span> <span class="s1">&#39;twitter&#39;</span><span class="p">)</span>
     <span class="n">twitter_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-        <span class="p">{</span><span class="s1">&#39;party&#39;</span><span class="p">:</span> <span class="s2">&quot;CDU/CSU&quot;</span><span class="p">,</span>
+        <span class="p">{</span><span class="s1">&#39;party&#39;</span><span class="p">:</span> <span class="s2">&quot;cdu_csu&quot;</span><span class="p">,</span>
          <span class="s1">&#39;name&#39;</span><span class="p">:</span> <span class="n">abg</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s1">&#39;h2&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s1">&#39;span&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">text</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s1">&#39; &#39;</span><span class="p">),</span>
          <span class="s1">&#39;twitter_ext&#39;</span><span class="p">:</span> <span class="n">twitter</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s1">&#39;a&#39;</span><span class="p">,</span> <span class="n">href</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)[</span><span class="s1">&#39;href&#39;</span><span class="p">]</span> <span class="k">if</span> <span class="n">twitter</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="s2">&quot;&quot;</span>
         <span class="p">}</span>
@@ -17317,7 +17337,7 @@ Data for MP 740 successfully retrieved
                     <span class="n">twitter</span> <span class="o">=</span> <span class="n">i</span>
                     
     <span class="n">twitter_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>           
-        <span class="p">{</span><span class="s1">&#39;party&#39;</span><span class="p">:</span> <span class="s2">&quot;Bündnis 90/Die Grünen&quot;</span><span class="p">,</span>
+        <span class="p">{</span><span class="s1">&#39;party&#39;</span><span class="p">:</span> <span class="s2">&quot;gruene&quot;</span><span class="p">,</span>
          <span class="s1">&#39;name&#39;</span><span class="p">:</span> <span class="n">abg_soup</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s1">&#39;h1&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">text</span><span class="p">,</span>
          <span class="s1">&#39;twitter_ext&#39;</span><span class="p">:</span> <span class="n">twitter</span>
         <span class="p">}</span>
@@ -17331,7 +17351,7 @@ Data for MP 740 successfully retrieved
     <span class="n">abg_soup</span> <span class="o">=</span> <span class="n">BeautifulSoup</span><span class="p">(</span><span class="n">abg_source</span><span class="p">,</span> <span class="s1">&#39;html.parser&#39;</span><span class="p">)</span>
     <span class="n">twitter</span> <span class="o">=</span> <span class="n">abg_soup</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s1">&#39;a&#39;</span><span class="p">,</span> <span class="n">text</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="s1">&#39;Twitter-Profil&#39;</span><span class="p">))</span>
     <span class="n">twitter_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-        <span class="p">{</span><span class="s1">&#39;party&#39;</span><span class="p">:</span> <span class="s2">&quot;Die Linke&quot;</span><span class="p">,</span>
+        <span class="p">{</span><span class="s1">&#39;party&#39;</span><span class="p">:</span> <span class="s2">&quot;linke&quot;</span><span class="p">,</span>
          <span class="s1">&#39;name&#39;</span><span class="p">:</span> <span class="n">abg_soup</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s1">&#39;h1&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">text</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s1">&#39; &#39;</span><span class="p">),</span>
          <span class="s1">&#39;twitter_ext&#39;</span><span class="p">:</span> <span class="n">twitter</span><span class="p">[</span><span class="s1">&#39;href&#39;</span><span class="p">]</span> <span class="k">if</span> <span class="n">twitter</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="s2">&quot;&quot;</span>
         <span class="p">}</span>
@@ -17343,7 +17363,7 @@ Data for MP 740 successfully retrieved
     
     <span class="n">twitter</span> <span class="o">=</span> <span class="n">abg</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="n">class_</span> <span class="o">=</span> <span class="s1">&#39;ico_twitter&#39;</span><span class="p">)</span>
     <span class="n">twitter_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-        <span class="p">{</span><span class="s1">&#39;party&#39;</span><span class="p">:</span> <span class="s2">&quot;SPD&quot;</span><span class="p">,</span>
+        <span class="p">{</span><span class="s1">&#39;party&#39;</span><span class="p">:</span> <span class="s2">&quot;spd&quot;</span><span class="p">,</span>
          <span class="s1">&#39;name&#39;</span><span class="p">:</span> <span class="n">abg</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s1">&#39;h3&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s1">&#39;a&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">get_text</span><span class="p">()</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s1">&#39; &#39;</span><span class="p">),</span>
          <span class="s1">&#39;twitter_ext&#39;</span><span class="p">:</span> <span class="n">twitter</span><span class="p">[</span><span class="s1">&#39;href&#39;</span><span class="p">]</span> <span class="k">if</span> <span class="n">twitter</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="s2">&quot;&quot;</span>
         <span class="p">}</span>
@@ -17366,7 +17386,7 @@ Data for MP 740 successfully retrieved
 
 <div class="output_area">
 
-    <div class="prompt output_prompt">Out[14]:</div>
+    <div class="prompt output_prompt">Out[38]:</div>
 
 
 
@@ -17383,7 +17403,7 @@ Data for MP 740 successfully retrieved
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[15]:</div>
+<div class="prompt input_prompt">In&nbsp;[39]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">twitter_df</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
@@ -17399,7 +17419,7 @@ Data for MP 740 successfully retrieved
 
 <div class="output_area">
 
-    <div class="prompt output_prompt">Out[15]:</div>
+    <div class="prompt output_prompt">Out[39]:</div>
 
 
 
@@ -17430,31 +17450,31 @@ Data for MP 740 successfully retrieved
   <tbody>
     <tr>
       <th>0</th>
-      <td>Bündnis 90/Die Grünen</td>
+      <td>gruene</td>
       <td>Luise  Amtsberg</td>
       <td></td>
     </tr>
     <tr>
       <th>1</th>
-      <td>Bündnis 90/Die Grünen</td>
+      <td>gruene</td>
       <td>Lisa  Badum</td>
       <td>https://twitter.com/badulrichmartha</td>
     </tr>
     <tr>
       <th>2</th>
-      <td>Bündnis 90/Die Grünen</td>
+      <td>gruene</td>
       <td>Annalena  Baerbock</td>
       <td>https://twitter.com/ABaerbock</td>
     </tr>
     <tr>
       <th>3</th>
-      <td>Bündnis 90/Die Grünen</td>
+      <td>gruene</td>
       <td>Margarete  Bause</td>
       <td>https://twitter.com/MargareteBause</td>
     </tr>
     <tr>
       <th>4</th>
-      <td>Bündnis 90/Die Grünen</td>
+      <td>gruene</td>
       <td>Dr. Danyal  Bayaz</td>
       <td>https://twitter.com/derdanyal</td>
     </tr>
@@ -17486,7 +17506,7 @@ Data for MP 740 successfully retrieved
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[16]:</div>
+<div class="prompt input_prompt">In&nbsp;[40]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">name_prep</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">twitter</span> <span class="o">=</span> <span class="kc">True</span><span class="p">):</span>
@@ -17533,12 +17553,12 @@ Data for MP 740 successfully retrieved
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[17]:</div>
+<div class="prompt input_prompt">In&nbsp;[42]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># Check whether it works</span>
 
-<span class="n">name_prep</span><span class="p">(</span><span class="n">name</span> <span class="o">=</span> <span class="s1">&#39;Prof. Dr. Dr. rer. nat. Carl Friedrich Gauss&#39;</span><span class="p">)</span>
+<span class="n">name_prep</span><span class="p">(</span><span class="n">name</span> <span class="o">=</span> <span class="s1">&#39;Prof. Dr. Dr. rer. nat. Carl Friedrich Gauss&#39;</span><span class="p">,</span> <span class="n">twitter</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span>
 </pre></div>
 
     </div>
@@ -17551,7 +17571,7 @@ Data for MP 740 successfully retrieved
 
 <div class="output_area">
 
-    <div class="prompt output_prompt">Out[17]:</div>
+    <div class="prompt output_prompt">Out[42]:</div>
 
 
 
@@ -17576,7 +17596,7 @@ Data for MP 740 successfully retrieved
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[18]:</div>
+<div class="prompt input_prompt">In&nbsp;[44]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># Prepare MP names from Twitter df for name-based matching</span>
@@ -17591,13 +17611,13 @@ Data for MP 740 successfully retrieved
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[19]:</div>
+<div class="prompt input_prompt">In&nbsp;[45]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># Prepare MP names from MP df for name-based matching</span>
 
-<span class="n">abg_df</span><span class="p">[</span><span class="s1">&#39;name_matching&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">abg_df</span><span class="p">[</span><span class="s1">&#39;first_name&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">name_prep</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39; &#39;</span> <span class="o">+</span> \
-<span class="n">abg_df</span><span class="p">[</span><span class="s1">&#39;last_name&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">name_prep</span><span class="p">)</span>
+<span class="n">abg_df</span><span class="p">[</span><span class="s1">&#39;name_matching&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">abg_df</span><span class="p">[</span><span class="s1">&#39;first_name&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">name_prep</span><span class="p">,</span> <span class="n">twitter</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39; &#39;</span> <span class="o">+</span> \
+<span class="n">abg_df</span><span class="p">[</span><span class="s1">&#39;last_name&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">name_prep</span><span class="p">,</span> <span class="n">twitter</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span>
 </pre></div>
 
     </div>
@@ -17615,7 +17635,7 @@ Data for MP 740 successfully retrieved
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[20]:</div>
+<div class="prompt input_prompt">In&nbsp;[47]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># Merge Twitter df and MP df</span>
@@ -17628,9 +17648,9 @@ Data for MP 740 successfully retrieved
     <span class="n">right_on</span> <span class="o">=</span> <span class="s1">&#39;name_matching&#39;</span>
 <span class="p">)</span>
 
-<span class="n">abg_twitter_df</span><span class="p">[</span><span class="s1">&#39;twitter&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span>
-    <span class="n">abg_twitter_df</span><span class="p">[</span><span class="s1">&#39;twitter&#39;</span><span class="p">]</span> <span class="o">!=</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> 
-    <span class="n">abg_twitter_df</span><span class="p">[</span><span class="s1">&#39;twitter&#39;</span><span class="p">],</span> 
+<span class="n">abg_twitter_df</span><span class="p">[</span><span class="s1">&#39;username&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span>
+    <span class="n">abg_twitter_df</span><span class="p">[</span><span class="s1">&#39;username&#39;</span><span class="p">]</span> <span class="o">!=</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> 
+    <span class="n">abg_twitter_df</span><span class="p">[</span><span class="s1">&#39;username&#39;</span><span class="p">],</span> 
     <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
 <span class="p">)</span>
 
@@ -17648,7 +17668,7 @@ Data for MP 740 successfully retrieved
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[21]:</div>
+<div class="prompt input_prompt">In&nbsp;[48]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">abg_twitter_df</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
@@ -17664,7 +17684,7 @@ Data for MP 740 successfully retrieved
 
 <div class="output_area">
 
-    <div class="prompt output_prompt">Out[21]:</div>
+    <div class="prompt output_prompt">Out[48]:</div>
 
 
 
@@ -17694,7 +17714,7 @@ Data for MP 740 successfully retrieved
       <th>wahlkreis_name</th>
       <th>wahlkreis_nr</th>
       <th>wahlkreis</th>
-      <th>twitter</th>
+      <th>username</th>
       <th>name_matching</th>
       <th>twitter_ext</th>
     </tr>
@@ -17710,7 +17730,7 @@ Data for MP 740 successfully retrieved
       <td>7</td>
       <td>Wahlkreis 007: Pinneberg</td>
       <td>https://twitter.com/mvabercron/</td>
-      <td>Michael von Abercron</td>
+      <td>Michael Abercron</td>
       <td>NaN</td>
     </tr>
     <tr>
@@ -17786,15 +17806,15 @@ Data for MP 740 successfully retrieved
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[22]:</div>
+<div class="prompt input_prompt">In&nbsp;[49]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># Impute account name from Bundestag website where necessary and available</span>
 
-<span class="n">abg_twitter_df</span><span class="p">[</span><span class="s1">&#39;twitter&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span>
+<span class="n">abg_twitter_df</span><span class="p">[</span><span class="s1">&#39;username&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span>
     <span class="n">abg_twitter_df</span><span class="p">[</span><span class="s1">&#39;twitter_ext&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">notnull</span><span class="p">(),</span> 
     <span class="n">abg_twitter_df</span><span class="p">[</span><span class="s1">&#39;twitter_ext&#39;</span><span class="p">],</span> 
-    <span class="n">abg_twitter_df</span><span class="p">[</span><span class="s1">&#39;twitter&#39;</span><span class="p">])</span>
+    <span class="n">abg_twitter_df</span><span class="p">[</span><span class="s1">&#39;username&#39;</span><span class="p">])</span>
 
 <span class="n">abg_twitter_df</span> <span class="o">=</span> <span class="n">abg_twitter_df</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="s1">&#39;twitter_ext&#39;</span><span class="p">,</span> <span class="n">axis</span> <span class="o">=</span> <span class="mi">1</span><span class="p">)</span>
 </pre></div>
@@ -17806,7 +17826,7 @@ Data for MP 740 successfully retrieved
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[23]:</div>
+<div class="prompt input_prompt">In&nbsp;[50]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">abg_twitter_df</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
@@ -17822,7 +17842,7 @@ Data for MP 740 successfully retrieved
 
 <div class="output_area">
 
-    <div class="prompt output_prompt">Out[23]:</div>
+    <div class="prompt output_prompt">Out[50]:</div>
 
 
 
@@ -17852,7 +17872,7 @@ Data for MP 740 successfully retrieved
       <th>wahlkreis_name</th>
       <th>wahlkreis_nr</th>
       <th>wahlkreis</th>
-      <th>twitter</th>
+      <th>username</th>
       <th>name_matching</th>
     </tr>
   </thead>
@@ -17867,7 +17887,7 @@ Data for MP 740 successfully retrieved
       <td>7</td>
       <td>Wahlkreis 007: Pinneberg</td>
       <td>https://twitter.com/mvabercron/</td>
-      <td>Michael von Abercron</td>
+      <td>Michael Abercron</td>
     </tr>
     <tr>
       <th>1</th>
@@ -17945,7 +17965,7 @@ Data for MP 740 successfully retrieved
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[24]:</div>
+<div class="prompt input_prompt">In&nbsp;[51]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># Define function to extract usernames</span>
@@ -17965,16 +17985,140 @@ Data for MP 740 successfully retrieved
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[25]:</div>
+<div class="prompt input_prompt">In&nbsp;[52]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># Apply to all observations with existing account URL</span>
 
-<span class="n">mask</span> <span class="o">=</span> <span class="n">abg_twitter_df</span><span class="p">[</span><span class="s1">&#39;twitter&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">notnull</span><span class="p">()</span>
-<span class="n">abg_twitter_df</span><span class="p">[</span><span class="s1">&#39;twitter&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">abg_twitter_df</span><span class="p">[</span><span class="s1">&#39;twitter&#39;</span><span class="p">][</span><span class="n">mask</span><span class="p">]</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">get_username</span><span class="p">)</span>
+<span class="n">mask</span> <span class="o">=</span> <span class="n">abg_twitter_df</span><span class="p">[</span><span class="s1">&#39;username&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">notnull</span><span class="p">()</span>
+<span class="n">abg_twitter_df</span><span class="p">[</span><span class="s1">&#39;username&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">abg_twitter_df</span><span class="p">[</span><span class="s1">&#39;username&#39;</span><span class="p">][</span><span class="n">mask</span><span class="p">]</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">get_username</span><span class="p">)</span>
 </pre></div>
 
     </div>
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[53]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">abg_twitter_df</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt output_prompt">Out[53]:</div>
+
+
+
+<div class="output_html rendered_html output_subarea output_execute_result">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>last_name</th>
+      <th>first_name</th>
+      <th>party</th>
+      <th>bundesland</th>
+      <th>wahlkreis_name</th>
+      <th>wahlkreis_nr</th>
+      <th>wahlkreis</th>
+      <th>username</th>
+      <th>name_matching</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>Abercron</td>
+      <td>Dr. Michael von</td>
+      <td>CDU/CSU</td>
+      <td>Schleswig-Holstein</td>
+      <td>Pinneberg</td>
+      <td>7</td>
+      <td>Wahlkreis 007: Pinneberg</td>
+      <td>mvabercron</td>
+      <td>Michael Abercron</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>Achelwilm</td>
+      <td>Doris</td>
+      <td>Die Linke</td>
+      <td>Bremen</td>
+      <td></td>
+      <td></td>
+      <td>n.a.</td>
+      <td>doris_achelwilm</td>
+      <td>Doris Achelwilm</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>Aggelidis</td>
+      <td>Grigorios</td>
+      <td>FDP</td>
+      <td>Niedersachsen</td>
+      <td>Hannover-Land I</td>
+      <td>43</td>
+      <td>Wahlkreis 043: Hannover-Land I</td>
+      <td>aggelidis_fdp</td>
+      <td>Grigorios Aggelidis</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>Akbulut</td>
+      <td>Gökay</td>
+      <td>Die Linke</td>
+      <td>Baden-Württemberg</td>
+      <td>Mannheim</td>
+      <td>275</td>
+      <td>Wahlkreis 275: Mannheim</td>
+      <td>akbulutgokay</td>
+      <td>Gokay Akbulut</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>Albani</td>
+      <td>Stephan</td>
+      <td>CDU/CSU</td>
+      <td>Niedersachsen</td>
+      <td>Oldenburg – Ammerland</td>
+      <td>27</td>
+      <td>Wahlkreis 027: Oldenburg – Ammerland</td>
+      <td>NaN</td>
+      <td>Stephan Albani</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+</div>
+
+</div>
+
 </div>
 </div>
 
@@ -18010,7 +18154,7 @@ Data for MP 740 successfully retrieved
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[26]:</div>
+<div class="prompt input_prompt">In&nbsp;[55]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># Function to download tweets for a specific user with Tweepy</span>
@@ -18018,6 +18162,7 @@ Data for MP 740 successfully retrieved
 <span class="k">def</span> <span class="nf">download_tweets_tweepy_mod</span><span class="p">(</span><span class="n">username</span><span class="p">):</span>
     
     <span class="c1"># Helper function to check whether tweet is retweet</span>
+    
     <span class="k">def</span> <span class="nf">is_retweet</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="n">res</span> <span class="o">=</span> <span class="ow">not</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>
@@ -18026,21 +18171,25 @@ Data for MP 740 successfully retrieved
         <span class="k">return</span><span class="p">(</span><span class="n">res</span><span class="p">)</span>
 
     <span class="c1"># Helper function to retrieve hashtags</span>
+    
     <span class="k">def</span> <span class="nf">get_hashtags</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
         <span class="n">hashtags_dict</span> <span class="o">=</span> <span class="n">x</span><span class="p">[</span><span class="s1">&#39;hashtags&#39;</span><span class="p">]</span>
         <span class="n">hashtags_text</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span><span class="p">[</span><span class="s1">&#39;text&#39;</span><span class="p">]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">hashtags_dict</span><span class="p">]</span>
         <span class="k">return</span><span class="p">(</span><span class="n">hashtags_text</span><span class="p">)</span>
 
     <span class="c1"># Helper function to retrieve user mentions</span>
+    
     <span class="k">def</span> <span class="nf">get_mentions</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
         <span class="n">mentions_dict</span> <span class="o">=</span> <span class="n">x</span><span class="p">[</span><span class="s1">&#39;user_mentions&#39;</span><span class="p">]</span>
         <span class="n">mentions_text</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span><span class="p">[</span><span class="s1">&#39;screen_name&#39;</span><span class="p">]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">mentions_dict</span><span class="p">]</span>
         <span class="k">return</span><span class="p">(</span><span class="n">mentions_text</span><span class="p">)</span>
     
     <span class="c1"># Initialize a list to hold all the tweepy Tweets</span>
+    
     <span class="n">alltweets</span> <span class="o">=</span> <span class="p">[]</span>
     
     <span class="c1"># Specify relevant columns</span>
+    
     <span class="n">colnames</span> <span class="o">=</span> <span class="p">[</span>
         <span class="s1">&#39;created_at&#39;</span><span class="p">,</span> 
         <span class="s1">&#39;full_text&#39;</span><span class="p">,</span> 
@@ -18052,39 +18201,52 @@ Data for MP 740 successfully retrieved
     <span class="k">try</span><span class="p">:</span>
         
         <span class="c1"># Make initial request for most recent tweets (200 is the maximum allowed count)</span>
+        
         <span class="n">new_tweets</span> <span class="o">=</span> <span class="n">api</span><span class="o">.</span><span class="n">user_timeline</span><span class="p">(</span><span class="n">screen_name</span> <span class="o">=</span> <span class="n">username</span><span class="p">,</span> 
                                        <span class="n">count</span> <span class="o">=</span> <span class="mi">200</span><span class="p">,</span> 
                                        <span class="n">tweet_mode</span> <span class="o">=</span> <span class="s2">&quot;extended&quot;</span><span class="p">)</span>	
+        
         <span class="c1"># Save most recent tweets</span>
+        
         <span class="n">alltweets</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">new_tweets</span><span class="p">)</span>
+        
         <span class="c1"># Save the id of the oldest tweet less one</span>
+        
         <span class="n">oldest</span> <span class="o">=</span> <span class="n">alltweets</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">id</span> <span class="o">-</span> <span class="mi">1</span>
         
         <span class="c1"># Keep grabbing tweets until there are no tweets left to grab</span>
+        
         <span class="k">while</span> <span class="nb">len</span><span class="p">(</span><span class="n">new_tweets</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
             
             <span class="c1"># All subsequent requests use the max_id param to prevent duplicates</span>
+            
             <span class="n">new_tweets</span> <span class="o">=</span> <span class="n">api</span><span class="o">.</span><span class="n">user_timeline</span><span class="p">(</span><span class="n">screen_name</span> <span class="o">=</span> <span class="n">username</span><span class="p">,</span>
                                            <span class="n">count</span> <span class="o">=</span> <span class="mi">200</span><span class="p">,</span>
                                            <span class="n">max_id</span> <span class="o">=</span> <span class="n">oldest</span><span class="p">,</span>
                                            <span class="n">tweet_mode</span> <span class="o">=</span> <span class="s1">&#39;extended&#39;</span><span class="p">)</span>
+            
             <span class="c1"># Save most recent tweets</span>
+            
             <span class="n">alltweets</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">new_tweets</span><span class="p">)</span>
             <span class="n">oldest</span> <span class="o">=</span> <span class="n">alltweets</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">id</span> <span class="o">-</span> <span class="mi">1</span>
             
         <span class="c1"># Convert output to pandas DataFrame</span>
+        
         <span class="n">outtweets</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">([</span><span class="n">tweet</span><span class="o">.</span><span class="vm">__dict__</span> <span class="k">for</span> <span class="n">tweet</span> <span class="ow">in</span> <span class="n">alltweets</span><span class="p">])</span>
         
         <span class="c1"># Check whether tweet is retweet</span>
+        
         <span class="n">outtweets</span><span class="p">[</span><span class="s1">&#39;is_retweet&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">outtweets</span><span class="p">[</span><span class="s1">&#39;retweeted_status&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">is_retweet</span><span class="p">)</span>
                 
         <span class="c1"># Retrieve other metrics</span>
+        
         <span class="n">outtweets</span><span class="p">[</span><span class="s1">&#39;followers_count&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span><span class="o">.</span><span class="n">followers_count</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">outtweets</span><span class="p">[</span><span class="s1">&#39;author&#39;</span><span class="p">]]</span>
         <span class="n">outtweets</span><span class="p">[</span><span class="s1">&#39;location&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span><span class="o">.</span><span class="n">location</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">outtweets</span><span class="p">[</span><span class="s1">&#39;author&#39;</span><span class="p">]]</span>
         <span class="n">outtweets</span> <span class="o">=</span> <span class="n">outtweets</span><span class="p">[</span><span class="o">~</span> <span class="n">outtweets</span><span class="p">[</span><span class="s1">&#39;is_retweet&#39;</span><span class="p">]]</span>
         <span class="n">outtweets</span> <span class="o">=</span> <span class="n">outtweets</span><span class="p">[</span><span class="n">colnames</span><span class="p">]</span>
         
-        <span class="c1"># Add boolean column for availability (True)</span>
+        <span class="c1"># Add boolean column for availability</span>
+        
         <span class="n">outtweets</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="s1">&#39;available&#39;</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
         
     <span class="k">except</span><span class="p">:</span>
@@ -18094,6 +18256,7 @@ Data for MP 740 successfully retrieved
         <span class="n">outtweets</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="s1">&#39;available&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
         
     <span class="c1"># Add column with username</span>
+    
     <span class="n">outtweets</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="s1">&#39;username&#39;</span><span class="p">,</span> <span class="n">username</span><span class="p">)</span>
     <span class="k">return</span><span class="p">(</span><span class="n">outtweets</span><span class="p">)</span>
 </pre></div>
@@ -18113,7 +18276,7 @@ Data for MP 740 successfully retrieved
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[31]:</div>
+<div class="prompt input_prompt">In&nbsp;[56]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">my_keys</span> <span class="o">=</span> <span class="p">{</span>
@@ -18144,14 +18307,13 @@ Data for MP 740 successfully retrieved
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[32]:</div>
+<div class="prompt input_prompt">In&nbsp;[57]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># Get names and usernames</span>
 
 <span class="n">names</span> <span class="o">=</span> <span class="n">abg_twitter_df</span><span class="p">[</span><span class="s1">&#39;name_matching&#39;</span><span class="p">]</span>
-<span class="n">twitter_usernames</span> <span class="o">=</span> <span class="n">abg_twitter_df</span><span class="p">[</span><span class="s1">&#39;twitter&#39;</span><span class="p">]</span>
-<span class="n">twitter_usernames</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="s1">&#39;username&#39;</span><span class="p">,</span> <span class="n">inplace</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span>
+<span class="n">twitter_usernames</span> <span class="o">=</span> <span class="n">abg_twitter_df</span><span class="p">[</span><span class="s1">&#39;username&#39;</span><span class="p">]</span>
 <span class="n">twitter_account</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">names</span><span class="p">,</span> <span class="n">twitter_usernames</span><span class="p">],</span> <span class="n">axis</span> <span class="o">=</span> <span class="mi">1</span><span class="p">)</span>
 
 <span class="n">mask</span> <span class="o">=</span> <span class="n">twitter_account</span><span class="o">.</span><span class="n">username</span><span class="o">.</span><span class="n">notnull</span><span class="p">()</span>
@@ -18166,7 +18328,7 @@ Data for MP 740 successfully retrieved
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[33]:</div>
+<div class="prompt input_prompt">In&nbsp;[58]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">twitter_account</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
@@ -18182,7 +18344,7 @@ Data for MP 740 successfully retrieved
 
 <div class="output_area">
 
-    <div class="prompt output_prompt">Out[33]:</div>
+    <div class="prompt output_prompt">Out[58]:</div>
 
 
 
@@ -18212,7 +18374,7 @@ Data for MP 740 successfully retrieved
   <tbody>
     <tr>
       <th>0</th>
-      <td>Michael von Abercron</td>
+      <td>Michael Abercron</td>
       <td>mvabercron</td>
     </tr>
     <tr>
@@ -18256,7 +18418,7 @@ Data for MP 740 successfully retrieved
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[34]:</div>
+<div class="prompt input_prompt">In&nbsp;[59]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># Download most recent tweets using tweepy (at most 3200 tweets per user)</span>
@@ -18297,11 +18459,10 @@ Data for user AchimKessler cannot be downloaded
 Data for user BabettesChefin cannot be downloaded
 Data for user Team_GLoetzsch cannot be downloaded
 Data for user HiltrudLotze cannot be downloaded
+Data for user buerger2016 cannot be downloaded
 Data for user thlutze cannot be downloaded
-Data for user ChristophFDP cannot be downloaded
 Data for user SiemtjeMoeller cannot be downloaded
 Data for user joloulou cannot be downloaded
-Data for user LisaPaus cannot be downloaded
 Data for user #! cannot be downloaded
 Data for user martinrabanus cannot be downloaded
 Data for user ManuelaRottmann cannot be downloaded
@@ -18315,7 +18476,7 @@ Data for user JensZimmermann1 cannot be downloaded
 
 <div class="output_area">
 
-    <div class="prompt output_prompt">Out[34]:</div>
+    <div class="prompt output_prompt">Out[59]:</div>
 
 
 
@@ -18332,10 +18493,12 @@ Data for user JensZimmermann1 cannot be downloaded
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[35]:</div>
+<div class="prompt input_prompt">In&nbsp;[75]:</div>
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">tweepy_df</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># Inspect</span>
+
+<span class="n">tweepy_df</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="n">n</span> <span class="o">=</span> <span class="mi">20</span><span class="p">)</span>
 </pre></div>
 
     </div>
@@ -18348,7 +18511,7 @@ Data for user JensZimmermann1 cannot be downloaded
 
 <div class="output_area">
 
-    <div class="prompt output_prompt">Out[35]:</div>
+    <div class="prompt output_prompt">Out[75]:</div>
 
 
 
@@ -18384,64 +18547,244 @@ Data for user JensZimmermann1 cannot be downloaded
   </thead>
   <tbody>
     <tr>
-      <th>0</th>
-      <td>Michael von Abercron</td>
-      <td>mvabercron</td>
+      <th>247609</th>
+      <td>Niema Movassat</td>
+      <td>niemamovassat</td>
       <td>True</td>
-      <td>2021-04-13 20:32:30</td>
-      <td>@max_power84 @Markus_Soeder Ihnen auch!</td>
+      <td>2021-01-18 08:45:39</td>
+      <td>@tfoederation 😪</td>
       <td>0.0</td>
-      <td>0.0</td>
-      <td>1073.0</td>
-      <td>Pinneberg, Deutschland</td>
+      <td>2.0</td>
+      <td>25025.0</td>
+      <td></td>
     </tr>
     <tr>
-      <th>1</th>
-      <td>Michael von Abercron</td>
-      <td>mvabercron</td>
+      <th>175494</th>
+      <td>Cansel Kiziltepe</td>
+      <td>CanselK</td>
       <td>True</td>
-      <td>2021-04-13 20:05:58</td>
-      <td>Spenden an Abgeordnete wären auch nicht im Int...</td>
-      <td>0.0</td>
-      <td>5.0</td>
-      <td>1073.0</td>
-      <td>Pinneberg, Deutschland</td>
-    </tr>
-    <tr>
-      <th>2</th>
-      <td>Michael von Abercron</td>
-      <td>mvabercron</td>
-      <td>True</td>
-      <td>2021-04-13 20:04:39</td>
-      <td>Da eine von mir ursprünglich nicht zur Veröffe...</td>
+      <td>2020-09-25 14:30:36</td>
+      <td>@HelmutWehner84 @stgSPD @PhilippaSigl @michael...</td>
       <td>0.0</td>
       <td>6.0</td>
-      <td>1073.0</td>
-      <td>Pinneberg, Deutschland</td>
+      <td>7718.0</td>
+      <td>Berlin</td>
     </tr>
     <tr>
-      <th>3</th>
-      <td>Michael von Abercron</td>
-      <td>mvabercron</td>
+      <th>202517</th>
+      <td>Renate Kunast</td>
+      <td>renatekuenast</td>
       <td>True</td>
-      <td>2021-04-13 19:16:07</td>
-      <td>@max_power84 @Markus_Soeder Das Unternehmen be...</td>
+      <td>2020-12-30 16:21:53</td>
+      <td>@alx_froehlich Die größte wirtschaftliche Bela...</td>
       <td>0.0</td>
-      <td>0.0</td>
-      <td>1073.0</td>
-      <td>Pinneberg, Deutschland</td>
+      <td>5.0</td>
+      <td>68893.0</td>
+      <td>Berlin</td>
     </tr>
     <tr>
-      <th>4</th>
-      <td>Michael von Abercron</td>
-      <td>mvabercron</td>
+      <th>353582</th>
+      <td>Dirk Spaniel</td>
+      <td>dirkspaniel</td>
       <td>True</td>
-      <td>2021-04-13 08:57:33</td>
-      <td>@max_power84 @Markus_Soeder Nix.</td>
+      <td>2019-06-22 06:54:39</td>
+      <td>@jreichelt @HeikoMaas @BILD Herr Reichelt, hab...</td>
+      <td>3.0</td>
+      <td>11.0</td>
+      <td>3997.0</td>
+      <td>Stuttgart, Deutschland</td>
+    </tr>
+    <tr>
+      <th>332649</th>
+      <td>Martin Schulz</td>
+      <td>MartinSchulz</td>
+      <td>True</td>
+      <td>2015-03-03 15:34:06</td>
+      <td>#Greece &amp;amp; the #Eurozone have 4 months to b...</td>
+      <td>59.0</td>
+      <td>32.0</td>
+      <td>680913.0</td>
+      <td></td>
+    </tr>
+    <tr>
+      <th>296139</th>
+      <td>Bernd Riexinger</td>
+      <td>b_riexinger</td>
+      <td>True</td>
+      <td>2018-10-09 15:27:07</td>
+      <td>Noch nie wurden in #Bayern soviele Unterschrif...</td>
+      <td>34.0</td>
+      <td>92.0</td>
+      <td>39976.0</td>
+      <td>Stuttgart</td>
+    </tr>
+    <tr>
+      <th>168747</th>
+      <td>Uwe Kekeritz</td>
+      <td>Uwekekeritz</td>
+      <td>True</td>
+      <td>2013-10-01 12:08:58</td>
+      <td>@Osgyan Herzlichen Glückwunsch zur Wahl als st...</td>
       <td>0.0</td>
+      <td>2.0</td>
+      <td>3167.0</td>
+      <td>Uffenheim / Berlin</td>
+    </tr>
+    <tr>
+      <th>159899</th>
+      <td>Oliver Kaczmarek</td>
+      <td>KaczmarekOliver</td>
+      <td>True</td>
+      <td>2013-05-10 16:42:01</td>
+      <td>The Broken Circle. (@ Camera) http://t.co/BXdb...</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>3526.0</td>
+      <td>Kamen</td>
+    </tr>
+    <tr>
+      <th>337441</th>
+      <td>Frank Schwabe</td>
+      <td>FrankSchwabe</td>
+      <td>True</td>
+      <td>2021-03-11 16:35:58</td>
+      <td>Wir reden morgen Klartext und zeigen Verbindun...</td>
       <td>1.0</td>
-      <td>1073.0</td>
-      <td>Pinneberg, Deutschland</td>
+      <td>7.0</td>
+      <td>8074.0</td>
+      <td></td>
+    </tr>
+    <tr>
+      <th>80995</th>
+      <td>Marcus Faber</td>
+      <td>marcusfaber</td>
+      <td>True</td>
+      <td>2018-02-15 15:03:03</td>
+      <td>Next Stop: Buchhandel! 😂 https://t.co/USDWUqejHF</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>2685.0</td>
+      <td>Stendal, Sachsen-Anhalt</td>
+    </tr>
+    <tr>
+      <th>114740</th>
+      <td>Hermann Grohe</td>
+      <td>groehe</td>
+      <td>True</td>
+      <td>2013-01-20 09:40:18</td>
+      <td>Union und FDP legen zu, SPD und Grüne verliere...</td>
+      <td>12.0</td>
+      <td>2.0</td>
+      <td>49634.0</td>
+      <td>Berlin</td>
+    </tr>
+    <tr>
+      <th>139086</th>
+      <td>Torsten Herbst</td>
+      <td>torstenherbst</td>
+      <td>True</td>
+      <td>2012-07-12 10:10:14</td>
+      <td>Mehr Augenmaß und Rationalität - Wir brauchen ...</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>2461.0</td>
+      <td>Dresden</td>
+    </tr>
+    <tr>
+      <th>20779</th>
+      <td>Margarete Bause</td>
+      <td>MargareteBause</td>
+      <td>True</td>
+      <td>2017-09-11 21:15:34</td>
+      <td>@lenakoester Entscheidend ist für mich die Zwe...</td>
+      <td>0.0</td>
+      <td>3.0</td>
+      <td>7153.0</td>
+      <td>München &amp; Berlin</td>
+    </tr>
+    <tr>
+      <th>71231</th>
+      <td>Katharina Droge</td>
+      <td>katdro</td>
+      <td>True</td>
+      <td>2020-09-27 17:04:41</td>
+      <td>So toll liebe Bondina Schulze! Herzlichen Glüc...</td>
+      <td>0.0</td>
+      <td>26.0</td>
+      <td>6645.0</td>
+      <td></td>
+    </tr>
+    <tr>
+      <th>287560</th>
+      <td>Stephan Protschka</td>
+      <td>AfDProtschka</td>
+      <td>True</td>
+      <td>2019-12-13 05:49:09</td>
+      <td>Guten Morgen #Deutschland ! Ist die #SPD noch ...</td>
+      <td>30.0</td>
+      <td>103.0</td>
+      <td>5930.0</td>
+      <td>Mamming, Deutschland</td>
+    </tr>
+    <tr>
+      <th>87769</th>
+      <td>Ulrich Freese</td>
+      <td>ulifreese</td>
+      <td>True</td>
+      <td>2018-06-14 07:59:27</td>
+      <td>Heute startet die Fußball WM 2018! Viel Glück ...</td>
+      <td>1.0</td>
+      <td>5.0</td>
+      <td>756.0</td>
+      <td>Wahlkreis Cottbus/Spree-Neiße</td>
+    </tr>
+    <tr>
+      <th>9533</th>
+      <td>Lisa Badum</td>
+      <td>badulrichmartha</td>
+      <td>True</td>
+      <td>2019-02-09 08:39:10</td>
+      <td>@DanielHofing Danke Euch!💪</td>
+      <td>0.0</td>
+      <td>2.0</td>
+      <td>4840.0</td>
+      <td>Forchheim</td>
+    </tr>
+    <tr>
+      <th>390951</th>
+      <td>Stephan Thomae</td>
+      <td>stephanthomae</td>
+      <td>True</td>
+      <td>2012-11-27 16:04:05</td>
+      <td>Glückwunsch an Wirtschaftsminister Martin Zeil...</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>3162.0</td>
+      <td>Kempten (Allgäu)</td>
+    </tr>
+    <tr>
+      <th>310765</th>
+      <td>Erwin Ruddel</td>
+      <td>Erwin_Rueddel</td>
+      <td>True</td>
+      <td>2020-10-21 12:28:55</td>
+      <td>Die 106. Sitzung des Gesundheitsausschusses fa...</td>
+      <td>0.0</td>
+      <td>5.0</td>
+      <td>4602.0</td>
+      <td>Windhagen, Kreis Neuwied</td>
+    </tr>
+    <tr>
+      <th>411024</th>
+      <td>Johann Wadephul</td>
+      <td>jowadephul</td>
+      <td>True</td>
+      <td>2020-09-05 10:47:25</td>
+      <td>Entscheidend ist, dass es eine geschlossene eu...</td>
+      <td>10.0</td>
+      <td>48.0</td>
+      <td>3772.0</td>
+      <td>Berlin, Deutschland</td>
     </tr>
   </tbody>
 </table>
