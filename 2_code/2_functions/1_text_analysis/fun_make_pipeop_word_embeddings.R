@@ -141,6 +141,11 @@ PipeOpMakeGloveEmbeddings = R6::R6Class(
         quanteda::dfm(tkns),
         rownames(word_vecs))
       
+      # Normalize to achieve row sums of 1 such that the subsequent matrix 
+      # multiplication is equivalent to element-wise averaging
+      
+      dtm <- text2vec::normalize(dtm, norm = "l1")
+      
       as.matrix(dtm) %*% word_vecs
       
     }
