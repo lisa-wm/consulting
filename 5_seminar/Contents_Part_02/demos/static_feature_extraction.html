@@ -11,7 +11,6 @@
 
 <meta name="author" content="Asmik &amp; Lisa – for Intro to NLP" />
 
-<meta name="date" content="2021-04-30" />
 
 <title>Static Feature Extraction</title>
 
@@ -167,7 +166,7 @@ pre code {
 
 <h1 class="title toc-ignore">Static Feature Extraction</h1>
 <h4 class="author">Asmik &amp; Lisa – for Intro to NLP</h4>
-<h4 class="date">30 April 2021</h4>
+<h4 class="date">April/May 2021</h4>
 
 </div>
 
@@ -222,12 +221,12 @@ twitter_tokens</code></pre>
 ##  [1] &quot;hab&quot;             &quot;mir&quot;             &quot;das&quot;             &quot;gro&quot;            
 ##  [5] &quot;ko&quot;              &quot;sondierungspapi&quot; &quot;zu&quot;              &quot;klima&quot;          
 ##  [9] &quot;nochmal&quot;         &quot;genau&quot;           &quot;angeschaut&quot;      &quot;krass&quot;          
-## [ ... and 22 more ]
+## [ ... and 23 more ]
 ## 
 ## ABaerbock15210084001 :
 ##  [1] &quot;auch&quot;      &quot;weltweit&quot;  &quot;sieht&quot;     &quot;man&quot;       &quot;dass&quot;      &quot;angela&quot;   
 ##  [7] &quot;merkel&quot;    &quot;s&quot;         &quot;groko&quot;     &quot;nicht&quot;     &quot;klimataug&quot; &quot;ist&quot;      
-## [ ... and 13 more ]
+## [ ... and 14 more ]
 ## 
 ## ABaerbock15216341401 :
 ##  [1] &quot;der&quot;               &quot;groesst&quot;           &quot;global&quot;           
@@ -240,19 +239,19 @@ twitter_tokens</code></pre>
 ##  [1] &quot;wir&quot;           &quot;brauch&quot;        &quot;ein&quot;           &quot;and&quot;          
 ##  [5] &quot;verkehrspolit&quot; &quot;weg&quot;           &quot;von&quot;           &quot;benzin&quot;       
 ##  [9] &quot;und&quot;           &quot;diesel&quot;        &quot;hin&quot;           &quot;zu&quot;           
-## [ ... and 25 more ]
+## [ ... and 26 more ]
 ## 
 ## ABaerbock15256297201 :
 ##  [1] &quot;das&quot;        &quot;ist&quot;        &quot;die&quot;        &quot;leistung&quot;   &quot;von&quot;       
 ##  [6] &quot;hundert&quot;    &quot;wahlkaempf&quot; &quot;und&quot;        &quot;polit&quot;      &quot;im&quot;        
 ## [11] &quot;land&quot;       &quot;die&quot;       
-## [ ... and 27 more ]
+## [ ... and 28 more ]
 ## 
 ## ABaerbock15283779001 :
 ##  [1] &quot;luis&quot;            &quot;amtsberg&quot;        &quot;hat&quot;             &quot;heut&quot;           
 ##  [5] &quot;all&quot;             &quot;gesagt&quot;          &quot;was&quot;             &quot;es&quot;             
 ##  [9] &quot;zum&quot;             &quot;familiennachzug&quot; &quot;zu&quot;              &quot;sag&quot;            
-## [ ... and 28 more ]
+## [ ... and 29 more ]
 ## 
 ## [ reached max_ndoc ... 1,209 more documents ]</code></pre>
 <p>We quickly spot some tokens that do not seem to be of much help (e.g., “zu”). This is where <strong>stopwords</strong> come in. We define a list of such stopwords and have <code>quanteda</code> remove them from our <code>tokens</code>.</p>
@@ -353,12 +352,12 @@ twitter_tokens</code></pre>
 ##  [1] &quot;das&quot;             &quot;gro&quot;             &quot;ko&quot;              &quot;sondierungspapi&quot;
 ##  [5] &quot;klima&quot;           &quot;nochmal&quot;         &quot;genau&quot;           &quot;angeschaut&quot;     
 ##  [9] &quot;krass&quot;           &quot;facto&quot;           &quot;sogar&quot;           &quot;das&quot;            
-## [ ... and 13 more ]
+## [ ... and 14 more ]
 ## 
 ## ABaerbock15210084001 :
 ##  [1] &quot;weltweit&quot;  &quot;sieht&quot;     &quot;angela&quot;    &quot;merkel&quot;    &quot;s&quot;         &quot;groko&quot;    
 ##  [7] &quot;nicht&quot;     &quot;klimataug&quot; &quot;sond&quot;      &quot;vielmehr&quot;  &quot;das&quot;       &quot;paris&quot;    
-## [ ... and 7 more ]
+## [ ... and 8 more ]
 ## 
 ## ABaerbock15216341401 :
 ##  [1] &quot;groesst&quot;           &quot;global&quot;            &quot;herausforder&quot;     
@@ -371,19 +370,19 @@ twitter_tokens</code></pre>
 ##  [1] &quot;brauch&quot;        &quot;and&quot;           &quot;verkehrspolit&quot; &quot;benzin&quot;       
 ##  [5] &quot;diesel&quot;        &quot;emissionsarm&quot;  &quot;mobilitaet&quot;    &quot;das&quot;          
 ##  [9] &quot;sozial&quot;        &quot;frag&quot;          &quot;unt&quot;           &quot;schlecht&quot;     
-## [ ... and 8 more ]
+## [ ... and 9 more ]
 ## 
 ## ABaerbock15256297201 :
 ##  [1] &quot;das&quot;        &quot;leistung&quot;   &quot;hundert&quot;    &quot;wahlkaempf&quot; &quot;polit&quot;     
 ##  [6] &quot;land&quot;       &quot;drauss&quot;     &quot;gezeigt&quot;    &quot;dicht&quot;      &quot;was&quot;       
 ## [11] &quot;mensch&quot;     &quot;umtreibt&quot;  
-## [ ... and 8 more ]
+## [ ... and 9 more ]
 ## 
 ## ABaerbock15283779001 :
 ##  [1] &quot;luis&quot;            &quot;amtsberg&quot;        &quot;heut&quot;            &quot;gesagt&quot;         
 ##  [5] &quot;was&quot;             &quot;es&quot;              &quot;familiennachzug&quot; &quot;sag&quot;            
 ##  [9] &quot;gibt&quot;            &quot;wer&quot;             &quot;integration&quot;     &quot;gefluechtet&quot;    
-## [ ... and 14 more ]
+## [ ... and 15 more ]
 ## 
 ## [ reached max_ndoc ... 1,209 more documents ]</code></pre>
 <p>Apparently, some very short word stumps result from our cleaning operations, which we will also discard:</p>
@@ -398,13 +397,13 @@ twitter_tokens</code></pre>
 ##  [1] &quot;gro&quot;             &quot;sondierungspapi&quot; &quot;klima&quot;           &quot;nochmal&quot;        
 ##  [5] &quot;genau&quot;           &quot;angeschaut&quot;      &quot;krass&quot;           &quot;facto&quot;          
 ##  [9] &quot;sogar&quot;           &quot;kyoto&quot;           &quot;protokoll&quot;       &quot;meilenstein&quot;    
-## [ ... and 9 more ]
+## [ ... and 10 more ]
 ## 
 ## ABaerbock15210084001 :
 ##  [1] &quot;weltweit&quot;    &quot;sieht&quot;       &quot;angela&quot;      &quot;merkel&quot;      &quot;groko&quot;      
 ##  [6] &quot;nicht&quot;       &quot;klimataug&quot;   &quot;sond&quot;        &quot;vielmehr&quot;    &quot;paris&quot;      
 ## [11] &quot;abkomm&quot;      &quot;unterlaeuft&quot;
-## [ ... and 5 more ]
+## [ ... and 6 more ]
 ## 
 ## ABaerbock15216341401 :
 ##  [1] &quot;groesst&quot;           &quot;global&quot;            &quot;herausforder&quot;     
@@ -417,19 +416,19 @@ twitter_tokens</code></pre>
 ##  [1] &quot;brauch&quot;        &quot;and&quot;           &quot;verkehrspolit&quot; &quot;benzin&quot;       
 ##  [5] &quot;diesel&quot;        &quot;emissionsarm&quot;  &quot;mobilitaet&quot;    &quot;sozial&quot;       
 ##  [9] &quot;frag&quot;          &quot;unt&quot;           &quot;schlecht&quot;      &quot;luft&quot;         
-## [ ... and 7 more ]
+## [ ... and 8 more ]
 ## 
 ## ABaerbock15256297201 :
 ##  [1] &quot;leistung&quot;   &quot;hundert&quot;    &quot;wahlkaempf&quot; &quot;polit&quot;      &quot;land&quot;      
 ##  [6] &quot;drauss&quot;     &quot;gezeigt&quot;    &quot;dicht&quot;      &quot;mensch&quot;     &quot;umtreibt&quot;  
 ## [11] &quot;konkret&quot;    &quot;beweis&quot;    
-## [ ... and 6 more ]
+## [ ... and 7 more ]
 ## 
 ## ABaerbock15283779001 :
 ##  [1] &quot;luis&quot;            &quot;amtsberg&quot;        &quot;heut&quot;            &quot;gesagt&quot;         
 ##  [5] &quot;familiennachzug&quot; &quot;sag&quot;             &quot;gibt&quot;            &quot;integration&quot;    
 ##  [9] &quot;gefluechtet&quot;     &quot;perspektiv&quot;      &quot;zusammenleb&quot;     &quot;famili&quot;         
-## [ ... and 9 more ]
+## [ ... and 10 more ]
 ## 
 ## [ reached max_ndoc ... 1,209 more documents ]</code></pre>
 <p>There is still a variety of tokens we could probably remove (there are more extensive stopwords lists to be found online, the built-in one from <code>quanteda</code> is not too good tbh). In a real application you should dedicate some time to this sub-task to make sure your tokens representation is not contaminated by such noise.</p>
@@ -441,7 +440,7 @@ twitter_tokens</code></pre>
 <pre class="r"><code>twitter_dfm &lt;- quanteda::dfm(twitter_tokens)
 
 twitter_dfm</code></pre>
-<pre><code>## Document-feature matrix of: 1,215 documents, 7,536 features (99.8% sparse) and 15 docvars.
+<pre><code>## Document-feature matrix of: 1,215 documents, 8,360 features (99.8% sparse) and 15 docvars.
 ##                       features
 ## docs                   gro sondierungspapi klima nochmal genau angeschaut krass
 ##   ABaerbock15156546001   1               1     1       1     1          1     1
@@ -458,7 +457,7 @@ twitter_dfm</code></pre>
 ##   ABaerbock15252349801     0     0     0
 ##   ABaerbock15256297201     0     0     0
 ##   ABaerbock15283779001     0     0     0
-## [ reached max_ndoc ... 1,209 more documents, reached max_nfeat ... 7,526 more features ]</code></pre>
+## [ reached max_ndoc ... 1,209 more documents, reached max_nfeat ... 8,350 more features ]</code></pre>
 <pre class="r"><code>saveRDS(twitter_dfm, sprintf(&quot;%s/twitter_dfm.RDS&quot;, path))</code></pre>
 </div>
 <div id="find-polarity-clues" class="section level3">
@@ -585,8 +584,8 @@ list(
 ## 
 ## $distribution
 ## 
-##    0    1    2    3    4    5 
-## 1119   77   13    4    1    1</code></pre>
+##    0    1    2    3    5 
+## 1003  176   28    6    2</code></pre>
 </div>
 <div id="detect-negation" class="section level3">
 <h3>Detect negation</h3>
@@ -633,7 +632,7 @@ head(twitter_negation)</code></pre>
 <h3>Get character unigrams</h3>
 <p>Due to the sheer variety of words that exist in a language a simple tokens representation will typically contain a huge number of features:</p>
 <pre class="r"><code>quanteda::nfeat(twitter_dfm)</code></pre>
-<pre><code>## [1] 7536</code></pre>
+<pre><code>## [1] 8360</code></pre>
 <p>This is an overwhelmingly large number for any machine learning classifier (particularly so if we have more features than observations).</p>
 <p>We will therefore streamline our tokens further. Most applications include some kind of <strong>n-grams</strong>. Interestingly, character unigrams seem to work quite well, i.e., rather than entire words or even concatenations, we simply count occurrences of single letters.</p>
 <p>Thereby, we effectively coerce our texts to a set of merely 26 features:</p>
@@ -666,19 +665,19 @@ data.table::setcolorder(twitter_char_unigrams, c(&quot;doc_id&quot;, letters))
 
 head(twitter_char_unigrams)</code></pre>
 <pre><code>##                  doc_id  a b c  d  e f  g  h  i j k  l  m  n  o p q  r  s  t  u
-## 1: ABaerbock15156546001 19 2 6  9 22 3  8  8 14 0 9 10  7 11 14 4 0 16 15 11  7
-## 2: ABaerbock15210084001 19 1 5  4 18 4  5  8 11 1 5 11  9  9  8 3 0 11 12 13  7
+## 1: ABaerbock15156546001 20 3 7 10 22 3  8  9 15 1 9 10  7 11 15 5 0 16 16 15  9
+## 2: ABaerbock15210084001 19 1 6  4 18 4  6 10 11 1 5 12  9  9  9 4 0 11 15 16  8
 ## 3: ABaerbock15216341401 15 1 3 13 40 5 10  4 18 0 6 15  7 17 10 1 0 21 20 13 11
-## 4: ABaerbock15252349801 10 4 6 10 38 2  4 11 22 0 4  8  3 24  7 1 0 16 15 11  8
-## 5: ABaerbock15256297201 13 4 2 14 29 1  4  8 19 0 8  8  8 24  6 3 0  8 15 11  9
-## 6: ABaerbock15283779001 20 6 6  6 35 7 12  9 18 0 2 10 10 19  3 2 0 11 14 16 12
+## 4: ABaerbock15252349801 10 5 8 10 38 2  5 13 23 0 4  8  3 24  8 3 0 18 17 14  8
+## 5: ABaerbock15256297201 13 4 4 14 31 1  4  9 19 0 8  9  8 24  7 5 0  8 17 14 10
+## 6: ABaerbock15283779001 21 6 7  7 35 7 12 10 20 0 4 10 10 20  5 3 0 11 15 19 12
 ##    v w x y z
-## 1: 0 1 0 1 1
-## 2: 1 2 0 0 1
+## 1: 0 3 0 1 1
+## 2: 1 3 0 0 1
 ## 3: 2 2 0 0 2
-## 4: 3 3 0 0 3
-## 5: 1 8 0 0 1
-## 6: 1 4 0 0 4</code></pre>
+## 4: 3 3 0 1 3
+## 5: 1 8 0 1 2
+## 6: 1 5 0 0 4</code></pre>
 </div>
 <div id="get-pos-tags" class="section level3">
 <h3>Get POS tags</h3>
@@ -776,19 +775,19 @@ head(twitter_features_static)</code></pre>
 ## 5: ABaerbock15256297201   2   4   1   5     3   2    0   10   0    0    5     2
 ## 6: ABaerbock15283779001   2   4   2   2     0   4    0    8   0    2    5     3
 ##    PUNCT SCONJ VERB X negation  a b c  d  e f  g  h  i j k  l  m  n  o p q  r
-## 1:     7     0    3 2        1 19 2 6  9 22 3  8  8 14 0 9 10  7 11 14 4 0 16
-## 2:     5     1    3 1        1 19 1 5  4 18 4  5  8 11 1 5 11  9  9  8 3 0 11
+## 1:     7     0    3 2        1 20 3 7 10 22 3  8  9 15 1 9 10  7 11 15 5 0 16
+## 2:     5     1    3 1        1 19 1 6  4 18 4  6 10 11 1 5 12  9  9  9 4 0 11
 ## 3:     7     0    4 0        0 15 1 3 13 40 5 10  4 18 0 6 15  7 17 10 1 0 21
-## 4:     6     0    3 0        1 10 4 6 10 38 2  4 11 22 0 4  8  3 24  7 1 0 16
-## 5:     6     1    4 0        0 13 4 2 14 29 1  4  8 19 0 8  8  8 24  6 3 0  8
-## 6:     6     0    9 0        1 20 6 6  6 35 7 12  9 18 0 2 10 10 19  3 2 0 11
+## 4:     6     0    3 0        1 10 5 8 10 38 2  5 13 23 0 4  8  3 24  8 3 0 18
+## 5:     6     1    4 0        0 13 4 4 14 31 1  4  9 19 0 8  9  8 24  7 5 0  8
+## 6:     6     0    9 0        1 21 6 7  7 35 7 12 10 20 0 4 10 10 20  5 3 0 11
 ##     s  t  u v w x y z n_emojis positive negative
-## 1: 15 11  7 0 1 0 1 1        0        3        3
-## 2: 12 13  7 1 2 0 0 1        0        1        2
+## 1: 16 15  9 0 3 0 1 1        0        3        3
+## 2: 15 16  8 1 3 0 0 1        0        1        2
 ## 3: 20 13 11 2 2 0 0 2        0        3        4
-## 4: 15 11  8 3 3 0 0 3        0        3        5
-## 5: 15 11  9 1 8 0 0 1        0        3        0
-## 6: 14 16 12 1 4 0 0 4        0        2        2</code></pre>
+## 4: 17 14  8 3 3 0 1 3        0        3        5
+## 5: 17 14 10 1 8 0 1 2        0        3        0
+## 6: 15 19 12 1 5 0 0 4        0        2        2</code></pre>
 <p><strong>This provides us with a solid foundation for sentiment analysis! We now represent each document by a total of 46 variables. Of course we can think of many more features to include here – we will see some more in the exercise; in general, be creative and see how classification can be improved by adding different explanatory variables.</strong></p>
 <p><img src="data:image/jpeg;base64,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" /></p>
 </div>

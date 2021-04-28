@@ -1,0 +1,28 @@
+---
+title: "Topic-Specific Word Embeddings with GloVe"
+author: "Asmik & Lisa -- for Intro to NLP"
+date: "April/May 2021"
+output:
+  html_document: default
+  pdf_document: default
+---
+
+![](../../Logo_Consulting.JPG)
+
+## Computing Topic-Specific Word Embeddings with Global Vectors (GloVe)
+
+This demo is about **computing topic-specific word embeddings with GloVe**.
+
+We show how to compute word embeddings via [GloVe](https://nlp.stanford.edu/pubs/glove.pdf) for a corpus segmented into multiple topics, where the embedding part is of course applicable to a non-partitioned corpus as well.
+
+
+```{r setup_packages, message=FALSE, warning=FALSE}
+# Load required packages
+
+library(data.table)
+library(quanteda)
+library(stm)
+```
+
+### Create `dfm` object
+

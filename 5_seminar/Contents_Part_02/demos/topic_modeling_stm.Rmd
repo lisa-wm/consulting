@@ -1,7 +1,7 @@
 ---
 title: "Topic Modeling -- STM"
 author: "Asmik & Lisa -- for Intro to NLP"
-date: "30 April 2021"
+date: "April/May 2021"
 output:
   html_document: default
   pdf_document: default
