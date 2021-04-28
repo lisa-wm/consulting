@@ -149,6 +149,8 @@ stopwords <- c(
   stopwords, 
   c("der", "die", "das", "was", "wer", "wie", "ich", "sie", "wir", "ihr"))
 
+saveRDS(stopwords, sprintf("%s/stopwords.RDS", path))
+
 twitter_tokens <- quanteda::tokens_remove(
   twitter_tokens,
   pattern = stopwords)
@@ -440,11 +442,19 @@ twitter_docvars[sample(twitter_docvars[, .I], 5)]
 
 ...and, lastly, feed this information back into the original corpus object to save it for further usage:
 
-```{r assigntopics_4, eval = FALSE}
+```{r assigntopics_4}
 
 # Insert info back into corpus
 
-quanteda::docvars(twitter_corpus) <- as.data.frame(twitter_docvars)
+twitter_corpus_with_topics <- twitter_corpus
+
+quanteda::docvars(twitter_corpus_with_topics) <- as.data.frame(twitter_docvars)
+
+# Save
+
+saveRDS(
+  twitter_corpus_with_topics, 
+  sprintf("%s/twitter_corpus_with_topics.RDS", path))
 
 ```
 

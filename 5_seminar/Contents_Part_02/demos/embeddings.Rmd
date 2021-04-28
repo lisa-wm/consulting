@@ -9,20 +9,227 @@ output:
 
 ![](../../Logo_Consulting.JPG)
 
-## Computing Topic-Specific Word Embeddings with Global Vectors (GloVe)
+## Compute Topic-Specific Word Embeddings with Global Vectors (GloVe)
 
 This demo is about **computing topic-specific word embeddings with GloVe**.
 
 We show how to compute word embeddings via [GloVe](https://nlp.stanford.edu/pubs/glove.pdf) for a corpus segmented into multiple topics, where the embedding part is of course applicable to a non-partitioned corpus as well.
 
+The code is based on the `text2vec` package, much of which is built in `R6`. 
+Covering object-oriented programming is beyond the scope of this course, but we will mention some basics during sentiment analysis with `mlr3`.
 
 ```{r setup_packages, message=FALSE, warning=FALSE}
 # Load required packages
 
-library(data.table)
+library(Matrix)
 library(quanteda)
-library(stm)
+library(text2vec)
 ```
 
-### Create `dfm` object
+### Subset corpus
 
+```{r path, include = FALSE}
+path <- "5_seminar"
+```
+
+We start by **reading** the data we have created during the topic modeling process:
+
+```{r read}
+
+# path <- ... (individual file location)
+
+twitter_corpus <- readRDS(sprintf("%s/twitter_corpus_with_topics.RDS", path))
+
+twitter_corpus
+
+```
+
+Next, we **subset** the corpus by topic label:
+
+```{r subset}
+
+# Recode NA labels
+
+twitter_corpus$topic_label <- ifelse(
+  is.na(twitter_corpus$topic_label),
+  99, 
+  twitter_corpus$topic_label)
+
+# Subset corpus
+
+twitter_corpus_subsets <- lapply(
+  unique(twitter_corpus$topic_label),
+  function(i) quanteda::corpus_subset(twitter_corpus, topic_label == i))
+
+sapply(twitter_corpus_subsets, quanteda::ndoc)
+
+```
+
+### Compute embeddings
+
+We will now define the **embedding** procedure and encapsulate it in a function we can then apply to each corpus subset.
+It is typically advisable to break down such routines into sub-functions (top-down programming). 
+This keeps the code readable and is much easier to debug.
+
+Our embedding function should have the following structure (regard this as pseudo-code):
+
+```{r emb_draft, eval = FALSE}
+
+make_glove_embeddings <- function(text, stopwords, glove_args) {
+  
+  tokens <- tokenize(text)
+  vocabulary <- make_vocab(tokens, glove_args)
+  glove <- make_glove_instance(vocabulary, glove_args)
+  doc_embeddings <- get_doc_embeddings(tokens, glove, glove_args)
+  
+  doc_embeddings
+  
+}
+
+```
+
+**Tokenization** feels pretty been-there-done-that by now:
+
+```{r clean_stem, include=FALSE}
+
+clean_and_stem <- function(text) {
+  
+  # Convert to uniform encoding
+  
+  text <-  stringi::stri_trans_general(text, "Any-Latin")
+  
+  # Replace umlauts and litigate s
+  
+  text <- stringr::str_replace_all(
+    text,
+      c("\u00c4" = "Ae",
+      "\u00e4" = "ae",
+      "\u00d6" = "Oe",
+      "\u00f6" = "oe",
+      "\u00dc" = "Ue",
+      "\u00fc" = "ue",
+      "\u00df" = "ss"))
+  
+  # Stem
+  
+  text <- SnowballC::wordStem(text)
+  
+  unique(text)
+
+}
+
+```
+
+```{r tkns}
+
+tokenize <- function(text) {
+  
+  tokens <- quanteda::tokens(
+    text,
+    what = "word",
+    remove_symbols = TRUE,
+    remove_punct = TRUE,
+    remove_numbers = TRUE,
+    remove_separators = TRUE,
+    split_hyphens = TRUE,
+    include_docvars = TRUE)
+  
+  tokens <- quanteda::tokens_wordstem(tokens, language = "german")
+  
+  tokens <- quanteda::tokens_remove(
+    quanteda::tokens_tolower(tokens),
+    pattern = stopwords)
+  
+  tokens
+  
+}
+
+test_tokens <- tokenize(twitter_corpus)
+test_tokens[1:2]
+
+```
+
+The next step is to create a **vocabulary**. 
+This is where `text2vec` first comes into play:
+
+```{r vocab}
+
+make_vocab <- function(tokens, term_count_min) {
+  
+  # Convert tokens to list
+  
+  tokens <- as.list(tokens)
+  
+  # Create iterator (kind of list from which vocabulary can be created)
+  
+  itokens <- text2vec::itoken(tokens, progressbar = FALSE)
+  
+  # Create vocabulary and retain only words of a certain frequency
+      
+  vocab <- text2vec::create_vocabulary(itokens)
+  vocab <- text2vec::prune_vocabulary(vocab, term_count_min = term_count_min)
+  
+  list(itokens = itokens, vocab = vocab)
+  
+}
+
+test_vocab <- make_vocab(test_tokens, term_count_min = 1)
+summary(test_vocab$vocab)
+
+```
+Let's now create an **instance** of the GloVe class (if you are not familiar with object-oriented programming, imagine this as some kind of abstract machine we can kick-start to compute our embeddings).
+
+This commands the specification of some additional arguments: 
+
+* the width of the window for neighboring words `skip_grams_window`, which we 
+will later set rather small as our texts are super short,
+* the number of embedding dimensions `dimension`, arguably the most important hyperparameter, and
+* maximum frequency of occurrence `x_max`, controlling the GloVe-inherent weighting function (not that critical for us as we have only very few words with multiple occurrences)
+
+```{r instantiate}
+
+make_glove_instance <- function(vocabulary, skip_grams_window, dimension, x_max) {
+  
+  vect <- text2vec::vocab_vectorizer(vocabulary$vocab)
+  
+  tcm <- text2vec::create_tcm(
+    vocabulary$itokens, 
+    vect, 
+    skip_grams_window = skip_grams_window) 
+  
+  glove <- text2vec::GlobalVectors$new(rank = dimension, x_max = x_max)
+  
+}
+
+test_model <- fit_glove(test_vocab, skip_grams_window = 5, dimension = 3, x_max = 5)
+test_model
+
+```
+
+With this somewhat hard-to-grasp container we can **fit** the GloVe (no bad jokes intended).
+
+Again, there are some (rather technical) hyperparameters to set:
+
+* `iterations` -- how many iterations do we allow for the optimization process?
+* `convergence_tol` -- how large is our tolerance in declaring convergence (the process will terminate if either convergence is reached or the number of iterations is exhausted)?
+* `threads`
+
+```{r fit}
+
+get_glove_embeddings <- function(tokens, glove, iterations, convergence_tol, threads) {
+  
+  vect <- text2vec::vocab_vectorizer(vocabulary$vocab)
+  
+  tcm <- text2vec::create_tcm(
+    vocabulary$itokens, 
+    vect, 
+    skip_grams_window = skip_grams_window) 
+  
+  glove <- text2vec::GlobalVectors$new(rank = dimension, x_max = x_max)
+  
+}
+
+test_model <- fit_glove(test_vocab, skip_grams_window = 5, dimension = 3, x_max = 5)
+test_model
+
+```

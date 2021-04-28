@@ -86,6 +86,7 @@ PipeOpMakeGloveEmbeddings = R6::R6Class(
         text,
         what = "word",
         remove_symbols = TRUE,
+        remove_punct = TRUE,
         remove_numbers = TRUE,
         remove_separators = TRUE,
         split_hyphens = TRUE,
