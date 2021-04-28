@@ -176,6 +176,7 @@ pre code {
 <h2>Compute Topic-Specific Word Embeddings with Global Vectors (GloVe)</h2>
 <p>This demo is about <strong>computing topic-specific word embeddings with GloVe</strong>.</p>
 <p>We show how to compute word embeddings via <a href="https://nlp.stanford.edu/pubs/glove.pdf">GloVe</a> for a corpus segmented into multiple topics, where the embedding part is of course applicable to a non-partitioned corpus as well.</p>
+<p>The code is based on the <code>text2vec</code> package, much of which is built in <code>R6</code>. Covering object-oriented programming is beyond the scope of this course, but we will mention some basics during sentiment analysis with <code>mlr3</code>.</p>
 <pre class="r"><code># Load required packages
 
 library(Matrix)
@@ -229,15 +230,166 @@ sapply(twitter_corpus_subsets, quanteda::ndoc)</code></pre>
 <div id="compute-embeddings" class="section level3">
 <h3>Compute embeddings</h3>
 <p>We will now define the <strong>embedding</strong> procedure and encapsulate it in a function we can then apply to each corpus subset. It is typically advisable to break down such routines into sub-functions (top-down programming). This keeps the code readable and is much easier to debug.</p>
-<p>Our embedding function should have the following structure:</p>
+<p>Our embedding function should have the following structure (regard this as pseudo-code):</p>
 <pre class="r"><code>make_glove_embeddings &lt;- function(text, stopwords, glove_args) {
   
-  tokens &lt;- tokenize(text)
-  vocabulary &lt;- vectorize_vocab(tokens)
-  glove_vectors &lt;- fit_glove(vocabulary)
-  doc_embeddings &lt;- get_doc_embeddings(tokens, glove_vectors)
+  tokens &lt;- tokenize(text, stopwords)
+  vocabulary &lt;- make_vocab(tokens, glove_args)
+  glove &lt;- make_glove_instance(vocabulary, glove_args)
+  doc_embeddings &lt;- get_doc_embeddings(tokens, glove, glove_args)
   
   doc_embeddings
+  
+}</code></pre>
+<p><strong>Tokenization</strong> feels pretty been-there-done-that by now:</p>
+<pre class="r"><code>tokenize &lt;- function(text, stopwords) {
+  
+  tokens &lt;- quanteda::tokens(
+    text,
+    what = &quot;word&quot;,
+    remove_symbols = TRUE,
+    remove_punct = TRUE,
+    remove_numbers = TRUE,
+    remove_separators = TRUE,
+    split_hyphens = TRUE,
+    include_docvars = TRUE)
+  
+  tokens &lt;- quanteda::tokens_wordstem(tokens, language = &quot;german&quot;)
+  
+  tokens &lt;- quanteda::tokens_remove(
+    quanteda::tokens_tolower(tokens),
+    pattern = stopwords)
+  
+  tokens &lt;- quanteda::tokens_select(tokens, min_nchar = 3)
+  
+  tokens
+  
+}
+
+stopwords &lt;- readRDS(sprintf(&quot;%s/stopwords.RDS&quot;, path))
+test_tokens &lt;- tokenize(twitter_corpus, stopwords)
+test_tokens[1:2]</code></pre>
+<pre><code>## Tokens consisting of 2 documents and 19 docvars.
+## ABaerbock15156546001 :
+##  [1] &quot;gro&quot;             &quot;sondierungspapi&quot; &quot;klima&quot;           &quot;nochmal&quot;        
+##  [5] &quot;genau&quot;           &quot;angeschaut&quot;      &quot;krass&quot;           &quot;facto&quot;          
+##  [9] &quot;sogar&quot;           &quot;kyoto&quot;           &quot;protokoll&quot;       &quot;meilenstein&quot;    
+## [ ... and 10 more ]
+## 
+## ABaerbock15210084001 :
+##  [1] &quot;weltweit&quot;    &quot;sieht&quot;       &quot;angela&quot;      &quot;merkel&quot;      &quot;groko&quot;      
+##  [6] &quot;nicht&quot;       &quot;klimataug&quot;   &quot;sond&quot;        &quot;vielmehr&quot;    &quot;paris&quot;      
+## [11] &quot;abkomm&quot;      &quot;unterlaeuft&quot;
+## [ ... and 6 more ]</code></pre>
+<p>The next step is to create a <strong>vocabulary</strong>. This is where <code>text2vec</code> first comes into play:</p>
+<pre class="r"><code>make_vocab &lt;- function(tokens, term_count_min) {
+  
+  # Convert tokens to list
+  
+  tokens &lt;- as.list(tokens)
+  
+  # Create iterator (kind of list from which vocabulary can be created)
+  
+  itokens &lt;- text2vec::itoken(tokens, progressbar = FALSE)
+  
+  # Create vocabulary and retain only words of a certain frequency
+      
+  vocab &lt;- text2vec::create_vocabulary(itokens)
+  vocab &lt;- text2vec::prune_vocabulary(vocab, term_count_min = term_count_min)
+  
+  list(itokens = itokens, vocab = vocab)
+  
+}
+
+test_vocab &lt;- make_vocab(test_tokens, term_count_min = 1)
+summary(test_vocab$vocab)</code></pre>
+<pre><code>##      term             term_count        doc_count      
+##  Length:8427        Min.   :  1.000   Min.   :  1.000  
+##  Class :character   1st Qu.:  1.000   1st Qu.:  1.000  
+##  Mode  :character   Median :  1.000   Median :  1.000  
+##                     Mean   :  2.865   Mean   :  2.759  
+##                     3rd Qu.:  2.000   3rd Qu.:  2.000  
+##                     Max.   :442.000   Max.   :358.000</code></pre>
+<p>Let’s now create an <strong>instance</strong> of the GloVe class (if you are not familiar with object-oriented programming, imagine this as some kind of abstract machine we can kick-start to compute our embeddings).</p>
+<p>This commands the specification of some additional arguments:</p>
+<ul>
+<li>the width of the window for neighboring words <code>skip_grams_window</code>, which we will later set rather small as our texts are super short,</li>
+<li>the number of embedding dimensions <code>dimension</code>, arguably the most important hyperparameter, and</li>
+<li>maximum frequency of occurrence <code>x_max</code>, controlling the GloVe-inherent weighting function (not that critical for us as we have only very few words with multiple occurrences)</li>
+</ul>
+<pre class="r"><code>make_glove_instance &lt;- function(vocabulary, skip_grams_window, dimension, x_max) {
+  
+  vect &lt;- text2vec::vocab_vectorizer(vocabulary$vocab)
+  
+  tcm &lt;- text2vec::create_tcm(
+    vocabulary$itokens, 
+    vect, 
+    skip_grams_window = skip_grams_window) 
+  
+  glove &lt;- text2vec::GlobalVectors$new(rank = dimension, x_max = x_max)
+  
+}
+
+test_model &lt;- make_glove_instance(
+  test_vocab, 
+  skip_grams_window = 5, 
+  dimension = 3, 
+  x_max = 5)
+test_model</code></pre>
+<pre><code>## &lt;GloVe&gt;
+##   Public:
+##     bias_i: NULL
+##     bias_j: NULL
+##     clone: function (deep = FALSE) 
+##     components: NULL
+##     fit_transform: function (x, n_iter = 10L, convergence_tol = -1, n_threads = getOption(&quot;rsparse_omp_threads&quot;, 
+##     get_history: function () 
+##     initialize: function (rank, x_max, learning_rate = 0.15, alpha = 0.75, lambda = 0, 
+##     shuffle: FALSE
+##   Private:
+##     alpha: 0.75
+##     b_i: NULL
+##     b_j: NULL
+##     cost_history: 
+##     fitted: FALSE
+##     glove_fitter: NULL
+##     initial: NULL
+##     lambda: 0
+##     learning_rate: 0.15
+##     rank: 3
+##     w_i: NULL
+##     w_j: NULL
+##     x_max: 5</code></pre>
+<p>With this somewhat hard-to-grasp container we can <strong>fit</strong> the GloVe (no bad jokes intended).</p>
+<p>Again, there are some (rather technical) hyperparameters to set:</p>
+<ul>
+<li><code>iterations</code> – how many iterations do we allow for the optimization process?</li>
+<li><code>convergence_tol</code> – how large is our tolerance in declaring convergence (the process will terminate if either convergence is reached or the number of iterations is exhausted)?</li>
+</ul>
+<p>Besides, we note two important things:</p>
+<ol style="list-style-type: decimal">
+<li>The word vectors are composed of the actual word vectors, here called <code>wv_main</code>, and some “context” vectors <code>wv_context</code>. The <a href="https://nlp.stanford.edu/pubs/glove.pdf">original paper</a> is somewhat cryptic about the purpose of this double computation but it seems to help alleviate overfitting and noise (and to not make a difference in the worst case).</li>
+<li>We need to transform the word vectors into document-level features somehow.</li>
+</ol>
+<p>We will go about this step by step:</p>
+<pre class="r"><code>get_glove_embeddings &lt;- function(tokens, glove, iterations, convergence_tol) {
+  
+  wv_main &lt;- glv$fit_transform(
+    tcm, 
+    n_iter = n_iter, 
+    convergence_tol = convergence_tol)  
+  
+  wv_context &lt;- glv$components
+  
+  word_vecs &lt;-  wv_main + t(wv_context)
+  
+  dtm &lt;- quanteda::dfm_match(
+    quanteda::dfm(tkns),
+    rownames(word_vecs))
+  
+  dtm &lt;- text2vec::normalize(dtm, norm = &quot;l1&quot;)
+  
+  as.matrix(dtm) %*% word_vecs
   
 }</code></pre>
 </div>

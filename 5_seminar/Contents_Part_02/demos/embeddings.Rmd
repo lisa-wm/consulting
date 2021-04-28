@@ -77,7 +77,7 @@ Our embedding function should have the following structure (regard this as pseud
 
 make_glove_embeddings <- function(text, stopwords, glove_args) {
   
-  tokens <- tokenize(text)
+  tokens <- tokenize(text, stopwords)
   vocabulary <- make_vocab(tokens, glove_args)
   glove <- make_glove_instance(vocabulary, glove_args)
   doc_embeddings <- get_doc_embeddings(tokens, glove, glove_args)
@@ -122,7 +122,7 @@ clean_and_stem <- function(text) {
 
 ```{r tkns}
 
-tokenize <- function(text) {
+tokenize <- function(text, stopwords) {
   
   tokens <- quanteda::tokens(
     text,
@@ -140,11 +140,14 @@ tokenize <- function(text) {
     quanteda::tokens_tolower(tokens),
     pattern = stopwords)
   
+  tokens <- quanteda::tokens_select(tokens, min_nchar = 3)
+  
   tokens
   
 }
 
-test_tokens <- tokenize(twitter_corpus)
+stopwords <- readRDS(sprintf("%s/stopwords.RDS", path))
+test_tokens <- tokenize(twitter_corpus, stopwords)
 test_tokens[1:2]
 
 ```
@@ -201,7 +204,11 @@ make_glove_instance <- function(vocabulary, skip_grams_window, dimension, x_max)
   
 }
 
-test_model <- fit_glove(test_vocab, skip_grams_window = 5, dimension = 3, x_max = 5)
+test_model <- make_glove_instance(
+  test_vocab, 
+  skip_grams_window = 5, 
+  dimension = 3, 
+  x_max = 5)
 test_model
 
 ```
@@ -212,24 +219,35 @@ Again, there are some (rather technical) hyperparameters to set:
 
 * `iterations` -- how many iterations do we allow for the optimization process?
 * `convergence_tol` -- how large is our tolerance in declaring convergence (the process will terminate if either convergence is reached or the number of iterations is exhausted)?
-* `threads`
+
+Besides, we note two important things: 
+
+1. The word vectors are composed of the actual word vectors, here called `wv_main`, and some "context" vectors `wv_context`. The [original paper](https://nlp.stanford.edu/pubs/glove.pdf) is somewhat cryptic about the purpose of this double computation but it seems to help alleviate overfitting and noise (and to not make a difference in the worst case).
+2. We need to transform the word vectors into document-level features somehow.
+
+We will go about this step by step:
 
 ```{r fit}
 
-get_glove_embeddings <- function(tokens, glove, iterations, convergence_tol, threads) {
+get_glove_embeddings <- function(tokens, glove, iterations, convergence_tol) {
   
-  vect <- text2vec::vocab_vectorizer(vocabulary$vocab)
+  wv_main <- glv$fit_transform(
+    tcm, 
+    n_iter = n_iter, 
+    convergence_tol = convergence_tol)  
   
-  tcm <- text2vec::create_tcm(
-    vocabulary$itokens, 
-    vect, 
-    skip_grams_window = skip_grams_window) 
+  wv_context <- glv$components
   
-  glove <- text2vec::GlobalVectors$new(rank = dimension, x_max = x_max)
+  word_vecs <-  wv_main + t(wv_context)
+  
+  dtm <- quanteda::dfm_match(
+    quanteda::dfm(tkns),
+    rownames(word_vecs))
+  
+  dtm <- text2vec::normalize(dtm, norm = "l1")
+  
+  as.matrix(dtm) %*% word_vecs
   
 }
-
-test_model <- fit_glove(test_vocab, skip_grams_window = 5, dimension = 3, x_max = 5)
-test_model
 
 ```
