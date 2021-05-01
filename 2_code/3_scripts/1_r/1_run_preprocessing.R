@@ -151,7 +151,8 @@ if (FALSE) {
     "twitter_created_at",
     "twitter_full_text",
     "twitter_favorite_count",
-    "twitter_retweet_count")
+    "twitter_retweet_count",
+    "label")
     
   data_seminar <- data_seminar[, ..cols_to_keep]
   
@@ -165,7 +166,7 @@ if (FALSE) {
     data_seminar,
     here("5_seminar", "twitter_data.csv"),
     sep = ";")
-  
+
 }
 
 # Remove umlauts and non-informative symbols

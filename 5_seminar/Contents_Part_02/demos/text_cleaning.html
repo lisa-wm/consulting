@@ -268,13 +268,13 @@ head(twitter_data)</code></pre>
 ## 4:                         Wir brauchen eine andere Verkehrspolitik - weg von Benzinern und Diesel, hin zu emissionsarmer Mobilität. Das ist auch eine soziale Frage. Denn unter schlechter Luft leiden die, die sich die Wohnung an der verkehrsberuhigten Straße nicht leisten können. https://t.co/GhIrbSrcYP
 ## 5:                            Das ist die Leistung von Hunderten Wahlkämpfern und Politikern im Land, die draußen waren und gezeigt haben, dass sie dicht an dem sind, was die Menschen umtreibt. Und im Konkreten beweisen, wie lebensnah grüne Politik ist. #kwsh #kow18 #Kommunalwahl https://t.co/zYCeel8UpS
 ## 6: Luise #Amtsberg hat heute alles gesagt,was es zum #Familiennachzug  zu sagen gibt. Wer #Integration will, muss Geflüchteten Perspektiven auf  ein Zusammenleben mit ihren Familien geben. Das #Grundrecht auf Familie darf nicht beschnitten werden. Die #GroKo macht aber genau das. https://t.co/Dii2NWKAkO
-##    favorite_count retweet_count               doc_id
-## 1:            233           111 ABaerbock15156546001
-## 2:             96            24 ABaerbock15210084001
-## 3:            153            39 ABaerbock15216341401
-## 4:            213            49 ABaerbock15252349801
-## 5:            301            39 ABaerbock15256297201
-## 6:            115            23 ABaerbock15283779001</code></pre>
+##    favorite_count retweet_count    label               doc_id
+## 1:            233           111 negative ABaerbock15156546001
+## 2:             96            24 negative ABaerbock15210084001
+## 3:            153            39 negative ABaerbock15216341401
+## 4:            213            49 negative ABaerbock15252349801
+## 5:            301            39 positive ABaerbock15256297201
+## 6:            115            23 negative ABaerbock15283779001</code></pre>
 </div>
 <div id="remove-umlauts" class="section level3">
 <h3>Remove umlauts</h3>
@@ -432,13 +432,13 @@ tail(twitter_data)</code></pre>
 ## 4:                                                                                                  Ich kann diese Wut gegen den #Klerus verstehen! Uebergriffige #Priester muessen fuer ihre Taten weltlich belangt werden! #Kinderrechte sind #Menschenrechte! #Missbrauch @Linksfraktion
 ## 5:  In #Chile geht Praesident Milliardaer #Piñera mit Militaer gegen Demonstranten vor (1 Mio alleine in der Hauptstadt). Die #Bundesregierung schweigt zu den Vorgaengen im Vorzeigeland des #Neoliberalismus. Wir kennen diese Doppelmoral ja schon bzgl #Katalonien @Linksfraktion @KRLS
 ## 6:                                                                                             Herzlichen Glueckwunsch @Amira_M_Ali zur #Wahl als Fraktionsvorsitzende @Linksfraktion Gemeinsam moechten wir dem globalisierten Kapitalismus eine starke Linke im Parlament entgegensetzen.
-##    favorite_count retweet_count                  doc_id emojis
-## 1:            224            59  victorperli15914375401       
-## 2:             12             8 zaklinnastic15196618801       
-## 3:              3             0 zaklinnastic15395969401       
-## 4:             15             3 zaklinnastic15517762801       
-## 5:            116            66 zaklinnastic15723763201       
-## 6:             15             2 zaklinnastic15735666001       
+##    favorite_count retweet_count    label                  doc_id emojis
+## 1:            224            59 negative  victorperli15914375401       
+## 2:             12             8 negative zaklinnastic15196618801       
+## 3:              3             0 negative zaklinnastic15395969401       
+## 4:             15             3 negative zaklinnastic15517762801       
+## 5:            116            66 negative zaklinnastic15723763201       
+## 6:             15             2 positive zaklinnastic15735666001       
 ##                                                                               hashtags
 ## 1:                                                                                    
 ## 2:                                               #SalihMuslim,#Afrin,#Tuerkei,#Erdogan
@@ -543,7 +543,7 @@ twitter_corpus &lt;- quanteda::corpus(
 # Inspect
 
 twitter_corpus</code></pre>
-<pre><code>## Corpus consisting of 1,215 documents and 15 docvars.
+<pre><code>## Corpus consisting of 1,215 documents and 16 docvars.
 ## ABaerbock15156546001 :
 ## &quot;Habe mir das Gro Ko-Sondierungspapier zu Klima nochmal genau...&quot;
 ## 
@@ -578,20 +578,20 @@ twitter_corpus</code></pre>
 ## 4 gruene Brandenburg                 6                 6.3 ABaerbock
 ## 5 gruene Brandenburg                 6                 6.3 ABaerbock
 ## 6 gruene Brandenburg                 6                 6.3 ABaerbock
-##   followers_count          created_at favorite_count retweet_count emojis
-## 1          107693 2018-01-11 07:10:00            233           111       
-## 2          107693 2018-03-14 06:20:00             96            24       
-## 3          107693 2018-03-21 12:09:00            153            39       
-## 4           94139 2018-05-02 04:23:00            213            49       
-## 5          107693 2018-05-06 18:02:00            301            39       
-## 6          107693 2018-06-07 13:25:00            115            23       
-##                                                         hashtags tags
-## 1      #GroKo, #Klima, #Klimadiplomatie, #Merkel, #kohleausstieg     
-## 2                                                #Merkel, #GroKo     
-## 3         #Klimakrise, #Regierungserklaerung, #Koalitionsvertrag     
-## 4                                                                    
-## 5                                   #kwsh, #kow18, #Kommunalwahl     
-## 6 #Amtsberg, #Familiennachzug, #Integration, #Grundrecht, #GroKo</code></pre>
+##   followers_count          created_at favorite_count retweet_count    label
+## 1          107693 2018-01-11 07:10:00            233           111 negative
+## 2          107693 2018-03-14 06:20:00             96            24 negative
+## 3          107693 2018-03-21 12:09:00            153            39 negative
+## 4           94139 2018-05-02 04:23:00            213            49 negative
+## 5          107693 2018-05-06 18:02:00            301            39 positive
+## 6          107693 2018-06-07 13:25:00            115            23 negative
+##   emojis                                                       hashtags tags
+## 1             #GroKo, #Klima, #Klimadiplomatie, #Merkel, #kohleausstieg     
+## 2                                                       #Merkel, #GroKo     
+## 3                #Klimakrise, #Regierungserklaerung, #Koalitionsvertrag     
+## 4                                                                           
+## 5                                          #kwsh, #kow18, #Kommunalwahl     
+## 6        #Amtsberg, #Familiennachzug, #Integration, #Grundrecht, #GroKo</code></pre>
 <pre class="r"><code># Save corpus object for further analysis
 
 saveRDS(twitter_corpus, sprintf(&quot;%s/twitter_corpus.RDS&quot;, path))</code></pre>

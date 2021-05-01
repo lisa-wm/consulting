@@ -181,15 +181,6 @@ However, this is obviously a heavy simplification and leads to all documents tha
 
 What we will do to alleviate the sparsity problem at least to some extent is to condense the `dfm` to the most prominent features: 
 
-<!-- Therefore, we make another simplifying concession: we **pool** documents to create larger entities that should share more common tokens. -->
-
-<!-- In this demo, we pool very coarsely and concatenate all tweets by one user to a single document. -->
-<!-- Of course, it is not terribly plausible to assume users sticking to exactly one topic, but our toy data here are somewhat limited. -->
-
-<!-- In a real application you would try and find a more suitable way of pooling documents, e.g., taking into account the date of creation (and probably do it as little as possible). -->
-
-<!-- Using the pooling variable, we can reshape the `dfm` by **grouping** it: -->
-
 ```{r condense}
 
 # Eliminate less common features
@@ -291,7 +282,7 @@ hyperparameter_search <- stm::searchK(
 
 ```
 
-Seems `r toString(n_topics)` topics are a good choice, so let's fit the actual **model** now:
+Seems `r toString(n_topics)` topics is a good choice, so let's fit the actual **model** now:
 
 ```{r fitstm, results='hide'}
 
