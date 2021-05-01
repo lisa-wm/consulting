@@ -323,43 +323,43 @@ twitter_data[, full_text := stringr::str_replace_all(
 # Create pattern for symbols we want to discard altogether (including various types of quotes, sequences 
 # resulting from unicode conversion, hyperlinks, ...), concatenated with the logical OR operation
 
-pattern &lt;- c(
-  &quot;\U0022&quot;,
-  &quot;\U0027&quot;,
-  &quot;\U2018&quot;,
-  &quot;\U2019&quot;,
-  &quot;\U201C&quot;,
-  &quot;\U201D&quot;,
-  &quot;\U201E&quot;,
+pattern &lt;- stringr::str_c(c(
+  &quot;\U0022&quot;, 
+  &quot;\U0027&quot;, 
+  &quot;\U2018&quot;, 
+  &quot;\U2019&quot;, 
+  &quot;\U201C&quot;, 
+  &quot;\U201D&quot;, 
+  &quot;\U201E&quot;, 
   &quot;\U201F&quot;,
   &quot;&amp;amp;&quot;,
-  &quot;&amp;lt;&quot;,
+  &quot;&amp;lt;&quot;, 
   &quot;&amp;gt;&quot;,
   &quot;%&quot;,
   &quot; http([^ ]*)&quot;,
-  &quot;http([^ ]*)&quot;)
+  &quot;http([^ ]*)&quot;,
+  &quot;\\\n&quot;), 
+  collapse = &quot;|&quot;)
 
-twitter_data[, full_text := stringr::str_remove_all(full_text, pattern)]</code></pre>
-<pre><code>## Warning in stri_replace_all_regex(string, pattern,
-## fix_replacement(replacement), : longer object length is not a multiple of
-## shorter object length</code></pre>
-<pre class="r"><code># Remove additional whitespaces induced by removal
+twitter_data[, full_text := stringr::str_remove_all(full_text, pattern)]
+
+# Remove additional whitespaces induced by removal
 
 twitter_data[, full_text := stringr::str_squish(full_text)]
 
 # Inspect
 
 head(twitter_data, 10)$full_text</code></pre>
-<pre><code>##  [1] &quot;Habe mir das #GroKo-Sondierungspapier zu #Klima nochmal genau angeschaut. Krass: De facto wird sogar das Kyoto-Protokoll, der Meilenstein der #Klimadiplomatie fuer nichtig erklaert! Frau #Merkel, das geht so nicht! Nachbessern! #kohleausstieg https://t.co/tWIuwjAbUd&quot;                                         
-##  [2] &quot;Auch weltweit sieht man, dass Angela #Merkel s #GroKo 3.0 nicht klimatauglich ist, sondern vielmehr das Pariser Abkommen unterlaeuft. Auch aussenpolitisch fatal. Daher Klimasofortprogramm jetzt auflegen! https://t.co/LH73sSW5gU&quot;                                                                                
-##  [3] &quot;Der groessten globalen Herausforderung, der #Klimakrise, 30 Sek. von 1 Std #Regierungserklaerung zu widmen, unterstreicht die groesste Leerstelle im #Koalitionsvertrag. Auch sozialpolitisch wird uns das auf die Fuesse fallen. Unter den Klimafolgen leiden gerade die aermsten am meisten.&quot;                     
-##  [4] &quot;Wir brauchen eine andere Verkehrspolitik - weg von Benzinern und Diesel, hin zu emissionsarmer Mobilitaet. Das ist auch eine soziale Frage. Denn unter schlechter Luft leiden die, die sich die Wohnung an der verkehrsberuhigten Strasse nicht leisten koennen. https://t.co/GhIrbSrcYP&quot;                           
-##  [5] &quot;Das ist die Leistung von Hunderten Wahlkaempfern und Politikern im Land, die draussen waren und gezeigt haben, dass sie dicht an dem sind, was die Menschen umtreibt. Und im Konkreten beweisen, wie lebensnah gruene Politik ist. #kwsh #kow18 #Kommunalwahl https://t.co/zYCeel8UpS&quot;                              
-##  [6] &quot;Luise #Amtsberg hat heute alles gesagt,was es zum #Familiennachzug zu sagen gibt. Wer #Integration will, muss Gefluechteten Perspektiven auf ein Zusammenleben mit ihren Familien geben. Das #Grundrecht auf Familie darf nicht beschnitten werden. Die #GroKo macht aber genau das. https://t.co/Dii2NWKAkO&quot;       
-##  [7] &quot;#Maassen nun also rechte“ Hand von #Seehofer. Es gibt nicht genug Adjektive um das Drama dieser Grossen Koalition zu beschreiben. Aber ehrlich gesagt, mach ich mir nach heute einfach nur noch mehr Sorgen um die Zukunft unserer Demokratie. Umso mehr gilt: #WhenTheyGoLowWeGoHigh&quot;                              
-##  [8] &quot;„Ob Kohleausstieg, CO2-Preis, Verkehrswende oder die Einhaltung eigener CO2-Minderungsziele. Beim #Klimaschutz hakt es in Deutschland an allen Ecken und Enden.“ Das muss sich dringend aendern. #COP24 https://t.co/1PZQXb2gBI&quot;                                                                                    
-##  [9] &quot;Ein wirkliches Recht auf Information zum Schwangerschaftsabbruch fuer alle Frauen sowie Rechtssicherheit fuer Aerztinnen Aerzte sollte selbstverstaendlich sein! In 30 Staedten sind wir Frauen heute auf der Strasse, damit es endlich kommt. #wegmit219a #mybodymychoice @GrueneBundestag https://t.co/UgPq4TtRb1&quot;
-## [10] &quot;@haenel_kh , Natascha Nicklaus + @NoraSzasz1 kaempfen fuer etwas das groesser ist als ein Bulletpoint auf ihrer Praxis Website. Sie kaempfen fuer das #Selbstbestimmungsrecht von uns Frauen. Dafuer gibts zu Recht den #AnneKleinFrauenpreis der @boell_stiftung #Trustwomen #wegmit219a https://t.co/pKKgZ3sPzV&quot;</code></pre>
+<pre><code>##  [1] &quot;Habe mir das #GroKo-Sondierungspapier zu #Klima nochmal genau angeschaut. Krass: De facto wird sogar das Kyoto-Protokoll, der Meilenstein der #Klimadiplomatie fuer nichtig erklaert! Frau #Merkel, das geht so nicht! Nachbessern! #kohleausstieg&quot;                                            
+##  [2] &quot;Auch weltweit sieht man, dass Angela #Merkel s #GroKo 3.0 nicht klimatauglich ist, sondern vielmehr das Pariser Abkommen unterlaeuft. Auch aussenpolitisch fatal. Daher Klimasofortprogramm jetzt auflegen!&quot;                                                                                   
+##  [3] &quot;Der groessten globalen Herausforderung, der #Klimakrise, 30 Sek. von 1 Std #Regierungserklaerung zu widmen, unterstreicht die groesste Leerstelle im #Koalitionsvertrag. Auch sozialpolitisch wird uns das auf die Fuesse fallen. Unter den Klimafolgen leiden gerade die aermsten am meisten.&quot;
+##  [4] &quot;Wir brauchen eine andere Verkehrspolitik - weg von Benzinern und Diesel, hin zu emissionsarmer Mobilitaet. Das ist auch eine soziale Frage. Denn unter schlechter Luft leiden die, die sich die Wohnung an der verkehrsberuhigten Strasse nicht leisten koennen.&quot;                              
+##  [5] &quot;Das ist die Leistung von Hunderten Wahlkaempfern und Politikern im Land, die draussen waren und gezeigt haben, dass sie dicht an dem sind, was die Menschen umtreibt. Und im Konkreten beweisen, wie lebensnah gruene Politik ist. #kwsh #kow18 #Kommunalwahl&quot;                                 
+##  [6] &quot;Luise #Amtsberg hat heute alles gesagt,was es zum #Familiennachzug zu sagen gibt. Wer #Integration will, muss Gefluechteten Perspektiven auf ein Zusammenleben mit ihren Familien geben. Das #Grundrecht auf Familie darf nicht beschnitten werden. Die #GroKo macht aber genau das.&quot;          
+##  [7] &quot;#Maassen nun also rechte Hand von #Seehofer. Es gibt nicht genug Adjektive um das Drama dieser Grossen Koalition zu beschreiben. Aber ehrlich gesagt, mach ich mir nach heute einfach nur noch mehr Sorgen um die Zukunft unserer Demokratie. Umso mehr gilt: #WhenTheyGoLowWeGoHigh&quot;          
+##  [8] &quot;Ob Kohleausstieg, CO2-Preis, Verkehrswende oder die Einhaltung eigener CO2-Minderungsziele. Beim #Klimaschutz hakt es in Deutschland an allen Ecken und Enden. Das muss sich dringend aendern. #COP24&quot;                                                                                         
+##  [9] &quot;Ein wirkliches Recht auf Information zum Schwangerschaftsabbruch fuer alle Frauen sowie Rechtssicherheit fuer Aerztinnen Aerzte sollte selbstverstaendlich sein! In 30 Staedten sind wir Frauen heute auf der Strasse, damit es endlich kommt. #wegmit219a #mybodymychoice @GrueneBundestag&quot;   
+## [10] &quot;@haenel_kh , Natascha Nicklaus + @NoraSzasz1 kaempfen fuer etwas das groesser ist als ein Bulletpoint auf ihrer Praxis Website. Sie kaempfen fuer das #Selbstbestimmungsrecht von uns Frauen. Dafuer gibts zu Recht den #AnneKleinFrauenpreis der @boell_stiftung #Trustwomen #wegmit219a&quot;</code></pre>
 </div>
 <div id="extract-twitter-specific-symbols" class="section level3">
 <h3>Extract Twitter-specific symbols</h3>
@@ -370,8 +370,11 @@ head(twitter_data, 10)$full_text</code></pre>
 <li>tags.</li>
 </ul>
 <p>This time, though, we keep the extracted parts and store them into separate variables since they might be useful for sentiment analysis.</p>
+<p>Note that emojis are a bit iffy to handle: concatenating the entire <code>rtweet</code> list as a regex pattern produces a super long string that will cause R to crash. We therefore use a workaround: first, we extract all emoji <em>candidates</em>, and afterwards we match them witht the <code>rtweet</code> list.</p>
 <p>First, specify patterns with regex:</p>
-<pre class="r"><code>pattern_emoji &lt;- unlist(stringr::str_extract_all(rtweet::emojis$code, &quot;[[:xdigit:]]&quot;))
+<pre class="r"><code># Specify emoji candidate pattern: all non-printable characters
+
+pattern_emoji &lt;- &quot;[^ -~]&quot;
 
 # Specify hashtag pattern: # symbol, followed by anything alphanumeric
 
@@ -381,12 +384,21 @@ pattern_hashtag &lt;- &quot;(#)[[:alnum:]]+&quot;
 
 pattern_tag &lt;- &quot;@\\S+&quot;</code></pre>
 <p>Extract all matching sequences and store them in separate columns:</p>
-<pre class="r"><code># Extract
+<pre class="r"><code># Ensure unicode characters are displayed correctly
 
-twitter_data[, emojis := stringr::str_extract_all(full_text, pattern_emoji)]</code></pre>
-<pre><code>## Warning in stri_extract_all_regex(string, pattern, simplify = simplify, : longer
-## object length is not a multiple of shorter object length</code></pre>
-<pre class="r"><code>twitter_data[, hashtags := stringr::str_extract_all(full_text, pattern_hashtag)]
+twitter_data[, full_text := stringi::stri_unescape_unicode(full_text)]
+
+# Extract
+
+twitter_data[, emojis := stringr::str_extract_all(full_text, pattern_emoji)]
+
+emojis_real &lt;- lapply(
+  twitter_data$emojis, 
+  function(i) unlist(i)[unlist(i) %in% rtweet::emojis$code])
+
+twitter_data$emojis &lt;- emojis_real
+
+twitter_data[, hashtags := stringr::str_extract_all(full_text, pattern_hashtag)]
 twitter_data[, tags := stringr::str_extract_all(full_text, pattern_tag)]
 
 # Inspect
@@ -413,18 +425,18 @@ tail(twitter_data)</code></pre>
 ## 4: 2019-03-05 08:58:00
 ## 5: 2019-10-29 19:12:00
 ## 6: 2019-11-12 13:50:00
-##                                                                                                                                                                                                                                                                                                         full_text
-## 1:                 Die Autobosse sind selbst Schuld an ihrem miserablen Ruf. Wer Schlagzeilen mit Abgasbetrug, Manipulation und ueblen Insta-Videos macht, verliert Vertrauen der Kunden &amp;amp; gefaehrdet Millionen Jobs. In der Krise ueber 5 Mrd Dividende auszahlen und dann nach Staatshilfe rufen, ist gaga!
-## 2: #SalihMuslim war erst letzte Woche in @Linksfraktion und berichtete ueber die schwere Situation in #Afrin und #Tuerkei ,jetzt wurde er festgenommen.Morgen beginnt der Prozess in Prag.Freiheit fuer Salih Muslim,statt Unterstuetzung fuer Diktator #Erdogan! https://t.co/IQx02zA9Ut https://t.co/ZqfdAoZ5L1
-## 3:                                                                                Richtiger Kommentar @SZ! #SaudiArabien kann nicht beweisen das #Khashoggi noch lebt. Nun sollen #Menschenrechte wieder #Wirtschaftsinteressen geopfert werden. #BuReg, beenden sie dieses #Trauerspiel. https://t.co/mivYYDut4s
-## 4:                                                                                                Ich kann diese Wut gegen den #Klerus verstehen! Uebergriffige #Priester muessen fuer ihre Taten weltlich belangt werden! #Kinderrechte sind #Menschenrechte! #Missbrauch @Linksfraktion https://t.co/r2u2riFdyu
-## 5:  In #Chile geht Praesident &amp;amp; Milliardaer #Piñera mit Militaer gegen Demonstranten vor (1 Mio alleine in der Hauptstadt). Die #Bundesregierung schweigt zu den Vorgaengen im &quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;Vorzeigeland des #Neoliberalismus&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;. Wir kennen diese Doppelmoral ja schon bzgl #Katalonien @Linksfraktion @KRLS
-## 6:                                                                                           Herzlichen Glueckwunsch @Amira_M_Ali zur #Wahl als Fraktionsvorsitzende @Linksfraktion Gemeinsam moechten wir dem globalisierten Kapitalismus eine starke Linke im Parlament entgegensetzen. https://t.co/ESXn8QkEFa
+##                                                                                                                                                                                                                                                                                   full_text
+## 1: Die Autobosse sind selbst Schuld an ihrem miserablen Ruf. Wer Schlagzeilen mit Abgasbetrug, Manipulation und ueblen Insta-Videos macht, verliert Vertrauen der Kunden gefaehrdet Millionen Jobs. In der Krise ueber 5 Mrd Dividende auszahlen und dann nach Staatshilfe rufen, ist gaga!
+## 2:                           #SalihMuslim war erst letzte Woche in @Linksfraktion und berichtete ueber die schwere Situation in #Afrin und #Tuerkei ,jetzt wurde er festgenommen.Morgen beginnt der Prozess in Prag.Freiheit fuer Salih Muslim,statt Unterstuetzung fuer Diktator #Erdogan!
+## 3:                                                                                  Richtiger Kommentar @SZ! #SaudiArabien kann nicht beweisen das #Khashoggi noch lebt. Nun sollen #Menschenrechte wieder #Wirtschaftsinteressen geopfert werden. #BuReg, beenden sie dieses #Trauerspiel.
+## 4:                                                                                                  Ich kann diese Wut gegen den #Klerus verstehen! Uebergriffige #Priester muessen fuer ihre Taten weltlich belangt werden! #Kinderrechte sind #Menschenrechte! #Missbrauch @Linksfraktion
+## 5:  In #Chile geht Praesident Milliardaer #Piñera mit Militaer gegen Demonstranten vor (1 Mio alleine in der Hauptstadt). Die #Bundesregierung schweigt zu den Vorgaengen im Vorzeigeland des #Neoliberalismus. Wir kennen diese Doppelmoral ja schon bzgl #Katalonien @Linksfraktion @KRLS
+## 6:                                                                                             Herzlichen Glueckwunsch @Amira_M_Ali zur #Wahl als Fraktionsvorsitzende @Linksfraktion Gemeinsam moechten wir dem globalisierten Kapitalismus eine starke Linke im Parlament entgegensetzen.
 ##    favorite_count retweet_count                  doc_id emojis
 ## 1:            224            59  victorperli15914375401       
-## 2:             12             8 zaklinnastic15196618801      0
+## 2:             12             8 zaklinnastic15196618801       
 ## 3:              3             0 zaklinnastic15395969401       
-## 4:             15             3 zaklinnastic15517762801    2,2
+## 4:             15             3 zaklinnastic15517762801       
 ## 5:            116            66 zaklinnastic15723763201       
 ## 6:             15             2 zaklinnastic15735666001       
 ##                                                                               hashtags
@@ -475,27 +487,27 @@ twitter_data[, full_text := lapply(
 
 tail(twitter_data)$full_text</code></pre>
 <pre><code>## [[1]]
-## [1] &quot;Die Autobosse sind selbst Schuld an ihrem miserablen Ruf. Wer Schlagzeilen mit Abgasbetrug, Manipulation und ueblen Insta-Videos macht, verliert Vertrauen der Kunden &amp;amp; gefaehrdet Millionen Jobs. In der Krise ueber 5 Mrd Dividende auszahlen und dann nach Staatshilfe rufen, ist gaga!&quot;
+## [1] &quot;Die Autobosse sind selbst Schuld an ihrem miserablen Ruf. Wer Schlagzeilen mit Abgasbetrug, Manipulation und ueblen Insta-Videos macht, verliert Vertrauen der Kunden gefaehrdet Millionen Jobs. In der Krise ueber 5 Mrd Dividende auszahlen und dann nach Staatshilfe rufen, ist gaga!&quot;
 ## 
 ## [[2]]
-## [1] &quot;#Salih Muslim war erst letzte Woche in @Linksfraktion und berichtete ueber die schwere Situation in #Afrin und #Tuerkei ,jetzt wurde er festgenommen.Morgen beginnt der Prozess in Prag.Freiheit fuer Salih Muslim,statt Unterstuetzung fuer Diktator #Erdogan! https://t.co/IQx02zA9Ut https://t.co/ZqfdAoZ5L1&quot;
+## [1] &quot;#Salih Muslim war erst letzte Woche in @Linksfraktion und berichtete ueber die schwere Situation in #Afrin und #Tuerkei ,jetzt wurde er festgenommen.Morgen beginnt der Prozess in Prag.Freiheit fuer Salih Muslim,statt Unterstuetzung fuer Diktator #Erdogan!&quot;
 ## 
 ## [[3]]
-## [1] &quot;Richtiger Kommentar @SZ! #Saudi Arabien kann nicht beweisen das #Khashoggi noch lebt. Nun sollen #Menschenrechte wieder #Wirtschaftsinteressen geopfert werden. #Bu Reg, beenden sie dieses #Trauerspiel. https://t.co/mivYYDut4s&quot;
+## [1] &quot;Richtiger Kommentar @SZ! #Saudi Arabien kann nicht beweisen das #Khashoggi noch lebt. Nun sollen #Menschenrechte wieder #Wirtschaftsinteressen geopfert werden. #Bu Reg, beenden sie dieses #Trauerspiel.&quot;
 ## 
 ## [[4]]
-## [1] &quot;Ich kann diese Wut gegen den #Klerus verstehen! Uebergriffige #Priester muessen fuer ihre Taten weltlich belangt werden! #Kinderrechte sind #Menschenrechte! #Missbrauch @Linksfraktion https://t.co/r2u2riFdyu&quot;
+## [1] &quot;Ich kann diese Wut gegen den #Klerus verstehen! Uebergriffige #Priester muessen fuer ihre Taten weltlich belangt werden! #Kinderrechte sind #Menschenrechte! #Missbrauch @Linksfraktion&quot;
 ## 
 ## [[5]]
-## [1] &quot;In #Chile geht Praesident &amp;amp; Milliardaer #Piñera mit Militaer gegen Demonstranten vor (1 Mio alleine in der Hauptstadt). Die #Bundesregierung schweigt zu den Vorgaengen im \&quot;\&quot;\&quot;\&quot;\&quot;\&quot;\&quot;\&quot;Vorzeigeland des #Neoliberalismus\&quot;\&quot;\&quot;\&quot;\&quot;\&quot;\&quot;\&quot;. Wir kennen diese Doppelmoral ja schon bzgl #Katalonien @Linksfraktion @KRLS&quot;
+## [1] &quot;In #Chile geht Praesident Milliardaer #Piñera mit Militaer gegen Demonstranten vor (1 Mio alleine in der Hauptstadt). Die #Bundesregierung schweigt zu den Vorgaengen im Vorzeigeland des #Neoliberalismus. Wir kennen diese Doppelmoral ja schon bzgl #Katalonien @Linksfraktion @KRLS&quot;
 ## 
 ## [[6]]
-## [1] &quot;Herzlichen Glueckwunsch @Amira_M_Ali zur #Wahl als Fraktionsvorsitzende @Linksfraktion Gemeinsam moechten wir dem globalisierten Kapitalismus eine starke Linke im Parlament entgegensetzen. https://t.co/ESXn8QkEFa&quot;</code></pre>
+## [1] &quot;Herzlichen Glueckwunsch @Amira_M_Ali zur #Wahl als Fraktionsvorsitzende @Linksfraktion Gemeinsam moechten wir dem globalisierten Kapitalismus eine starke Linke im Parlament entgegensetzen.&quot;</code></pre>
 <p>Et voilà, we seem to have caught and stored all special symbols, so we can eventually remove them from the text.</p>
 <pre class="r"><code># Collect all patterns to remove
 
 patterns_to_remove &lt;- stringr::str_c(
-  c(pattern_emoji, &quot;#&quot;, pattern_tag, &quot;[^\001-\177]&quot;),
+  c(pattern_emoji, &quot;#&quot;, pattern_tag),
   collapse = &quot;|&quot;)
 
 # Remove patterns and unwanted whitespace
@@ -506,16 +518,16 @@ twitter_data[, full_text := stringr::str_squish(full_text)]
 # Inspect
 
 head(twitter_data, 10)$full_text</code></pre>
-<pre><code>##  [1] &quot;Habe mir das Gro Ko-Sondierungspapier zu Klima nochmal genau angeschaut. Krass: De facto wird sogar das Kyoto-Protokoll, der Meilenstein der Klimadiplomatie fuer nichtig erklaert! Frau Merkel, das geht so nicht! Nachbessern! kohleausstieg https://t.co/tWIuwjAbUd&quot;                                
-##  [2] &quot;Auch weltweit sieht man, dass Angela Merkel s GroKo . nicht klimatauglich ist, sondern vielmehr das Pariser Abkommen unterlaeuft. Auch aussenpolitisch fatal. Daher Klimasofortprogramm jetzt auflegen! https://t.co/LHsSWgU&quot;                                                                          
-##  [3] &quot;Der groessten globalen Herausforderung, der Klimakrise, Sek. von Std Regierungserklaerung zu widmen, unterstreicht die groesste Leerstelle im Koalitionsvertrag. Auch sozialpolitisch wird uns das auf die Fuesse fallen. Unter den Klimafolgen leiden gerade die aermsten am meisten.&quot;                
-##  [4] &quot;Wir brauchen eine andere Verkehrspolitik - weg von Benzinern und Diesel, hin zu emissionsarmer Mobilitaet. Das ist auch eine soziale Frage. Denn unter schlechter Luft leiden die, die sich die Wohnung an der verkehrsberuhigten Strasse nicht leisten koennen. https://t.co/GhIrbSrcYP&quot;              
-##  [5] &quot;Das ist die Leistung von Hunderten Wahlkaempfern und Politikern im Land, die draussen waren und gezeigt haben, dass sie dicht an dem sind, was die Menschen umtreibt. Und im Konkreten beweisen, wie lebensnah gruene Politik ist. kwsh kow Kommunalwahl https://t.co/zYCeelUpS&quot;                       
-##  [6] &quot;Luise Amtsberg hat heute alles gesagt,was es zum Familiennachzug zu sagen gibt. Wer Integration will, muss Gefluechteten Perspektiven auf ein Zusammenleben mit ihren Familien geben. Das Grundrecht auf Familie darf nicht beschnitten werden. Die GroKo macht aber genau das. https://t.co/DiiNWKAkO&quot;
-##  [7] &quot;Maassen nun also rechte Hand von Seehofer. Es gibt nicht genug Adjektive um das Drama dieser Grossen Koalition zu beschreiben. Aber ehrlich gesagt, mach ich mir nach heute einfach nur noch mehr Sorgen um die Zukunft unserer Demokratie. Umso mehr gilt: When They Go Low We Go High&quot;               
-##  [8] &quot;Ob Kohleausstieg, CO-Preis, Verkehrswende oder die Einhaltung eigener CO-Minderungsziele. Beim Klimaschutz hakt es in Deutschland an allen Ecken und Enden. Das muss sich dringend aendern. COP https://t.co/PZQXbgBI&quot;                                                                                 
-##  [9] &quot;Ein wirkliches Recht auf Information zum Schwangerschaftsabbruch fuer alle Frauen sowie Rechtssicherheit fuer Aerztinnen Aerzte sollte selbstverstaendlich sein! In Staedten sind wir Frauen heute auf der Strasse, damit es endlich kommt. wegmita mybodymychoice https://t.co/UgPqTtRb&quot;              
-## [10] &quot;, Natascha Nicklaus + kaempfen fuer etwas das groesser ist als ein Bulletpoint auf ihrer Praxis Website. Sie kaempfen fuer das Selbstbestimmungsrecht von uns Frauen. Dafuer gibts zu Recht den Anne Klein Frauenpreis der Trustwomen wegmita https://t.co/pKKgZsPzV&quot;</code></pre>
+<pre><code>##  [1] &quot;Habe mir das Gro Ko-Sondierungspapier zu Klima nochmal genau angeschaut. Krass: De facto wird sogar das Kyoto-Protokoll, der Meilenstein der Klimadiplomatie fuer nichtig erklaert! Frau Merkel, das geht so nicht! Nachbessern! kohleausstieg&quot;                                             
+##  [2] &quot;Auch weltweit sieht man, dass Angela Merkel s GroKo 3.0 nicht klimatauglich ist, sondern vielmehr das Pariser Abkommen unterlaeuft. Auch aussenpolitisch fatal. Daher Klimasofortprogramm jetzt auflegen!&quot;                                                                                  
+##  [3] &quot;Der groessten globalen Herausforderung, der Klimakrise, 30 Sek. von 1 Std Regierungserklaerung zu widmen, unterstreicht die groesste Leerstelle im Koalitionsvertrag. Auch sozialpolitisch wird uns das auf die Fuesse fallen. Unter den Klimafolgen leiden gerade die aermsten am meisten.&quot;
+##  [4] &quot;Wir brauchen eine andere Verkehrspolitik - weg von Benzinern und Diesel, hin zu emissionsarmer Mobilitaet. Das ist auch eine soziale Frage. Denn unter schlechter Luft leiden die, die sich die Wohnung an der verkehrsberuhigten Strasse nicht leisten koennen.&quot;                           
+##  [5] &quot;Das ist die Leistung von Hunderten Wahlkaempfern und Politikern im Land, die draussen waren und gezeigt haben, dass sie dicht an dem sind, was die Menschen umtreibt. Und im Konkreten beweisen, wie lebensnah gruene Politik ist. kwsh kow18 Kommunalwahl&quot;                                 
+##  [6] &quot;Luise Amtsberg hat heute alles gesagt,was es zum Familiennachzug zu sagen gibt. Wer Integration will, muss Gefluechteten Perspektiven auf ein Zusammenleben mit ihren Familien geben. Das Grundrecht auf Familie darf nicht beschnitten werden. Die GroKo macht aber genau das.&quot;            
+##  [7] &quot;Maassen nun also rechte Hand von Seehofer. Es gibt nicht genug Adjektive um das Drama dieser Grossen Koalition zu beschreiben. Aber ehrlich gesagt, mach ich mir nach heute einfach nur noch mehr Sorgen um die Zukunft unserer Demokratie. Umso mehr gilt: When They Go Low We Go High&quot;    
+##  [8] &quot;Ob Kohleausstieg, CO2-Preis, Verkehrswende oder die Einhaltung eigener CO2-Minderungsziele. Beim Klimaschutz hakt es in Deutschland an allen Ecken und Enden. Das muss sich dringend aendern. COP24&quot;                                                                                        
+##  [9] &quot;Ein wirkliches Recht auf Information zum Schwangerschaftsabbruch fuer alle Frauen sowie Rechtssicherheit fuer Aerztinnen Aerzte sollte selbstverstaendlich sein! In 30 Staedten sind wir Frauen heute auf der Strasse, damit es endlich kommt. wegmit219a mybodymychoice&quot;                   
+## [10] &quot;, Natascha Nicklaus + kaempfen fuer etwas das groesser ist als ein Bulletpoint auf ihrer Praxis Website. Sie kaempfen fuer das Selbstbestimmungsrecht von uns Frauen. Dafuer gibts zu Recht den Anne Klein Frauenpreis der Trustwomen wegmit219a&quot;</code></pre>
 </div>
 <div id="create-corpus-object" class="section level3">
 <h3>Create <code>corpus</code> object</h3>
@@ -536,10 +548,10 @@ twitter_corpus</code></pre>
 ## &quot;Habe mir das Gro Ko-Sondierungspapier zu Klima nochmal genau...&quot;
 ## 
 ## ABaerbock15210084001 :
-## &quot;Auch weltweit sieht man, dass Angela Merkel s GroKo . nicht ...&quot;
+## &quot;Auch weltweit sieht man, dass Angela Merkel s GroKo 3.0 nich...&quot;
 ## 
 ## ABaerbock15216341401 :
-## &quot;Der groessten globalen Herausforderung, der Klimakrise, Sek....&quot;
+## &quot;Der groessten globalen Herausforderung, der Klimakrise, 30 S...&quot;
 ## 
 ## ABaerbock15252349801 :
 ## &quot;Wir brauchen eine andere Verkehrspolitik - weg von Benzinern...&quot;

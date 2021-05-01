@@ -42,7 +42,9 @@ This [vignette](https://cran.r-project.org/web/packages/data.table/vignettes/dat
 Assuming we have concluded the initial step of scraping the data and stored them as a `.csv` file, we now **import** the data into R.
 
 ```{r path, include = FALSE}
+
 path <- "5_seminar"
+
 ```
 
 ```{r import_data, message=FALSE, warning=FALSE}
@@ -90,6 +92,7 @@ data.table::setkey(twitter_data, doc_id)
 # Inspect
 
 head(twitter_data)
+
 ```
 
 ### Remove umlauts
@@ -140,21 +143,23 @@ twitter_data[, full_text := stringr::str_replace_all(
 # Create pattern for symbols we want to discard altogether (including various types of quotes, sequences 
 # resulting from unicode conversion, hyperlinks, ...), concatenated with the logical OR operation
 
-pattern <- c(
-  "\U0022",
-  "\U0027",
-  "\U2018",
-  "\U2019",
-  "\U201C",
-  "\U201D",
-  "\U201E",
+pattern <- stringr::str_c(c(
+  "\U0022", 
+  "\U0027", 
+  "\U2018", 
+  "\U2019", 
+  "\U201C", 
+  "\U201D", 
+  "\U201E", 
   "\U201F",
   "&amp;",
-  "&lt;",
+  "&lt;", 
   "&gt;",
   "%",
   " http([^ ]*)",
-  "http([^ ]*)")
+  "http([^ ]*)",
+  "\\\n"), 
+  collapse = "|")
 
 twitter_data[, full_text := stringr::str_remove_all(full_text, pattern)]
 
@@ -178,11 +183,16 @@ After handling standard text cleaning issues, we remove the **Twitter-specific s
 
 This time, though, we keep the extracted parts and store them into separate variables since they might be useful for sentiment analysis.
 
+Note that emojis are a bit iffy to handle: concatenating the entire `rtweet` list as a regex pattern produces a super long string that will cause R to crash.
+We therefore use a workaround: first, we extract all emoji *candidates*, and afterwards we match them witht the `rtweet` list.
+
 First, specify patterns with regex:
 
 ```{r patterns}
 
-pattern_emoji <- unlist(stringr::str_extract_all(rtweet::emojis$code, "[[:xdigit:]]"))
+# Specify emoji candidate pattern: all non-printable characters
+
+pattern_emoji <- "[^ -~]"
 
 # Specify hashtag pattern: # symbol, followed by anything alphanumeric
 
@@ -198,9 +208,20 @@ Extract all matching sequences and store them in separate columns:
 
 ```{r extraction}
 
+# Ensure unicode characters are displayed correctly
+
+twitter_data[, full_text := stringi::stri_unescape_unicode(full_text)]
+
 # Extract
 
 twitter_data[, emojis := stringr::str_extract_all(full_text, pattern_emoji)]
+
+emojis_real <- lapply(
+  twitter_data$emojis, 
+  function(i) unlist(i)[unlist(i) %in% rtweet::emojis$code])
+
+twitter_data$emojis <- emojis_real
+
 twitter_data[, hashtags := stringr::str_extract_all(full_text, pattern_hashtag)]
 twitter_data[, tags := stringr::str_extract_all(full_text, pattern_tag)]
 
@@ -261,7 +282,7 @@ Et voilà, we seem to have caught and stored all special symbols, so we can even
 # Collect all patterns to remove
 
 patterns_to_remove <- stringr::str_c(
-  c(pattern_emoji, "#", pattern_tag, "[^\001-\177]"),
+  c(pattern_emoji, "#", pattern_tag),
   collapse = "|")
 
 # Remove patterns and unwanted whitespace

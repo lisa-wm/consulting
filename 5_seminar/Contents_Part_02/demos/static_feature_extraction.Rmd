@@ -276,7 +276,7 @@ twitter_polarities <- data.table::as.data.table(
 
 # Inspect
 
-head(twitter_polarities)
+twitter_polarities[sample(twitter_polarities[, .I], 10)]
 
 ```
 
@@ -296,7 +296,7 @@ twitter_docvars <- data.table::as.data.table(
     quanteda::docvars(twitter_corpus)), 
   key = "doc_id")
 
-head(twitter_docvars)
+twitter_docvars[sample(twitter_docvars[, .I], 10)]
 
 ```
 
@@ -310,7 +310,7 @@ twitter_emojis <- twitter_docvars[
     ][, emojis := NULL]
 
 list(
-  twitter_emojis = head(twitter_emojis),
+  twitter_emojis = twitter_emojis[sample(twitter_emojis[, .I], 10)],
   distribution = table(twitter_emojis$n_emojis))
 
 ```
@@ -358,7 +358,7 @@ twitter_negation <- data.table::as.data.table(
 
 # Inspect
 
-head(twitter_negation)
+twitter_negation[sample(twitter_negation[, .I], 10)]
 
 ```
 
@@ -409,7 +409,7 @@ data.table::setcolorder(twitter_char_unigrams, c("doc_id", letters))
 
 # Inspect
 
-head(twitter_char_unigrams)
+twitter_char_unigrams[sample(twitter_char_unigrams[, .I], 10)]
 
 ```
 
@@ -467,7 +467,7 @@ For the POS tags to be admissible in sentiment analysis, however, we need to con
 
 twitter_pos_tags <- twitter_pos_tags[
   , .(doc_id, pos)
-  ][, aux := 1L
+  ][, aux := 1
     ][, n_tags := sum(aux), by = list(doc_id, pos)
       ][, aux := NULL]
 
@@ -506,7 +506,7 @@ twitter_features_static <- twitter_docvars[, .(doc_id)
 
 saveRDS(twitter_features_static, sprintf("%s/twitter_features_static.RDS", path))
 
-head(twitter_features_static)
+twitter_features_static[sample(twitter_features_static[, .I], 10)]
 
 ```
 
