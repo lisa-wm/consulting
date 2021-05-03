@@ -337,7 +337,7 @@ make_glove_embeddings <- function(text,
 embeddings <- lapply(
   twitter_corpus_subsets,
   function(i) {make_glove_embeddings(
-    quanteda::texts(i),
+    quanteda::texts(i$text),
     stopwords = stopwords,
     term_count_min = 2,
     skip_grams_window = 5,
@@ -370,45 +370,7 @@ data.table::setnames(
   embeddings_dt,
   sprintf("embedding_%d", seq_along(embeddings_dt)))
 
-embeddings_dt$doc_id <- unlist(lapply(
-  twitter_corpus_subsets, 
-  function(i) quanteda::docvars(i)$doc_id))
-
 embeddings_dt[sample(embeddings_dt[, .I], 10)]
-
-```
-
-```{r append}
-
-# Insert info back into corpus
-
-twitter_docvars <- data.table::as.data.table(
-  cbind(
-    doc_id = quanteda::docid(twitter_corpus),
-    quanteda::docvars(twitter_corpus)), 
-  key = "doc_id")
-
-twitter_docvars <- embeddings_dt[twitter_docvars, on = "doc_id"]
-
-```
-
-```{r rm, include = FALSE}
-
-twitter_docvars[, i.doc_id := NULL]
-
-```
-
-```{r save}
-
-twitter_corpus_with_embeddings <- twitter_corpus
-
-quanteda::docvars(twitter_corpus_with_embeddings) <- as.data.frame(twitter_docvars)
-
-# Save
-
-saveRDS(
-  twitter_corpus_with_embeddings, 
-  sprintf("%s/twitter_corpus_with_embeddings.RDS", path))
 
 ```
 

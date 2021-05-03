@@ -345,16 +345,16 @@ test_word_vectors &lt;- get_word_vectors(
   glove = test_model,
   iterations = 3,
   convergence_tol = 0.001)</code></pre>
-<pre><code>## INFO  [10:34:20.928] epoch 1, loss 0.1224 
-## INFO  [10:34:20.978] epoch 2, loss 0.0971 
-## INFO  [10:34:21.009] epoch 3, loss 0.0907</code></pre>
+<pre><code>## INFO  [15:26:19.370] epoch 1, loss 0.1220 
+## INFO  [15:26:19.418] epoch 2, loss 0.0969 
+## INFO  [15:26:19.446] epoch 3, loss 0.0904</code></pre>
 <pre class="r"><code>test_word_vectors[sample(nrow(test_word_vectors), 5), ]</code></pre>
-<pre><code>##                 [,1]       [,2]       [,3]
-## lass     -0.19929431 0.19402343  0.2101474
-## industri  0.29289063 0.62314505 -0.1184532
-## quatsch   0.76178159 0.51340974 -0.1262692
-## rand      0.65872563 0.03662952  0.1931117
-## rum       0.09155133 0.28876698 -0.1674594</code></pre>
+<pre><code>##                       [,1]        [,2]        [,3]
+## finanzaufsicht -0.21460034 -0.50561502 -0.07267112
+## srebrenica      0.39521122 -0.58640705 -0.15307050
+## press           0.01015545  0.49679528  0.43049885
+## faschist       -0.47899645  0.02319419 -0.26114313
+## journalist     -0.32367252 -0.43245035  0.15213700</code></pre>
 <p>This provides us with the embedding vectors per word, from which we calculate the <strong>embeddings per document</strong> by averaging the embeddings across all words present in the document (weighted by occurrence).</p>
 <p>Mathematically speaking, we can achieve this by matrix multiplication:</p>
 <ul>
@@ -404,12 +404,12 @@ test_doc_embeddings &lt;- get_doc_embeddings(test_tokens, test_word_vectors)
 
 test_doc_embeddings[sample(nrow(test_doc_embeddings), 5), ]</code></pre>
 <pre><code>##                             
-## docs                                [,1]        [,2]        [,3]
-##   th_sattelberger15913508401  0.09195645  0.10089187  0.03527298
-##   KatjaKeul15768450001        0.06990026  0.06892603 -0.04004351
-##   Martin_Hess_AfD15926731201 -0.07450224  0.14409132  0.26093597
-##   ch_buchholz15490153801     -0.27040002 -0.02247933  0.04165739
-##   DirkSpaniel15780549601      0.03576956  0.13124738 -0.01079312</code></pre>
+## docs                                [,1]         [,2]        [,3]
+##   Beatrix_vStorch15679483201 -0.08719679  0.032017927 -0.16205685
+##   AndreasBleckMdB15163475401  0.20780590 -0.072809171 -0.08276535
+##   PetraPauMaHe15709138801    -0.04386329 -0.008747932  0.18455879
+##   KatjaMast16050014401        0.02648091  0.284990682  0.47133368
+##   zaklinnastic15723763201    -0.09653051 -0.007008394  0.11327277</code></pre>
 </div>
 <div id="compute-embeddings" class="section level3">
 <h3>Compute embeddings</h3>
@@ -436,7 +436,7 @@ test_doc_embeddings[sample(nrow(test_doc_embeddings), 5), ]</code></pre>
 embeddings &lt;- lapply(
   twitter_corpus_subsets,
   function(i) {make_glove_embeddings(
-    quanteda::texts(i$text),
+    quanteda::texts(i),
     stopwords = stopwords,
     term_count_min = 2,
     skip_grams_window = 5,
@@ -457,29 +457,62 @@ data.table::setnames(
   embeddings_dt,
   sprintf(&quot;embedding_%d&quot;, seq_along(embeddings_dt)))
 
+embeddings_dt$doc_id &lt;- unlist(lapply(
+  twitter_corpus_subsets, 
+  function(i) quanteda::docvars(i)$doc_id))
+
 embeddings_dt[sample(embeddings_dt[, .I], 10)]</code></pre>
-<pre><code>##     embedding_1 embedding_2  embedding_3 embedding_4 embedding_5 embedding_6
-##  1: -0.07980747 -0.08686166  0.002530539  0.00000000  0.00000000   0.0000000
-##  2: -0.12016932  0.05614180 -0.057705287  0.00000000  0.00000000   0.0000000
-##  3:  0.12387183 -0.07745132  0.372300810  0.00000000  0.00000000   0.0000000
-##  4:  0.00000000  0.00000000  0.000000000  0.11740997 -0.14232517   0.1831743
-##  5:  0.05355553 -0.17677504 -0.002757236  0.00000000  0.00000000   0.0000000
-##  6: -0.13218609 -0.09082768  0.003504508  0.00000000  0.00000000   0.0000000
-##  7:  0.08640557  0.13676505  0.143415330  0.00000000  0.00000000   0.0000000
-##  8:  0.00000000  0.00000000  0.000000000  0.00000000  0.00000000   0.0000000
-##  9:  0.00000000  0.00000000  0.000000000  0.07635021  0.03660762  -0.1060796
-## 10:  0.00000000  0.00000000  0.000000000  0.00000000  0.00000000   0.0000000
+<pre><code>##      embedding_1  embedding_2 embedding_3 embedding_4 embedding_5 embedding_6
+##  1:  0.010983113 -0.041170514  0.03265103           0           0           0
+##  2:  0.000000000  0.000000000  0.00000000           0           0           0
+##  3:  0.019463380 -0.098445258  0.35200226           0           0           0
+##  4:  0.000000000  0.000000000  0.00000000           0           0           0
+##  5: -0.005863924 -0.047761841  0.30200074           0           0           0
+##  6:  0.000000000  0.000000000  0.00000000           0           0           0
+##  7:  0.041585042  0.103125891  0.09242270           0           0           0
+##  8: -0.294479684 -0.026474347 -0.24060488           0           0           0
+##  9:  0.118401660 -0.002675472  0.47638685           0           0           0
+## 10:  0.000000000  0.000000000  0.00000000           0           0           0
 ##     embedding_7 embedding_8 embedding_9 embedding_10 embedding_11 embedding_12
-##  1:   0.0000000   0.0000000 0.000000000            0            0            0
-##  2:   0.0000000   0.0000000 0.000000000            0            0            0
-##  3:   0.0000000   0.0000000 0.000000000            0            0            0
-##  4:   0.0000000   0.0000000 0.000000000            0            0            0
-##  5:   0.0000000   0.0000000 0.000000000            0            0            0
-##  6:   0.0000000   0.0000000 0.000000000            0            0            0
-##  7:   0.0000000   0.0000000 0.000000000            0            0            0
-##  8:   0.1085388   0.1397619 0.003617312            0            0            0
-##  9:   0.0000000   0.0000000 0.000000000            0            0            0
-## 10:  -0.3887658   0.2827944 0.106450474            0            0            0</code></pre>
+##  1:  0.00000000  0.00000000  0.00000000    0.0000000    0.0000000   0.00000000
+##  2:  0.00000000  0.00000000  0.00000000    0.3736044    0.2489607   0.08387806
+##  3:  0.00000000  0.00000000  0.00000000    0.0000000    0.0000000   0.00000000
+##  4:  0.03379107 -0.02295922 -0.05207521    0.0000000    0.0000000   0.00000000
+##  5:  0.00000000  0.00000000  0.00000000    0.0000000    0.0000000   0.00000000
+##  6: -0.02310977  0.01602190  0.04708194    0.0000000    0.0000000   0.00000000
+##  7:  0.00000000  0.00000000  0.00000000    0.0000000    0.0000000   0.00000000
+##  8:  0.00000000  0.00000000  0.00000000    0.0000000    0.0000000   0.00000000
+##  9:  0.00000000  0.00000000  0.00000000    0.0000000    0.0000000   0.00000000
+## 10:  0.22300332  0.24149879 -0.07222759    0.0000000    0.0000000   0.00000000
+##                         doc_id
+##  1: MarcBernhardAfD15517113601
+##  2:        CarenLay15194597401
+##  3: Beatrix_vStorch16039630801
+##  4:  GoeringEckardt15706271401
+##  5:       KatjaMast16070725201
+##  6: Beatrix_vStorch15209208001
+##  7:          HHirte15499031401
+##  8: AndreasBleckMdB15332866801
+##  9:           anked15881858401
+## 10:   agnieszka_mdb15543702001</code></pre>
+<pre class="r"><code># Insert info back into corpus
+
+twitter_docvars &lt;- data.table::as.data.table(
+  cbind(
+    doc_id = quanteda::docid(twitter_corpus),
+    quanteda::docvars(twitter_corpus)), 
+  key = &quot;doc_id&quot;)
+
+twitter_docvars &lt;- embeddings_dt[twitter_docvars, on = &quot;doc_id&quot;]</code></pre>
+<pre class="r"><code>twitter_corpus_with_embeddings &lt;- twitter_corpus
+
+quanteda::docvars(twitter_corpus_with_embeddings) &lt;- as.data.frame(twitter_docvars)
+
+# Save
+
+saveRDS(
+  twitter_corpus_with_embeddings, 
+  sprintf(&quot;%s/twitter_corpus_with_embeddings.RDS&quot;, path))</code></pre>
 </div>
 </div>
 
