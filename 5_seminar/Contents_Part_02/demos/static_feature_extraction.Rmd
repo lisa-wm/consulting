@@ -497,7 +497,7 @@ In a final step, we put everything together (starting the join operation with a 
 
 # Collect all features
 
-twitter_features_static <- twitter_docvars[, .(doc_id)
+twitter_features_static <- twitter_docvars[, .(doc_id, label)
   ][twitter_pos_tags,
     ][twitter_negation,
       ][twitter_char_unigrams,

@@ -1,5 +1,5 @@
 ---
-title: "Topic-Specific Word Embeddings with GloVe"
+title: "Sentiment Analysis -- Training & Prediction"
 author: "Asmik & Lisa -- for Intro to NLP"
 date: "April/May 2021"
 output:
@@ -9,24 +9,31 @@ output:
 
 ![](../../Logo_Consulting.JPG)
 
-## Compute Topic-Specific Word Embeddings with Global Vectors (GloVe)
+## Train Sentiment Analysis Classifier and Compute Prediction
 
-This demo is about **computing topic-specific word embeddings with GloVe**.
+This demo is about **training a classifier for sentiment analysis and predicting sentiment labels**.
 
-We show how to compute word embeddings via [GloVe](https://nlp.stanford.edu/pubs/glove.pdf) for a corpus segmented into multiple topics, where the embedding part is of course applicable to a non-partitioned corpus as well.
+We show how to perform sentiment analysis with machine learning methods. 
+More specifically, we will use a logistic regression model to predict sentiment labels in a binary classification task.
 
-The code is based on the `text2vec` package, much of which is built in `R6`. 
-Covering object-oriented programming is beyond the scope of this course, but we will mention some basics during sentiment analysis with `mlr3`.
+The code is based on the `mlr3` universe, a unifying framework for a broad variety of tasks in supervised learning that subsumes many other packages and provides consistent syntax.
+This [book](https://mlr3book.mlr-org.com/) provides a great introduction to `mlr3`. Further examples with applied use cases may be found [here](https://mlr3gallery.mlr-org.com/).
+
+Note that it is built in `R6`. 
+Covering object-oriented programming (OOP) is beyond the scope of this course but we will mention some basics.
+The most important things to know here are: 
+
+* All objects are of a specific *class* for which different *methods* exist.
+* Methods are very similar to functions, but objects are modified *in place* rather than re-assigned (which is much more memory-friendly and natural to non-R programmers, we just need to pay attention that each operation might actually change our object even if we do not assign anything). 
 
 ```{r setup_packages, message=FALSE, warning=FALSE}
 # Load required packages
 
-library(Matrix)
-library(quanteda)
-library(text2vec)
+library(data.table)
+library(mlr3verse)
 ```
 
-### Subset corpus
+### Perform train-test split
 
 ```{r path, include = FALSE}
 
@@ -34,288 +41,245 @@ path <- "5_seminar"
 
 ```
 
-We start by **reading** the data we have created during the topic modeling process:
+As always, we start by **reading** the data.
+Now there is one big BUT: we cannot simply take the data with topic embeddings as created in the last demo -- if we used these and splitted them into train and test sets, we would see information from the training observations leak into the test part.
+That is why we called topic labels and embeddings *dynamic* features.
+
+We want to avoid such bias and proceed as follows:
+
+1. We split the data without topic labels / embeddings into training and test data.
+2. We extract topics and compute topic-specific embeddings *separately* for both data sets.
 
 ```{r read}
 
 # path <- ... (individual file location)
 
-twitter_corpus <- readRDS(sprintf("%s/twitter_corpus_with_topics.RDS", path))
+twitter_corpus <- readRDS(sprintf("%s/twitter_corpus.RDS", path))
 
 ```
 
-Next, we **subset** the corpus by topic label:
+```{r train-test}
 
-```{r subset}
+# Create a binary variable indicating whether the document belongs to training or test data (setting a seed for reproducibility and choosing 70% of data for training)
 
-# Recode NA labels
+set.seed(123)
 
-twitter_corpus$topic_label <- ifelse(
-  is.na(twitter_corpus$topic_label),
-  99, 
-  twitter_corpus$topic_label)
+twitter_corpus$is_train <- rbinom(
+  n = quanteda::ndoc(twitter_corpus), 
+  size = 1, 
+  prob = 0.7)
 
-# Subset corpus
+twitter_corpus_train <- quanteda::corpus_subset(twitter_corpus, is_train == 1)
+twitter_corpus_test <- quanteda::corpus_subset(twitter_corpus, is_train == 0)
 
-twitter_corpus_subsets <- lapply(
-  unique(twitter_corpus$topic_label),
-  function(i) quanteda::corpus_subset(twitter_corpus, topic_label == i))
-
-sapply(twitter_corpus_subsets, quanteda::ndoc)
+quanteda::ndoc(twitter_corpus_train) + quanteda::ndoc(twitter_corpus_test) == 
+  quanteda::ndoc(twitter_corpus)
 
 ```
 
-### Define function to compute embeddings
+Now we compute the **topic-specific embeddings**.
+For the sake of clarity, we have collected all operations performed in the demos on topic modeling and word embeddings into a single function in the background (keeping the number of topics and word embeddings, respectively, unchanged).
+We can now call this function on both training and test data:
 
-We will now define the **embedding** procedure and encapsulate it in a function we can then apply to each corpus subset.
-It is typically advisable to break down such routines into sub-functions (top-down programming). 
-This keeps the code readable and is much easier to debug.
+```{r fun_tm, eval=FALSE}
 
-Our embedding function should have the following structure (regard this as pseudo-code):
-
-```{r emb_draft, eval = FALSE}
-
-make_glove_embeddings <- function(text, stopwords, glove_args) {
+make_topic_embeddings <- function(twitter_corpus) {
   
-  tokens <- tokenize(text, stopwords)
-  vocabulary <- make_vocab(tokens, glove_args)
-  glove <- make_glove_instance(vocabulary, glove_args)
-  word_vectors <- get_word_vectors(tokens, glove, glove_args)
-  doc_embeddings <- get_doc_embeddings(tokens, word_vectors)
-  
-  doc_embeddings
+  ...
   
 }
 
 ```
 
-**Tokenization** feels pretty been-there-done-that by now:
 
-```{r clean_stem, include=FALSE}
+```{r fun_tm_2, include=FALSE}
 
-clean_and_stem <- function(text) {
+make_topic_embeddings <- function(twitter_corpus) {
   
-  # Convert to uniform encoding
+  # TOPIC MODELING
   
-  text <-  stringi::stri_trans_general(text, "Any-Latin")
+  quanteda::docvars(twitter_corpus)$text <- quanteda::texts(twitter_corpus)
   
-  # Replace umlauts and litigate s
-  
-  text <- stringr::str_replace_all(
-    text,
-      c("\u00c4" = "Ae",
-      "\u00e4" = "ae",
-      "\u00d6" = "Oe",
-      "\u00f6" = "oe",
-      "\u00dc" = "Ue",
-      "\u00fc" = "ue",
-      "\u00df" = "ss"))
-  
-  # Stem
-  
-  text <- SnowballC::wordStem(text)
-  
-  unique(text)
-
-}
-
-```
-
-```{r tkns}
-
-tokenize <- function(text, stopwords) {
-  
-  tokens <- quanteda::tokens(
-    text,
+  twitter_tokens <- quanteda::tokens(
+    twitter_corpus,
     what = "word",
     remove_symbols = TRUE,
-    remove_punct = TRUE,
     remove_numbers = TRUE,
     remove_separators = TRUE,
     split_hyphens = TRUE,
     include_docvars = TRUE)
   
-  tokens <- quanteda::tokens_wordstem(tokens, language = "german")
+  twitter_tokens <- quanteda::tokens_wordstem(
+    twitter_tokens, 
+    language = "german")
   
-  tokens <- quanteda::tokens_remove(
-    quanteda::tokens_tolower(tokens),
+  twitter_tokens <- quanteda::tokens_tolower(twitter_tokens)
+  
+  stopwords <- readRDS(sprintf("%s/stopwords.RDS", path))
+
+  twitter_tokens <- quanteda::tokens_remove(
+    twitter_tokens,
     pattern = stopwords)
   
-  tokens <- quanteda::tokens_select(tokens, min_nchar = 3)
+  twitter_tokens <- quanteda::tokens_select(twitter_tokens, min_nchar = 3)
   
-  tokens
+  twitter_dfm <- quanteda::dfm(twitter_tokens)
   
-}
-
-stopwords <- readRDS(sprintf("%s/stopwords.RDS", path))
-test_tokens <- tokenize(twitter_corpus, stopwords)
-test_tokens[1:2]
-
-```
-
-The next step is to create a **vocabulary**. 
-This is where `text2vec` first comes into play:
-
-```{r vocab}
-
-make_vocab <- function(tokens, term_count_min) {
+  twitter_dfm <- quanteda::dfm_select(
+    twitter_dfm,
+    names(quanteda::topfeatures(twitter_dfm, n = 300)))
   
-  # Convert tokens to list
+  prevalence_formula <- as.formula(paste(
+    "", 
+    "party + bundesland", 
+    sep = "~"))
   
-  tokens <- as.list(tokens)
+  twitter_dfm <- quanteda::dfm_subset(
+    twitter_dfm,
+    !is.na(party) & !is.na(bundesland) & !is.na(unemployment_rate) &
+      !is.na(share_pop_migration))
   
-  # Create iterator (kind of list from which vocabulary can be created)
+  twitter_stm <- quanteda::convert(twitter_dfm, to = "stm")
   
-  itokens <- text2vec::itoken(tokens, progressbar = FALSE)
+  topic_model <- stm::stm(
+    documents = twitter_stm$documents,
+    vocab = twitter_stm$vocab,
+    data = twitter_stm$meta,
+    K = 3,
+    prevalence = prevalence_formula,
+    gamma.prior = "L1",
+    seed = 1,
+    max.em.its = 15,
+    init.type = "Spectral",
+    verbose = FALSE)
   
-  # Create vocabulary and retain only words of a certain frequency
-      
-  vocab <- text2vec::create_vocabulary(itokens)
-  vocab <- text2vec::prune_vocabulary(vocab, term_count_min = term_count_min)
+  topic_probs <- stm::make.dt(topic_model)[
+    , doc_id := names(twitter_stm$documents)
+      ][, docnum := NULL]
   
-  list(itokens = itokens, vocab = vocab)
+  topic_cols <- names(topic_probs)[startsWith(names(topic_probs), "Topic")]
+
+  topic_probs[
+    , `:=` (
+      max_topic_score = max(.SD, na.rm = TRUE),
+      topic_label = which.max(.SD)),
+    .SDcols = topic_cols,
+    by = doc_id]
   
-}
+  twitter_docvars <- data.table::as.data.table(
+    cbind(
+      doc_id = quanteda::docid(twitter_corpus),
+      quanteda::docvars(twitter_corpus)), 
+    key = "doc_id")
 
-test_vocab <- make_vocab(test_tokens, term_count_min = 2)
-summary(test_vocab$vocab)
-
-```
-Let's now create an **instance** of the GloVe class (if you are not familiar with object-oriented programming, imagine this as some kind of abstract machine we can kick-start to compute our embeddings).
-
-This commands the specification of some additional arguments: 
-
-* the width of the window for neighboring words `skip_grams_window`, which we 
-will later set rather small as our texts are super short,
-* the number of embedding dimensions `dimension`, arguably the most important hyperparameter, and
-* maximum frequency of co-occurrence `x_max`, controlling the GloVe-inherent weighting function (not that critical for us as we have only very few words with multiple co-occurrences)
-
-```{r instantiate}
-
-make_glove_instance <- function(vocabulary, skip_grams_window, dimension, x_max) {
+  twitter_docvars <- topic_probs[
+    twitter_docvars, on = "doc_id"
+      ][, c(topic_cols) := NULL]
   
-  vect <- text2vec::vocab_vectorizer(vocabulary$vocab)
+  twitter_corpus_with_topics <- twitter_corpus
+
+  quanteda::docvars(twitter_corpus_with_topics) <- as.data.frame(twitter_docvars)
   
-  tcm <- text2vec::create_tcm(
-    vocabulary$itokens, 
-    vect, 
-    skip_grams_window = skip_grams_window) 
+  twitter_corpus <- twitter_corpus_with_topics
   
-  glove_instance <- text2vec::GlobalVectors$new(rank = dimension, x_max = x_max)
+  # EMBEDDINGS
   
-  list(tcm = tcm, glove_instance = glove_instance)
+  twitter_corpus$topic_label <- ifelse(
+    is.na(twitter_corpus$topic_label),
+    99, 
+    twitter_corpus$topic_label)
+
+  twitter_corpus_subsets <- lapply(
+    unique(twitter_corpus$topic_label),
+    function(i) quanteda::corpus_subset(twitter_corpus, topic_label == i))
   
-}
-
-test_model <- make_glove_instance(
-  test_vocab, 
-  skip_grams_window = 5, 
-  dimension = 3, 
-  x_max = 5)
-
-```
-
-With this somewhat hard-to-grasp container we can **fit** the GloVe (no bad jokes intended).
-
-Again, there are some (rather technical) hyperparameters to set:
-
-* `iterations` -- how many iterations do we allow for the optimization process?
-* `convergence_tol` -- how large is our tolerance in declaring convergence (the process will terminate if either convergence is reached or the number of iterations is exhausted)?
-
-Besides, we note that the word vectors are composed of the actual word vectors, here called `wv_main`, and some "context" vectors `wv_context`. The [original paper](https://nlp.stanford.edu/pubs/glove.pdf) is somewhat cryptic about the purpose of this double computation but it seems to help alleviate overfitting and noise (and to not make a difference in the worst case).
-
-
-```{r fit}
-
-get_word_vectors <- function(tokens, glove, iterations, convergence_tol) {
+  make_glove_embeddings <- function(text, stopwords, glove_args) {
   
-  # Compute word vectors
+    tokens <- tokenize(text, stopwords)
+    vocabulary <- make_vocab(tokens, glove_args)
+    glove <- make_glove_instance(vocabulary, glove_args)
+    word_vectors <- get_word_vectors(tokens, glove, glove_args)
+    doc_embeddings <- get_doc_embeddings(tokens, word_vectors)
+    
+    doc_embeddings
+    
+  }
   
-  wv_main <- glove$glove_instance$fit_transform(
-    glove$tcm, 
-    n_iter = iterations, 
-    convergence_tol = convergence_tol)  
+  tokenize <- function(text, stopwords) {
   
-  # Compute context vectors
+    tokens <- quanteda::tokens(
+      text,
+      what = "word",
+      remove_symbols = TRUE,
+      remove_punct = TRUE,
+      remove_numbers = TRUE,
+      remove_separators = TRUE,
+      split_hyphens = TRUE,
+      include_docvars = TRUE)
+    
+    tokens <- quanteda::tokens_wordstem(tokens, language = "german")
+    
+    tokens <- quanteda::tokens_remove(
+      quanteda::tokens_tolower(tokens),
+      pattern = stopwords)
+    
+    tokens <- quanteda::tokens_select(tokens, min_nchar = 3)
+    
+    tokens
   
-  wv_context <- glove$glove_instance$components
+  }
   
-  wv_main + t(wv_context)
+  make_vocab <- function(tokens, term_count_min) {
+    
+    tokens <- as.list(tokens)
+    itokens <- text2vec::itoken(tokens, progressbar = FALSE)
+    vocab <- text2vec::create_vocabulary(itokens)
+    vocab <- text2vec::prune_vocabulary(vocab, term_count_min = term_count_min)
+    
+    list(itokens = itokens, vocab = vocab)
+    
+  }
   
-}
-
-test_word_vectors <- get_word_vectors(
-  tokens = test_tokens,
-  glove = test_model,
-  iterations = 3,
-  convergence_tol = 0.001)
-
-test_word_vectors[sample(nrow(test_word_vectors), 5), ]
-
-```
-
-This provides us with the embedding vectors per word, from which we calculate the **embeddings per document** by averaging the embeddings across all words present in the document (weighted by occurrence).
-
-Mathematically speaking, we can achieve this by matrix multiplication:
-
-* First, get the document-term matrix counting each word's occurrences per document (below is an example for 2 documents and 3 terms).
-
-$$\begin{bmatrix} 1 & 1 & 0 \\ 0 & 1 & 2 \end{bmatrix}$$
-
-* Modify the entrances so they sum to 1 in each row -- these form the weights for our average.
-
-$$\begin{bmatrix} \frac{1}{2} & \frac{1}{2} & 0 \\ 0 & \frac{1}{3} & \frac{2}{3} \end{bmatrix}$$
-
-* Multiply each row by each column of the word vectors, effectively amounting to taking the average, by matrix multiplication.
-
-$$\begin{bmatrix} \frac{1}{2} & \frac{1}{2} & 0 \\ 0 & \frac{1}{3} & \frac{2}{3} 
-\end{bmatrix} \times 
-\begin{bmatrix} 0.34 & 0.11 & 0.52 \\ 0.25 & 0.08 & 0.64 \\ 0.02 & 0.77 & 0.15 
-\end{bmatrix} \\
-= \begin{bmatrix} \frac{1}{2} \cdot 0.34 + \frac{1}{2} \cdot 0.25 + 0 \cdot 0.02 &
-\frac{1}{2} \cdot 0.11 + \frac{1}{2} \cdot 0.08 + 0 \cdot 0.77 &
-\frac{1}{2} \cdot 0.52 + \frac{1}{2} \cdot 0.64 + 0 \cdot 0.15 \\
-0 \cdot 0.34 + \frac{1}{3} \cdot 0.25 + \frac{2}{3} \cdot 0.02 &
-0 \cdot 0.11 + \frac{1}{3} \cdot 0.08 + \frac{2}{3} \cdot 0.77 &
-0 \cdot 0.52 + \frac{1}{3} \cdot 0.64 + \frac{2}{3} \cdot 0.15 \end{bmatrix}$$
-
-* ... yielding the matrix of documents x embedding vectors:
-
-$$\begin{bmatrix} 0.295 & 0.095 & 0.580 \\ 0.097 & 0.540 & 0.313 \end{bmatrix}$$
-
-```{r map}
-
-get_doc_embeddings <- function(tokens, word_vectors) {
-
-  # Compute document-term matrix
+  make_glove_instance <- function(vocabulary, skip_grams_window, dimension, x_max) {
   
-  dtm <- quanteda::dfm_match(
-    quanteda::dfm(tokens),
-    rownames(word_vectors))
+    vect <- text2vec::vocab_vectorizer(vocabulary$vocab)
+    
+    tcm <- text2vec::create_tcm(
+      vocabulary$itokens, 
+      vect, 
+      skip_grams_window = skip_grams_window) 
+    
+    glove_instance <- text2vec::GlobalVectors$new(rank = dimension, x_max = x_max)
+    
+    list(tcm = tcm, glove_instance = glove_instance)
+    
+  }
   
-  # Modify so rows sum to 1
+  get_word_vectors <- function(tokens, glove, iterations, convergence_tol) {
   
-  dtm <- text2vec::normalize(dtm, norm = "l1")
+    wv_main <- glove$glove_instance$fit_transform(
+      glove$tcm, 
+      n_iter = iterations, 
+      convergence_tol = convergence_tol)  
+
+    wv_context <- glove$glove_instance$components
+    wv_main + t(wv_context)
   
-  # Perform matrix multiplication
+  }
   
-  as.matrix(dtm) %*% word_vectors
+  get_doc_embeddings <- function(tokens, word_vectors) {
   
-}
-
-test_doc_embeddings <- get_doc_embeddings(test_tokens, test_word_vectors)
-
-test_doc_embeddings[sample(nrow(test_doc_embeddings), 5), ]
-
-```
-
-### Compute embeddings
-
-We now **collect** our sub-routines in one large function we apply to each of our corpus subsets:
-
-```{r emb, results='hide'}
-
-make_glove_embeddings <- function(text, 
+    dtm <- quanteda::dfm_match(
+      quanteda::dfm(tokens),
+      rownames(word_vectors))
+    
+    dtm <- text2vec::normalize(dtm, norm = "l1")
+    
+    as.matrix(dtm) %*% word_vectors
+  
+  }
+  
+  make_glove_embeddings <- function(text, 
                                   stopwords, 
                                   term_count_min,
                                   skip_grams_window, 
@@ -324,53 +288,168 @@ make_glove_embeddings <- function(text,
                                   iterations, 
                                   convergence_tol) {
   
-  tokens <- tokenize(text, stopwords)
-  vocabulary <- make_vocab(tokens, term_count_min)
-  glove <- make_glove_instance(vocabulary, skip_grams_window, dimension, x_max)
-  word_vectors <- get_word_vectors(tokens, glove, iterations, convergence_tol)
-  doc_embeddings <- get_doc_embeddings(tokens, word_vectors)
+    tokens <- tokenize(text, stopwords)
+    vocabulary <- make_vocab(tokens, term_count_min)
+    glove <- make_glove_instance(vocabulary, skip_grams_window, dimension, x_max)
+    word_vectors <- get_word_vectors(tokens, glove, iterations, convergence_tol)
+    doc_embeddings <- get_doc_embeddings(tokens, word_vectors)
+    
+    doc_embeddings
+    
+  }
   
-  doc_embeddings
+  embeddings <- lapply(
+    twitter_corpus_subsets,
+    function(i) {make_glove_embeddings(
+      quanteda::texts(i),
+      stopwords = stopwords,
+      term_count_min = 2,
+      skip_grams_window = 5,
+      dimension = 3,
+      x_max = 10,
+      iterations = 10,
+      convergence_tol = 0.001)})
+  
+  embedding_matrix <- do.call(Matrix::bdiag, embeddings)
+  
+  embeddings_dt <- data.table::as.data.table(as.matrix(embedding_matrix))
+
+  data.table::setnames(
+    embeddings_dt,
+    sprintf("embedding_%d", seq_along(embeddings_dt)))
+  
+  embeddings_dt$doc_id <- unlist(lapply(
+    twitter_corpus_subsets, 
+    function(i) quanteda::docvars(i)$doc_id))
+  
+  data.table::setkey(embeddings_dt, "doc_id")
+  
+  embeddings_dt
   
 }
 
-embeddings <- lapply(
-  twitter_corpus_subsets,
-  function(i) {make_glove_embeddings(
-    quanteda::texts(i$text),
-    stopwords = stopwords,
-    term_count_min = 2,
-    skip_grams_window = 5,
-    dimension = 3,
-    x_max = 10,
-    iterations = 10,
-    convergence_tol = 0.001)})
+```
+
+```{r tm_emb, warning=FALSE, results='hide'}
+
+embeddings_train <- make_topic_embeddings(twitter_corpus_train)
+embeddings_test <- make_topic_embeddings(twitter_corpus_test)
 
 ```
 
-And lastly, we store all embedding vectors in one `data.table` we can use for sentiment analysis, looking like this:
+Next, we append the static features:
 
-$$\begin{bmatrix} \text{embeddings for topic 1} & 0 & 0 & 0\\
-0 & \text{embeddings for topic 2} & 0 & 0 \\
-0 & 0 & \text{embeddings for topic 3} & 0 \\
-0 & 0 & 0 & \text{embeddings for topic 4}
-\end{bmatrix}$$
+```{r read_sf}
 
-```{r bdiag}
+# Read data
 
-embedding_matrix <- do.call(Matrix::bdiag, embeddings)
+twitter_features_static <- readRDS(sprintf("%s/twitter_features_static.RDS", path))
+
+# Append
+
+data_train <- twitter_features_static[embeddings_train, on = "doc_id"]
+data_test <- twitter_features_static[embeddings_test, on = "doc_id"]
+
+# Inspect
+
+list(train = head(data_train), test = head(data_test))
 
 ```
 
-```{r bdiag_dt}
+### Create classification task
 
-embeddings_dt <- data.table::as.data.table(as.matrix(embedding_matrix))
+Now we are all set for sentiment analysis.
+The first step is to create a **task** object (note that we need to make sure the `doc_id` variable, which is not a feature but merely an identifier, is exempt from the features):
 
-data.table::setnames(
-  embeddings_dt,
-  sprintf("embedding_%d", seq_along(embeddings_dt)))
+```{r tsk}
 
-embeddings_dt[sample(embeddings_dt[, .I], 10)]
+# Convert target variable to a factor
+
+data_train$label <- as.factor(data_train$label)
+
+# Create task object
+
+task <- mlr3::TaskClassif$new("sentiment_analysis", data_train, target = "label")
+
+# Set the role of doc_id to naming variable
+
+task$set_col_roles("doc_id", "name")
+
+# Inspect
+
+task
+
+```
+
+### Create and train learner
+
+The **learner** reflects our hypothesis about the feature-target relation. 
+
+`mlr3` supports a variety of different learning algorithms (convenient look-up via `mlr_learners`) and even more are available in the `mlr3learners` extension package.
+All are instantiated by the same call.
+
+We choose logistic regression here, a generalized version of the linear regression model that is able to predict class probabilities (if the concept seems somewhat distant in your memory, have a look into [one of the standard statistics books](https://web.stanford.edu/~hastie/Papers/ESLII.pdf), or into [this one](https://christophm.github.io/interpretable-ml-book/logistic.html#example-1), or check out one of the abundant blogposts and YouTube sources9.
+Logistic regression does not require any hyperparameters, allowing us to skip the tuning part.
+
+```{r lrn}
+
+# Create learner
+
+learner <- mlr3::lrn("classif.log_reg", predict_type = "prob")
+
+learner
+
+```
+
+After instantiating the learner object, we do the actual **training** using our training task. 
+Note how the learner is modified in-place:
+
+```{r train, warning=FALSE}
+
+# Train learner on training task
+
+learner$train(task)
+
+```
+
+### Evaluate learner
+
+Now is the time for our model to output some **predictions** on the test set so we can evaluate its performance.
+
+```{r test, warning=FALSE}
+
+# Compute predictions
+
+data_test$label <- as.factor(data_test$label)
+predictions <- learner$predict_newdata(data_test)
+
+# Inspect confusion matrix
+
+list(predictions = predictions, confusion = predictions$confusion)
+
+```
+
+Our learner looks okay but not overly accurate (it seems to struggle with the positive observations in particular). 
+Let's compute some **performance metrics** (list all available metrics with `mlr_measures`) to get a better picture:
+
+```{r eval}
+
+eval_metrics <- list(
+  mlr3::msr("classif.acc"), # accuracy
+  mlr3::msr("classif.ppv"), # positive predictive value
+  mlr3::msr("classif.fbeta") # f1 score
+)
+
+predictions$score(eval_metrics)
+
+```
+
+We can also plot the associated **ROC curve**:
+
+```{r roc}
+
+mlr3viz::autoplot(predictions, type = "roc") +
+  ggplot2::ggtitle("ROC curve for Twitter sentiment analysis")
 
 ```
 

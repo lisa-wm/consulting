@@ -412,3 +412,4 @@ saveRDS(
 
 ```
 
+**And that's it! Now we have topic-specific embedding vectors we can use as features in the upcoming sentiment analysis.**
