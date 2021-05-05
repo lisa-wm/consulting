@@ -1,0 +1,243 @@
+---
+title: "Sentiment Analysis -- Visualization"
+author: "Asmik & Lisa -- for Intro to NLP"
+date: "April/May 2021"
+output:
+  html_document: default
+  pdf_document: default
+---
+
+![](../../Logo_Consulting.JPG)
+
+## Visualize Results of Sentiment Analysis
+
+This demo is about **visualizing results of sentiment classifcation**.
+
+We show how to visualize classification results in different ways, mostly using the `tidyverse` and `ggplot2` packages.
+
+```{r setup_packages, message=FALSE, warning=FALSE}
+# Load required packages
+
+library(quanteda)
+library(readr)
+library(tidyverse)
+library(tidytext)
+library(wordcloud)
+
+```
+
+### Read data
+
+```{r path, include = FALSE}
+
+path <- "5_seminar"
+
+```
+
+As always, we start by **reading** the data.
+We will use data labeled with both sentiment polarities and topics, i.e., the result of topic modeling incl. interpretation and sentiment prediction.
+
+```{r read, message=FALSE}
+
+# path <- ... (individual file location)
+
+data_labeled <- readr::read_delim(
+  sprintf("%s/data_labeled_processed.csv", path),
+  delim = ",", 
+  escape_double = FALSE, 
+  trim_ws = TRUE)
+
+```
+
+### Create barplots
+
+With **barplots** we can nicely depict label distributions along various dimensions, e.g., time.
+
+```{r barplot}
+
+# Extract year and save in a seperate column
+
+data_labeled$year <- format(data_labeled$twitter_created_at, format = "%Y")
+
+# Count tweets grouped by year, topic and label
+
+labels_per_year <- data_labeled %>% 
+  dplyr::group_by(year, topic) %>% 
+  dplyr::count(label) 
+
+# Filter 4 topics to dive into more deeply
+
+labels_per_year_filtered <- labels_per_year %>% 
+  dplyr::filter(topic %in% c(
+    "Coronamassnahmen", 
+    "Medien", 
+    "Migrantenkriminalitaet", 
+    "Klimapolitik"))
+
+# Create a grouped and stacked barplot
+
+barplot_label_per_year <- ggplot2::ggplot(
+  labels_per_year_filtered, 
+  aes(y = n, x = label, fill = topic)) +
+  geom_bar(position = "stack", stat = "identity") +
+  facet_grid(. ~ year) +
+  ylab("Count") +
+  xlab("Label") +
+  theme_classic() +
+  theme(
+    text = element_text(size = 17),
+    axis.text.x = element_text(angle = 90, size = 17, vjust = 0.5),
+    axis.title.x = element_text(margin = margin(t = 10, r = 0, b = 0, l = 0)),
+    axis.title.y = element_text(margin = margin(t = 0, r = 10, b = 0, l = 0)),
+    legend.position = "right",
+    plot.title = element_text(hjust = 0.5)) +
+  scale_fill_manual(
+    "Topic",
+    values = c("darkorange3", "cadetblue3", "goldenrod3", "hotpink3")) +
+  labs(title = "") +
+  ggtitle("Labels grouped by topics over time")
+
+barplot_label_per_year
+
+```
+
+Rather than over time, we can also show the label distribution by topic and color it according to sentiment:
+
+```{r barplot_2}
+
+# Count tweets grouped by topic and label
+
+labels_per_topic <- data_labeled %>% 
+  dplyr::group_by(topic) %>% 
+  dplyr::count(label)
+
+# Filter 9 topics to dive into more deeply
+
+labels_per_topic_filtered <- labels_per_topic %>% 
+  filter(topic %in% c(
+    "Antisemitismus", 
+    "AfD", 
+    "Coronamassnahmen",
+    "Parteipolitik", 
+    "Coronapolitik", 
+    "Klimapolitik",
+    "Rechtsextremismus", 
+    "Medien", 
+    "Gleichberechtigung"))
+
+# Create a grouped and stacked 
+
+barplot_label_per_topic <- ggplot2::ggplot(
+  labels_per_topic_filtered, aes(y = n, x = topic, fill = label)) +
+  geom_bar(position = "dodge", stat = "identity") +
+  ylab("Count") +
+  xlab("Topics") +
+  theme_classic() +
+  theme(
+    text = element_text(size = 17),
+    axis.text.x = element_text(angle = 90, size = 17, vjust = 0.5),
+    axis.title.x = element_text(margin = margin(t = 10, r = 0, b = 0, l = 0)),
+    axis.title.y = element_text(margin = margin(t = 0, r = 10, b = 0, l = 0)),
+    legend.position = "right",
+    plot.title = element_text(hjust = 0.5)) +
+  scale_fill_manual(
+    "Label",
+    values = c("brown2", "darkolivegreen4")) +
+  labs(title = "") +
+  ggtitle("Labels grouped by topics")
+
+barplot_label_per_topic
+
+```
+### Create word clouds
+
+As seen during topic modeling, we can use **word clouds** to visualize topic-word distribution.
+With the additional sentiment information we can also color them accordingly.
+
+**Option 1:** via `quanteda`:
+
+```{r wordclouds}
+
+# Create dfm
+
+dfm <- quanteda::dfm(
+  quanteda::corpus(data_labeled, text_field = "twitter_full_text"),
+  remove = quanteda::stopwords("de"),
+  remove_punct = TRUE,
+  groups = "label") %>%
+  quanteda::dfm_trim(min_termfreq = 5)
+
+# Plot word cloud
+
+quanteda::textplot_wordcloud(
+  dfm,
+  comparison = TRUE,
+  max_words = 300,
+  adjust = 0.1,
+  color = c("brown2", "darkolivegreen4"))
+
+```
+
+**Option 2:** via `tidytext` and `wordcloud`, this time for one selected topic:
+
+```{r wordclouds_2}
+
+word_frequencies <- data_labeled %>%
+  dplyr::mutate(linenumber = row_number()) %>%
+  tidytext::unnest_tokens(word, twitter_full_text) %>%
+  dplyr::anti_join(tidytext::get_stopwords(language = "de")) %>% 
+  dplyr::group_by(topic, label) %>% 
+  dplyr::count(word, sort = TRUE) %>%
+  dplyr::mutate(word = reorder(word, n)) %>% 
+  dplyr::ungroup()
+
+topic_name <- "AfD"
+
+word_frequencies_filtered_topic <- word_frequencies %>% 
+  filter(topic == topic_name) %>% 
+  top_n(20) %>% 
+  mutate(color = ifelse(label == "positive", "darkolivegreen4", "brown2"))
+
+wordcloud::wordcloud(
+  words = word_frequencies_filtered_topic$word,
+  freq = word_frequencies_filtered_topic$n,
+  min.freq = 1,
+  max.words = 200,
+  ordered.colors = TRUE,
+  random.order = FALSE,
+  scale = c(2, 0.5),
+  rot.per = 0.1,
+  colors = word_frequencies_filtered_topic$color)
+
+```
+
+Alternatively, we can visualize **word frequencies** like this:
+
+```{r wordfreq}
+
+word_frequencies_filtered_topic %>%
+  dplyr::mutate(word = reorder(word, n)) %>%
+  dplyr::filter(n > 1) %>% 
+  ggplot2::ggplot(aes(reorder(word, -n), n, fill = label)) +
+  geom_col() +
+  xlab(NULL) +
+  coord_flip() +
+  ylab("Count") +
+  xlab("Words") +
+  theme_classic() +
+  theme(
+    text = element_text(size = 17),
+    axis.text.x = element_text(size = 17, vjust = 0.5),
+    axis.title.x = element_text(margin = margin(t = 10, r = 0, b = 0, l = 0)),
+    axis.title.y = element_text(margin = margin(t = 0, r = 10, b = 0, l = 0)),
+    legend.position = "right",
+    plot.title = element_text(hjust = 0.5)) +
+  scale_fill_manual("Label", values = c("brown2", "darkolivegreen4")) +
+  labs(title = "") +
+  ggtitle(paste0("Word frequencies in topic ", topic_name))
+
+```
+
+**Obviously, there are infinitely more possibilities for visualizing results. Maybe this helps for a little inspiration!**
+
+
