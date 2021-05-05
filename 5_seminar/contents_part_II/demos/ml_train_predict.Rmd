@@ -504,4 +504,10 @@ summary(final_model)
 
 ```
 
+```{r save, include=FALSE}
+
+saveRDS(data_total, file = sprintf("%s/data_sentiment_analysis.RDS", path))
+
+```
+
 **And that's it for a first jump at sentiment analysis! We have performed a train-test split of our data, trained a logistic regression learner on the training task, used the resulting model to compute predictions for the test data to evaluate performance, and trained the final model we could now use for future sentiment analysis. **
