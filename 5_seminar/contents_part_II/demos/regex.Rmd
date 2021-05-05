@@ -1,0 +1,335 @@
+---
+title: "Regular Expressions"
+author: "Asmik & Lisa -- for Intro to NLP"
+date: "April/May 2021"
+output:
+  html_document: default
+  pdf_document: default
+---
+
+![](../../Logo_Consulting.JPG)
+
+## Handling Regular Expressions
+
+This demo is about **regular expressions (regex)**.
+
+We show how to perform several basic text mining operations using the systematic regex syntax.
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+```
+
+```{r setup_packages, message=FALSE}
+
+# Load required packages
+
+library(stringr)
+
+```
+
+### Disclaimer
+
+With regular expressions there are often several ways to specify the desired pattern.
+In the following, we will have a look at the most frequently used text mining operations, employing various regex patterns.
+
+You are free to use whatever works but it's certainly good practice to pick a style and stick to it as it makes your code more easily readable.
+
+In any case do not hesitate to ask Google. Thanks to regex being present in many programming languages there is plenty of help out there.
+
+The [`stringr` vignette](https://cran.r-project.org/web/packages/stringr/vignettes/regular-expressions.html) provides a nice intro, and the [R regex cheatsheet](https://www.rstudio.com/wp-content/uploads/2016/09/RegExCheatsheet.pdf) has all the important stuff nicely arranged at one glance.
+
+### Identify
+
+We will work with `stringr` here as we consider it extensive and user-friendly.
+Most `stringr` functions take a character vector and a **pattern**.
+
+The most generic command to match regular patterns is probably `str_detect`, returning a boolean value indicating whether or not a string contains the specified pattern.
+
+Identify a **specific character sequence**:
+
+```{r identify_0}
+stringr::str_detect(
+  string = c("Hello world", "bye"), 
+  pattern = "world")
+```
+
+Identify **any character** value:
+
+```{r identify_1}
+
+string <- c("999_user_999", "123")
+
+list(
+  posix = stringr::str_detect(string, pattern = "[:alpha:]"),
+  ascii = stringr::str_detect(string, pattern = "[A-Za-z]"))
+```
+
+Identify **lowercase** characters:
+
+```{r identify_2}
+
+string <- c("why ON EARTH", "WHAT!!?!1!")
+
+list(
+  posix = stringr::str_detect(string, pattern = "[:lower:]"), # [:upper:] for uppercase
+  ascii = stringr::str_detect(string, pattern = "[a-z]")) # [A-Z] for uppercase
+```
+
+Identify **digits**:
+
+```{r identify_3}
+
+string <- c("I got 99 problems but regex ain't one", "one two three")
+
+list(
+  perl = stringr::str_detect(string, pattern = "\\d"),
+  posix = stringr::str_detect(string, pattern = "[:digit:]"),
+  ascii = stringr::str_detect(string, pattern = "[0-9]"))
+```
+
+Identify **punctuation**:
+
+```{r identify_4}
+
+stringr::str_detect(
+  string = c("Well... you're right!", "No punct to be seen here"), 
+  pattern = "[:punct:]")
+```
+
+Identify **spaces**:
+
+```{r identify_5}
+
+string <- c("Gimme some space, will ya", "tightstuffhere")
+
+list(
+  perl = stringr::str_detect(string, pattern = "\\s"),
+  posix = stringr::str_detect(string, pattern = "[:space:]"))
+```
+
+Caution with special characters -- we can still query those but we need to "escape" them by prefixing them with a backslash. This tells R that we mean a literal symbol here.
+
+Even more caution with characters that have a special meaning in regex. For example, `+` is used to indicate an occurrence of at least one repetition (more on this in a moment). Internally, to give the plus sign its special meaning in the first place, regex prefix them by a backslash also. In order to match `+`, we therefore need *double* backslashes.
+
+Identify **special characters**:
+
+```{r identify_6}
+
+stringr::str_detect(
+  string = "Cote d'Azure", 
+  pattern = "\'") # omitting the backslash will throw an error
+```
+
+```{r identify_7}
+stringr::str_detect(
+  string = "Wanna be my +1?", 
+  pattern = "\\+") # omitting the double backslashes will throw an error
+```
+
+Now let's talk **repetitions**.
+
+Basically, we have the following possibilities:
+
+* `?` repeat 0x or 1x
+* `*` repeat 0x or more
+* `+` repeat 1x or more
+* `{n}` repeat exactly n times
+* `{n,m}` repeat between n and m times
+* `{n,}` repeat at least n times
+* `{,m}` repeat at most m times
+
+Matches 3 p's in a row:
+
+```{r identify_9}
+
+stringr::str_detect(
+  string  = c("nlp_2021", "nlppp_2021"),
+  pattern = "p{3}")
+```
+
+Matches 2 dots in a row:
+
+```{r identify_10}
+
+stringr::str_detect(
+  string  = c("never.stop.learning", "never stop learning.."),
+  pattern = "\\.{2}")
+```
+
+Matches at most one l:
+
+```{r identify_11}
+stringr::str_detect(
+  string = c("np", "nlp", "nllp", "nllllp"),
+  pattern = "nl?p")
+```
+
+Matches at least two l's:
+
+```{r identify_12}
+stringr::str_detect(
+  string = c("np", "nlp", "nllp", "nllllp"),
+  pattern = "nl{2,}p")
+```
+
+Matches between 1 and 2 l's:
+
+```{r identify_13}
+stringr::str_detect(
+  string = c("np", "nlp", "nllp", "nllllp"),
+  pattern = "nl{1,2}p")
+```
+
+Matches one or more quotation marks:
+
+```{r identify_14}
+stringr::str_detect(
+  string = c("What?", "What??", "Huh"),
+  pattern = "\\?+")
+```
+
+### Extract
+
+`str_extract` works similarly but returns the specified string instead of `TRUE` or `FALSE`.
+
+We will extract character sequences and have a look at **groups** wrapped in parentheses.
+
+For example, we can extract sequences with some optional parts, which might be helpful in dealing with plurals:
+
+```{r extract_1}
+stringr::str_extract(
+  string = c("Mark my word", "words don't do her justice"),
+  pattern = "word(s)?")
+```
+
+We can also use grouping to specify various accepted options separated by `|`:
+
+```{r extract_2}
+stringr::str_extract(
+  string = c("Mum, is there any pudding left?", "No mom, I want fries!", "Mommy please"),
+  pattern = "(M|m)(u|o)m(my)?")
+```
+
+### Locate
+
+Besides detecting and extracting patterns, we sometimes need to know their exact **location** within a text.
+`str_locate` returns the beginning and end of the specified pattern (`NA` if the pattern is not detected).
+
+Make sure to allow for repetitions if needed:
+
+```{r locate_1}
+
+stringr::str_locate(
+  string = c("nlp2021", "nlp_kurs"),
+  pattern = "\\d")
+```
+
+```{r locate_2}
+
+stringr::str_locate(
+  string = c("nlp2021", "nlp_kurs"),
+  pattern = "\\d+")
+```
+
+Sometimes we might expect multiple occurrences of our patterns.
+In that case we use `str_locate_all` (`str_locate` only returns the location of the first match -- the same is true for, e.g., `str_replace` and `str_replace_all`).
+When in doubt, better go for `_all`.
+
+```{r locate_3}
+
+string <- c("I am Thorin son of Thrain son of Thror, King under the Mountain!")
+
+list(
+  single = stringr::str_locate(string, pattern = "of"),
+  multiple = stringr::str_locate_all(string, pattern = "of"))
+
+```
+
+### Replace
+
+Text cleaning will often require replacement of unwanted, leading or trailing sequences.
+
+`^` and `$` are **anchors** indicating the beginning and end of a string, respectively.
+
+Replace leading 0's by an empty character (note that we could also use `str_remove_all` here): 
+
+```{r replace_1}
+
+stringr::str_replace(
+  string = c("0005", "1050"),
+  pattern = "^0+",
+  replacement = "")
+
+```
+
+Replace gender suffices by "x": 
+
+```{r replace_2}
+
+stringr::str_replace(
+  string = c("Innenarchitektin", "Binnenschifffahrtskapitänin", "ProfessorInnen"),
+  pattern = "(I|i)n(nen)?$",
+  replacement = "x")
+
+```
+
+Besides the simple `^` and `$` there is another useful anchoring pattern, namely **look-arounds**. 
+This allows to match a pattern only if it is preceded or followed by a specific other pattern:
+
+* Look-ahead `(?=...)`: match if followed by "..."
+* Look-behind `(?<=...)`: match if preceded by "..."
+* Negated version for both: replace `=` by `!`
+
+Replace any word preceded by `#` with "hashtag":
+
+```{r replace_3}
+stringr::str_replace_all(
+  string = c("Ob Laschet Kanzler wird? #idautit"),
+  pattern = "(?<=#)[:alpha:]+",
+  replacement = "hashtag")
+```
+
+Remove all numbers except when they are followed by a currency expression:
+
+```{r replace_4}
+stringr::str_replace_all(
+  string = c("I bought 5 apples for 5$"),
+  pattern = "\\d+(?!\\$)",
+  replacement = "")
+```
+
+Or, simply replace occurrences at any location (make sure to use the `_all` version): 
+
+```{r replace_5}
+stringr::str_replace_all(
+  string = c("Our Father, who art in heaven, hallowed be thy name; thy kingdom come, thy will be done on earth as it is in heaven."),
+  pattern = "thy",
+  replacement = "your")
+```
+
+### Other useful operations
+
+`stringr` offers a lot more than we have covered so far. 
+
+Some additional operations that might be useful:
+
+```{r misc_1}
+stringr::str_split(
+  string = c("Heufer-Umlauf", "Walter-Borjans"),
+  pattern = "-")
+```
+
+```{r misc_2}
+stringr::str_count(
+  string = c("lorem ipsum, quia dolor sit"),
+  pattern = "i")
+```
+
+```{r misc_3}
+stringr::str_squish(
+  string = c("   if  you manipulate   strings this sometimes leaves  annoying whitespaces   "))
+```
+
+
+**As you might have realized by now, handling regex is often trial-and-error (especially when you try to match more complex sequences). They will most certainly drive you crazy at some point or other, but they are a powerful and absolutely essential tool in text mining.**

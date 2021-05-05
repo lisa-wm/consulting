@@ -1,0 +1,452 @@
+---
+title: "Topic Modeling -- STM"
+author: "Asmik & Lisa -- for Intro to NLP"
+date: "April/May 2021"
+output:
+  html_document: default
+  pdf_document: default
+---
+
+![](../../Logo_Consulting.JPG)
+
+## Modeling Topics with an STM
+
+This demo is about **topic modeling with a structural topic model (STM)**.
+
+We show how to prepare the data for fitting an STM ([Roberts et al., 2016](https://scholar.princeton.edu/sites/default/files/bstewart/files/a_model_of_text_for_experimentation_in_the_social_sciences.pdf)), conduct the modeling process, and analyze the results.
+
+
+```{r setup_packages, message=FALSE, warning=FALSE}
+# Load required packages
+
+library(data.table)
+library(quanteda)
+library(stm)
+```
+
+### Create `dfm` object
+
+As in the static feature extraction demo, we convert our data to a `dfm`. 
+However, we focus on slightly different tokens this time as we are now interested in identifying topical relations.
+
+First, we get the **data** (the `path` variable again requiring individual adaptation):
+
+```{r path, include = FALSE}
+path <- "5_seminar"
+```
+
+
+```{r read}
+
+# path <- ... (individual file location)
+
+twitter_corpus <- readRDS(sprintf("%s/twitter_corpus.RDS", path))
+
+twitter_corpus
+
+```
+
+We furthermore store the document texts in the docvars (which poses a redundancy in the `corpus` object but ensures the texts are not lost during conversion for the `dfm`).
+
+```{r text}
+
+quanteda::docvars(twitter_corpus)$text <- quanteda::texts(twitter_corpus)
+
+```
+
+Now let's **tokenize** our corpus in a way appropriate for topic modeling. 
+
+We assume that topical information is mostly carried by nouns and choose to remove all other words for document representation, attempting to eliminate noise that might distract our topic model.
+This is, of course, a simplification, but that's life (of an analyst). 
+
+Luckily, nouns are pretty easy to identify by their leading capital letters in German (implicitly relying on MPs' grammar skills and/or auto-correct, and accepting that this will also include non-nouns from the beginning of a sentence):
+
+```{r tokenize}
+
+# First, tokenize as usual
+
+twitter_tokens <- quanteda::tokens(
+  twitter_corpus,
+  what = "word",
+  remove_symbols = TRUE,
+  remove_numbers = TRUE,
+  remove_separators = TRUE,
+  split_hyphens = TRUE,
+  include_docvars = TRUE)
+
+```
+
+```{r stem}
+
+# Stem
+
+twitter_tokens <- quanteda::tokens_wordstem(
+  twitter_tokens, 
+  language = "german")
+
+```
+
+```{r keep}
+
+# Keep only tokens starting with a capital letter
+
+twitter_tokens <- quanteda::tokens_keep(
+  twitter_tokens,
+  pattern = c("[:upper:]([:lower:])+"),
+  valuetype = "regex",
+  case_insensitive = FALSE)
+
+# Lowercase afterwards
+
+twitter_tokens <- quanteda::tokens_tolower(twitter_tokens)
+
+```
+
+```{r clean_stem, include=FALSE}
+
+clean_and_stem <- function(text) {
+  
+  # Convert to uniform encoding
+  
+  text <-  stringi::stri_trans_general(text, "Any-Latin")
+  
+  # Replace umlauts and litigate s
+  
+  text <- stringr::str_replace_all(
+    text,
+      c("\u00c4" = "Ae",
+      "\u00e4" = "ae",
+      "\u00d6" = "Oe",
+      "\u00f6" = "oe",
+      "\u00dc" = "Ue",
+      "\u00fc" = "ue",
+      "\u00df" = "ss"))
+  
+  # Stem
+  
+  text <- SnowballC::wordStem(text)
+  
+  unique(text)
+
+}
+
+clean_and_stem(c("Döner", "Bereicherung", "kulinarischer", "Angebote"))
+
+```
+
+For **stopwords** removal we retrace the steps taken in the static feature extraction:
+
+```{r stopwords}
+
+# Remove stopwords using our cleaning function from earlier
+
+stopwords <- clean_and_stem(quanteda::stopwords(language = "de"))
+stopwords <- stopwords[nchar(stopwords) > 0]
+stopwords <- stringr::str_remove_all(
+  stopwords,
+  "kein(.)*|nicht")
+stopwords <- c(
+  stopwords, 
+  c("der", "die", "das", "was", "wer", "wie", "ich", "sie", "wir", "ihr"))
+
+saveRDS(stopwords, sprintf("%s/stopwords.RDS", path))
+
+twitter_tokens <- quanteda::tokens_remove(
+  twitter_tokens,
+  pattern = stopwords)
+
+twitter_tokens <- quanteda::tokens_select(twitter_tokens, min_nchar = 3)
+
+# Inspect
+
+twitter_tokens
+
+```
+
+Looking good, so convert to `dfm`:
+
+```{r dfm}
+
+twitter_dfm <- quanteda::dfm(twitter_tokens)
+
+twitter_dfm
+
+```
+
+Unfortunately, as the above output tells us, our `dfm` is extremely **sparse** -- tokens are not at all common across documents, which will pose a challenge to any topic model.
+This is actually not too surprising when we recall the extreme brevity of our Twitter documents.
+
+*Side note*: if you run into this problem you might want to consider the option of pooling texts into larger documents (this can be achieved, for instance, calling `quanteda::dfm_group`).
+However, this is obviously a heavy simplification and leads to all documents that share the same grouping variable being assigned the same topic label.
+
+What we will do to alleviate the sparsity problem at least to some extent is to condense the `dfm` to the most prominent features: 
+
+```{r condense}
+
+# Eliminate less common features
+
+twitter_dfm <- quanteda::dfm_select(
+  twitter_dfm,
+  names(quanteda::topfeatures(twitter_dfm, n = 300)))
+
+twitter_dfm
+
+```
+
+### Create prevalence formula
+
+The special trait of the STM is its making use of s document-level **meta data**, so we need to specify which information to use here. In the `stm` function the corresponding argument is called `prevalence` and must be stated as a formula.
+
+We will use the following meta variables (smooth effects defaulting to B-splines):
+
+* `party` as a categorical variable,
+* `bundesland` as a categorical variable,
+* `unemployment_rate` as a smooth effect with 5 degrees of freedom, and
+* `share_pop_migration` as a smooth effect with 5 degrees of freedom.
+
+The resulting formula, `~ party + bundesland + s(unemployment_rate, df = 5) + s(share_pop_migration, df = 5)`, is perfectly disputable -- this decision is up to domain knowledge and some trial-and-error.
+
+```{r prevalence}
+
+prevalence_formula <- as.formula(paste(
+  "", 
+  "party + bundesland + s(unemployment_rate, df = 5) + s(share_pop_migration, df = 5)", 
+  sep = "~"))
+
+```
+
+Now we have one thing to pay attention to: the `stm` implementation cannot handle **missing data** in its prevalence variables.
+We must therefore exclude non-complete observations (alternatively, we could impute the missing values if it made sense and we had a meaningful imputation mechanism):
+
+```{r missings}
+
+twitter_dfm <- quanteda::dfm_subset(
+  twitter_dfm,
+  !is.na(party) & !is.na(bundesland) & !is.na(unemployment_rate) &
+    !is.na(share_pop_migration))
+
+twitter_dfm
+
+```
+
+### Create `stm` object
+
+We then convert our `dfm` to an `stm` object we can use in the structural topic model.
+This is super simple with `quanteda`:
+
+```{r stm, warning=FALSE}
+
+twitter_stm <- quanteda::convert(twitter_dfm, to = "stm")
+
+summary(twitter_stm)
+
+```
+
+### Fit STM
+
+Time to fit the actual **model**.
+
+While models learn all necessary *parameters* during training, *hyperparameters* need to be specified upfront.
+The most critical hyperparameter here is the number of topics, *K*. 
+So how to find *K*?
+
+Topic modeling being an unsupervised task (i.e., we do not have access to the ground truth), the quality of model output must ultimately be judged by human interpretability.
+We can seek some help from the data: `stm` offers a function that searches for the optimal *K* (still requiring a range of potential values!).
+Exactly what optimal means can be somewhat steered by the user.
+We will use the *held-out likelihood* option which creates an artificial supervised task: we mask a certain part of some of the documents and ask the model to complete them (note that the ground truth is known now).
+The more predictive power our model has, the higher the likelihood for the held-out words should be (for details see [Wallach et al., 2009](http://dirichlet.net/pdf/wallach09evaluation.pdf):
+
+```{r searchk}
+
+# Conduct hyperparameter search
+
+hyperparameter_search <- stm::searchK(
+  documents = twitter_stm$documents,
+  vocab = twitter_stm$vocab,
+  data = twitter_stm$meta,
+  K = c(3:10),
+  prevalence = prevalence_formula,
+  heldout.seed = 1, # seed for reproducibility
+  max.em.its = 5, # number of iterations
+  init.type = "Spectral",
+  verbose = FALSE)
+
+```
+
+```{r findk}
+
+# Fix optimal number of topics
+
+(n_topics <- as.numeric(hyperparameter_search$results[
+  which.max(hyperparameter_search$results[, "heldout"]), "K"]))
+
+```
+
+Seems `r toString(n_topics)` topics is a good choice, so let's fit the actual **model** now:
+
+```{r fitstm, results='hide'}
+
+# Fit STM
+
+topic_model <- stm::stm(
+  documents = twitter_stm$documents,
+  vocab = twitter_stm$vocab,
+  data = twitter_stm$meta,
+  K = n_topics,
+  prevalence = prevalence_formula,
+  gamma.prior = "L1",
+  seed = 1,
+  max.em.its = 15,
+  init.type = "Spectral",
+  verbose = FALSE)
+
+```
+
+### Interpret results
+
+The tricky thing about unsupervised topic modeling is the **interpretation** part.
+Statistical computations yield the results that best fit the data according to model assumptions but whether the found topics are considered meaningful is up to the human analyst.
+
+Let's see whether we can make any sense of the model output by
+
+* inspecting the most characteristic words for each topic,
+* printing the most representative document for a given topic, and
+* generating a variety of visualizations.
+
+For one, we can call `stm`'s `labelTopics` function which returns the top terms per topic according to different metrics (for details, best check the function documentation):
+
+* Highest probability: which words are most likely to occur in a document of the given topic?
+* FREX: which words occur both frequently and exclusively, i.e., serve to characterize and distinguish topics? 
+* Lift: which words occur most frequently if weighted by the inverse of their relative empirical frequency across the entire corpus?
+* Score: which words show the largest difference between their (log) frequency in topic *k* and their average (log) frequency across all topics?
+
+The `n` argument allows to specify how many words should be displayed. 
+We go for 10:
+
+```{r fitstm_2}
+
+# Inspect results
+
+(result_topic_modeling <- stm::labelTopics(topic_model, n = 10))
+
+```
+
+We can also access the word lists directly if we are particularly interested in results w.r.t a specific metric:
+
+```{r fitstm_3}
+
+t(result_topic_modeling$frex)
+
+```
+
+NB: Our results here are not very glorious.
+We have already seen the extreme sparsity of the `dfm`, and with documents that are pretty dissimilar a topic model can only do so much.
+This is also a consequence of our training data design: we have labels for relatively few, extremely short documents from a bunch of different authors.
+In reality, scraping gives us access to much larger amounts of data.
+
+Next, let's take another look at our topics by a more visually appealing means: 
+
+```{r int}
+
+plot(topic_model, type = "summary")
+
+```
+
+We can also plot **word clouds** displaying the most prominent words per topic (size indicating the probability of a word occurring in a document of the given topic):
+
+```{r int_2}
+
+invisible(lapply(seq_len(n_topics), function(i) stm::cloud(topic_model, topic = i)))
+
+```
+
+Finally, let's see the most representative documents for each topic, i.e., the tweets with the highest topic probability:
+
+```{r int_3}
+
+lapply(seq_len(n_topics), function(i) {
+  stm::findThoughts(
+    model = topic_model,
+    texts = twitter_stm$meta$text,
+    topics = i,
+    n = 2)$docs[[1]]})
+
+```
+
+Using this visual support (and probably playing around with, e.g., the number of features to include in the `dfm` and the number of topics) we would now try to give our topic some decent names.
+
+### Assign documents to topics
+
+So `stm` has thrown a lot of words at us from which we are hopefully able to infer meaningful topics, but which documents actually belong to which topic? 
+The model output provides us with a vector of topic probabilities for each document, meaning we can **label** the tweets by picking the topic for which they have the highest respective probability:
+
+```{r assigntopics}
+
+# Extract topic probabilities together with topic IDs and discard docnum
+
+topic_probs <- stm::make.dt(topic_model)[
+  , doc_id := names(twitter_stm$documents)
+  ][, docnum := NULL]
+
+topic_probs[sample(topic_probs[, .I], 5)]
+
+```
+
+```{r assigntopics_2}
+
+# Get topic with highest score per document
+
+topic_cols <- names(topic_probs)[startsWith(names(topic_probs), "Topic")]
+
+topic_probs[
+  , `:=` (
+    max_topic_score = max(.SD, na.rm = TRUE),
+    topic_label = which.max(.SD)),
+  .SDcols = topic_cols,
+  by = doc_id]
+
+topic_probs[sample(topic_probs[, .I], 5)]
+
+```
+
+For mapping the topic labels back to the original tweets append them to the docvars...
+
+```{r assigntopics_3}
+
+# Extract docvars
+
+twitter_docvars <- data.table::as.data.table(
+  cbind(
+    doc_id = quanteda::docid(twitter_corpus),
+    quanteda::docvars(twitter_corpus)), 
+  key = "doc_id")
+
+# Append topic labels and remove irrelevant columns
+
+twitter_docvars <- topic_probs[
+  twitter_docvars, on = "doc_id"
+    ][, c(topic_cols) := NULL]
+
+twitter_docvars[sample(twitter_docvars[, .I], 5)]
+
+```
+
+...and, lastly, feed this information back into the original corpus object to save it for further usage:
+
+```{r assigntopics_4}
+
+# Insert info back into corpus
+
+twitter_corpus_with_topics <- twitter_corpus
+
+quanteda::docvars(twitter_corpus_with_topics) <- as.data.frame(twitter_docvars)
+
+# Save
+
+saveRDS(
+  twitter_corpus_with_topics, 
+  sprintf("%s/twitter_corpus_with_topics.RDS", path))
+
+```
+
+**So that's how to model topics with an `stm`! Even though our training corpus is not easily clustered into topics, you hopefully got some idea how to handle this process code-wise. And then, we just do not always get lucky with such tasks in a sense that they can be expected to produce meaningful output all the time** ¯|_(ツ)_/¯

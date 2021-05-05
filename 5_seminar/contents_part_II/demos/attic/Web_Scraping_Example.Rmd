@@ -1,0 +1,124 @@
+---
+title: "Web Scraping - Example"
+author: "Asmik & Lisa - for Intro to NLP"
+date: "2 April 2021"
+output:
+  html_document: default
+  pdf_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+```
+
+```{r setup_packages, message=FALSE}
+# Load required packages
+
+library("rvest")
+library("stringr")
+```
+
+# Web Scraping from the IMDb website
+
+Specifying the url for desired website to be scraped <http://www.imdb.com/chart/top?ref_=nv_mv_250_6>.
+
+
+```{r cars}
+
+url <- read_html("http://www.imdb.com/chart/top?ref_=nv_mv_250_6")
+
+```
+
+HTML nodes can be found via SelectorGadget or Developer Tab (F12)
+
+## Title
+
+```{r title}
+title_data <- html_nodes(url,'.titleColumn a') %>% 
+  html_text()
+```
+
+```{r title_1}
+head(title_data)
+```
+
+## Year
+
+```{r year}
+year_data <- html_nodes(url,'.secondaryInfo') %>% 
+  html_text()
+```
+
+```{r year_1}
+head(year_data)
+```
+
+Year without parentheses and convert to numeric: 
+
+```{r year_clean}
+
+year_data_clean <- year_data %>% 
+  str_replace_all(pattern = "[\\(\\)]", replacement = "") %>% 
+  as.numeric()
+
+year_data_clean
+```
+
+## Ranking
+
+```{r rank}
+rank_data <- html_nodes(url,'.imdbRating') %>% 
+  html_text()
+```
+
+```{r rank_1}
+head(rank_data)
+```
+
+Clean the extracted ranking datarmation and convert to numeric:
+
+```{r rank_clean}
+
+rank_data_clean <- rank_data %>% 
+  str_replace_all(pattern = "\n", replacement = "") %>% 
+  str_trim(side = "both") %>% 
+  as.numeric()
+
+rank_data_clean
+```
+
+## Rating 
+
+```{r rating}
+rating_data <- html_nodes(url,'strong') %>% 
+  html_text()
+```
+
+```{r rating_1}
+head(rating_data)
+```
+
+
+Convert rating to numeric:
+
+```{r rating_clean}
+rating_data_clean <- rating_data %>% 
+  as.numeric()
+
+rating_data_clean
+```
+
+
+## Create a data frame
+
+```{r create_df}
+imdb_scraped_data <- data.frame(
+  ranking = rank_data_clean,
+  title   = title_data,
+  year    = year_data_clean,
+  rating  = rating_data_clean
+  )
+
+head(imdb_scraped_data)
+```
