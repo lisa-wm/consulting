@@ -11,7 +11,7 @@ output:
 
 ## Visualize Results of Sentiment Analysis
 
-This demo is about **visualizing results of sentiment classifcation**.
+This demo is about **visualizing results of sentiment classification**.
 
 We show how to visualize classification results in different ways, mostly using the `tidyverse` and `ggplot2` packages.
 

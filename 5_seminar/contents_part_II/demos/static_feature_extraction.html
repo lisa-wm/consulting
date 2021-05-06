@@ -508,16 +508,16 @@ twitter_polarities &lt;- data.table::as.data.table(
 
 twitter_polarities[sample(twitter_polarities[, .I], 10)]</code></pre>
 <pre><code>##                         doc_id positive negative
-##  1:   Frank_Magnitz15160059601        2        0
-##  2:    JensMaierAfD15179888401        4        1
-##  3:     DirkSpaniel15552279001        4        2
-##  4: Martin_Hess_AfD15468573001        4        1
-##  5: Martin_Hess_AfD15344829001        1        3
-##  6:     AndrejHunko15929832001        3        1
-##  7:     UliGroetsch15633503401        9        0
-##  8:   BriHasselmann15824074801        4        0
-##  9:       ABaerbock16060596601       11        1
-## 10:     steffilemke15732231001        0        0</code></pre>
+##  1:     Peter_Beyer16037862001        4        2
+##  2: JuergenBraunAfD16070286001        2        4
+##  3:   BriHasselmann15932577001        2        3
+##  4:   agnieszka_mdb15510815401        3        3
+##  5:     jankortemdb15388216201        1        4
+##  6:        kleikert15421870801        5        0
+##  7:      KaiGehring16099352401        2        2
+##  8: ManuelHoeferlin15543111601        5        5
+##  9:     UliGroetsch15916122601        2        0
+## 10:  HoffmannForest15877429801        3        2</code></pre>
 </div>
 <div id="get-number-of-emojis-used" class="section level3">
 <h3>Get number of emojis used</h3>
@@ -532,83 +532,72 @@ twitter_docvars &lt;- data.table::as.data.table(
   key = &quot;doc_id&quot;)
 
 twitter_docvars[sample(twitter_docvars[, .I], 10)]</code></pre>
-<pre><code>##                         doc_id   last_name  first_name
-##  1:   agnieszka_mdb15906769801     Brugger   Agnieszka
-##  2:     DrHollnagel15951431401   Hollnagel   Dr. Bruno
-##  3:  annachristmann16001539201  Christmann    Dr. Anna
-##  4:   BriHasselmann15694185001   Haßelmann      Britta
-##  5:   FrStraetmanns15379410601 Straetmanns   Friedrich
-##  6:       KatjaKeul15617025001        Keul       Katja
-##  7: Beatrix_vStorch15178999201      Storch Beatrix von
-##  8:     DirkSpaniel15500475601     Spaniel    Dr. Dirk
-##  9:      KaiGehring15764234401     Gehring         Kai
-## 10: Beatrix_vStorch15886604401      Storch Beatrix von
-##                         wahlkreis_name  party          bundesland
-##  1:                         Ravensburg gruene  Baden-Wuerttemberg
-##  2: Herzogtum Lauenburg – Stormarn-Süd    afd  Schleswig-Holstein
-##  3:                       Stuttgart II gruene  Baden-Wuerttemberg
-##  4:           Bielefeld – Gütersloh II gruene Nordrhein-Westfalen
-##  5:           Bielefeld – Gütersloh II  linke Nordrhein-Westfalen
-##  6:           Nienburg II – Schaumburg gruene       Niedersachsen
-##  7:                       Berlin-Mitte    afd              Berlin
-##  8:                        Stuttgart I    afd  Baden-Wuerttemberg
-##  9:                          Essen III gruene Nordrhein-Westfalen
-## 10:                       Berlin-Mitte    afd              Berlin
+<pre><code>##                         doc_id       last_name    first_name
+##  1:        MiRo_SPD15821874601 Roth (Heringen)       Michael
+##  2:     UweSchummer15962863201        Schummer           Uwe
+##  3:         oezoguz15954811201          Özoguz         Aydan
+##  4:       JM_Luczak15693072001          Luczak Dr. Jan-Marco
+##  5: Beatrix_vStorch15415882801          Storch   Beatrix von
+##  6: Beatrix_vStorch15507566401          Storch   Beatrix von
+##  7:      helgelindh15809889601           Lindh         Helge
+##  8:        DJanecek16091836201         Janecek        Dieter
+##  9:     Peter_Beyer16037862001           Beyer         Peter
+## 10:        LisaPaus15936849601            Paus          Lisa
+##                         wahlkreis_name   party          bundesland
+##  1: Werra-Meißner – Hersfeld-Rotenburg     spd              Hessen
+##  2:                            Viersen cdu_csu Nordrhein-Westfalen
+##  3:                   Hamburg-Wandsbek     spd             Hamburg
+##  4:        Berlin-Tempelhof-Schöneberg cdu_csu              Berlin
+##  5:                       Berlin-Mitte     afd              Berlin
+##  6:                       Berlin-Mitte     afd              Berlin
+##  7:                        Wuppertal I     spd Nordrhein-Westfalen
+##  8:                 München-West/Mitte  gruene              Bayern
+##  9:                        Mettmann II cdu_csu Nordrhein-Westfalen
+## 10:  Berlin-Charlottenburg-Wilmersdorf  gruene              Berlin
 ##     unemployment_rate share_pop_migration        username followers_count
-##  1:               3.0                20.1   agnieszka_mdb           11106
-##  2:               4.8                12.7     DrHollnagel             668
-##  3:               5.0                38.6  annachristmann            3730
-##  4:               8.6                32.7   BriHasselmann           20299
-##  5:               8.6                32.7   FrStraetmanns            1700
-##  6:               5.9                15.3       KatjaKeul            2145
-##  7:               9.4                24.1 Beatrix_vStorch           61329
-##  8:               5.0                38.6     DirkSpaniel            3743
-##  9:              11.9                24.5      KaiGehring            9738
-## 10:               9.4                24.1 Beatrix_vStorch           61329
-##              created_at favorite_count retweet_count    label
-##  1: 2020-05-28 14:43:00             18             4 positive
-##  2: 2020-07-19 07:19:00              4             2 negative
-##  3: 2020-09-15 07:12:00             10             3 positive
-##  4: 2019-09-25 13:35:00            162            20 positive
-##  5: 2018-09-26 05:51:00              3             3 positive
-##  6: 2019-06-28 06:15:00             42             8 negative
-##  7: 2018-02-06 06:52:00            766           482 negative
-##  8: 2019-02-13 08:46:00             63            37 negative
-##  9: 2019-12-15 15:24:00             30             4 negative
-## 10: 2020-05-05 06:34:00            378           106 negative
-##                                                       emojis
-##  1: &lt;U+0001F389&gt;,&lt;U+2665&gt;,&lt;U+0001F389&gt;,&lt;U+2665&gt;,&lt;U+0001F389&gt;
-##  2:                                                         
-##  3:                                             &lt;U+0001F44C&gt;
-##  4:                                                         
-##  5:                                                         
-##  6:                                                         
-##  7:                                                         
-##  8:                                                         
-##  9:                                                         
-## 10:                                                         
-##                                                                                hashtags
-##  1:                                                                                    
-##  2:                                                                   #Negativzins,#EZB
-##  3:                             #Buergerstiftungen,#Genossenschaften,#Zivilgesellschaft
-##  4:                                                      #Greta,#AlternativerNobelpreis
-##  5:                                                                                    
-##  6:                                                                       #Iran,#INSTEX
-##  7: #Satzungsaenderung,#AmtUndMandat,#Uebergangszeit,#Verlogen,#Establishment,#SoSindSe
-##  8:           #SPD,#Arbeitsplaetze,#Sozialstaat,#AfD,#AfDimBundestag,#Autoindustrie,...
-##  9:                                                                  #Klimschutz,#COP25
-## 10:                                    #EZB,#Bundesverfassungsgericht,#BVerG,#Karlsruhe
-##                 tags
-##  1:                 
-##  2:                 
-##  3:   @aktivebuerger
-##  4:                 
-##  5:   @Linksfraktion
-##  6: @GrueneBundestag
-##  7:    @RobertHabeck
-##  8:                 
-##  9:   @GretaThunberg
-## 10:</code></pre>
+##  1:               5.2                14.0        MiRo_SPD           35028
+##  2:               6.7                16.8     UweSchummer            8549
+##  3:               7.1                28.3         oezoguz           19092
+##  4:               9.4                24.1       JM_Luczak            5202
+##  5:               9.4                24.1 Beatrix_vStorch           61329
+##  6:               9.4                24.1 Beatrix_vStorch           61329
+##  7:               9.6                31.8      helgelindh            9850
+##  8:               4.5                34.3        DJanecek           11488
+##  9:               6.4                24.4     Peter_Beyer            1799
+## 10:               9.4                24.1        LisaPaus            9024
+##              created_at favorite_count retweet_count    label       emojis
+##  1: 2020-02-20 08:31:00            915           181 negative             
+##  2: 2020-08-01 12:52:00              2             0 negative             
+##  3: 2020-07-23 05:12:00              9             0 negative             
+##  4: 2019-09-24 06:40:00             23             3 negative             
+##  5: 2018-11-07 10:58:00            377           141 negative &lt;U+0001F92C&gt;
+##  6: 2019-02-21 13:44:00           1228           426 negative &lt;U+0001F929&gt;
+##  7: 2020-02-06 11:36:00             67            15 negative             
+##  8: 2020-12-28 19:27:00             15             2 positive             
+##  9: 2020-10-27 08:10:00              1             0 positive             
+## 10: 2020-07-02 10:16:00             12             5 negative &lt;U+0001F92F&gt;
+##                                           hashtags
+##  1:                                           #AfD
+##  2:                                               
+##  3:                                               
+##  4:                     #Mietendeckel,#Mietspiegel
+##  5:                         #MidtermsElections2018
+##  6:                                           #SPD
+##  7:    #Kubicki,#Thueringen,#Fundamentalopposition
+##  8:                                               
+##  9:                        #Mond,#USA,#Deutschland
+## 10: #Dax,#Geldwaesche,#Wirecard,#Aufsicht,#Skandal
+##                                   tags
+##  1:                                   
+##  2:         @oida_grantler,@HollsteinM
+##  3:                                   
+##  4: @cducsubt&lt;U+2069&gt;,@BFWBund&lt;U+2069&gt;
+##  5:                                   
+##  6:                                   
+##  7:                                   
+##  8:                    @FAZ_Wirtschaft
+##  9:      @NASA,@DLR_de,@SOFIAtelescope
+## 10:                     @MarcusTheurer</code></pre>
 <pre class="r"><code># Count emojis (stored as list objects, so we take the length of these lists)
 
 twitter_emojis &lt;- twitter_docvars[
@@ -621,16 +610,16 @@ list(
   distribution = table(twitter_emojis$n_emojis))</code></pre>
 <pre><code>## $twitter_emojis
 ##                         doc_id n_emojis
-##  1:    FrankSchwabe15678777001        0
-##  2:    HeikeHaensel15769670401        0
-##  3: karl_lauterbach15934090201        0
-##  4:     svenlehmann15505071601        0
-##  5:     EskenSaskia15940886401        0
-##  6:     ernst_klaus16043208001        0
-##  7:  KonstantinNotz15550776001        0
-##  8: JuergenBraunAfD15833971201        0
-##  9:   Erhard_Grundl16013082601        0
-## 10:      n_roettgen15388213201        0
+##  1:   BriHasselmann15481791601        0
+##  2:  DietmarBartsch15357022801        0
+##  3: Beatrix_vStorch15862634401        0
+##  4:        DJanecek16016214001        0
+##  5: karl_lauterbach15824776201        0
+##  6:   renatekuenast16019082001        0
+##  7:   EnricoKomning15133498801        0
+##  8:           anked15925735801        0
+##  9:    MaikBeermann15216265201        0
+## 10:   niemamovassat15904086001        0
 ## 
 ## $distribution
 ## 
@@ -671,16 +660,16 @@ twitter_negation &lt;- data.table::as.data.table(
 
 twitter_negation[sample(twitter_negation[, .I], 10)]</code></pre>
 <pre><code>##                         doc_id negation
-##  1:         hahnflo16069099801        1
-##  2:    NicoleGohlke15700213801        0
-##  3: AndreasBleckMdB15228248401        1
-##  4:     EskenSaskia16023584401        0
-##  5:     josteiniger15901503001        0
-##  6:       JM_Luczak15603246001        0
-##  7:       HeikoMaas15683075401        0
-##  8:  annachristmann15378921001        1
-##  9:  MargareteBause15453067801        0
-## 10: Martin_Hess_AfD15360731401        1</code></pre>
+##  1:       ABaerbock15256297201        0
+##  2: HajdukBundestag15518854801        0
+##  3:      KaiGehring15833458801        1
+##  4: Beatrix_vStorch15379738201        1
+##  5:  GoeringEckardt15529879801        0
+##  6:       JM_Luczak15608635201        0
+##  7: karl_lauterbach15721146001        0
+##  8:  KonstantinNotz15884889001        0
+##  9: Dr_Rainer_Kraft15910718401        0
+## 10:   Frank_Magnitz15235207201        0</code></pre>
 </div>
 <div id="get-character-unigrams" class="section level3">
 <h3>Get character unigrams</h3>
@@ -718,28 +707,28 @@ data.table::setcolorder(twitter_char_unigrams, c(&quot;doc_id&quot;, letters))
 # Inspect
 
 twitter_char_unigrams[sample(twitter_char_unigrams[, .I], 10)]</code></pre>
-<pre><code>##                         doc_id  a b  c  d  e f g  h  i j k  l  m  n  o p q  r
-##  1: karl_lauterbach15735888001 11 5  8 11 47 5 9 14 15 0 4  6  6 21  7 2 0 26
-##  2:     b_riexinger15374616001 10 3  3 12 38 7 4 10 19 0 3  8  9 20  8 5 0 12
-##  3:      nilsschmid15877169401 18 4  6 11 31 6 9  8 23 0 5  8  7 21  5 0 1 20
-##  4:    NicoleGohlke15706117801 14 5  8  7 33 5 6 11 18 0 3 14 11 18  4 2 0 18
-##  5:         NordMdb15846517201 13 2  4  5 28 0 8  9  9 0 3  3  4 16  8 5 0 12
-##  6:      Kaiser_SPD15346111201 10 0  0 10 23 6 8  2 10 0 1  7  4 13  4 3 0 13
-##  7: Beatrix_vStorch16001680201 18 4  5 10 36 6 9 10 17 0 1  7  3 22 11 3 0 16
-##  8:   BriHasselmann16022380801  7 3  9 12 40 2 9 14 18 0 0 12  4 18  7 1 0 18
-##  9:     jenskoeppen15745189801 15 0  5  6 26 3 6  8 12 0 6  5  3 13  3 5 0 14
-## 10:     AndrejHunko15529038001 12 7 11 11 37 2 3 12 20 0 5 10  5 13  1 1 0  9
-##      s  t  u v w x y z
-##  1: 10 14  7 4 1 0 0 2
-##  2:  7  9  6 0 4 0 0 3
-##  3: 12 18 14 3 5 0 0 4
-##  4:  8 11  8 0 5 0 1 0
-##  5: 16 12 10 0 2 0 0 2
-##  6: 11 12  7 1 2 0 0 0
-##  7: 14 12 10 2 2 0 1 1
-##  8: 20 15  7 1 8 0 0 3
-##  9: 12 16 12 0 0 0 0 1
-## 10: 11 12  9 0 2 0 2 3</code></pre>
+<pre><code>##                         doc_id  a b c  d  e  f  g  h  i j k  l m  n o p q  r  s
+##  1: Beatrix_vStorch15862634401 18 5 5 13 37  6  5 11 11 0 3  6 3 14 7 6 0 22 11
+##  2:   FrStraetmanns15923979601  8 6 8 12 30  4  6  9 18 0 3  5 3 14 5 1 0 12 10
+##  3:   MatthiasHauer15918112801 11 0 3  6 21  1  7  5 11 0 2  5 0 14 5 3 0 11 13
+##  4:          katdro15869262601 15 2 9 13 38  5  7 11 17 0 1  7 4 22 5 2 0 15 18
+##  5:       jensspahn15809874001 19 2 5 12 43  3 10  8 19 1 5  8 5 21 6 1 0 18 15
+##  6:        HuberMdB15830672401  8 3 9 11 35  3  8 11 11 0 4  4 1 16 7 1 0 17 12
+##  7:   DrAndreasNick16057137001 16 2 4  8 23  5  1  9 13 2 4 10 6 19 7 3 0 13 14
+##  8:      falkomohrs15414163201 14 1 6  7 36  3  4 11 16 0 4 15 5 11 7 4 0 18 25
+##  9:    HeikeHaensel15236835601  9 3 4 10 40 11  7  7 18 0 3  3 3 21 8 1 0 25 15
+## 10:   MetinHakverdi15736454401 11 2 7  5 32  4 10 12 17 0 3  8 5 19 7 7 0 13 11
+##      t  u v w x y z
+##  1: 11 10 2 2 0 0 2
+##  2:  6 10 1 0 0 0 0
+##  3:  5  9 3 2 0 0 3
+##  4: 16 12 1 4 2 0 2
+##  5: 14  8 3 2 0 0 5
+##  6: 14 12 2 5 0 0 3
+##  7:  8 10 2 1 0 0 1
+##  8: 16 12 3 2 0 0 4
+##  9: 17 17 4 5 0 1 3
+## 10: 15 11 0 1 0 1 4</code></pre>
 </div>
 <div id="get-pos-tags" class="section level3">
 <h3>Get POS tags</h3>
@@ -830,38 +819,38 @@ saveRDS(twitter_features_static, sprintf(&quot;%s/twitter_features_static.RDS&qu
 
 twitter_features_static[sample(twitter_features_static[, .I], 10)]</code></pre>
 <pre><code>##                         doc_id    label ADJ ADP ADV AUX CCONJ DET INTJ NOUN NUM
-##  1:     smuellermdb15416762401 positive   2   4   0   1     1   2    0    8   0
-##  2:     DirkSpaniel15607438801 negative   3   3   2   1     0   5    0    9   0
-##  3: Martin_Hess_AfD15248194801 negative   4   4   0   0     2   4    0   10   0
-##  4:  Frank_Pasemann15715615801 negative   2   1   2   3     3   4    0   10   0
-##  5:    danielakolbe15812392801 negative   3   3   2   4     1   2    0    4   0
-##  6: Dr_Rainer_Kraft15846307801 negative   1   3   4   4     2   7    0   14   0
-##  7:  felixschreiner16066781401 positive   3   1   3   1     1   1    0    4   0
-##  8:   BriHasselmann15744991201 positive   5   2   3   1     0   5    0    7   0
-##  9: Martin_Hess_AfD15858480001 positive   4   2   3   0     0   7    0    8   0
-## 10:   mdb_schreiber15498883201 positive   2   4   0   1     3   5    0    9   0
-##     PART PRON PROPN PUNCT SCONJ VERB X negation  a b c  d  e f  g  h  i j k  l
-##  1:    0    1     3     3     0    1 0        0  5 2 3  6 24 1  6  5 14 0 3  7
-##  2:    0    0     2     6     1    3 0        1  8 5 5 10 35 2  7  8 18 1 4  7
-##  3:    1    2     0     4     0    6 0        1 21 1 4  6 35 6  9  5 15 0 3 13
-##  4:    0    5     0     7     1    3 1        1 15 6 3  9 31 1  4  5 24 2 7 10
-##  5:    1    9     2     7     0    5 0        1 11 2 8  6 25 2  2 11 17 1 0  3
-##  6:    1    0     0     4     1    3 0        0 15 4 3 12 33 2  5  5 18 2 7 13
-##  7:    1    2     2     3     1    3 0        0  7 2 3  4 22 1  8  7 10 0 1  7
-##  8:    0    0     3     3     0    1 0        0  9 3 2  8 38 6  8  3 11 0 1  9
-##  9:    1    1     1     6     0    5 0        1 10 2 6 10 41 3 11 10 20 1 1 14
-## 10:    0    5     2     5     0    5 0        0 13 5 4  8 39 3  8  8 15 0 3  7
-##     m  n o p q  r  s  t  u v w x y z n_emojis positive negative
-##  1: 2 15 5 5 0  9  7  9  8 1 1 0 0 3        0        7        0
-##  2: 8 19 6 2 0 22 14  9 11 2 3 0 0 1        0        1        3
-##  3: 3 18 8 2 1 20 17 19  9 2 3 0 0 1        0        1        5
-##  4: 4 23 8 2 0 12 13 13  7 5 3 0 0 2        0        2        2
-##  5: 7 14 1 1 0 10 14  9  7 0 5 0 0 0        2        0        3
-##  6: 4 19 8 3 0 21 14 16 19 5 1 0 0 5        0        0        1
-##  7: 2 14 4 2 0  9  7  9  7 0 5 0 0 4        0        2        0
-##  8: 8 14 4 0 0 10 13 12 11 2 1 0 0 2        0        4        0
-##  9: 3 16 8 3 0 12 12 15  9 1 3 0 0 5        0        3        1
-## 10: 3 19 3 1 0 21 15 26 14 2 2 0 0 2        0        5        2</code></pre>
+##  1:     b_riexinger15374616001 negative   4   3   4   0     2   6    0    8   0
+##  2:      Kaiser_SPD15533487601 positive   5   4   1   1     0   3    0    9   0
+##  3:   Schneider_AfD16028714401 positive   3   1   2   2     1   6    0    7   0
+##  4:     PaulZiemiak15744411601 positive   4   4   3   3     0   2    0    5   0
+##  5: karl_lauterbach15812601001 negative   0   3   4   1     3   1    0    9   0
+##  6:   hubertus_heil15744274201 positive   5   2   1   1     2   2    0    8   0
+##  7:        HuberMdB15468630001 positive   3   4   0   0     0   5    0    7   1
+##  8:      KaiGehring15742380601 positive   4   4   1   4     0   0    0   10   1
+##  9:    juergenhardt15442605601 positive   5   3   1   0     2   0    0    5   0
+## 10:       SoenkeRix15547031401 positive   2   0   2   1     0   0    0    2   0
+##     PART PRON PROPN PUNCT SCONJ VERB X negation  a b  c  d  e f g  h  i j k  l
+##  1:    0    0     4     3     0    6 0        0 10 3  3 12 38 7 4 10 19 0 3  8
+##  2:    0    0     4     4     0    2 0        0 15 1  2  8 29 7 9  3 13 0 5  6
+##  3:    0    1     4     3     0    2 0        1 10 7  4  7 24 0 2  6 14 0 5  8
+##  4:    0   10     1     6     0    6 0        0 15 5 10  6 35 3 6 13 19 0 2  8
+##  5:    1    6     1     6     1    9 0        1 16 2  3  6 39 3 9  7 13 1 1 13
+##  6:    0    2     0     4     0    4 0        0 11 6  4  7 27 2 3  8 11 1 4  3
+##  7:    0    0     0     3     0    1 0        0  5 0  2  6 17 3 7  4 12 0 2  1
+##  8:    1    2     1     8     0    4 0        0 11 2  8  5 31 5 2 12 18 1 5  4
+##  9:    0    0     3     3     0    1 0        0 11 1  6  7 18 3 2  7  7 1 2  2
+## 10:    1    2     0     2     1    1 0        1  3 0  2  3 10 3 2  3  8 1 0  2
+##      m  n o p q  r  s  t  u v w x y z n_emojis positive negative
+##  1:  9 20 8 5 0 12  7  9  6 0 4 0 0 3        0        4        4
+##  2:  8 19 9 3 0 14 12 16 10 3 2 0 0 1        1        4        2
+##  3:  4 13 9 1 0 11  7 10  5 1 3 0 0 3        0        3        1
+##  4: 13 14 2 1 0  8 10 12  8 0 6 0 0 3        0        7        0
+##  5:  8 13 4 3 0 20 17 21  6 0 5 0 0 4        0        7        3
+##  6:  3 16 5 3 0  6  9 17  5 1 1 0 0 6        0        9        2
+##  7:  7 14 6 2 0  5  2  8  4 0 1 0 0 0        0        2        0
+##  8:  6 17 0 1 0 16 12 13  9 0 5 0 0 3        0        7        4
+##  9:  3 14 3 3 0 12 12 13 10 2 0 0 0 2        0        1        0
+## 10:  1  8 0 2 0  5  4  4  3 1 1 0 0 0        0        3        1</code></pre>
 <p><strong>This provides us with a solid foundation for sentiment analysis! We now represent each document by a total of 47 variables. Of course we can think of many more features to include here – we will see some more in the exercise; in general, be creative and see how classification can be improved by adding different explanatory variables.</strong></p>
 <p><img src="data:image/jpeg;base64,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" /></p>
 </div>
