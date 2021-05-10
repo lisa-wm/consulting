@@ -12,7 +12,9 @@
 # different time points apart --> adjust
 
 tweets_raw_new <- data.table::fread(
-  here("1_scraping/output/202010113_2146", "tweepy_df_subset_no_retweets.csv"), 
+  here::here(
+    "1_scraping/3_output/202010113_2146", 
+    "tweepy_df_subset_no_retweets.csv"), 
   encoding = "UTF-8",
   sep = ",")
 
@@ -79,7 +81,7 @@ save_rdata_files(
 # READ META DATA ---------------------------------------------------------------
 
 meta_mp_level <- data.table::fread(
-  here("1_scraping/output", "abg_twitter_df.csv"),
+  here("1_scraping/3_output", "abg_twitter_df.csv"),
   encoding = "UTF-8",
   sep = ",",
   drop = "twitter",
@@ -95,7 +97,7 @@ data.table::setnames(
   sprintf("meta_%s", names(meta_mp_level)))
 
 meta_socio_electoral <- data.table::fread(
-  here("1_scraping/output", "socioeconomics_zweitstimmen_df.csv"),
+  here("1_scraping/3_output", "socioeconomics_zweitstimmen_df.csv"),
   encoding = "UTF-8",
   sep = ",",
   drop = c("district", "wahlkreis", "bundesland"),
