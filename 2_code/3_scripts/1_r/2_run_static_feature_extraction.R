@@ -27,14 +27,11 @@ tweets_features_twitter <- tweets_features_twitter[
 
 save_rdata_files(tweets_features_twitter, folder = "2_code/1_data/2_tmp_data")
 
-# TODO find sth to do w/ hashtags
-
 # EXTRACT DICTIONARY-BASED FEATURES --------------------------------------------
 
 # Get polarity dictionaries from various sources
-# TODO check whether strong weak is so beneficial, rauh does not fit in
 
-dict_german_polarity_clues <- get_dict_gpc()
+dict_gpc <- get_dict_gpc()
 dict_sentiws <- get_dict_sentiws()
 dict_rauh <- get_dict_rauh()
 
@@ -43,17 +40,17 @@ dict_rauh <- get_dict_rauh()
 dict_global <- quanteda::dictionary(
   list(
     feat_polarity_positive_strong = unique(c(
-      dict_german_polarity_clues$positive[polarity_degree == "strong", term], 
+      dict_gpc$positive[polarity_degree == "strong", term], 
       dict_sentiws$positive[polarity_degree == "strong", term])),
     feat_polarity_negative_strong = unique(c(
-      dict_german_polarity_clues$negative[polarity_degree == "strong", term], 
+      dict_gpc$negative[polarity_degree == "strong", term], 
       dict_sentiws$negative[polarity_degree == "strong", term])),
     feat_polarity_positive_weak = unique(c(
-      dict_german_polarity_clues$positive[polarity_degree == "weak", term],
+      dict_gpc$positive[polarity_degree == "weak", term],
       dict_sentiws$positive[polarity_degree == "weak", term],
       dict_rauh[polarity == "positive", term])),
     feat_polarity_negative_weak = unique(c(
-      dict_german_polarity_clues$negative[polarity_degree == "weak", term],
+      dict_gpc$negative[polarity_degree == "weak", term],
       dict_sentiws$negative[polarity_degree == "weak", term],
       dict_rauh[polarity == "negative", term]))))
 
@@ -105,11 +102,6 @@ tweets_tokens_sfe <- quanteda::tokens_remove(
   quanteda::tokens_tolower(tweets_tokens_basic),
   pattern = stopwords_sfe) 
 
-# tweets_tokens_sfe <- quanteda::tokens_remove(
-#   tweets_tokens_sfe,
-#   pattern = "[[:punct:]]",
-#   valuetype = "regex")
-
 tweets_dfm_sfe <- quanteda::dfm(tweets_tokens_sfe)
 
 save_rdata_files(tweets_tokens_sfe, folder = "2_code/1_data/2_tmp_data")
@@ -126,8 +118,8 @@ tweets_sentiments_global <- convert_qtda_to_dt(
 # Read emoji ranking data
 
 emojis_ranking <- data.table::fread(
-  here("2_code/1_data/0_external_data", "emojis-sentiment-ranking.csv"),
-  drop = c(1, 3, 4, 8, 9), 
+  here::here("2_code/1_data/0_external_data", "emojis-sentiment-ranking.csv"),
+  drop = c(1L, 3L, 4L, 8L, 9L), 
   col.names = c(
     "unicode", 
     "negative", 
@@ -167,16 +159,14 @@ data_dt <- data.table::as.data.table(
 
 tweets_emojis <- data_dt[
   , .(doc_id, twitter_emojis)
-  ][lengths(twitter_emojis) > 0
+  # ][lengths(twitter_emojis) > 0L
     ][, twitter_emojis := paste(unlist(twitter_emojis), collapse = " "), 
       by = doc_id
       ][, twitter_emojis := as.character(twitter_emojis)
         ][, twitter_emojis := paste(as.character(
           sapply(unlist(stringr::str_split(twitter_emojis, " ")), utf8ToInt)),
           collapse = " "),
-          by = doc_id
-          ][, feat_n_emojis := stringr::str_count(twitter_emojis, "\\w+"), 
-            by = doc_id]
+          by = doc_id]
 
 # Convert to dfm object
 
@@ -187,34 +177,27 @@ tweets_corpus_emojis <- quanteda::corpus(
 
 tweets_dfm_emojis <- quanteda::dfm(tweets_corpus_emojis)
 
-# TODO look into that - non-matches veritable non-matches?
+# Match with dictionary
 
 tweets_sentiments_emojis <- convert_qtda_to_dt(
   quanteda::dfm_lookup(tweets_dfm_emojis, dict_emojis),
   key = "doc_id")
 
-tweets_sentiments_emojis <- 
-  tweets_sentiments_emojis[tweets_emojis[, .(doc_id, feat_n_emojis)]]
+tweets_sentiments_emojis[
+  , feat_n_emojis := feat_positive_emojis + feat_negative_emojis, by = doc_id]
 
 # ------------------------------------------------------------------------------
 
 # Combine dictionary-based features
 
 tweets_features_dict <- tweets_sentiments_emojis[
-  tweets_sentiments_global, on = "doc_id"
-  ][, c("feat_positive_emojis", "feat_negative_emojis", "feat_n_emojis") :=
-      lapply(.SD, function(i) {ifelse(is.na(i), 0, i)}),
-    .SDcols = c(
-      "feat_positive_emojis", 
-      "feat_negative_emojis", 
-      "feat_n_emojis"),
-    by = "doc_id"]
+  tweets_sentiments_global, on = "doc_id"]
 
 save_rdata_files(tweets_features_dict, folder = "2_code/1_data/2_tmp_data")
 
 # EXTRACT LEXICAL FEATURES -----------------------------------------------------
 
-# Define patterns for negations, intensifications, punctuations, repetitions
+# Define patterns for negations, intensifications, punctuations
 
 tokens_negation <- SnowballC::wordStem(
   remove_umlauts(c(
@@ -231,6 +214,7 @@ tokens_negation <- SnowballC::wordStem(
 tokens_intensification <- SnowballC::wordStem(
   remove_umlauts(c(
     "sehr", 
+    "extrem",
     "besonders", 
     "total", 
     "absolut", 
@@ -242,17 +226,6 @@ tokens_intensification <- SnowballC::wordStem(
 tokens_punctuation <- c(
   exclamation_mark = "!", 
   question_mark = "?")
-
-# tokens_punctuation <- c(
-#   dotdotdot = "[.]{3}",
-#   exclamation_mark_single = "!", 
-#   question_mark_single = "\\?",
-#   exclamation_mark_repeated = "[!]{2}",
-#   question_mark_repeated = "[\\?]{2}")
-
-# tokens_repetition <- c(
-#   repeated_char = "(.)\\1{3}", 
-#   repeated_char_seq = "\\b(\\S+?)\\1\\S*\\b")
 
 # Match patterns
 
@@ -295,11 +268,6 @@ tweets_char_unigrams <- convert_qtda_to_dt(
   quanteda::dfm(tweets_char_unigrams),
   key = "doc_id")
 
-data.table::setcolorder(
-  tweets_char_unigrams, 
-  c("doc_id", 
-    sort(names(tweets_char_unigrams)[names(tweets_char_unigrams) != "doc_id"])))
-
 data.table::setnames(
   tweets_char_unigrams, 
   c("doc_id",
@@ -308,6 +276,8 @@ data.table::setnames(
       names(tweets_char_unigrams)[names(tweets_char_unigrams) != "doc_id"])))
 
 # EXTRACT POS TAGS -------------------------------------------------------------
+
+# Commented because it takes some time
 
 if (FALSE) spacyr::spacy_install()
 if (FALSE) spacyr::spacy_download_langmodel("de")
@@ -358,10 +328,9 @@ tweets_features_static <- tweets_pos_tags[
   tweets_negation
   ][tweets_intensification,
     ][tweets_punctuation,
-      # ][tweets_repetition,
-        ][tweets_char_unigrams, 
-          ][tweets_features_twitter, 
-            ][tweets_features_dict, ]
+      ][tweets_char_unigrams,
+        ][tweets_features_twitter,
+          ][tweets_features_dict, ]
 
 save_rdata_files(tweets_features_static, folder = "2_code/1_data/2_tmp_data")
 

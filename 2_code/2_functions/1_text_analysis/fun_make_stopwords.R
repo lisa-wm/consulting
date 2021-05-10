@@ -2,8 +2,8 @@
 # STOPWORD CREATION
 # ------------------------------------------------------------------------------
 
-# PURPOSE: create basic list of stopwords to be used in topic modeling (coarser than 
-# for sentiment analysis)
+# PURPOSE: create basic list of stopwords to be used in topic modeling (coarser
+# than for sentiment analysis)
 
 make_stopwords <- function() {
   
@@ -11,12 +11,12 @@ make_stopwords <- function() {
   
   sw_1 <- quanteda::stopwords("de")
   
-  sw_2 <- XML::xmlToDataFrame(XML::xmlParse(here(
+  sw_2 <- XML::xmlToDataFrame(XML::xmlParse(here::here(
     "2_code/1_data/0_external_data", 
     "german_stopwords.xml"), 
     encoding = "UTF-8"))
   
-  sw_3 <- read.delim(here(
+  sw_3 <- read.delim(here::here(
     "2_code/1_data/0_external_data", 
     "stopwords-iso.txt"), encoding = "UTF-8")
   
@@ -37,10 +37,6 @@ make_stopwords <- function() {
       "woch",
       "partei"))
   
-  sort(
-    unique(
-      SnowballC::wordStem(
-        remove_umlauts(sw), 
-        language = "de")))
+  sort(unique(SnowballC::wordStem(remove_umlauts(sw), language = "de")))
   
 }

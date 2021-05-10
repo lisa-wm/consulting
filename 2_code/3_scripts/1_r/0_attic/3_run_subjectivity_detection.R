@@ -7,8 +7,6 @@
 
 # FILTER SUBJECTIVE TWEETS -----------------------------------------------------
 
-# TODO make subjectivity detection better if possible
-
 load_rdata_files(tweets_corpus, folder = "2_code/1_data/2_tmp_data")
 
 tweets_subjective <- convert_qtda_to_dt(tweets_corpus, key = "doc_id")

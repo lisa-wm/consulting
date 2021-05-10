@@ -2,11 +2,11 @@
 # CREATION OF SENTIMENT DICTIONARY BY RAUH
 # ------------------------------------------------------------------------------
 
-# PURPOSE: dictionary proposed by Rauh
+# PURPOSE: read dictionary proposed by Rauh, tidy up
 
 get_dict_rauh <- function() {
   
-  load(here(
+  load(here::here(
     "2_code/1_data/0_external_data", 
     "Rauh_SentDictionaryGerman.Rdata"))
   

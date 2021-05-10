@@ -2,28 +2,49 @@
 # SENTIMENT CLASSIFICATION PIPELINE
 # ------------------------------------------------------------------------------
 
-# IN: data filtered for subjective tweets
+# IN: corpus object of cleaned tweets and meta data
 # OUT: data with sentiment labels
 
 # MAKE CLASSIFICATION TASK -----------------------------------------------------
 
+# Load data
+
+load_rdata_files(tweets_corpus, folder = "2_code/1_data/2_tmp_data")
+tweets_sa <- convert_qtda_to_dt(tweets_corpus, key = "doc_id")
+
+cols_to_keep <- c(
+  "doc_id",
+  "label",
+  "text",
+  names(tweets_sa)[startsWith(names(tweets_sa), "feat")],
+  "meta_party",
+  "meta_bundesland",
+  "meta_unemployment_rate",
+  "twitter_username",
+  "twitter_year",
+  "twitter_month")
+
+char_cols <- sprintf("feat_%s", letters)
+tweets_sa <- tweets_sa[, ..cols_to_keep]
+tweets_sa$label <- as.factor(tweets_sa$label)
+
 # Make task
 
-load_rdata_files(tweets_subjective, folder = "2_code/1_data/2_tmp_data")
+data_labeled <- tweets_sa[label != "none"]
+data_unlabeled <- tweets_sa[label == "none"]
 
-data_labeled <- tweets_subjective[label != "none"]
-data_unlabeled <- tweets_subjective[label == "none"]
+stopifnot(nrow(data_labeled) + nrow(data_unlabeled) == nrow(tweets_sa))
 
 invisible(sapply(
   list(data_labeled, data_unlabeled), 
   data.table::setorder, doc_id))
 
 task <- mlr3::TaskClassif$new(
-  "twitter_ttsa", 
+  "sentiment_analysis", 
   backend = data_labeled,
   target = "label")
 
-# Create stratified train-test split
+# Create stratified train-test split (data are only moderately imbalanced)
 
 indices_positive <- data.table::copy(task$data())[
   , row_indices := .I

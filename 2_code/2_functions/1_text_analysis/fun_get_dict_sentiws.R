@@ -19,7 +19,7 @@ get_dict_sentiws <- function() {
       # Read data
       
       dict <- data.table::fread(
-        here("2_code/1_data/0_external_data", data_sentiws[i]),
+        here::here("2_code/1_data/0_external_data", data_sentiws[i]),
         encoding = "UTF-8",
         drop = 1L,
         col.names = c("polarity_score", "term"))
@@ -35,7 +35,7 @@ get_dict_sentiws <- function() {
           "strong",
           "weak")
       ][, term := remove_umlauts(tolower(term))
-        ][, term := str_split(term, ",")]
+        ][, term := stringr::str_split(term, ",")]
       
       dict <- dict[
         , list(term = as.character(unlist(term))), 

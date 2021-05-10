@@ -3,7 +3,7 @@
 # ------------------------------------------------------------------------------
 
 # IN: raw twitter data + meta data
-# OUT: single data file of cleaned tweets and meta data
+# OUT: corpus object of cleaned tweets and meta data + temporary data sets
 
 # READ AND CLEAN DATA ----------------------------------------------------------
 
@@ -35,7 +35,7 @@ tweets_raw_new[
 # Append annotated data
 
 tweets_raw_labeled <- data.table::fread(
-  here("2_code/1_data/1_training_data", "data_labeled.csv"),
+  here::here("2_code/1_data/1_training_data", "data_labeled.csv"),
   encoding = "UTF-8",
   sep = ";")
 
@@ -80,7 +80,7 @@ save_rdata_files(
 # READ META DATA ---------------------------------------------------------------
 
 meta_mp_level <- data.table::fread(
-  here("1_scraping/3_output", "abg_twitter_df.csv"),
+  here::here("1_scraping/3_output", "abg_twitter_df.csv"),
   encoding = "UTF-8",
   sep = ",",
   drop = "twitter",
@@ -96,7 +96,7 @@ data.table::setnames(
   sprintf("meta_%s", names(meta_mp_level)))
 
 meta_socio_electoral <- data.table::fread(
-  here("1_scraping/3_output", "socioeconomics_zweitstimmen.csv"),
+  here::here("1_scraping/3_output", "socioeconomics_zweitstimmen.csv"),
   encoding = "UTF-8",
   sep = ",",
   drop = c("district", "wahlkreis", "bundesland"),
@@ -165,7 +165,7 @@ if (FALSE) {
   
   data.table::fwrite(
     data_seminar,
-    here("5_seminar", "twitter_data.csv"),
+    here::here("5_seminar", "twitter_data.csv"),
     sep = ";")
 
 }
@@ -179,25 +179,6 @@ data_clean[
     remove_umlauts(meta_name_matching))]
 
 # EXTRACT TWITTER-SPECIFIC ELEMENTS --------------------------------------------
-
-# String pattern of emojis, hashtags and tags
-
-# test <- data.table::copy(data_clean)
-
-# pattern_emoji <- stringr::str_c(c(
-#   "[^\001-\177]", # unicode emojis
-#   "(\\:(\\-)?\\))", # simple happy smiley w/ or w/o nose
-#   "(\\:(\\-)?\\()", # simple sad smiley w/ or w/o nose
-#   "(\\;(\\-)?\\))", # simple winking smiley w/ or w/o nose
-#   "\\:P"), # simple smiley sticking tongue out
-#   collapse = "|")
-
-emojis_unicode <- data.table::fread(
-  here("2_code/1_data/0_external_data", "emojis_unicode.csv"),
-  encoding = "UTF-8",
-  sep = ";")
-
-pattern_emoji <- stringr::str_c(emojis_unicode$symbol, collapse = "|")
 
 # Specify emoji candidate pattern: all non-printable characters (match with
 # rtweet's emoji list later on as resulting pattern would create too long a
@@ -296,12 +277,12 @@ data_unlabeled_processed <- data_clean[label == "none"][, ..cols_to_keep]
 
 data.table::fwrite(
   data_labeled_processed,
-  here("2_code/1_data/1_training_data", "data_labeled_processed.csv"),
+  here::here("2_code/1_data/1_training_data", "data_labeled_processed.csv"),
   sep = ";")
 
 data.table::fwrite(
   data_unlabeled_processed,
-  here("2_code/1_data/1_training_data", "data_unlabeled_processed.csv"),
+  here::here("2_code/1_data/1_training_data", "data_unlabeled_processed.csv"),
   sep = ";")
 
 data_clean[, topic := NULL]
