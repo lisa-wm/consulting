@@ -61,116 +61,98 @@ stopifnot(abs(
   table(task$data()[train_set]$label)["positive"] / length(train_set) -
     table(task$data()[test_set]$label)["positive"] / length(test_set)) < 5e-2)
 
-# CREATE PREPROCESSING PIPELINE ------------------------------------------------
+# CREATE PREPROCESSING PIPELINES -----------------------------------------------
 
-# Define topic modeling type (parameters need to be set within if clause)
+# Create two different graph learners to benchmark against each other (one with,
+# one without upstream topic modeling)
 
-topic_type <- c("stm", "keyword", "none")[1L]
+# Define topic modeling pipeop
 
-if (topic_type == "stm") {
-  
-  # Define topic modeling pipeop
-  
-  po_topic_modeling <- PipeOpExtractTopicsSTM$new()
-  
-  po_topic_modeling$param_set$values <- list(
-    docid_field = "doc_id",
-    text_field = "text",
-    doc_grouping_var = c("twitter_username", "twitter_year", "twitter_month"),
-    prevalence_vars_cat = list("meta_party", "meta_bundesland"),
-    prevalence_vars_smooth = list("meta_unemployment_rate"),
-    max.em.its = 100L,
-    stopwords = make_stopwords(),
-    init.type = "LDA")
-  
-} else if (topic_type == "keyword") {
-  
-  keywords <- list(
-    corona = c("corona", "pandemie", "virus", "krise")
-    ,
-    test = c("menschen", "europa", "demokratie")
-    )
-  
-  po_stratify <- PipeOpStratifyKeywords$new()
-  
-  po_stratify$param_set$values <- list(
-    docid_field = "doc_id",
-    text_field = "text",
-    stopwords = make_stopwords(),
-    keywords = keywords)
+po_tm <- PipeOpExtractTopicsSTM$new()
 
-  po_set_strata <- mlr3pipelines::PipeOpColRoles$new(id = "set_strata")
-  
-  strata <- as.list(rep("stratum", length(keywords)))
-  names(strata) <- sprintf("stratum_%s", seq_along(keywords))
+po_tm$param_set$values <- list(
+  docid_field = "doc_id",
+  text_field = "text",
+  doc_grouping_var = c("twitter_username", "twitter_year", "twitter_month"),
+  prevalence_vars_cat = list("meta_party", "meta_bundesland"),
+  prevalence_vars_smooth = list("meta_unemployment_rate"),
+  max.em.its = 50L,
+  stopwords = make_stopwords(),
+  init.type = "LDA")
 
-  po_set_strata$param_set$values$new_role <- strata
-
-  po_topic_modeling <- PipeOpExtractTopicsKeyword$new()
-
-  po_topic_modeling$param_set$values <- list(
-    docid_field = "doc_id",
-    text_field = "text",
-    stopwords = make_stopwords(),
-    keywords = keywords,
-    n_byterms = 10L)
-  
-}
-
-# Define selector pipeop for features to be piped into embedding extraction
-
-po_sel_embeddings <- mlr3pipelines::PipeOpSelect$new(id = "select_embedding")
-po_sel_embeddings_inv <- mlr3pipelines::PipeOpSelect$new(id = "select_rest")
-
-po_sel_embeddings$param_set$values$selector <- switch(
-  topic_type,
-  stm = mlr3pipelines::selector_name(c("topic_label", "text")),
-  keyword = mlr3pipelines::selector_name(c("topic_label", "text")),
-  none = mlr3pipelines::selector_name(c("text")))
-
-po_sel_embeddings_inv$param_set$values$selector <- switch(
-  topic_type,
-  stm = mlr3pipelines::selector_invert(
-    mlr3pipelines::selector_name(c("topic_label", "text"))),
-  keyword = mlr3pipelines::selector_invert(
-    mlr3pipelines::selector_name(c("topic_label", "text"))),
-  none = mlr3pipelines::selector_invert(
-    mlr3pipelines::selector_name(c("text"))))
-
-# Define glove embedding pipeop
-
-po_embeddings <- PipeOpMakeGloveEmbeddings$new()
-po_embeddings$param_set$values$stopwords <- make_stopwords()
-
-# Define trivial pipeop for features not piped into embedding extraction
-
-po_nop <- mlr3pipelines::PipeOpNOP$new(id = "pipe_along")
-
-# Define selector pipeop for features to be piped into classification
-
-po_sel_sentiment_analysis <- 
-  mlr3pipelines::PipeOpSelect$new(id = "select_sentiment_analysis")
-
-po_sel_sentiment_analysis$param_set$values$selector <- 
-  mlr3pipelines::selector_union(
-    mlr3pipelines::selector_name("doc_id"),
-    mlr3pipelines::selector_grep("feat.*"))
-
-# Define pipeop to set col role for doc_id to naming column
-
-po_set_colroles <- mlr3pipelines::PipeOpColRoles$new(id = "set_colroles")
-po_set_colroles$param_set$values$new_role <- list(doc_id = "name")
-
-# Create graph from preprocessing steps
-
-graph_preproc <- switch(
-  topic_type,
-  stm = mlr3pipelines::Graph$new()$add_pipeop(po_topic_modeling),
-  keyword = mlr3pipelines::Graph$new()$add_pipeop(po_stratify) %>>% 
-    po_set_strata %>>% 
-    po_topic_modeling,
-  none = mlr3pipelines::Graph$new()$add_pipeop(
+pipelines <- list(
+  ppl_with_tm = Graph$new()$add_pipeop(po_tm), 
+  ppl_without_tm = mlr3pipelines::Graph$new()$add_pipeop(
     mlr_pipeops$get("nop", id = "start")))
+
+# Create pipelines
+
+pipelines <- lapply(
+  
+  pipelines,
+  
+  function(i) {
+  
+    # Define selector pipeop for features to be piped into embedding extraction
+    
+    po_sel_embeddings <- 
+      mlr3pipelines::PipeOpSelect$new(id = "select_embedding")
+    po_sel_embeddings_inv <- mlr3pipelines::PipeOpSelect$new(id = "select_rest")
+    
+    po_sel_embeddings$param_set$values$selector <- switch(
+      deparse(substitute(i)),
+      ppl_with_tm = mlr3pipelines::selector_name(c("topic_label", "text")),
+      ppl_without_tm = mlr3pipelines::selector_name(c("text")))
+    
+    po_sel_embeddings_inv$param_set$values$selector <- switch(
+      deparse(substitute(i)),
+      ppl_with_tm = mlr3pipelines::selector_invert(
+        mlr3pipelines::selector_name(c("topic_label", "text"))),
+      ppl_without_tm = mlr3pipelines::selector_invert(
+        mlr3pipelines::selector_name(c("text"))))
+    
+    # Define glove embedding pipeop
+    
+    po_embeddings <- PipeOpMakeGloveEmbeddings$new()
+    po_embeddings$param_set$values$stopwords <- make_stopwords()
+    
+    # Define trivial pipeop for features not piped into embedding extraction
+    
+    po_nop <- mlr3pipelines::PipeOpNOP$new(id = "pipe_along")
+    
+    # Define selector pipeop for features to be piped into classification
+    
+    po_sel_sentiment_analysis <- 
+      mlr3pipelines::PipeOpSelect$new(id = "select_sentiment_analysis")
+    
+    po_sel_sentiment_analysis$param_set$values$selector <- 
+      mlr3pipelines::selector_union(
+        mlr3pipelines::selector_name("doc_id"),
+        mlr3pipelines::selector_grep("feat.*"))
+    
+    # Define pipeop to set col role for doc_id to naming column
+    
+    po_set_colroles <- mlr3pipelines::PipeOpColRoles$new(id = "set_colroles")
+    po_set_colroles$param_set$values$new_role <- list(doc_id = "name")
+    
+    # Create graph from preprocessing steps
+
+    graph_preproc <- i %>>%
+      gunion(list(
+        po_sel_embeddings %>>% 
+          po_embeddings,
+        po_sel_embeddings_inv %>>% 
+          po_nop)
+      ) %>>%
+      po("featureunion", id = "unite_features") %>>%
+      po_sel_sentiment_analysis %>>%
+      po_set_colroles
+      
+  }
+)
+
+invisible(lapply(pipelines, plot, html = FALSE))
+
 
 if (FALSE) {
   
@@ -180,16 +162,7 @@ if (FALSE) {
   
 }
 
-graph_preproc <- graph_preproc %>>%
-  gunion(list(
-    po_sel_embeddings %>>% 
-      po_embeddings,
-    po_sel_embeddings_inv %>>% 
-      po_nop)
-    ) %>>%
-  po("featureunion", id = "unite_features") %>>%
-  po_sel_sentiment_analysis %>>%
-  po_set_colroles
+
 
 if (FALSE) {
   
