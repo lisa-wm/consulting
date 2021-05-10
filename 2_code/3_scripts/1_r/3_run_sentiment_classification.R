@@ -71,6 +71,7 @@ stopifnot(abs(
 po_tm <- PipeOpExtractTopicsSTM$new()
 
 po_tm$param_set$values <- list(
+  K = 3,
   docid_field = "doc_id",
   text_field = "text",
   doc_grouping_var = c("twitter_username", "twitter_year", "twitter_month"),
@@ -153,23 +154,10 @@ pipelines <- lapply(
 
 invisible(lapply(pipelines, plot, html = FALSE))
 
+foo <- pipelines$ppl_with_tm
 
-if (FALSE) {
-  
-  res_tm_train <- graph_preproc$train(task$clone()$filter(train_set))[[1]]
-  res_tm_test <- graph_preproc$predict(task$clone()$filter(test_set))[[1]]
-  res_tm_test$data()
-  
-}
-
-
-
-if (FALSE) {
-  
-  plot(graph_preproc, html = FALSE)
-  res_tm_train <- graph_preproc$train(task$clone()$filter(train_set))[[1]]
-  
-}
+foofoo <- foo$train(task$clone()$filter(train_set))[[1]]
+graph_preproc$train(task$clone()$filter(train_set))[[1]]
 
 # CREATE GRAPH LEARNERS --------------------------------------------------------
 
