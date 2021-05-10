@@ -13,10 +13,12 @@
 
 tweets_raw_new <- data.table::fread(
   here::here(
-    "1_scraping/3_output/202010113_2146", 
+    "1_scraping/3_output/20210108", 
     "tweepy_df_subset_no_retweets.csv"), 
   encoding = "UTF-8",
   sep = ",")
+
+# Discard observations prior to last federal election
 
 tweets_raw_new <- tweets_raw_new[created_at >= "2017-09-24"]
 
@@ -24,16 +26,13 @@ tweets_raw_new <- tweets_raw_new[created_at >= "2017-09-24"]
 
 tweets_raw_new <- tweets_raw_new[cld3::detect_language(full_text) == "de"]
 
-# Append annotated data
+# Re-format date column
 
 tweets_raw_new[
   , `:=` (label = "none", topic = "none")
   ][, created_at := as.POSIXct(as.Date(created_at))]
 
-# load_rdata_files(
-  # data_labeled,
-  # folder = "2_code/1_data/1_training_data",
-  # tmp = FALSE)
+# Append annotated data
 
 tweets_raw_labeled <- data.table::fread(
   here("2_code/1_data/1_training_data", "data_labeled.csv"),
@@ -97,7 +96,7 @@ data.table::setnames(
   sprintf("meta_%s", names(meta_mp_level)))
 
 meta_socio_electoral <- data.table::fread(
-  here("1_scraping/3_output", "socioeconomics_zweitstimmen_df.csv"),
+  here("1_scraping/3_output", "socioeconomics_zweitstimmen.csv"),
   encoding = "UTF-8",
   sep = ",",
   drop = c("district", "wahlkreis", "bundesland"),
@@ -179,8 +178,6 @@ data_clean[
   ][, meta_name_matching := remove_noisy_symbols(
     remove_umlauts(meta_name_matching))]
 
-# data_clean <- data_clean[meta_party != "fraktionslos"]
-
 # EXTRACT TWITTER-SPECIFIC ELEMENTS --------------------------------------------
 
 # String pattern of emojis, hashtags and tags
@@ -202,8 +199,21 @@ emojis_unicode <- data.table::fread(
 
 pattern_emoji <- stringr::str_c(emojis_unicode$symbol, collapse = "|")
 
+# Specify emoji candidate pattern: all non-printable characters (match with
+# rtweet's emoji list later on as resulting pattern would create too long a
+# string)
+
+pattern_emoji <- "[^ -~]"
+
+# Specify patterns for hashtags and user tags
+
 pattern_hashtag <- "(#)[[:alnum:]]+"
 pattern_tag <- "@\\S+"
+
+# Ensure unicode characters are displayed correctly
+
+data_clean[
+  , twitter_full_text := stringi::stri_unescape_unicode(twitter_full_text)]
 
 # Extract emojis, hashtags and tags
 
@@ -218,14 +228,19 @@ data_clean[, `:=` (
     twitter_full_text, 
     pattern_tag))]
 
+emojis_real <- lapply(
+  data_clean$twitter_emojis, 
+  function(i) unlist(i)[unlist(i) %in% rtweet::emojis$code])
+
+data_clean$twitter_emojis <- emojis_real
+
 # Split camel case used in hashtags (only in hashtags, only if at most one 
 # lowercase letter follows, to escape cases such as "#AfD")
-# TODO check if this can be done faster / more elegantly
 
 data_clean[, twitter_full_text := lapply(
   .I, function(i) {
-    pattern_camelcase_hashtag <- "(#)(.)+([[:upper:]])([[:lower:]])+"
-    pattern_split_camelcase <- "(?<=[[:lower:]])(?=[[:upper:]])"
+    pattern_camelcase_hashtag <- "#(.)+[:upper:][:lower:]{2,}"
+    pattern_split_camelcase <- "(?<=[:lower:])(?=[:upper:])"
     components <- unlist(stringr::str_split(twitter_full_text[i], " "))
     case_numbers <- which(
       stringr::str_detect(components, pattern_camelcase_hashtag))
