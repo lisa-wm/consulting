@@ -183,7 +183,7 @@ graph_learners <- lapply(
             maxit = 10^3L,
             parallel = ifelse(parallel::detectCores() > 1L, TRUE, FALSE)),
           ranger = list(
-            num.trees = 10L,
+            num.trees = 200L,
             min.node.size = ceiling(0.1 * task$nrow),
             oob.error = FALSE,
             num.threads = parallel::detectCores()))
@@ -220,8 +220,8 @@ names(graph_learners) <- c("ppl_with_tm", "ppl_without_tm")
 hyperparameters <- paradox::ParamSet$new(list(
   paradox::ParamInt$new(
     "make_glove_embeddings.dimension",
-    lower = 5L,
-    upper = 30L),
+    lower = 10L,
+    upper = 50L),
   paradox::ParamFct$new(
     "choose_learner.selection", 
     levels = names_learners)))
@@ -295,7 +295,7 @@ tuner <- mlr3tuning::tnr("random_search")
 
 # Define terminator: number of evals
 
-terminator <- mlr3tuning::trm("evals", n_evals = 5L)
+terminator <- mlr3tuning::trm("evals", n_evals = 20L)
 
 # Set up autotuners for each pipeline
 
@@ -330,7 +330,7 @@ auto_tuners <- lapply(
 set.seed(123L)
 invisible(lapply(auto_tuners, function(i) i$train(task)))
 
-save_rdata_files(auto_tuners, folder = "2_code/1_data/2_tmp_data")
+save_rdata_files(auto_tuners, folder = "2_code/1_data/2_tmp_data", tmp = FALSE)
 
 # TRAIN FINAL MODELS -----------------------------------------------------------
 
@@ -340,6 +340,14 @@ invisible(lapply(
     graph_learners[[i]]$param_set$values <- 
       auto_tuners[[i]]$tuning_instance$result_learner_param_vals
     graph_learners[[i]]$train(task)}))
+
+save_rdata_files(
+  graph_learners, 
+  folder = "2_code/1_data/2_tmp_data", 
+  tmp = FALSE)
+
+graph_learners$ppl_with_tm$param_set$values
+graph_learners$ppl_without_tm$param_set$values
 
 # predictions <- lapply(
 #   graph_learners,
@@ -365,7 +373,10 @@ nested_resampling_results <- lapply(
       resampling = resampling_strategy_outer, 
       store_models = TRUE)})
 
-save_rdata_files(nested_resampling_results, folder = "2_code/1_data/2_tmp_data")
+save_rdata_files(
+  nested_resampling_results, 
+  folder = "2_code/1_data/2_tmp_data",
+  tmp = FALSE)
 
 sapply(
   nested_resampling_results,
