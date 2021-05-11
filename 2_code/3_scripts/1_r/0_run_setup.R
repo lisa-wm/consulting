@@ -14,6 +14,7 @@ packages_required <-  c(
   "data.table", # data wrangling
   "future", # parallelization
   "future.apply", # parallelization
+  "glmnet", # penalized regression
   "here", # path management
   "mlr3", # machine learning basics
   "mlr3learners", # machine learning learners
@@ -21,6 +22,7 @@ packages_required <-  c(
   "mlr3tuning", # machine learning tuning
   "paradox", # handling parameter spaces
   "quanteda", # natural language processing
+  "ranger", # random forests
   "spacyr", # pos tagging
   "stringi", # string manipulation
   "stringr", # string manipulation

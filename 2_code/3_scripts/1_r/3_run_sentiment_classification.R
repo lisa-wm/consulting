@@ -26,11 +26,11 @@ cols_to_keep <- c(
 
 char_cols <- sprintf("feat_%s", letters)
 tweets_sa <- tweets_sa[, ..cols_to_keep]
-tweets_sa$label <- as.factor(tweets_sa$label)
 
 # Make task
 
 data_labeled <- tweets_sa[label != "none"]
+data_labeled$label <- as.factor(data_labeled$label)
 data_unlabeled <- tweets_sa[label == "none"]
 
 stopifnot(nrow(data_labeled) + nrow(data_unlabeled) == nrow(tweets_sa))
@@ -44,23 +44,6 @@ task <- mlr3::TaskClassif$new(
   backend = data_labeled,
   target = "label")
 
-# Create stratified train-test split (data are only moderately imbalanced)
-
-indices_positive <- data.table::copy(task$data())[
-  , row_indices := .I
-  ][label == "positive", row_indices]
-indices_negative <- setdiff(seq_len(task$nrow), indices_positive)
-
-set.seed(123L)
-train_set = sort(union(
-  sample(indices_positive, 0.7 * length(indices_positive)),
-  sample(indices_negative, 0.7 * length(indices_negative))))
-test_set = setdiff(seq_len(task$nrow), train_set)
-
-stopifnot(abs(
-  table(task$data()[train_set]$label)["positive"] / length(train_set) -
-    table(task$data()[test_set]$label)["positive"] / length(test_set)) < 5e-2)
-
 # CREATE PRE-PROCESSING PIPELINES ----------------------------------------------
 
 # Create two different graph learners to benchmark against each other (one with,
@@ -71,7 +54,6 @@ stopifnot(abs(
 po_tm <- PipeOpExtractTopicsSTM$new()
 
 po_tm$param_set$values <- list(
-  K = 3L,
   docid_field = "doc_id",
   text_field = "text",
   doc_grouping_var = c("twitter_username", "twitter_year", "twitter_month"),
@@ -80,14 +62,6 @@ po_tm$param_set$values <- list(
   max.em.its = 5L,
   stopwords = make_stopwords(),
   init.type = "LDA")
-
-# ppl_with_tm = Graph$new()$add_pipeop(po_tm)
-# 
-# foo <- ppl_with_tm$train(task$clone())[[1]]
-# head(foo$data())
-# 
-# foofoo <- ppl_with_tm$predict(task$clone())[[1]]
-# head(foofoo$data())
 
 preproc_pipelines <- list(
   ppl_with_tm = Graph$new()$add_pipeop(po_tm), 
@@ -125,8 +99,7 @@ preproc_pipelines <- lapply(
     
     po_embeddings <- PipeOpMakeGloveEmbeddings$new()
     po_embeddings$param_set$values$stopwords <- make_stopwords()
-    po_embeddings$param_set$values$dimension <- 3L
-    
+
     # Create trivial pipeop for features not piped into embedding extraction
     
     po_nop <- mlr3pipelines::po("nop", id = "pipe_along")
@@ -149,21 +122,18 @@ preproc_pipelines <- lapply(
     # Create graph from pre-processing steps
 
     preproc_pipelines[[i]]%>>%
-      po_embeddings #%>>%
-      # po_sel_sentiment_analysis %>>% 
-      # po_set_colroles 
+      po_embeddings %>>%
+      po_sel_sentiment_analysis %>>%
+      po_set_colroles
       
-  }
-)
-
-invisible(lapply(preproc_pipelines, plot))
+})
 
 if (FALSE) {
   
   foo <- preproc_pipelines[[1]]
-  foofoo <- foo$train(task$clone()$filter(train_set))[[1]]
+  foofoo <- foo$train(task$clone())[[1]]
   head(foofoo$data())
-  phew <- foo$predict(task$clone()$filter(test_set))[[1]]
+  phew <- foo$predict(task$clone())[[1]]
   head(phew$data())
   
 }
@@ -239,14 +209,19 @@ graph_learners <- lapply(
       graph,
       id = "graph_learner")
 
-  }
-)
+})
+
+names(graph_learners) <- c("ppl_with_tm", "ppl_without_tm")
 
 # DEFINE TUNING SEARCH SPACES --------------------------------------------------
 
-# Instantiate tuning search space with learner selection hyperparameter
+# Instantiate tuning search space
 
 hyperparameters <- paradox::ParamSet$new(list(
+  paradox::ParamInt$new(
+    "make_glove_embeddings.dimension",
+    lower = 5L,
+    upper = 30L),
   paradox::ParamFct$new(
     "choose_learner.selection", 
     levels = names_learners)))
@@ -265,168 +240,116 @@ invisible(sapply(
         paradox::ParamDbl$new(
           "glmnet.alpha", 
           lower = 0L, 
-          upper = 1L))),
-      log_reg = paradox::ParamSet$new(list()),
+          upper = 1L),
+        paradox::ParamDbl$new(
+          "glmnet.lambda",
+          lower = 0L, 
+          upper = 0.2))),
       ranger = paradox::ParamSet$new(list(
         paradox::ParamInt$new(
           "ranger.mtry",
           lower = 1L,
-          upper = ceiling(0.5 * n_cols_effective)))),
-      svm = paradox::ParamSet$new(list(
-        paradox::ParamFct$new(
-          "svm.kernel",
-          levels = c("radial")),
+          upper = ceiling(0.5 * task$ncol)),
         paradox::ParamDbl$new(
-          "svm.gamma", 
-          lower = 1e-4, 
-          upper = 1e-1))))
+          "ranger.sample.fraction",
+          lower = 0.25,
+          upper = 1L))))
     
     hyperparameters$add(hyperparameters_learners)
     
-  }
-))
+}))
 
+# Add dependencies between learner selection and associated hyperparameters
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-# Define pipeops for different classifiers
-
-po_learners <- list(
-  forest = mlr3pipelines::PipeOpLearner$new(
-    learner = lrn("classif.ranger"), 
-    id = "classify_forest"),
-  svm = mlr3pipelines::PipeOpLearner$new(
-    learner = lrn("classif.svm"), 
-    id = "classify_svm"),
-  lasso = mlr3pipelines::PipeOpLearner$new(
-    learner = lrn("classif.cv_glmnet"), 
-    id = "classify_lasso"))
-
-# Create full graphs
-
-graphs_full <- lapply(po_learners, function(i) graph_preproc %>>% i)
-
-# Create graph_learners
-
-graph_learners <- lapply(
-  seq_along(graphs_full),
-  function(i) GraphLearner$new(graphs_full[[i]], id = names(po_learners)[i]))
-names(graph_learners) <- names(po_learners)
-
-# BENCHMARK LEARNERS -----------------------------------------------------------
-
-# Define search spaces
-
-if (topic_type == "stm") {
+invisible(sapply(
   
-  invisible(lapply(
-    graph_learners,
-    function(i) {
-      i$param_set$values$extract_topics_stm.K <- paradox::to_tune(5L, 10L)}))
+  names_learners,
   
-}
-
-invisible(lapply(
-  graph_learners,
   function(i) {
-    i$param_set$values$make_glove_embeddings.dimension <- 
-      paradox::to_tune(5L, 10L)}))
-  
-graph_learners$forest$param_set$values$classify_forest.mtry <- 
-  paradox::to_tune(7L, 30L)
+    
+    this_hp_set <- hyperparameters$ids()[startsWith(hyperparameters$ids(), i)]
+    
+    for (j in this_hp_set) {
+      hyperparameters$add_dep(
+        j, 
+        "choose_learner.selection", 
+        paradox::CondEqual$new(i))}
+    
+}))
 
-graph_learners$svm$param_set$values$classify_svm.type <- "C-classification"
-graph_learners$svm$param_set$values$classify_svm.kernel <- 
-  paradox::to_tune(c("polynomial", "radial"))
-graph_learners$svm$param_set$values$classify_svm.gamma <- 
-  paradox::to_tune(1e-3, 1e-1)
+hyperparameters
 
-graph_learners$lasso$param_set$values$classify_lasso.alpha <- 
-  paradox::to_tune(1e-2, 1L)
+# CONDUCT TUNING ---------------------------------------------------------------
 
-for (i in graph_learners) print(i$param_set$search_space())
+# Define resampling strategy: 3-fold cross-validation
 
-# Define tuning parameters
+resampling_strategy_inner <- mlr3::rsmp("cv", folds = 3L)
 
-resampling_inner <- mlr3::rsmp("cv", folds = 2L)
+# Define performance metric: accuracy
+
 measure_inner <- mlr3::msr("classif.acc")
-terminator <- mlr3tuning::trm("evals", n_evals = 2L)
-tuner <- mlr3tuning::tnr("grid_search", resolution = 2L)
 
-# Define tuning learners
+# Define tuner: random search
+
+tuner <- mlr3tuning::tnr("random_search")
+
+# Define terminator: number of evals
+
+terminator <- mlr3tuning::trm("evals", n_evals = 5L)
+
+# Set up autotuners for each pipeline
+
+# future::plan("multisession")
 
 auto_tuners <- lapply(
-  graph_learners, 
+  
+  names(graph_learners),
+  
   function(i) {
+    
     mlr3tuning::AutoTuner$new(
-      learner = i,
-      resampling = resampling_inner,
+      learner = graph_learners[[i]],
+      search_space = switch(
+        i,
+        ppl_with_tm = hyperparameters$clone()$add(
+          paradox::ParamSet$new(list(
+            paradox::ParamInt$new(
+              "extract_topics_stm.K", 
+              lower = 3L, 
+              upper = 6L)))),
+        ppl_without_tm = hyperparameters),
+      resampling = resampling_strategy_inner,
       measure = measure_inner,
-      search_space = i$param_set$search_space(),
       terminator = terminator,
-      tuner = tuner)})
+      tuner = tuner)
+    
+})
 
-if (FALSE) {
-  
-  auto_tuners[[1]]$train(task, row_ids = train_set)
-  res_cart <- auto_tuners[[1]]$predict(task, row_ids = test_set)
-  res_cart$confusion
-  
-}
+# Tune
 
-# Define benchmarking parameters
-
-resampling_outer <- mlr3::rsmp("cv", folds = 2L)
-
-# Define benchmarking design
-
-benchmark_design <- mlr3::benchmark_grid(
-  task$clone()$filter(train_set), 
-  auto_tuners, 
-  resampling_outer)
-
-# Run benchmark 
-
-future::plan("multiprocess")
+auto_tuners <- list(auto_tuners[[2]])
 set.seed(123L)
-benchmark <- mlr3::benchmark(benchmark_design)
+invisible(lapply(auto_tuners, function(i) i$train(task)))
 
-benchmark_results <- data.table::as.data.table(benchmark)
+# TRAIN FINAL MODELS -----------------------------------------------------------
 
-save_rdata_files(
-  benchmark_results, 
-  folder = "2_code/1_data/2_tmp_data",
-  tmp = FALSE)
+invisible(lapply(
+  seq_along(graph_learners),
+  function(i) {
+    graph_learners[[i]]$param_set$values <- 
+      auto_tuners[[i]]$tuning_result$result_learner_param_vals
+    graph_learners[[i]]$train(task)}))
 
-perf_benchmark <- benchmark$score(msr("classif.acc", id = "accuracy"))
-winner <- which.max(perf_benchmark$accuracy)
+graph_learners[[2]]$param_set$values <- 
+  auto_tuners[[1]]$tuning_instance$result_learner_param_vals
 
-# EVALUATE PERFORMANCE OF SELECTED LEARNER -------------------------------------
+graph_learners[[2]]$train(task)
 
-winning_learner <- benchmark_results$learner[[winner]]
-winning_learner$train(task, row_ids = train_set)
-winning_learner$param_set$values
+test <- data_unlabeled[complete.cases(data_unlabeled)]
+test <- test[sample(test[, .I], 3000L)]
+pred <- graph_learners[[2]]$predict_newdata(
+  data_unlabeled[complete.cases(data_unlabeled)])
 
-perf_selected_learner <- winning_learner$predict(task, row_ids = test_set)
+table(pred$response)
+pred$predict_types
 
-perf_selected_learner$confusion
-perf_selected_learner$score(msr("classif.acc"))
-
-# TRAIN SELECTEDLEARNER ON ENTIRE DATA -----------------------------------------
-
-winning_learner$train(task)
-perf_new_data <- winning_learner$predict_newdata(data_unlabeled)
-table(perf_new_data$response)
