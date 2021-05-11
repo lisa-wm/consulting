@@ -61,12 +61,12 @@ stopifnot(abs(
   table(task$data()[train_set]$label)["positive"] / length(train_set) -
     table(task$data()[test_set]$label)["positive"] / length(test_set)) < 5e-2)
 
-# CREATE PREPROCESSING PIPELINES -----------------------------------------------
+# CREATE PRE-PROCESSING PIPELINES ----------------------------------------------
 
 # Create two different graph learners to benchmark against each other (one with,
 # one without upstream topic modeling)
 
-# Define topic modeling pipeop
+# Create topic modeling pipeop (defined in separate function)
 
 po_tm <- PipeOpExtractTopicsSTM$new()
 
@@ -81,24 +81,24 @@ po_tm$param_set$values <- list(
   stopwords = make_stopwords(),
   init.type = "LDA")
 
-pipelines <- list(
+preproc_pipelines <- list(
   ppl_with_tm = Graph$new()$add_pipeop(po_tm), 
   ppl_without_tm = mlr3pipelines::Graph$new()$add_pipeop(
-    mlr_pipeops$get("nop", id = "start")))
+    mlr3pipelines::po("nop", id = "start")))
 
 # Create pipelines
 
-pipelines <- lapply(
+preproc_pipelines <- lapply(
   
-  names(pipelines),
+  names(preproc_pipelines),
   
   function(i) {
   
-    # Define selector pipeop for features to be piped into embedding extraction
+    # Create selector pipeop for features to be piped into embedding extraction
     
     po_sel_embeddings <- 
       mlr3pipelines::PipeOpSelect$new(id = "select_embedding")
-    po_sel_embeddings_inv <- mlr3pipelines::PipeOpSelect$new(id = "select_rest")
+    po_sel_embeddings_inv <- mlr3pipelines::po("select", id = "select_rest")
     
     po_sel_embeddings$param_set$values$selector <- switch(
       i,
@@ -112,56 +112,189 @@ pipelines <- lapply(
       ppl_without_tm = mlr3pipelines::selector_invert(
         mlr3pipelines::selector_name(c("text"))))
     
-    # Define glove embedding pipeop
+    # Create glove embedding pipeop (defined in separate function)
     
     po_embeddings <- PipeOpMakeGloveEmbeddings$new()
     po_embeddings$param_set$values$stopwords <- make_stopwords()
     po_embeddings$param_set$values$dimension <- 3L
     
-    # Define trivial pipeop for features not piped into embedding extraction
+    # Create trivial pipeop for features not piped into embedding extraction
     
-    po_nop <- mlr3pipelines::PipeOpNOP$new(id = "pipe_along")
+    po_nop <- mlr3pipelines::po("nop", id = "pipe_along")
     
-    # Define selector pipeop for features to be piped into classification
+    # Create selector pipeop for features to be piped into classification
     
     po_sel_sentiment_analysis <- 
-      mlr3pipelines::PipeOpSelect$new(id = "select_sentiment_analysis")
+      mlr3pipelines::po("select", id = "select_sentiment_analysis")
     
     po_sel_sentiment_analysis$param_set$values$selector <- 
       mlr3pipelines::selector_union(
         mlr3pipelines::selector_name("doc_id"),
         mlr3pipelines::selector_grep("feat.*|embedding.*"))
     
-    # Define pipeop to set col role for doc_id to naming column
+    # Create pipeop to set column role for doc_id to naming column
     
-    po_set_colroles <- mlr3pipelines::PipeOpColRoles$new(id = "set_colroles")
+    po_set_colroles <- mlr3pipelines::po("colroles", id = "set_colroles")
     po_set_colroles$param_set$values$new_role <- list(doc_id = "name")
     
-    # Create graph from preprocessing steps
+    # Create graph from pre-processing steps
 
     pipelines[[i]] %>>%
-      gunion(list(
+      mlr3pipelines::gunion(list(
         po_sel_embeddings %>>% 
           po_embeddings,
         po_sel_embeddings_inv %>>% 
-          po_nop)
-      ) %>>%
-      po("featureunion", id = "unite_features") %>>%
+          po_nop)) %>>%
+      mlr3pipelines::po("featureunion", id = "unite_features") %>>%
       po_sel_sentiment_analysis %>>%
       po_set_colroles
       
   }
 )
 
+invisible(lapply(preproc_pipelines, plot))
+
 if (FALSE) {
   
-  foo <- pipelines[[1]]
+  foo <- preproc_pipelines[[2]]
   foofoo <- foo$train(task$clone()$filter(train_set))[[1]]
   head(foofoo$data())
   
 }
 
 # CREATE GRAPH LEARNERS --------------------------------------------------------
+
+# Create AutoML pipeline that allows to choose between a penalized logistic
+# regression and a random forest classifier and tunes selected hyperparameters
+
+# Define learners
+
+learners <- list(glmnet = "classif.glmnet", ranger = "classif.ranger")
+names_learners <- c("glmnet", "ranger")
+
+# Create graph learners
+
+graph_learners <- lapply(
+  
+  preproc_pipelines,
+  
+  function(i) {
+    
+    # Create branching pipeop
+    
+    po_branch_learners <- mlr3pipelines::po(
+      "branch",
+      options = names_learners,
+      id = "choose_learner")
+    
+    # Create pipeop for each learner
+    
+    po_learners <- lapply(
+      names(learners), 
+      function(j) mlr3::lrn(learners[[j]], id = j))
+    
+    # Fix hyperparameters not included in tuning process
+    
+    invisible(lapply(
+      
+      po_learners,
+      
+      function(j) {
+        
+        params <- switch(
+          j$id,
+          glmnet = list(
+            maxit = 10^3L,
+            parallel = ifelse(parallel::detectCores() > 1L, TRUE, FALSE)),
+          ranger = list(
+            num.trees = 10L,
+            min.node.size = ceiling(0.1 * task$nrow),
+            oob.error = FALSE,
+            num.threads = parallel::detectCores()))
+        
+        j$param_set$values <- params
+        
+      }))
+    
+    # Add learner-specific branches
+    
+    graph <- i %>>% 
+      po_branch_learners %>>% 
+      mlr3pipelines::gunion(po_learners)
+    
+    # Unbranch afterwards
+    
+    graph <- graph %>>%
+      mlr3pipelines::po("unbranch")
+    
+    # Create graph learner
+    
+    mlr3pipelines::GraphLearner$new(
+      graph,
+      id = "graph_learner")
+
+  }
+)
+
+# DEFINE TUNING SEARCH SPACES --------------------------------------------------
+
+# Instantiate tuning search space with learner selection hyperparameter
+
+hyperparameters <- paradox::ParamSet$new(list(
+  paradox::ParamFct$new(
+    "choose_learner.selection", 
+    levels = names_learners)))
+
+# Add learner hyperparameters
+
+invisible(sapply(
+  
+  names_learners,
+  
+  function(i) {
+    
+    hyperparameters_learners <- switch(
+      i,
+      glmnet = paradox::ParamSet$new(list(
+        paradox::ParamDbl$new(
+          "glmnet.alpha", 
+          lower = 0L, 
+          upper = 1L))),
+      log_reg = paradox::ParamSet$new(list()),
+      ranger = paradox::ParamSet$new(list(
+        paradox::ParamInt$new(
+          "ranger.mtry",
+          lower = 1L,
+          upper = ceiling(0.5 * n_cols_effective)))),
+      svm = paradox::ParamSet$new(list(
+        paradox::ParamFct$new(
+          "svm.kernel",
+          levels = c("radial")),
+        paradox::ParamDbl$new(
+          "svm.gamma", 
+          lower = 1e-4, 
+          upper = 1e-1))))
+    
+    hyperparameters$add(hyperparameters_learners)
+    
+  }
+))
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 # Define pipeops for different classifiers
 
