@@ -301,7 +301,14 @@ get_doc_embeddings <- function(tokens, word_vectors) {
   
   # Perform matrix multiplication
   
-  as.matrix(dtm) %*% word_vectors
+  doc_embeddings <- as.matrix(dtm) %*% word_vectors
+  
+  # Append doc_id info
+  
+  doc_embeddings <- data.table::as.data.table(doc_embeddings)
+  doc_embeddings[, doc_id := tokens$doc_id]
+      
+  doc_embeddings
   
 }
 
@@ -317,7 +324,7 @@ We now **collect** our sub-routines in one large function we apply to each of ou
 
 ```{r emb, results='hide'}
 
-make_glove_embeddings <- function(text, 
+make_glove_embeddings <- function(corpus, 
                                   stopwords, 
                                   term_count_min,
                                   skip_grams_window, 
@@ -326,7 +333,7 @@ make_glove_embeddings <- function(text,
                                   iterations, 
                                   convergence_tol) {
   
-  tokens <- tokenize(text, stopwords)
+  tokens <- tokenize(corpus, stopwords)
   vocabulary <- make_vocab(tokens, term_count_min)
   glove <- make_glove_instance(vocabulary, skip_grams_window, dimension, x_max)
   word_vectors <- get_word_vectors(tokens, glove, iterations, convergence_tol)
@@ -339,7 +346,7 @@ make_glove_embeddings <- function(text,
 embeddings <- lapply(
   twitter_corpus_subsets,
   function(i) {make_glove_embeddings(
-    quanteda::texts(i),
+    i,
     stopwords = stopwords,
     term_count_min = 2,
     skip_grams_window = 5,
@@ -360,21 +367,28 @@ And lastly, we store all embedding vectors in one `data.table` we can use for se
 
 ```{r bdiag}
 
+# Save doc_id for join
+      
+doc_id <- unlist(lapply(embeddings, function(i) i$doc_id))
+invisible(lapply(embeddings, function(i) i[, doc_id := NULL]))
+
+# Create block matrix where each document's embedding loadings depend
+# on its topic label, but save doc_id info before
+
+embeddings <- lapply(embeddings, as.matrix)
+
 embedding_matrix <- do.call(Matrix::bdiag, embeddings)
 
-```
-
-```{r bdiag_dt}
+# Convert back to data.table
 
 embeddings_dt <- data.table::as.data.table(as.matrix(embedding_matrix))
-
 data.table::setnames(
   embeddings_dt,
   sprintf("embedding_%d", seq_along(embeddings_dt)))
 
-embeddings_dt$doc_id <- unlist(lapply(
-  twitter_corpus_subsets, 
-  function(i) quanteda::docvars(i)$doc_id))
+embeddings_dt[, doc_id := ..doc_id]
+
+# Inspect
 
 embeddings_dt[sample(embeddings_dt[, .I], 10)]
 

@@ -345,16 +345,16 @@ test_word_vectors &lt;- get_word_vectors(
   glove = test_model,
   iterations = 3,
   convergence_tol = 0.001)</code></pre>
-<pre><code>## INFO  [22:02:13.091] epoch 1, loss 0.1224 
-## INFO  [22:02:13.146] epoch 2, loss 0.0971 
-## INFO  [22:02:13.176] epoch 3, loss 0.0904</code></pre>
+<pre><code>## INFO  [17:18:21.112] epoch 1, loss 0.1226 
+## INFO  [17:18:21.221] epoch 2, loss 0.0972 
+## INFO  [17:18:21.258] epoch 3, loss 0.0907</code></pre>
 <pre class="r"><code>test_word_vectors[sample(nrow(test_word_vectors), 5), ]</code></pre>
-<pre><code>##                     [,1]        [,2]       [,3]
-## gesellschaft  0.02343717  0.02173589 -0.5593661
-## verwechseln   0.27402415 -0.33455750 -0.3393972
-## afrin         0.51662119 -0.37373556 -0.5468087
-## u.spd        -0.25432351 -0.55384352 -0.6707744
-## denk          0.11315129 -0.10876620  0.1260264</code></pre>
+<pre><code>##                       [,1]        [,2]        [,3]
+## unfassbar       -0.3863378  0.06020361 -0.02467850
+## gez              0.3217785  0.13338595  0.09811976
+## rundfunkgebuehr  0.4990832 -0.03229976  0.15888837
+## jahr            -0.6718606  0.18209690  0.87011693
+## immunitaet       0.1257666 -0.57761629 -0.44245804</code></pre>
 <p>This provides us with the embedding vectors per word, from which we calculate the <strong>embeddings per document</strong> by averaging the embeddings across all words present in the document (weighted by occurrence).</p>
 <p>Mathematically speaking, we can achieve this by matrix multiplication:</p>
 <ul>
@@ -398,25 +398,31 @@ test_word_vectors &lt;- get_word_vectors(
   
   # Perform matrix multiplication
   
-  as.matrix(dtm) %*% word_vectors
+  doc_embeddings &lt;- as.matrix(dtm) %*% word_vectors
+  
+  # Append doc_id info
+  
+  doc_embeddings &lt;- data.table::as.data.table(doc_embeddings)
+  doc_embeddings[, doc_id := tokens$doc_id]
+      
+  doc_embeddings
   
 }
 
 test_doc_embeddings &lt;- get_doc_embeddings(test_tokens, test_word_vectors)
 
 test_doc_embeddings[sample(nrow(test_doc_embeddings), 5), ]</code></pre>
-<pre><code>##                            
-## docs                               [,1]        [,2]        [,3]
-##   KonstantinNotz15802803601  0.21888075 -0.22808807  0.05556922
-##   larsklingbeil15596348401  -0.02349443 -0.01088485 -0.05278826
-##   DirkSpaniel15607438801     0.10729763 -0.12778006 -0.04670276
-##   lgbeutin15995440801        0.04964387 -0.05317271 -0.03593956
-##   HuberMdB15628304401        0.11223769  0.05001404 -0.09892254</code></pre>
+<pre><code>##              V1          V2         V3                     doc_id
+## 1:  0.001636491 -0.07232625 0.14960508 Oliver_Krischer15546483601
+## 2:  0.074788185 -0.09397858 0.19964961    sven_kindler15810591001
+## 3: -0.159996504 -0.04688173 0.28462818    danielakolbe15812392801
+## 4:  0.009321571 -0.01631489 0.09157415     AndrejHunko15662928601
+## 5: -0.214895043  0.02756950 0.20538623       tpflueger15647325601</code></pre>
 </div>
 <div id="compute-embeddings" class="section level3">
 <h3>Compute embeddings</h3>
 <p>We now <strong>collect</strong> our sub-routines in one large function we apply to each of our corpus subsets:</p>
-<pre class="r"><code>make_glove_embeddings &lt;- function(text, 
+<pre class="r"><code>make_glove_embeddings &lt;- function(corpus, 
                                   stopwords, 
                                   term_count_min,
                                   skip_grams_window, 
@@ -425,7 +431,7 @@ test_doc_embeddings[sample(nrow(test_doc_embeddings), 5), ]</code></pre>
                                   iterations, 
                                   convergence_tol) {
   
-  tokens &lt;- tokenize(text, stopwords)
+  tokens &lt;- tokenize(corpus, stopwords)
   vocabulary &lt;- make_vocab(tokens, term_count_min)
   glove &lt;- make_glove_instance(vocabulary, skip_grams_window, dimension, x_max)
   word_vectors &lt;- get_word_vectors(tokens, glove, iterations, convergence_tol)
@@ -438,7 +444,7 @@ test_doc_embeddings[sample(nrow(test_doc_embeddings), 5), ]</code></pre>
 embeddings &lt;- lapply(
   twitter_corpus_subsets,
   function(i) {make_glove_embeddings(
-    quanteda::texts(i),
+    i,
     stopwords = stopwords,
     term_count_min = 2,
     skip_grams_window = 5,
@@ -452,51 +458,63 @@ embeddings &lt;- lapply(
 0 &amp; 0 &amp; \text{embeddings for topic 3} &amp; 0 \\
 0 &amp; 0 &amp; 0 &amp; \text{embeddings for topic 4}
 \end{bmatrix}\]</span></p>
-<pre class="r"><code>embedding_matrix &lt;- do.call(Matrix::bdiag, embeddings)</code></pre>
-<pre class="r"><code>embeddings_dt &lt;- data.table::as.data.table(as.matrix(embedding_matrix))
+<pre class="r"><code># Save doc_id for join
+      
+doc_id &lt;- unlist(lapply(embeddings, function(i) i$doc_id))
+invisible(lapply(embeddings, function(i) i[, doc_id := NULL]))
 
+# Create block matrix where each document&#39;s embedding loadings depend
+# on its topic label, but save doc_id info before
+
+embeddings &lt;- lapply(embeddings, as.matrix)
+
+embedding_matrix &lt;- do.call(Matrix::bdiag, embeddings)
+
+# Convert back to data.table
+
+embeddings_dt &lt;- data.table::as.data.table(as.matrix(embedding_matrix))
 data.table::setnames(
   embeddings_dt,
   sprintf(&quot;embedding_%d&quot;, seq_along(embeddings_dt)))
 
-embeddings_dt$doc_id &lt;- unlist(lapply(
-  twitter_corpus_subsets, 
-  function(i) quanteda::docvars(i)$doc_id))
+embeddings_dt[, doc_id := ..doc_id]
+
+# Inspect
 
 embeddings_dt[sample(embeddings_dt[, .I], 10)]</code></pre>
-<pre><code>##     embedding_1 embedding_2 embedding_3 embedding_4  embedding_5 embedding_6
-##  1: -0.02205153 0.001672477 -0.08723467   0.0000000  0.000000000  0.00000000
-##  2:  0.00000000 0.000000000  0.00000000   0.0000000  0.000000000  0.00000000
-##  3:  0.00000000 0.000000000  0.00000000   0.0000000  0.000000000  0.00000000
-##  4: -0.22050614 0.093091332 -0.10396835   0.0000000  0.000000000  0.00000000
-##  5:  0.09561660 0.169627833  0.03841857   0.0000000  0.000000000  0.00000000
-##  6:  0.00000000 0.000000000  0.00000000   0.0000000  0.000000000  0.00000000
-##  7:  0.00000000 0.000000000  0.00000000   0.0000000  0.000000000  0.00000000
-##  8:  0.06178878 0.107344502 -0.26728767   0.0000000  0.000000000  0.00000000
-##  9:  0.00000000 0.000000000  0.00000000   0.1106875 -0.001142283 -0.21696718
-## 10:  0.00000000 0.000000000  0.00000000   0.1148068  0.092072922  0.08165375
+<pre><code>##     embedding_1 embedding_2 embedding_3 embedding_4 embedding_5 embedding_6
+##  1:    0.000000   0.0000000  0.00000000  0.05482503  0.06856164 -0.01412917
+##  2:    0.000000   0.0000000  0.00000000 -0.08276987 -0.05781258  0.04739306
+##  3:    0.000000   0.0000000  0.00000000  0.00000000  0.00000000  0.00000000
+##  4:    0.000000   0.0000000  0.00000000  0.00000000  0.00000000  0.00000000
+##  5:   -0.109036   0.2577165  0.05673243  0.00000000  0.00000000  0.00000000
+##  6:    0.000000   0.0000000  0.00000000 -0.17533056  0.08600875 -0.20579785
+##  7:    0.000000   0.0000000  0.00000000  0.00000000  0.00000000  0.00000000
+##  8:   -0.371374   0.4012897 -0.04043765  0.00000000  0.00000000  0.00000000
+##  9:    0.000000   0.0000000  0.00000000 -0.27099564  0.11642943  0.21945584
+## 10:    0.000000   0.0000000  0.00000000  0.01614947 -0.01226427 -0.16079251
 ##     embedding_7 embedding_8 embedding_9 embedding_10 embedding_11 embedding_12
-##  1:  0.00000000   0.0000000  0.00000000    0.0000000   0.00000000    0.0000000
-##  2: -0.25736944   0.2362448 -0.07465091    0.0000000   0.00000000    0.0000000
-##  3: -0.07399415   0.1231834  0.16664423    0.0000000   0.00000000    0.0000000
-##  4:  0.00000000   0.0000000  0.00000000    0.0000000   0.00000000    0.0000000
-##  5:  0.00000000   0.0000000  0.00000000    0.0000000   0.00000000    0.0000000
-##  6: -0.14988793  -0.0812580 -0.10324672    0.0000000   0.00000000    0.0000000
-##  7:  0.00000000   0.0000000  0.00000000    0.1980818   0.00280248    0.1210817
-##  8:  0.00000000   0.0000000  0.00000000    0.0000000   0.00000000    0.0000000
-##  9:  0.00000000   0.0000000  0.00000000    0.0000000   0.00000000    0.0000000
-## 10:  0.00000000   0.0000000  0.00000000    0.0000000   0.00000000    0.0000000
+##  1:  0.00000000   0.0000000   0.0000000    0.0000000    0.0000000   0.00000000
+##  2:  0.00000000   0.0000000   0.0000000    0.0000000    0.0000000   0.00000000
+##  3:  0.08121451  -0.1553581  -0.0612087    0.0000000    0.0000000   0.00000000
+##  4:  0.00000000   0.0000000   0.0000000    0.0198986   -0.1740356   0.03903582
+##  5:  0.00000000   0.0000000   0.0000000    0.0000000    0.0000000   0.00000000
+##  6:  0.00000000   0.0000000   0.0000000    0.0000000    0.0000000   0.00000000
+##  7:  0.05419094   0.1526954  -0.1800756    0.0000000    0.0000000   0.00000000
+##  8:  0.00000000   0.0000000   0.0000000    0.0000000    0.0000000   0.00000000
+##  9:  0.00000000   0.0000000   0.0000000    0.0000000    0.0000000   0.00000000
+## 10:  0.00000000   0.0000000   0.0000000    0.0000000    0.0000000   0.00000000
 ##                         doc_id
-##  1:          katdro15704311801
-##  2:  christianhirte15441714001
-##  3: Martin_Hess_AfD15278655601
-##  4: AndreasBleckMdB15278290801
-##  5:   andreassteier16027034401
-##  6: MarcBernhardAfD15768544201
-##  7: Beatrix_vStorch15862634401
-##  8:   SevimDagdelen15830847601
-##  9:        kleikert15438256201
-## 10:  ingrid_remmers15415867201</code></pre>
+##  1:         hahnflo15968008801
+##  2:   BriHasselmann15670225801
+##  3:    katjakipping15542043601
+##  4: karl_lauterbach15973945201
+##  5:        kleikert15421870801
+##  6:    IreneMihalic16021797601
+##  7:       JM_Luczak15713945401
+##  8:         NordMdb15880587601
+##  9: JuergenBraunAfD15845533201
+## 10:     victorperli15914375401</code></pre>
 <pre class="r"><code># Insert info back into corpus
 
 twitter_docvars &lt;- data.table::as.data.table(

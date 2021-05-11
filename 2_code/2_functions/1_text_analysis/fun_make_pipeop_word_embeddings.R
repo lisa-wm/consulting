@@ -250,7 +250,7 @@ PipeOpMakeGloveEmbeddings = R6::R6Class(
       doc_id <- unlist(lapply(doc_embeddings, function(i) i$doc_id))
       invisible(lapply(doc_embeddings, function(i) i[, doc_id := NULL]))
       
-      # Create block matrix where each documents' embedding loadings depend
+      # Create block matrix where each document's embedding loadings depend
       # on its topic label
       
       doc_embeddings <- lapply(doc_embeddings, as.matrix)
