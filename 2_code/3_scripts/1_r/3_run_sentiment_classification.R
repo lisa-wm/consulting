@@ -327,9 +327,10 @@ auto_tuners <- lapply(
 
 # Tune
 
-auto_tuners <- list(auto_tuners[[2]])
 set.seed(123L)
 invisible(lapply(auto_tuners, function(i) i$train(task)))
+
+save_rdata_files(auto_tuners, folder = "2_code/1_data/2_tmp_data")
 
 # TRAIN FINAL MODELS -----------------------------------------------------------
 
@@ -337,19 +338,35 @@ invisible(lapply(
   seq_along(graph_learners),
   function(i) {
     graph_learners[[i]]$param_set$values <- 
-      auto_tuners[[i]]$tuning_result$result_learner_param_vals
+      auto_tuners[[i]]$tuning_instance$result_learner_param_vals
     graph_learners[[i]]$train(task)}))
 
-graph_learners[[2]]$param_set$values <- 
-  auto_tuners[[1]]$tuning_instance$result_learner_param_vals
+# predictions <- lapply(
+#   graph_learners,
+#   function(i) i$predict_newdata(data_unlabeled[complete.cases(data_unlabeled)]))
+# 
+# table(pred$response)
+# pred$predict_types
 
-graph_learners[[2]]$train(task)
+# EVALUATE PERFORMANCE ---------------------------------------------------------
 
-test <- data_unlabeled[complete.cases(data_unlabeled)]
-test <- test[sample(test[, .I], 3000L)]
-pred <- graph_learners[[2]]$predict_newdata(
-  data_unlabeled[complete.cases(data_unlabeled)])
+# Define resampling strategy: 3-fold cross-validation
 
-table(pred$response)
-pred$predict_types
+resampling_strategy_outer <- mlr3::rsmp("cv", folds = 3L)
 
+# Perform nested resampling
+
+nested_resampling_results <- lapply(
+  seq_along(graph_learners),
+  function(i) {
+    mlr3::resample(
+      task = task, 
+      learner = auto_tuners[[i]], 
+      resampling = resampling_strategy_outer, 
+      store_models = TRUE)})
+
+save_rdata_files(nested_resampling_results, folder = "2_code/1_data/2_tmp_data")
+
+sapply(
+  nested_resampling_results,
+  function(i) i$aggregate(mlr3::msr("classif.acc")))
