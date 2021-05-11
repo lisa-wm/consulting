@@ -71,13 +71,13 @@ stopifnot(abs(
 po_tm <- PipeOpExtractTopicsSTM$new()
 
 po_tm$param_set$values <- list(
-  K = 3,
+  K = 3L,
   docid_field = "doc_id",
   text_field = "text",
   doc_grouping_var = c("twitter_username", "twitter_year", "twitter_month"),
   prevalence_vars_cat = list("meta_party", "meta_bundesland"),
   prevalence_vars_smooth = list("meta_unemployment_rate"),
-  max.em.its = 50L,
+  max.em.its = 5L,
   stopwords = make_stopwords(),
   init.type = "LDA")
 
@@ -90,7 +90,7 @@ pipelines <- list(
 
 pipelines <- lapply(
   
-  pipelines,
+  names(pipelines),
   
   function(i) {
   
@@ -101,12 +101,12 @@ pipelines <- lapply(
     po_sel_embeddings_inv <- mlr3pipelines::PipeOpSelect$new(id = "select_rest")
     
     po_sel_embeddings$param_set$values$selector <- switch(
-      deparse(substitute(i)),
+      i,
       ppl_with_tm = mlr3pipelines::selector_name(c("topic_label", "text")),
       ppl_without_tm = mlr3pipelines::selector_name(c("text")))
     
     po_sel_embeddings_inv$param_set$values$selector <- switch(
-      deparse(substitute(i)),
+      i,
       ppl_with_tm = mlr3pipelines::selector_invert(
         mlr3pipelines::selector_name(c("topic_label", "text"))),
       ppl_without_tm = mlr3pipelines::selector_invert(
@@ -116,6 +116,7 @@ pipelines <- lapply(
     
     po_embeddings <- PipeOpMakeGloveEmbeddings$new()
     po_embeddings$param_set$values$stopwords <- make_stopwords()
+    po_embeddings$param_set$values$dimension <- 3L
     
     # Define trivial pipeop for features not piped into embedding extraction
     
@@ -129,7 +130,7 @@ pipelines <- lapply(
     po_sel_sentiment_analysis$param_set$values$selector <- 
       mlr3pipelines::selector_union(
         mlr3pipelines::selector_name("doc_id"),
-        mlr3pipelines::selector_grep("feat.*"))
+        mlr3pipelines::selector_grep("feat.*|embedding.*"))
     
     # Define pipeop to set col role for doc_id to naming column
     
@@ -138,7 +139,7 @@ pipelines <- lapply(
     
     # Create graph from preprocessing steps
 
-    graph_preproc <- i %>>%
+    pipelines[[i]] %>>%
       gunion(list(
         po_sel_embeddings %>>% 
           po_embeddings,
@@ -152,12 +153,13 @@ pipelines <- lapply(
   }
 )
 
-invisible(lapply(pipelines, plot, html = FALSE))
-
-foo <- pipelines$ppl_with_tm
-
-foofoo <- foo$train(task$clone()$filter(train_set))[[1]]
-graph_preproc$train(task$clone()$filter(train_set))[[1]]
+if (FALSE) {
+  
+  foo <- pipelines[[1]]
+  foofoo <- foo$train(task$clone()$filter(train_set))[[1]]
+  head(foofoo$data())
+  
+}
 
 # CREATE GRAPH LEARNERS --------------------------------------------------------
 
