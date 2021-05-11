@@ -10,7 +10,7 @@ PipeOpExtractTopicsSTM = R6::R6Class(
   
   "PipeOpExtractTopicsSTM",
   
-  inherit = mlr3pipelines::PipeOpTaskPreprocSimple,
+  inherit = mlr3pipelines::PipeOpTaskPreproc,
   
   public = list(
     
@@ -45,7 +45,6 @@ PipeOpExtractTopicsSTM = R6::R6Class(
         emtol = 1e-05,
         seed = 123L,
         verbose = FALSE,
-        reportevery = 5L,
         LDAbeta = TRUE,
         ngroups = 1L,
         gamma.prior = "L1",
@@ -63,7 +62,7 @@ PipeOpExtractTopicsSTM = R6::R6Class(
   
   private = list(
     
-    .transform_dt = function(dt, levels) {
+    .train_dt = function(dt, levels, target) {
       
       # Transform data
 
@@ -113,9 +112,21 @@ PipeOpExtractTopicsSTM = R6::R6Class(
       
       if (inherits(stm_mod, "try-error")) {
         
+        self$state <- list(
+          model = NULL,
+          prevalence_formula = NULL,
+          original_vocab = NULL,
+          original_meta = NULL)
+        
         dt_final <- data.table::copy(dt)[, topic_label := 0L]
         
       } else {
+        
+        self$state <- list(
+          model = stm_mod,
+          prevalence_formula = prevalence_formula,
+          original_vocab = stm_obj$vocab,
+          original_meta = stm_obj$meta)
         
         topic_probs <- stm::make.dt(stm_mod)[
           , `:=` (
@@ -125,47 +136,80 @@ PipeOpExtractTopicsSTM = R6::R6Class(
         data.table::setnames(topic_probs, tolower(names(topic_probs)))
         
         topic_cols <- sprintf("topic%d", seq_len(self$param_set$values$K))
-        
-        topic_probs[
-          , topic_label := which.max(.SD),
-          .SDcols = topic_cols,
-          by = seq_len(nrow(topic_probs))]
-        
-        # Define output
-        
-        dt_new <- data.table::copy(dt)
-        dt_complete <- dt_new[complete_cases]
-        dt_incomplete <- dt_new[setdiff(dt_new[, .I], complete_cases)]
-        
-        id_cols <- unlist(self$param_set$values$doc_grouping_var)
-        
-        dt_complete <- dt_complete[
-          , topic_doc_id := paste(.SD, collapse = "."),
-          .SDcols = id_cols,
-          by = seq_len(nrow(dt_complete))]
-        
-        dt_complete <- topic_probs[dt_complete, on = "topic_doc_id"]
-        
-        dt_complete[
-          , top_user_topic := which.max(tabulate(topic_label)),
-          by = get(id_cols[1L])
-          ][, topic_label := ifelse(
-            is.na(topic_label),
-            top_user_topic,
-            topic_label)
-            ][, top_user_topic := NULL
-              ][, c(topic_cols) := NULL
-                ][, topic_doc_id := NULL]
-        
-        dt_incomplete[, topic_label := 0L]
-        
-        dt_final <- rbind(dt_complete, dt_incomplete)
-        data.table::setorder(dt_final, doc_id)
+
+        dt_final <- private$.assign_topic_labels(
+          dt = dt,
+          complete_cases = complete_cases,
+          topic_probs = topic_probs, 
+          topic_cols = topic_cols)
         
       }
       
       dt_final
 
+    },
+    
+    .predict_dt = function(dt, levels) {
+      
+      if (is.null(self$state$model)) {
+        
+        dt_final <- data.table::copy(dt)[, topic_label := 0L]
+        
+      } else {
+        
+        # Transform data
+        
+        prevalence_vars <- c(
+          unlist(self$param_set$values$prevalence_vars_cat),
+          unlist(self$param_set$values$prevalence_vars_smooth))
+        
+        complete_cases <- dt[, .I][complete.cases(dt[, ..prevalence_vars])]
+        
+        crp <- quanteda::corpus(
+          dt[complete_cases],
+          docid_field = self$param_set$values$docid_field,
+          text_field = self$param_set$values$text_field)
+        
+        tkns <- private$.tokenize(
+          corpus = crp, 
+          stopwords = self$param_set$values$stopwords)
+        
+        stm_obj <- private$.make_stm_obj(
+          tokens = tkns, 
+          doc_grouping_var = unlist(self$param_set$values$doc_grouping_var))
+        
+        # Adapt structure to training data
+        
+        stm_obj <- stm::alignCorpus(
+          new = stm_obj, 
+          old.vocab = self$state$original_vocab)
+        
+        # Predict topic proportions
+        
+        topic_probs <- data.table::as.data.table(
+          stm::fitNewDocuments(
+            model = self$state$model,
+            documents = stm_obj$documents,
+            newData = stm_obj$meta,
+            origData = self$state$original_meta,
+            prevalence = self$state$prevalence_formula)$theta)
+        
+        topic_cols <- sprintf("topic%d", seq_len(ncol(topic_probs)))
+        
+        data.table::setnames(topic_probs, topic_cols)
+        
+        topic_probs[, topic_doc_id := names(stm_obj$documents)]
+        
+        dt_final <- private$.assign_topic_labels(
+          dt = dt,
+          complete_cases = complete_cases,
+          topic_probs = topic_probs, 
+          topic_cols = topic_cols)
+        
+      }
+      
+      dt_final
+      
     },
 
     .tokenize = function(corpus, stopwords) {
@@ -236,6 +280,55 @@ PipeOpExtractTopicsSTM = R6::R6Class(
       formula_right <- paste0(c(cv_formula, sv_formula), collapse = "+")
       
       as.formula(paste("", formula_right, sep = "~"))
+      
+    },
+    
+    .assign_topic_labels = function(dt, 
+                                    complete_cases, 
+                                    topic_probs, 
+                                    topic_cols) {
+      
+      # Compute maximum topic probability
+      
+      topic_probs[
+        , topic_label := which.max(.SD),
+        .SDcols = topic_cols,
+        by = seq_len(nrow(topic_probs))]
+      
+      # Define output
+      
+      dt_new <- data.table::copy(dt)
+      dt_complete <- dt_new[complete_cases]
+      dt_incomplete <- dt_new[setdiff(dt_new[, .I], complete_cases)]
+      
+      id_cols <- unlist(self$param_set$values$doc_grouping_var)
+      
+      dt_complete <- dt_complete[
+        , topic_doc_id := paste(.SD, collapse = "."),
+        .SDcols = id_cols,
+        by = seq_len(nrow(dt_complete))]
+      
+      dt_complete <- topic_probs[dt_complete, on = "topic_doc_id"]
+      
+      # Insert modal value of topic label per user in case of missings
+      
+      dt_complete[
+        , top_user_topic := which.max(tabulate(topic_label)),
+        by = get(id_cols[1L])
+        ][, topic_label := ifelse(
+          is.na(topic_label),
+          top_user_topic,
+          topic_label)
+          ][, top_user_topic := NULL
+            ][, c(topic_cols) := NULL
+              ][, topic_doc_id := NULL]
+      
+      dt_incomplete[, topic_label := 0L]
+      
+      dt_final <- rbind(dt_complete, dt_incomplete)
+      data.table::setorder(dt_final, doc_id)
+      
+      dt_final
       
     }
 

@@ -81,6 +81,14 @@ po_tm$param_set$values <- list(
   stopwords = make_stopwords(),
   init.type = "LDA")
 
+ppl_with_tm = Graph$new()$add_pipeop(po_tm)
+
+# foo <- ppl_with_tm$train(task$clone())[[1]]
+# head(foo$data())
+# 
+# foofoo <- ppl_with_tm$predict(task$clone())[[1]]
+# head(foofoo$data())
+
 preproc_pipelines <- list(
   ppl_with_tm = Graph$new()$add_pipeop(po_tm), 
   ppl_without_tm = mlr3pipelines::Graph$new()$add_pipeop(
@@ -139,7 +147,7 @@ preproc_pipelines <- lapply(
     
     # Create graph from pre-processing steps
 
-    pipelines[[i]] %>>%
+    preproc_pipelines[[i]] %>>%
       mlr3pipelines::gunion(list(
         po_sel_embeddings %>>% 
           po_embeddings,
@@ -156,7 +164,7 @@ invisible(lapply(preproc_pipelines, plot))
 
 if (FALSE) {
   
-  foo <- preproc_pipelines[[2]]
+  foo <- preproc_pipelines[[1]]
   foofoo <- foo$train(task$clone()$filter(train_set))[[1]]
   head(foofoo$data())
   
