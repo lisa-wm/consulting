@@ -10,7 +10,7 @@ PipeOpMakeGloveEmbeddings = R6::R6Class(
   
   "PipeOpMakeGloveEmbeddings",
   
-  inherit = mlr3pipelines::PipeOpTaskPreprocSimple,
+  inherit = mlr3pipelines::PipeOpTaskPreproc,
   
   public = list(
     
@@ -46,38 +46,104 @@ PipeOpMakeGloveEmbeddings = R6::R6Class(
   
   private = list(
     
-    .transform_dt = function(dt, levels) {
+    .train_dt = function(dt, levels, target) {
+      
+      warn_default <- getOption("warn") 
+      options(warn = -1) 
+      
+      # Subset data by topic label (if present)
       
       if ("topic_label" %in% names(dt)) {
         
         dt_subsets <- lapply(
-          unique(dt$topic_label), 
+          sort(unique(dt$topic_label)), 
           function(i) data.table::copy(dt)[topic_label == i])
         
       } else dt_subsets <- list(data.table::copy(dt))
+
+      # Compute embeddings
       
-      emb_mats <- lapply(
+      embeddings <- lapply(
+        
         seq_along(dt_subsets),
+        
         function(i) {
+          
           mlr3misc::invoke(
             private$.make_glove_embeddings,
             .args = c(
               list(
-                text = dt_subsets[[i]]$text, 
+                subset = dt_subsets[[i]], 
                 stopwords = self$param_set$values$stopwords,
                 dimension = self$param_set$values$dimension), 
               self$param_set$get_values(tags = "glove")))})
       
-      loadings <- do.call(Matrix::bdiag, emb_mats)
-      loadings_dt <- data.table::as.data.table(as.matrix(loadings))
-      data.table::setnames(
-        loadings_dt, 
-        sprintf("embedding_%d", seq_along(loadings_dt)))
-
-      dt_new <- cbind(dt, loadings_dt)
+      self$state <- list(
+        terms = lapply(embeddings, function(i) i$terms),
+        word_vecs = lapply(embeddings, function(i) i$word_vecs))
       
+      # Compute embedding vectors and append
+      
+      dt_new <- private$.compute_doc_embeddings(
+        dt = dt,
+        doc_embeddings = lapply(embeddings, function(i) i$doc_embeddings))
+      
+      options(warn = warn_default)
+
       dt_new
       
+    },
+    
+    .predict_dt = function(dt, levels) {
+      
+      warn_default <- getOption("warn") 
+      options(warn = -1) 
+      
+      # Subset data by topic label (if present)
+      
+      if ("topic_label" %in% names(dt)) {
+        
+        dt_subsets <- lapply(
+          sort(unique(dt$topic_label)), 
+          function(i) data.table::copy(dt)[topic_label == i])
+        
+      } else dt_subsets <- list(data.table::copy(dt))
+      
+      # Compute embeddings
+      
+      doc_embeddings <- lapply(
+  
+        seq_along(dt_subsets),
+        
+        function(i) {
+          
+          tkns <- private$.tokenize(
+            dt_subsets[[i]]$text, 
+            stopwords = self$param_set$values$stopwords)
+          
+          dtm <- quanteda::dfm_match(
+            quanteda::dfm(tkns),
+            self$state$terms[[i]])
+          
+          dtm <- text2vec::normalize(dtm, norm = "l1")
+          
+          doc_embeddings <- as.matrix(dtm) %*% self$state$word_vecs[[i]]
+          
+          doc_embeddings <- data.table::as.data.table(doc_embeddings)
+          doc_embeddings[, doc_id := dt_subsets[[i]]$doc_id]
+          
+          })
+      
+      # Compute embedding vectors and append
+      
+      dt_new <- private$.compute_doc_embeddings(
+        dt = dt,
+        doc_embeddings = doc_embeddings)
+      
+      options(warn = warn_default)
+      
+      dt_new
+        
     },
     
     .tokenize = function(text, stopwords) {
@@ -102,7 +168,7 @@ PipeOpMakeGloveEmbeddings = R6::R6Class(
       
     },
     
-    .make_glove_embeddings = function(text, 
+    .make_glove_embeddings = function(subset, 
                                       stopwords,
                                       dimension,
                                       term_count_min,
@@ -112,21 +178,33 @@ PipeOpMakeGloveEmbeddings = R6::R6Class(
                                       convergence_tol,
                                       n_threads) {
       
-      tkns <- private$.tokenize(text, stopwords)
+      # Tokenize texts and create iterator
+      
+      tkns <- private$.tokenize(subset$text, stopwords)
       tkns_lst <- as.list(tkns)
       itkns <- text2vec::itoken(tkns_lst, progressbar = FALSE)
+      
+      # Create (pruned) vocabulary
       
       vcb <- text2vec::create_vocabulary(itkns)
       vcb <- text2vec::prune_vocabulary(vcb, term_count_min = term_count_min)
       
+      # Define vectorizer
+      
       vect <- text2vec::vocab_vectorizer(vcb)
+      
+      # Compute co-occurrence matrix
       
       tcm <- text2vec::create_tcm(
         itkns, 
         vect, 
         skip_grams_window = skip_grams_window) 
       
+      # Instantiate model
+      
       glv <- text2vec::GlobalVectors$new(rank = dimension, x_max = x_max)
+      
+      # Fit model
       
       wv_main <- glv$fit_transform(
         tcm, 
@@ -134,9 +212,13 @@ PipeOpMakeGloveEmbeddings = R6::R6Class(
         convergence_tol = convergence_tol, 
         n_threads = n_threads)  
       
+      # Combine vectors as proposed in original paper
+      
       wv_cntxt <- glv$components
       
-      word_vecs <-  wv_main + t(wv_cntxt)
+      word_vecs <- wv_main + t(wv_cntxt)
+      
+      # Compute document-term matrix
       
       dtm <- quanteda::dfm_match(
         quanteda::dfm(tkns),
@@ -147,7 +229,44 @@ PipeOpMakeGloveEmbeddings = R6::R6Class(
       
       dtm <- text2vec::normalize(dtm, norm = "l1")
       
-      as.matrix(dtm) %*% word_vecs
+      # Compute document-wise embeddings 
+      
+      doc_embeddings <- as.matrix(dtm) %*% word_vecs
+      
+      doc_embeddings <- data.table::as.data.table(doc_embeddings)
+      doc_embeddings[, doc_id := subset$doc_id]
+      
+      list(
+        terms = rownames(word_vecs), 
+        word_vecs = word_vecs, 
+        doc_embeddings = doc_embeddings)
+      
+    },
+    
+    .compute_doc_embeddings = function(dt, doc_embeddings) {
+      
+      # Save doc_id for join
+      
+      doc_id <- unlist(lapply(doc_embeddings, function(i) i$doc_id))
+      invisible(lapply(doc_embeddings, function(i) i[, doc_id := NULL]))
+      
+      # Create block matrix where each documents' embedding loadings depend
+      # on its topic label
+      
+      doc_embeddings <- lapply(doc_embeddings, as.matrix)
+      
+      loadings <- do.call(Matrix::bdiag, doc_embeddings)
+      
+      loadings_dt <- data.table::as.data.table(as.matrix(loadings))
+      data.table::setnames(
+        loadings_dt, 
+        sprintf("embedding_%d", seq_along(loadings_dt)))
+      
+      # Append back to data
+      
+      loadings_dt[, doc_id := ..doc_id]
+      
+      loadings_dt[dt, on = "doc_id"]
       
     }
   )

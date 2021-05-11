@@ -81,8 +81,8 @@ po_tm$param_set$values <- list(
   stopwords = make_stopwords(),
   init.type = "LDA")
 
-ppl_with_tm = Graph$new()$add_pipeop(po_tm)
-
+# ppl_with_tm = Graph$new()$add_pipeop(po_tm)
+# 
 # foo <- ppl_with_tm$train(task$clone())[[1]]
 # head(foo$data())
 # 
@@ -101,17 +101,18 @@ preproc_pipelines <- lapply(
   names(preproc_pipelines),
   
   function(i) {
-  
-    # Create selector pipeop for features to be piped into embedding extraction
     
+    # Create selector pipeop for features to be piped into embedding extraction
+
     po_sel_embeddings <- 
       mlr3pipelines::PipeOpSelect$new(id = "select_embedding")
     po_sel_embeddings_inv <- mlr3pipelines::po("select", id = "select_rest")
     
     po_sel_embeddings$param_set$values$selector <- switch(
       i,
-      ppl_with_tm = mlr3pipelines::selector_name(c("topic_label", "text")),
-      ppl_without_tm = mlr3pipelines::selector_name(c("text")))
+      ppl_with_tm = mlr3pipelines::selector_name(
+        c("doc_id", "topic_label", "text")),
+      ppl_without_tm = mlr3pipelines::selector_name(c("doc_id", "text")))
     
     po_sel_embeddings_inv$param_set$values$selector <- switch(
       i,
@@ -147,15 +148,10 @@ preproc_pipelines <- lapply(
     
     # Create graph from pre-processing steps
 
-    preproc_pipelines[[i]] %>>%
-      mlr3pipelines::gunion(list(
-        po_sel_embeddings %>>% 
-          po_embeddings,
-        po_sel_embeddings_inv %>>% 
-          po_nop)) %>>%
-      mlr3pipelines::po("featureunion", id = "unite_features") %>>%
-      po_sel_sentiment_analysis %>>%
-      po_set_colroles
+    preproc_pipelines[[i]]%>>%
+      po_embeddings #%>>%
+      # po_sel_sentiment_analysis %>>% 
+      # po_set_colroles 
       
   }
 )
@@ -167,6 +163,8 @@ if (FALSE) {
   foo <- preproc_pipelines[[1]]
   foofoo <- foo$train(task$clone()$filter(train_set))[[1]]
   head(foofoo$data())
+  phew <- foo$predict(task$clone()$filter(test_set))[[1]]
+  head(phew$data())
   
 }
 

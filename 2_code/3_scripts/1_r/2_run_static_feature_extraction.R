@@ -159,7 +159,6 @@ data_dt <- data.table::as.data.table(
 
 tweets_emojis <- data_dt[
   , .(doc_id, twitter_emojis)
-  # ][lengths(twitter_emojis) > 0L
     ][, twitter_emojis := paste(unlist(twitter_emojis), collapse = " "), 
       by = doc_id
       ][, twitter_emojis := as.character(twitter_emojis)
