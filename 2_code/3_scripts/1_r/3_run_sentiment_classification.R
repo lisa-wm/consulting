@@ -5,6 +5,14 @@
 # IN: corpus object of cleaned tweets and meta data
 # OUT: data with sentiment labels
 
+# SET TUNING & BENCHMARKING HYPERPARAMETERS ------------------------------------
+
+resampling_strategy_inner <- mlr3::rsmp("cv", folds = 3L)
+measure_inner <- mlr3::msr("classif.acc")
+tuner <- mlr3tuning::tnr("random_search")
+terminator <- mlr3tuning::trm("evals", n_evals = 30L)
+resampling_strategy_outer <- mlr3::rsmp("cv", folds = 3L)
+
 # MAKE CLASSIFICATION TASK -----------------------------------------------------
 
 # Load data
@@ -20,6 +28,7 @@ cols_to_keep <- c(
   "meta_party",
   "meta_bundesland",
   "meta_unemployment_rate",
+  "meta_share_pop_migration",
   "twitter_username",
   "twitter_year",
   "twitter_month")
@@ -58,8 +67,10 @@ po_tm$param_set$values <- list(
   text_field = "text",
   doc_grouping_var = c("twitter_username", "twitter_year", "twitter_month"),
   prevalence_vars_cat = list("meta_party", "meta_bundesland"),
-  prevalence_vars_smooth = list("meta_unemployment_rate"),
-  max.em.its = 5L,
+  prevalence_vars_smooth = list(
+    "meta_unemployment_rate", 
+    "meta_share_pop_migration"),
+  max.em.its = 10L,
   stopwords = make_stopwords(),
   init.type = "LDA")
 
@@ -160,8 +171,7 @@ graph_learners <- lapply(
             maxit = 10^3L,
             parallel = ifelse(parallel::detectCores() > 1L, TRUE, FALSE)),
           ranger = list(
-            num.trees = 200L,
-            min.node.size = ceiling(0.1 * task$nrow),
+            min.node.size = ceiling(0.05 * task$nrow),
             oob.error = FALSE,
             num.threads = parallel::detectCores()))
         
@@ -258,22 +268,6 @@ hyperparameters
 
 # CONDUCT TUNING ---------------------------------------------------------------
 
-# Define resampling strategy: 3-fold cross-validation
-
-resampling_strategy_inner <- mlr3::rsmp("cv", folds = 3L)
-
-# Define performance metric: accuracy
-
-measure_inner <- mlr3::msr("classif.acc")
-
-# Define tuner: random search
-
-tuner <- mlr3tuning::tnr("random_search")
-
-# Define terminator: number of evals
-
-terminator <- mlr3tuning::trm("evals", n_evals = 20L)
-
 # Set up autotuners for each pipeline
 
 # future::plan("multisession")
@@ -335,26 +329,30 @@ graph_learners$ppl_without_tm$param_set$values
 
 # EVALUATE PERFORMANCE ---------------------------------------------------------
 
-# Define resampling strategy: 3-fold cross-validation
+# Set up baseline: classifier that ignores features
 
-resampling_strategy_outer <- mlr3::rsmp("cv", folds = 3L)
+learner_featureless <- mlr3::lrn("classif.featureless")
+learners_with_baseline <- append(auto_tuners, learner_featureless)
+names(learners_with_baseline) <- c(names(graph_learners), "featureless")
 
-# Perform nested resampling
-
-nested_resampling_results <- lapply(
-  seq_along(graph_learners),
+invisible(lapply(
+  seq_along(learners_with_baseline), 
   function(i) {
-    mlr3::resample(
-      task = task, 
-      learner = auto_tuners[[i]], 
-      resampling = resampling_strategy_outer, 
-      store_models = TRUE)})
+    learners_with_baseline[[i]]$id <- names(learners_with_baseline)[i]}))
+
+# Calculate benchmark via nested resampling
+
+benchmark_design = mlr3::benchmark_grid(
+  tasks = task,
+  learners = learners_with_baseline,
+  resamplings = resampling_strategy_outer)
+
+set.seed(123L)
+benchmark_results <- mlr3::benchmark(benchmark_design)
 
 save_rdata_files(
-  nested_resampling_results, 
+  benchmark_results, 
   folder = "2_code/1_data/2_tmp_data",
   tmp = FALSE)
 
-sapply(
-  nested_resampling_results,
-  function(i) i$aggregate(mlr3::msr("classif.acc")))
+benchmark_results$aggregate(mlr3::msr("classif.acc"))
