@@ -10,7 +10,7 @@
 resampling_strategy_inner <- mlr3::rsmp("cv", folds = 3L)
 measure_inner <- mlr3::msr("classif.acc")
 tuner <- mlr3tuning::tnr("random_search")
-terminator <- mlr3tuning::trm("evals", n_evals = 30L)
+terminator <- mlr3tuning::trm("evals", n_evals = 50L)
 resampling_strategy_outer <- mlr3::rsmp("cv", folds = 3L)
 
 # MAKE CLASSIFICATION TASK -----------------------------------------------------
@@ -298,27 +298,27 @@ auto_tuners <- lapply(
 
 # Tune
 
-set.seed(123L)
-invisible(lapply(auto_tuners, function(i) i$train(task)))
-
-save_rdata_files(auto_tuners, folder = "2_code/1_data/2_tmp_data", tmp = FALSE)
+# set.seed(123L)
+# invisible(lapply(auto_tuners, function(i) i$train(task)))
+# 
+# save_rdata_files(auto_tuners, folder = "2_code/1_data/2_tmp_data", tmp = FALSE)
 
 # TRAIN FINAL MODELS -----------------------------------------------------------
 
-invisible(lapply(
-  seq_along(graph_learners),
-  function(i) {
-    graph_learners[[i]]$param_set$values <- 
-      auto_tuners[[i]]$tuning_instance$result_learner_param_vals
-    graph_learners[[i]]$train(task)}))
-
-save_rdata_files(
-  graph_learners, 
-  folder = "2_code/1_data/2_tmp_data", 
-  tmp = FALSE)
-
-graph_learners$ppl_with_tm$param_set$values
-graph_learners$ppl_without_tm$param_set$values
+# invisible(lapply(
+#   seq_along(graph_learners),
+#   function(i) {
+#     graph_learners[[i]]$param_set$values <- 
+#       auto_tuners[[i]]$tuning_instance$result_learner_param_vals
+#     graph_learners[[i]]$train(task)}))
+# 
+# save_rdata_files(
+#   graph_learners, 
+#   folder = "2_code/1_data/2_tmp_data", 
+#   tmp = FALSE)
+# 
+# graph_learners$ppl_with_tm$param_set$values
+# graph_learners$ppl_without_tm$param_set$values
 
 # predictions <- lapply(
 #   graph_learners,
