@@ -64,7 +64,7 @@ po_tm$param_set$values <- list(
   init.type = "LDA")
 
 preproc_pipelines <- list(
-  ppl_with_tm = Graph$new()$add_pipeop(po_tm), 
+  ppl_with_tm = mlr3pipelines::Graph$new()$add_pipeop(po_tm), 
   ppl_without_tm = mlr3pipelines::Graph$new()$add_pipeop(
     mlr3pipelines::po("nop", id = "start")))
 
@@ -76,34 +76,11 @@ preproc_pipelines <- lapply(
   
   function(i) {
     
-    # Create selector pipeop for features to be piped into embedding extraction
-
-    po_sel_embeddings <- 
-      mlr3pipelines::PipeOpSelect$new(id = "select_embedding")
-    po_sel_embeddings_inv <- mlr3pipelines::po("select", id = "select_rest")
-    
-    po_sel_embeddings$param_set$values$selector <- switch(
-      i,
-      ppl_with_tm = mlr3pipelines::selector_name(
-        c("doc_id", "topic_label", "text")),
-      ppl_without_tm = mlr3pipelines::selector_name(c("doc_id", "text")))
-    
-    po_sel_embeddings_inv$param_set$values$selector <- switch(
-      i,
-      ppl_with_tm = mlr3pipelines::selector_invert(
-        mlr3pipelines::selector_name(c("topic_label", "text"))),
-      ppl_without_tm = mlr3pipelines::selector_invert(
-        mlr3pipelines::selector_name(c("text"))))
-    
     # Create glove embedding pipeop (defined in separate function)
     
     po_embeddings <- PipeOpMakeGloveEmbeddings$new()
     po_embeddings$param_set$values$stopwords <- make_stopwords()
 
-    # Create trivial pipeop for features not piped into embedding extraction
-    
-    po_nop <- mlr3pipelines::po("nop", id = "pipe_along")
-    
     # Create selector pipeop for features to be piped into classification
     
     po_sel_sentiment_analysis <- 

@@ -30,7 +30,9 @@ The most important things to know here are:
 # Load required packages
 
 library(data.table)
+library(quanteda)
 library(mlr3verse)
+
 ```
 
 ### Perform train-test split
@@ -48,307 +50,41 @@ That is why we called topic labels and embeddings *dynamic* features.
 We want to avoid such bias and proceed as follows:
 
 1. We split the data without topic labels / embeddings into training and test data.
-2. We extract topics and compute topic-specific embeddings *separately* for both data sets.
+2. We extract topics and compute topic-specific embeddings for our training data, the results of which we can then apply to our test data.
+
+We first read the static features:
 
 ```{r read}
 
 # path <- ... (individual file location)
 
-twitter_corpus <- readRDS(sprintf("%s/twitter_corpus.RDS", path))
+twitter_features_static <- readRDS(sprintf("%s/twitter_features_static.RDS", path))
 
 ```
 
-```{r train-test}
+Next, we perform a **train-test split**:
+
+```{r read_sf}
 
 # Create a binary variable indicating whether the document belongs to training or test data (setting a seed for reproducibility and choosing 70% of data for training)
 
 set.seed(123)
 
-twitter_corpus$is_train <- rbinom(
-  n = quanteda::ndoc(twitter_corpus), 
+twitter_features_static$is_train <- rbinom(
+  n = nrow(twitter_features_static), 
   size = 1, 
   prob = 0.7)
 
-twitter_corpus_train <- quanteda::corpus_subset(twitter_corpus, is_train == 1)
-twitter_corpus_test <- quanteda::corpus_subset(twitter_corpus, is_train == 0)
+# Convert target variable to a factor
 
-quanteda::ndoc(twitter_corpus_train) + quanteda::ndoc(twitter_corpus_test) == 
-  quanteda::ndoc(twitter_corpus)
+twitter_features_static$label <- as.factor(twitter_features_static$label)
 
-```
+# Perform split
 
-Now we compute the **topic-specific embeddings**.
-For the sake of clarity, we have collected all operations performed in the demos on topic modeling and word embeddings into a single function in the background (keeping the number of topics and word embeddings, respectively, unchanged).
-We can now call this function on both training and test data:
+data_train <- twitter_features_static[is_train == 1]
+data_test <- twitter_features_static[is_train == 0]
 
-```{r fun_tm, eval=FALSE}
-
-make_topic_embeddings <- function(twitter_corpus) {
-  
-  ...
-  
-}
-
-```
-
-
-```{r fun_tm_2, include=FALSE}
-
-make_topic_embeddings <- function(twitter_corpus) {
-  
-  # TOPIC MODELING
-  
-  quanteda::docvars(twitter_corpus)$text <- quanteda::texts(twitter_corpus)
-  
-  twitter_tokens <- quanteda::tokens(
-    twitter_corpus,
-    what = "word",
-    remove_symbols = TRUE,
-    remove_numbers = TRUE,
-    remove_separators = TRUE,
-    split_hyphens = TRUE,
-    include_docvars = TRUE)
-  
-  twitter_tokens <- quanteda::tokens_wordstem(
-    twitter_tokens, 
-    language = "german")
-  
-  twitter_tokens <- quanteda::tokens_tolower(twitter_tokens)
-  
-  stopwords <- readRDS(sprintf("%s/stopwords.RDS", path))
-
-  twitter_tokens <- quanteda::tokens_remove(
-    twitter_tokens,
-    pattern = stopwords)
-  
-  twitter_tokens <- quanteda::tokens_select(twitter_tokens, min_nchar = 3)
-  
-  twitter_dfm <- quanteda::dfm(twitter_tokens)
-  
-  twitter_dfm <- quanteda::dfm_select(
-    twitter_dfm,
-    names(quanteda::topfeatures(twitter_dfm, n = 300)))
-  
-  prevalence_formula <- as.formula(paste(
-    "", 
-    "party + bundesland", 
-    sep = "~"))
-  
-  twitter_dfm <- quanteda::dfm_subset(
-    twitter_dfm,
-    !is.na(party) & !is.na(bundesland) & !is.na(unemployment_rate) &
-      !is.na(share_pop_migration))
-  
-  twitter_stm <- quanteda::convert(twitter_dfm, to = "stm")
-  
-  topic_model <- stm::stm(
-    documents = twitter_stm$documents,
-    vocab = twitter_stm$vocab,
-    data = twitter_stm$meta,
-    K = 3,
-    prevalence = prevalence_formula,
-    gamma.prior = "L1",
-    seed = 1,
-    max.em.its = 15,
-    init.type = "Spectral",
-    verbose = FALSE)
-  
-  topic_probs <- stm::make.dt(topic_model)[
-    , doc_id := names(twitter_stm$documents)
-      ][, docnum := NULL]
-  
-  topic_cols <- names(topic_probs)[startsWith(names(topic_probs), "Topic")]
-
-  topic_probs[
-    , `:=` (
-      max_topic_score = max(.SD, na.rm = TRUE),
-      topic_label = which.max(.SD)),
-    .SDcols = topic_cols,
-    by = doc_id]
-  
-  twitter_docvars <- data.table::as.data.table(
-    cbind(
-      doc_id = quanteda::docid(twitter_corpus),
-      quanteda::docvars(twitter_corpus)), 
-    key = "doc_id")
-
-  twitter_docvars <- topic_probs[
-    twitter_docvars, on = "doc_id"
-      ][, c(topic_cols) := NULL]
-  
-  twitter_corpus_with_topics <- twitter_corpus
-
-  quanteda::docvars(twitter_corpus_with_topics) <- as.data.frame(twitter_docvars)
-  
-  twitter_corpus <- twitter_corpus_with_topics
-  
-  # EMBEDDINGS
-  
-  twitter_corpus$topic_label <- ifelse(
-    is.na(twitter_corpus$topic_label),
-    99, 
-    twitter_corpus$topic_label)
-
-  twitter_corpus_subsets <- lapply(
-    unique(twitter_corpus$topic_label),
-    function(i) quanteda::corpus_subset(twitter_corpus, topic_label == i))
-  
-  make_glove_embeddings <- function(text, stopwords, glove_args) {
-  
-    tokens <- tokenize(text, stopwords)
-    vocabulary <- make_vocab(tokens, glove_args)
-    glove <- make_glove_instance(vocabulary, glove_args)
-    word_vectors <- get_word_vectors(tokens, glove, glove_args)
-    doc_embeddings <- get_doc_embeddings(tokens, word_vectors)
-    
-    doc_embeddings
-    
-  }
-  
-  tokenize <- function(text, stopwords) {
-  
-    tokens <- quanteda::tokens(
-      text,
-      what = "word",
-      remove_symbols = TRUE,
-      remove_punct = TRUE,
-      remove_numbers = TRUE,
-      remove_separators = TRUE,
-      split_hyphens = TRUE,
-      include_docvars = TRUE)
-    
-    tokens <- quanteda::tokens_wordstem(tokens, language = "german")
-    
-    tokens <- quanteda::tokens_remove(
-      quanteda::tokens_tolower(tokens),
-      pattern = stopwords)
-    
-    tokens <- quanteda::tokens_select(tokens, min_nchar = 3)
-    
-    tokens
-  
-  }
-  
-  make_vocab <- function(tokens, term_count_min) {
-    
-    tokens <- as.list(tokens)
-    itokens <- text2vec::itoken(tokens, progressbar = FALSE)
-    vocab <- text2vec::create_vocabulary(itokens)
-    vocab <- text2vec::prune_vocabulary(vocab, term_count_min = term_count_min)
-    
-    list(itokens = itokens, vocab = vocab)
-    
-  }
-  
-  make_glove_instance <- function(vocabulary, skip_grams_window, dimension, x_max) {
-  
-    vect <- text2vec::vocab_vectorizer(vocabulary$vocab)
-    
-    tcm <- text2vec::create_tcm(
-      vocabulary$itokens, 
-      vect, 
-      skip_grams_window = skip_grams_window) 
-    
-    glove_instance <- text2vec::GlobalVectors$new(rank = dimension, x_max = x_max)
-    
-    list(tcm = tcm, glove_instance = glove_instance)
-    
-  }
-  
-  get_word_vectors <- function(tokens, glove, iterations, convergence_tol) {
-  
-    wv_main <- glove$glove_instance$fit_transform(
-      glove$tcm, 
-      n_iter = iterations, 
-      convergence_tol = convergence_tol)  
-
-    wv_context <- glove$glove_instance$components
-    wv_main + t(wv_context)
-  
-  }
-  
-  get_doc_embeddings <- function(tokens, word_vectors) {
-  
-    dtm <- quanteda::dfm_match(
-      quanteda::dfm(tokens),
-      rownames(word_vectors))
-    
-    dtm <- text2vec::normalize(dtm, norm = "l1")
-    
-    as.matrix(dtm) %*% word_vectors
-  
-  }
-  
-  make_glove_embeddings <- function(text, 
-                                  stopwords, 
-                                  term_count_min,
-                                  skip_grams_window, 
-                                  dimension,
-                                  x_max,
-                                  iterations, 
-                                  convergence_tol) {
-  
-    tokens <- tokenize(text, stopwords)
-    vocabulary <- make_vocab(tokens, term_count_min)
-    glove <- make_glove_instance(vocabulary, skip_grams_window, dimension, x_max)
-    word_vectors <- get_word_vectors(tokens, glove, iterations, convergence_tol)
-    doc_embeddings <- get_doc_embeddings(tokens, word_vectors)
-    
-    doc_embeddings
-    
-  }
-  
-  embeddings <- lapply(
-    twitter_corpus_subsets,
-    function(i) {make_glove_embeddings(
-      quanteda::texts(i),
-      stopwords = stopwords,
-      term_count_min = 2,
-      skip_grams_window = 5,
-      dimension = 3,
-      x_max = 10,
-      iterations = 10,
-      convergence_tol = 0.001)})
-  
-  embedding_matrix <- do.call(Matrix::bdiag, embeddings)
-  
-  embeddings_dt <- data.table::as.data.table(as.matrix(embedding_matrix))
-
-  data.table::setnames(
-    embeddings_dt,
-    sprintf("embedding_%d", seq_along(embeddings_dt)))
-  
-  embeddings_dt$doc_id <- unlist(lapply(
-    twitter_corpus_subsets, 
-    function(i) quanteda::docvars(i)$doc_id))
-  
-  data.table::setkey(embeddings_dt, "doc_id")
-  
-  embeddings_dt
-  
-}
-
-```
-
-```{r tm_emb, warning=FALSE, results='hide'}
-
-embeddings_train <- make_topic_embeddings(twitter_corpus_train)
-embeddings_test <- make_topic_embeddings(twitter_corpus_test)
-
-```
-
-Next, we append the static features:
-
-```{r read_sf}
-
-# Read data
-
-twitter_features_static <- readRDS(sprintf("%s/twitter_features_static.RDS", path))
-
-# Append
-
-data_train <- twitter_features_static[embeddings_train, on = "doc_id"]
-data_test <- twitter_features_static[embeddings_test, on = "doc_id"]
+nrow(data_train) + nrow(data_test) == nrow(twitter_features_static)
 
 # Inspect
 
@@ -356,28 +92,359 @@ list(train = head(data_train), test = head(data_test))
 
 ```
 
+### Compute embeddings
+
+Now we compute the **topic-specific embeddings**.
+For the sake of clarity we have omitted the actual computation for this demo as things become a bit lengthy at this point code-wise.
+
+The basic idea is to compute topic labels and embeddings for the training data, just as we have seen before (using the same number of topics and dimensions, respectively), and storing the STM and embedding word vectors such that they can be used for prediction at test time.
+If you are interested in how this implemented, have a look at the [source code](https://github.com/lisa-wm/nlp-twitter-r-bert/tree/main/demos) of this demo.
+
+```{r tm_emb, eval=FALSE}
+
+embedding_values_train <- ...
+embedding_values_test <- ...
+
+```
+
+```{r tm, include=FALSE}
+
+# Load corpus and perform train-test split
+
+idx_train <- data_train$doc_id
+idx_test <- data_test$doc_id
+
+twitter_corpus <- readRDS(sprintf("%s/twitter_corpus.RDS", path))
+
+# Tokenize corpus
+
+twitter_tokens <- quanteda::tokens(
+  twitter_corpus,
+  what = "word",
+  remove_symbols = TRUE,
+  remove_numbers = TRUE,
+  remove_separators = TRUE,
+  split_hyphens = TRUE,
+  include_docvars = TRUE)
+
+twitter_tokens <- quanteda::tokens_wordstem(
+  twitter_tokens, 
+  language = "german")
+
+twitter_tokens <- quanteda::tokens_keep(
+  twitter_tokens,
+  pattern = c("[:upper:]([:lower:])+"),
+  valuetype = "regex",
+  case_insensitive = FALSE)
+
+twitter_tokens <- quanteda::tokens_tolower(twitter_tokens)
+
+stopwords <- readRDS(sprintf("%s/stopwords.RDS", path))
+
+twitter_tokens <- quanteda::tokens_remove(
+  twitter_tokens,
+  pattern = stopwords)
+
+twitter_tokens <- quanteda::tokens_select(twitter_tokens, min_nchar = 3)
+
+# Create dfm and define prevalence formula
+
+twitter_dfm <- quanteda::dfm(twitter_tokens)
+
+prevalence_formula <- as.formula(paste(
+  "", 
+  "party + bundesland", 
+  sep = "~"))
+
+twitter_dfm <- quanteda::dfm_subset(
+  twitter_dfm,
+  !is.na(party) & !is.na(bundesland) & !is.na(unemployment_rate) &
+    !is.na(share_pop_migration))
+
+twitter_dfm <- quanteda::dfm_select(
+  twitter_dfm,
+  names(quanteda::topfeatures(twitter_dfm, n = 300)))
+
+# Split data in train and test set
+
+twitter_dfm_train <- quanteda::dfm_subset(
+  twitter_dfm, 
+  quanteda::docnames(twitter_dfm) %in% idx_train)
+
+twitter_dfm_test <- quanteda::dfm_subset(
+  twitter_dfm, 
+  quanteda::docnames(twitter_dfm) %in% idx_test)
+
+# Create stm objects
+
+twitter_stm_train <- quanteda::convert(twitter_dfm_train, to = "stm")
+twitter_stm_test <- quanteda::convert(twitter_dfm_test, to = "stm")
+
+# Fit model
+
+topic_model <- stm::stm(
+  documents = twitter_stm_train$documents,
+  vocab = twitter_stm_train$vocab,
+  data = twitter_stm_train$meta,
+  K = 3,
+  prevalence = prevalence_formula,
+  gamma.prior = "L1",
+  seed = 1,
+  max.em.its = 15,
+  init.type = "Spectral",
+  verbose = FALSE)
+
+# Append topic probabilities
+
+topic_labels_train <- stm::make.dt(topic_model)[
+  , doc_id := names(twitter_stm_train$documents)
+  ][, docnum := NULL]
+
+topic_labels_train[
+  , topic_label := which.max(.SD), 
+  .SDcols = sprintf("Topic%d", seq_len(3L)), 
+  by = doc_id
+  ][, sprintf("Topic%d", seq_len(3L)) := NULL]
+
+# Predict topic probabilities for test data
+
+twitter_stm_test <- stm::alignCorpus(
+  new = twitter_stm_test,
+  old.vocab = topic_model$vocab)
+
+topic_labels_test <- data.table::as.data.table(
+  stm::fitNewDocuments(
+    model = topic_model,
+    documents = twitter_stm_test$documents,
+    newData = twitter_stm_test$meta,
+    origData = twitter_stm_train$meta,
+    prevalence = prevalence_formula)$theta)
+
+topic_labels_test[
+  , doc_id := names(twitter_stm_test$documents)
+  ][, topic_label := which.max(.SD), 
+    .SDcols = sprintf("V%d", seq_len(3L)), 
+    by = doc_id
+    ][, sprintf("V%d", seq_len(3L)) := NULL]
+
+# Feed topic information back in corpus
+
+twitter_corpus_train <- quanteda::corpus_subset(
+  twitter_corpus, 
+  quanteda::docnames(twitter_corpus) %in% idx_train)
+
+twitter_docvars_train <- data.table::as.data.table(
+  cbind(
+    doc_id = quanteda::docid(twitter_corpus_train),
+    quanteda::docvars(twitter_corpus_train)), 
+  key = "doc_id")
+
+twitter_docvars_train <- topic_labels_train[
+  twitter_docvars_train, on = "doc_id"]
+
+quanteda::docvars(twitter_corpus_train) <- as.data.frame(twitter_docvars_train)
+
+twitter_corpus_test <- quanteda::corpus_subset(
+  twitter_corpus, 
+  quanteda::docnames(twitter_corpus) %in% idx_test)
+
+twitter_docvars_test <- data.table::as.data.table(
+  cbind(
+    doc_id = quanteda::docid(twitter_corpus_test),
+    quanteda::docvars(twitter_corpus_test)), 
+  key = "doc_id")
+
+twitter_docvars_test <- topic_labels_test[
+  twitter_docvars_test, on = "doc_id"]
+
+quanteda::docvars(twitter_corpus_test) <- as.data.frame(twitter_docvars_test)
+
+```
+
+```{r emb, include=FALSE}
+
+# Train embeddings
+
+# Recode NA labels
+
+twitter_corpus_train$topic_label <- ifelse(
+  is.na(twitter_corpus_train$topic_label),
+  99, 
+  twitter_corpus_train$topic_label)
+
+# Subset corpus
+
+twitter_corpus_subsets_train <- lapply(
+  sort(unique(twitter_corpus_train$topic_label)),
+  function(i) quanteda::corpus_subset(twitter_corpus_train, topic_label == i))
+
+# Compute embeddings
+
+embeddings_train <- lapply(
+  
+  twitter_corpus_subsets_train,
+  
+  function(i) {
+    
+    tkns <- quanteda::tokens(
+      i,
+      what = "word",
+      remove_symbols = TRUE,
+      remove_punct = TRUE,
+      remove_numbers = TRUE,
+      remove_separators = TRUE,
+      split_hyphens = TRUE,
+      include_docvars = TRUE)
+      
+    tkns <- quanteda::tokens_wordstem(tkns, language = "german")
+      
+    tkns <- quanteda::tokens_remove(
+      quanteda::tokens_tolower(tkns),
+      pattern = stopwords)
+    
+    tkns_lst <- as.list(tkns)
+    itkns <- text2vec::itoken(tkns_lst, progressbar = FALSE)
+
+    vcb <- text2vec::create_vocabulary(itkns)
+    vcb <- text2vec::prune_vocabulary(vcb, term_count_min = 2)
+    vect <- text2vec::vocab_vectorizer(vcb)
+    
+    tcm <- text2vec::create_tcm(itkns, vect, skip_grams_window = 5) 
+    glv <- text2vec::GlobalVectors$new(rank = 3, x_max = 10)
+    wv_main <- glv$fit_transform(tcm, n_iter = 10, convergence_tol = 0.01)  
+    wv_cntxt <- glv$components
+    
+    word_vecs <- wv_main + t(wv_cntxt)
+
+    dtm <- quanteda::dfm_match(quanteda::dfm(tkns), rownames(word_vecs))
+    dtm <- text2vec::normalize(dtm, norm = "l1")
+
+    doc_embeddings <- as.matrix(dtm) %*% word_vecs
+    
+    doc_embeddings <- data.table::as.data.table(doc_embeddings)
+    doc_embeddings[, doc_id := quanteda::docnames(i)]
+    
+    list(
+      terms = rownames(word_vecs), 
+      word_vecs = word_vecs, 
+      doc_embeddings = doc_embeddings)
+    
+})
+
+# Create features for training data
+
+doc_embeddings_train <- lapply(embeddings_train, function(i) i$doc_embeddings)
+doc_id_train <- unlist(lapply(doc_embeddings_train, function(i) i$doc_id))
+invisible(lapply(
+  doc_embeddings_train, 
+  function(i) i[, doc_id := NULL]))
+
+doc_embeddings_train <- lapply(doc_embeddings_train, as.matrix)
+embedding_values_train <- do.call(Matrix::bdiag, doc_embeddings_train)
+embedding_values_train <- data.table::as.data.table(as.matrix(embedding_values_train))
+data.table::setnames(
+  embedding_values_train, 
+  sprintf("embedding_%d", seq_along(embedding_values_train)))
+
+embedding_values_train[, doc_id := ..doc_id_train]
+
+# Compute embeddings for test data
+
+twitter_corpus_test$topic_label <- ifelse(
+  is.na(twitter_corpus_test$topic_label),
+  99, 
+  twitter_corpus_test$topic_label)
+
+# Subset corpus
+
+twitter_corpus_subsets_test <- lapply(
+  sort(unique(twitter_corpus_test$topic_label)),
+  function(i) quanteda::corpus_subset(twitter_corpus_test, topic_label == i))
+
+embeddings_test <- lapply(
+  
+  seq_along(twitter_corpus_subsets_test),
+  
+  function(i) {
+    
+    tkns <- quanteda::tokens(
+      twitter_corpus_subsets_test[[i]],
+      what = "word",
+      remove_symbols = TRUE,
+      remove_punct = TRUE,
+      remove_numbers = TRUE,
+      remove_separators = TRUE,
+      split_hyphens = TRUE,
+      include_docvars = TRUE)
+      
+    tkns <- quanteda::tokens_wordstem(tkns, language = "german")
+      
+    tkns <- quanteda::tokens_remove(
+      quanteda::tokens_tolower(tkns),
+      pattern = stopwords)
+
+    dtm <- quanteda::dfm_match(quanteda::dfm(tkns), embeddings_train[[i]]$terms)
+    dtm <- text2vec::normalize(dtm, norm = "l1")
+
+    doc_embeddings <- as.matrix(dtm) %*% embeddings_train[[i]]$word_vecs
+    
+    doc_embeddings <- data.table::as.data.table(doc_embeddings)
+    doc_embeddings[
+      , doc_id := quanteda::docnames(twitter_corpus_subsets_test[[i]])]
+
+    doc_embeddings
+    
+})
+
+doc_id_test <- unlist(lapply(embeddings_test, function(i) i$doc_id))
+invisible(lapply(
+  embeddings_test, 
+  function(i) i[, doc_id := NULL]))
+
+doc_embeddings_test <- lapply(embeddings_test, as.matrix)
+embedding_values_test <- do.call(Matrix::bdiag, doc_embeddings_test)
+embedding_values_test <-
+  data.table::as.data.table(as.matrix(embedding_values_test))
+data.table::setnames(
+  embedding_values_test, 
+  sprintf("embedding_%d", seq_along(embedding_values_test)))
+
+embedding_values_test[, doc_id := ..doc_id_test]
+
+```
+
+```{r combine}
+
+# Collect all static and dynamic features
+
+data_train <- embedding_values_train[data_train, on = "doc_id"]
+data_test <- embedding_values_test[data_test, on = "doc_id"]
+
+```
+
 ### Create classification task
 
 Now we are all set for sentiment analysis.
-The first step is to create a **task** object (note that we need to make sure the `doc_id` variable, which is not a feature but merely an identifier, is exempt from the features):
+The first step is to create a **task** object:
 
 ```{r tsk}
-
-# Convert target variable to a factor
-
-data_train$label <- as.factor(data_train$label)
 
 # Create task object
 
 task <- mlr3::TaskClassif$new("sentiment_analysis", data_train, target = "label")
 
-# Set the role of doc_id to naming variable
-
-task$set_col_roles("doc_id", "name")
-
 # Inspect
 
 task
+
+```
+Note that we need to make sure the `doc_id` variable, which is not a feature but merely an identifier, is exempt from the features.
+
+```{r colrole}
+
+# Set the role of doc_id to naming variable
+
+task$set_col_roles("doc_id", "name")
 
 ```
 
@@ -445,7 +512,7 @@ list(predictions = predictions, confusion = predictions$confusion)
 
 ```
 
-Our learner looks like it's doing okay but not too accurate (it seems to struggle with the positive observations in particular). 
+Our learner looks like it's doing pretty okay but not extremely accurate (it seems to struggle with the positive observations in particular). 
 Let's compute some **performance metrics** (list all available metrics with `mlr_measures`) to get a better picture:
 
 ```{r eval}
@@ -480,9 +547,9 @@ For now, though, we stick with our logistic regression model.
 By splitting the data into train and test sets we deliberately forgo parts of the data for training (rule of thumb: more data, better model) so we had some spare observations for evaluation. 
 This allowed us to obtain a (slightly pessimistic) performance estimation.
 
-In the end we would typically train the learner on the entire data set and use the resulting, final model for predictions of future unseen data:
+In the end we would typically train the learner on the entire data set and use the resulting, **final model** for predictions of future unseen data:
 
-```{r final}
+```{r final, warning=FALSE}
 
 # Create task object
 
