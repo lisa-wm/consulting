@@ -127,10 +127,6 @@ emojis_ranking <- data.table::fread(
     "positive"),
   encoding = "UTF-8")
 
-# TODO CHECK THIS OUT !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
-emojis <- rtweet::emojis
-
 # Transform to appropriate format and convert to int representation to match
 # with tweets
 
