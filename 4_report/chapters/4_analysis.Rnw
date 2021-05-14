@@ -3,6 +3,16 @@
 
 % ------------------------------------------------------------------------------
 
+\subsubsection{Data Collection}
+\label{data_collection}
+
+% ------------------------------------------------------------------------------
+
+\subsubsection{Data Pre-Processing}
+\label{data_preproc}
+
+% ------------------------------------------------------------------------------
+
 \subsection{Standard Machine Learning Solution}
 \label{tssa_ml}
 

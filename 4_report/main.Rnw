@@ -219,12 +219,12 @@ Data, code and figures are provided in electronic form.
 
 We hereby declare that the report submitted is our own unaided work. All direct 
 or indirect sources used are acknowledged as references. We are aware that the 
-Thesis in digital form can be examined for the use of unauthorized aid and in 
+report in digital form can be examined for the use of unauthorized aid and in 
 order to determine whether the report as a whole or parts incorporated in it may 
 be deemed as plagiarism. For the comparison of our work with existing sources we 
 agree that it shall be entered in a database where it shall also remain after 
-examination, to enable comparison with future Theses submitted. Further rights 
-of reproduction and usage, however, are not granted here. This paper was no-t 
+examination, to enable comparison with future reports submitted. Further rights 
+of reproduction and usage, however, are not granted here. This paper was not 
 previously presented to another examination board and has not been published. 
 
 % ------------------------------------------------------------------------------
