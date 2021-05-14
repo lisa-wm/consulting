@@ -8,40 +8,26 @@
 \renewcommand{\labelitemii}{$\circ$}
 \renewcommand{\labelitemiii}{$\circ$}
 
-\newcommand{\topo}{\mathcal{T}}
-\newcommand{\mani}{\mathcal{M}}
-\newcommand{\N}{\mathbb{N}}
-\newcommand{\R}{\mathbb{R}}
-\newcommand{\RD}{\mathbb{R}^D}
-\newcommand{\Rd}{\mathbb{R}^d}
-\newcommand{\setN}{\{1, 2, ..., N\}}
-\newcommand{\X}{\mathcal{X}}
-\newcommand{\x}{\bm{x}}
-\newcommand{\Y}{\mathcal{Y}}
-\newcommand{\y}{\bm{y}}
-
-\usepackage[a4paper,width = 150mm, top = 25mm, bottom = 25mm, 
-bindingoffset = 6mm]{geometry}
+\usepackage[a4paper, width = 170mm, top = 20mm, bottom = 20mm, 
+bindingoffset = 0mm]{geometry}
 \usepackage[utf8]{inputenc}
 \usepackage[round, comma]{natbib}
 \usepackage{url}
 \usepackage[font = footnotesize]{caption}
 \usepackage{subcaption}
+\captionsetup[subfigure]{justification=justified,singlelinecheck=false}
 \usepackage{csquotes} \MakeOuterQuote{"}
 \usepackage{ragged2e}
 \usepackage{array}
 \usepackage{tabularx}
-\usepackage{amsmath}
+\usepackage[fleqn]{amsmath}
 \usepackage{bm}
 \usepackage{amssymb}
-\usepackage{amsthm }
+\usepackage{amsthm}
 \usepackage{graphicx}
 \usepackage{float}
 \usepackage[export]{adjustbox}
 \usepackage[table]{xcolor}
-% \usepackage{tikz}
-%   \usetikzlibrary{trees, arrows, decorations.pathmorphing, backgrounds, 
-%   positioning, fit, petri, shapes}
 \usepackage{algorithm}
 \usepackage{algorithmic}
 \usepackage{xcolor, listings}
@@ -50,8 +36,16 @@ bindingoffset = 6mm]{geometry}
 \newcommand{\changefont}{%
     \fontsize{8}{11}\selectfont
 }
+
 \usepackage{refcount}
-\usepackage[hang,flushmargin]{footmisc} 
+\usepackage[hang, flushmargin, bottom]{footmisc} 
+\usepackage{hyperref}
+\hypersetup{
+  colorlinks = true,
+  linkcolor = .,
+  urlcolor = .,
+  citecolor = .,
+  bookmarks = true}
 
 \newenvironment{tight_enumerate}{
 \begin{enumerate}
@@ -82,12 +76,12 @@ German MPs}}
 \begin{center}
     
 \LARGE
-Seminar Report
+Statistical Consulting
     
 \vspace{0.5cm}
       
 \rule{\textwidth}{1.5pt}
-\LARGE 
+\Huge
 \textbf{Topic-Specific Sentiment Analysis for Tweets by German MPs}
 \rule{\textwidth}{1.5pt}
    
@@ -95,20 +89,29 @@ Seminar Report
       
 \large
 Department of Statistics \\
-Ludwig-Maximilians-Universität München
+Ludwig-Maximilians-Universität München 
+
+\vfill
+
+\textcolor{red}{Munich, month day\textsuperscript{th}, 2021}
       
-\vspace{3.5cm}
+\vfill
 
 \includegraphics[width = 0.4\textwidth]{figures/sigillum.png}
 
-\vspace{3.5cm}
+\vfill
 
-\large
-By Asmik Nalmpatian and Lisa Wimmer \\
-In Cooperation with Prof. Dr. Paul Thurner (Department of Political Science) \\
-Under the supervision of Matthias Aßenmacher, Ph.D., and Prof. Dr. Christian 
-Heumann (Department of Statistics) \\
-Munich, month day\textsuperscript{th}, 2021
+\begin{tabular}{rl}
+  Authors & Asmik Nalmpatian \\
+  & Lisa Wimmer \\
+  & \\
+  Project Partner & Prof. Dr. Paul Thurner \\
+  & \textit{Department of Political Science} \\
+  & \\
+  Supervisors & Matthias Aßenmacher, Ph.D. \\
+  & Prof. Dr. Christian Heumann \\
+  & \textit{Department of Statistics}
+\end{tabular}
 
 \end{center}
 \end{titlepage}
@@ -124,7 +127,7 @@ Munich, month day\textsuperscript{th}, 2021
 \vspace{0.5cm} \\
 \noindent
 \normalsize
-\input{chapters/abstract.Rnw}
+\input{chapters/0_abstract.Rnw}
 \newpage
 
 \tableofcontents
@@ -141,35 +144,31 @@ Munich, month day\textsuperscript{th}, 2021
     
 \section{Introduction}
 \label{intro}
-\input{chapters/introduction.Rnw}
+\input{chapters/1_introduction.Rnw}
 
 \section{Project Outline}
 \label{project}
-\input{chapters/project.Rnw}
+\input{chapters/2_project.Rnw}
 
-\section{Theoretical Background}
+\section{General Theoretical Context}
 \label{theory}
-\input{chapters/theory.Rnw}
+\input{chapters/3_theory.Rnw}
 
-\section{Data}
-\label{data}
-\input{chapters/data.Rnw}
+\section{Analytical Proposal}
+\label{analysis}
+\input{chapters/4_analysis.Rnw}
 
-\section{Part I: Topic-Specific Sentiment Analysis in \texttt{R}}
-\label{rpipeline}
-\input{chapters/rpipeline.Rnw}
-
-\section{Part II: Topic-Specific Sentiment Analysis with \texttt{BERT}}
-\label{bert}
-\input{chapters/bert.Rnw}
+\section{Knowledge Transfer}
+\label{teaching}
+\input{chapters/5_teaching.Rnw}
 
 \section{Discussion}
 \label{discussion}
-\input{chapters/discussion.Rnw}
+\input{chapters/6_discussion.Rnw}
 
 \section{Conclusion}
 \label{conclusion}
-\input{chapters/conclusion.Rnw}
+\input{chapters/7_conclusion.Rnw}
 
 \newpage
 
@@ -219,10 +218,13 @@ Data, code and figures are provided in electronic form.
 \normalsize
 
 We hereby declare that the report submitted is our own unaided work. All direct 
-or indirect sources used are acknowledged as references. We are aware that the Thesis in digital form can be examined for the use of unauthorized aid and in order to determine whether the report as a whole or parts incorporated in it may be deemed as plagiarism. For the comparison of our work with existing sources we 
+or indirect sources used are acknowledged as references. We are aware that the 
+Thesis in digital form can be examined for the use of unauthorized aid and in 
+order to determine whether the report as a whole or parts incorporated in it may 
+be deemed as plagiarism. For the comparison of our work with existing sources we 
 agree that it shall be entered in a database where it shall also remain after 
 examination, to enable comparison with future Theses submitted. Further rights 
-of reproduction and usage, however, are not granted here. This paper was not 
+of reproduction and usage, however, are not granted here. This paper was no-t 
 previously presented to another examination board and has not been published. 
 
 % ------------------------------------------------------------------------------

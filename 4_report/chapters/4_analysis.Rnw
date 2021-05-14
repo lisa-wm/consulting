@@ -1,0 +1,50 @@
+\subsection{Data}
+\label{data}
+
+% ------------------------------------------------------------------------------
+
+\subsection{Standard Machine Learning Solution}
+\label{tssa_ml}
+
+% ------------------------------------------------------------------------------
+
+\subsubsection{Methodology}
+\label{tssa_ml_method}
+
+\textbf{Automated machine learning pipeline} \\
+
+foo
+\\
+
+\textbf{Methodological concepts} \\
+
+foo
+
+% ------------------------------------------------------------------------------
+
+\subsubsection{Results}
+\label{tssa_ml_results}
+
+% ------------------------------------------------------------------------------
+
+\subsection{Deep Learning Solution}
+\label{tssa_dl}
+
+% ------------------------------------------------------------------------------
+
+\subsubsection{Methodology}
+\label{tssa_dl_method}
+
+\textbf{Deep transfer learning} \\
+
+foo
+\\
+
+\textbf{BERT} \\
+
+foo
+
+% ------------------------------------------------------------------------------
+
+\subsubsection{Results}
+\label{tssa_dl_results}

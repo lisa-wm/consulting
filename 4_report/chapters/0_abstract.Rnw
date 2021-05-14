@@ -185,6 +185,6 @@
   or at least those that are selected with different polarities)
 \end{itemize}
 
-\begin{center}
-  \includegraphics[width = \textwidth]{figures/sketch-part-I-pipeline}
-\end{center}
+% \begin{center}
+%   \includegraphics[width = \textwidth]{figures/sketch-part-I-pipeline}
+% \end{center}

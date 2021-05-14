@@ -1,0 +1,7 @@
+\subsection{Static Material}
+\label{material}
+
+% ------------------------------------------------------------------------------
+
+\subsection{Live Teaching}
+\label{live}

@@ -1,0 +1,7 @@
+\subsection{Analytical Proposal}
+\label{discussion_analysis}
+
+% ------------------------------------------------------------------------------
+
+\subsection{Knowledge Transfer}
+\label{discussion_analysis}

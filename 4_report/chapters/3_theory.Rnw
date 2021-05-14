@@ -1,0 +1,16 @@
+\subsection{Topic Modeling}
+\label{tm}
+
+General context: topic modeling, sentiment analysis, why both combined
+
+TSSA as classification task that can be solved with ml oder dl
+
+% ------------------------------------------------------------------------------
+
+\subsection{Sentiment Analysis}
+\label{sa}
+
+% ------------------------------------------------------------------------------
+
+\subsection{Topic-Specific Sentiment Analysis (TSSA)}
+\label{tssa}

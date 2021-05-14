@@ -3,5 +3,5 @@
 
 % ------------------------------------------------------------------------------
 
-\subsection{Proposed Solution}
-\label{solution}
+\subsection{Project Goal}
+\label{goal}
