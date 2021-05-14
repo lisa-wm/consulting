@@ -1,6 +1,32 @@
 \subsection{Problem Description}
 \label{problem}
 
+Access to data on social media platforms provides the social sciences with a 
+source of cheap information readily available for empirical analysis. 
+Exploiting these data requires certain skills that may exceed basic 
+statistical knowledge.
+The first obstacle to overcome is data collection, i.e., retrieving online 
+information in an automated and resource-efficient manner that results in a 
+suitable data structure.
+Analysis of the thus acquired data is complicated by the special nature of 
+textual data.
+Texts are not arbitrary sequences of interchangeable characters but complex 
+constructs that carry meaning on multiple linguistic levels.
+Analyzing text entails handling the sheer size of languages' vocabularies, 
+grammatical rules and irregularities, individual preferences in expression, and
+delicate phenomena like colloquialisms or irony, to name only a few (section
+\ref{data_preproc} will address the challenges arising from Twitter data in more
+detail).
+
+Sentiment analysis, a task frequently encountered in social media analysis, is 
+therefore not straightforward despite posing a standard classification problem.
+
+A task frequently encountered in social media analysis is the assessment of 
+public sentiment.
+Although sentiment analysis poses a standard classification problem, the textual 
+form of data input makes modeling the relation between features and targets far 
+from straightforward.
+
 % ------------------------------------------------------------------------------
 
 \subsection{Project Goal}

@@ -53,6 +53,12 @@ bindingoffset = 0mm]{geometry}
   \setlength{\parskip}{0pt}
 }{\end{enumerate}}
 
+\newenvironment{tight_itemize}{
+\begin{itemize}
+  \setlength{\itemsep}{0pt}
+  \setlength{\parskip}{0pt}
+}{\end{itemize}}
+
 \pagestyle{fancy}
 \fancyhead{}
 \fancyhead[R]{\changefont{Topic-Specific Sentiment Analysis for Tweets by 
