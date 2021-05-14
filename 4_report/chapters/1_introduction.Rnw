@@ -38,7 +38,7 @@ These opportunities have propelled internet platforms to a level of significance
 at least equal to the former hegemons of political debate. 
 Twitter, in particular, has emerged as a medium for political information.
 In what might have been inconceivable a few years ago, politicians now actively 
-convey messages to the public via tweeting. 
+convey messages to the public via tweeting \citep{vanvlietetal2020}. 
 The impact of this profound disruption to the political environment is complex 
 and most certainly has positive as well as worrisome aspects.
 Yet, from a purely scientific point of view, activity on social media  creates 
@@ -51,7 +51,7 @@ challenging.
 \textit{Natural language processing (NLP)} subsumes a variety of analytical 
 tasks around textual data and has recently gained traction in many fields beyond 
 political analysis, techniques ranging from simple approaches to gigantic neural  
-networks.
+networks (see, for example, \citet{torfietal2020}).
 \\
 
 It is the goal of this project to make analysis of social media data in a 
