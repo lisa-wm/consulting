@@ -1,139 +1,55 @@
-\subsection{Problem Description}
-\label{problem}
+Before we outline the scope of our work it should be noted that it partly builds 
+on a predecessor project.
+\citet{schulzewiegrebe2020} studied how German MPs' Twitter data can be modeled 
+with a \textit{structural topic model} (\textit{STM}, \citet{robertsetal2013}), 
+and have since engaged in follow-up research on the STM \citep{schulzeetal2021}.
+Much of the data procurement and topic modeling process is adopted from their 
+work.
+The scope of the project at hand encompasses two subsequent steps.
+In a pioneering mode we first explore the overall feasibility of 
+TSSA with both basic and more advanced statistical techniques from the NLP 
+toolbox, and then, based on our findings, propose a collection of material to 
+support fellow researchers in conducting similar studies.
+\\
 
-Access to data on social media platforms provides the social sciences with a 
-source of cheap information readily available for empirical analysis. 
-Exploiting these data requires certain skills that may exceed basic 
-statistical knowledge.
-The first obstacle to overcome is data collection, i.e., retrieving online 
-information in an automated and resource-efficient manner that results in a 
-suitable data structure.
-Analysis of the thus acquired data is complicated by the special nature of 
-textual data.
-Texts are not arbitrary sequences of interchangeable characters but complex 
-constructs that carry meaning on multiple linguistic levels.
-Analyzing text entails handling the sheer size of languages' vocabularies, 
+\textbf{Topic-specific sentiment analysis.}
+Regardless of how the downstream task is solved, the first challenge to address 
+is data collection.
+The idea here is to retrieve information from the web in an automated and 
+resource-efficient manner that results in a suitable data structure.
+Afterwards, we pursue two fundamentally different approaches toward performing 
+TSSA.
+The first approach applies standard machine learning tools which require the 
+input data to be of tabular form.
+Obviously, texts are complex constructs and not arbitrary sequences of 
+interchangeable characters that can simply be cast into tabled variables:
+analyzing text entails handling the sheer size of languages' vocabularies, 
 grammatical rules and irregularities, individual preferences in expression, and
 delicate phenomena like colloquialisms or irony, to name only a few (section
 \ref{data_preproc} will address the challenges arising from Twitter data in more
 detail).
+It is nonetheless possible, as general research and also or own results suggest, 
+to obtain fairly good performance with this enormous simplification.
+State-of-the-art approaches, by contrast, avoid such blunt methodology and 
+genuinely attempt to teach the entire concept of language to machines
+This comes at the expense of large computational requirements but achieves 
+promising results in a variety of NLP tasks.
+We therefore build a deep bidirectional Transformer architecture (BERT, 
+\citet{devlin2019}) as a second approach and examine whether the additional 
+complexity is justified by better performance.
+\\
 
-Sentiment analysis, a task frequently encountered in social media analysis, is 
-therefore not straightforward despite posing a standard classification problem.
-
-A task frequently encountered in social media analysis is the assessment of 
-public sentiment.
-Although sentiment analysis poses a standard classification problem, the textual 
-form of data input makes modeling the relation between features and targets far 
-from straightforward.
-
-% ------------------------------------------------------------------------------
-
-\subsection{Project Goal}
-\label{goal}
-
-\begin{itemize}
-  \item \textbf{Relation to other problems of NLP.} We refer to the problem 
-  treated herein as topic-specific sentiment analysis (TSSA). 
-  TSSA overlaps with other well-known NLP problems:
-  \begin{itemize}
-    \item \textbf{Sentiment analysis (SA).} TSSA may be interpreted as a 
-    methodological variant, taking into account topical context that is lost on 
-    standard SA.
-    \item \textbf{Topic modeling (TM).} TM retrieves topics without sentiment 
-    classification and is thus subsumed under TSSA.
-    \item \textbf{Aspect-based sentiment analysis (ABSA).} TSSA is closely 
-    related to ABSA.
-    In particular, what we call topics, exhibiting several aspects, could be 
-    identified with entities from ABSA.
-    However, we observe that problems and solutions framed in ABSA often take 
-    a slightly different focus, and sometimes employ approaches that deviate 
-    from the idea we pursue here.
-    Therefore, we deliberately introduce this distinction to emphasize the 
-    difference in intuitions we perceive as follows:
-    \begin{itemize}
-      \item ABSA is frequently discussed in the context of product reviews and 
-      thus mostly concerned with a specific type of document: the topic treated 
-      is quite clear (reviews are typically posted on a product detail page or 
-      similar dedicated location), and the document always carries sentiment 
-      (sometimes, even with an explicit rating attached).
-      \item Whether or not such a prior sentiment information is available, ABSA 
-      is interested in the particular aspects that constitute overall sentiment 
-      (which all convey polarity, possibly of conflicting nature). 
-      These aspects are typically assembled in higher-level entities. 
-      \item A major task in ABSA is therefore the decomposition of the documents 
-      into single-aspect fragments, which may be interpreted as a reshaping of 
-      the corpus with a modified definition of the smallest-element level.
-      \item Once this is achieved, SA is performed on each single-aspect 
-      fragment.
-      \item Our setting, on the other hand, deals with a different kind of 
-      document. As tweets are publicly posted without explicit connection to a 
-      specific target, we will usually not know what a document is about, 
-      much less its polarity -- many documents will not even convey sentiment.
-      \item Also, as mentioned above, tweets can be expected to have a narrow 
-      focus on a single topical issue.
-      \item We identify three potential sub-tasks of TSSA that relate to ABSA in 
-      varying degree: 
-      \begin{itemize}
-        \item \textbf{Stand-alone TM.} We might be only interested in extracting 
-        topics from a set of tweets, which is equivalent to the ABSA-sub-task 
-        of aspect extraction (i.e., finding entity-aspect pairs), albeit on 
-        document level only. If the goal is to label tweets according to 
-        pre-specified topics, we are more in the realm of multi-label 
-        classification.
-        \item \textbf{Stand-alone SA.} We might also be purely interested in SA 
-        without relation to single aspects (e.g., because the data were 
-        collected in such a fashion that they are related to a very specific 
-        topic from the beginning, or because we wish to analyze general polarity 
-        of tweets by a certain source).
-        Here, we emphasize in particular the topic orientation of TSSA: we still 
-        want to leverage latent (sub-)topics because we believe it will aid 
-        classification by providing contextual information.
-        Rather than being an explicit target of sentiments, topics and aspects 
-        are indicators of contextual clusters then.
-        \item \textbf{TSSA.} This is indeed a form of ABSA with the specific 
-        assumption that one document carries exactly one aspect and one 
-        associated sentiment (topic is then synonym to entity).
-        We underline that topics and aspects do not serve as mere
-        document separators, but are viewed as indicative for different contexts 
-        that need to be accounted for.
-        By this, we differentiate with respect to approaches that only 
-        reshape corpora according to aspects and then perform topic-agnostic 
-        SA\footnote{
-        E.g., \citet{sivakumarreddy2017}, \citet{zhaoetal2016}, 
-        \citet{renhong2017} first assign aspects, but then apply 
-        standard classifiers / global dictionaries.
-        }.
-      \end{itemize}
-      \item Summing up the above, our approach incorporates all general ideas 
-      present in ABSA, but does so with a slightly different focus, and special 
-      emphasis on topical context.
-    \end{itemize}
-  \end{itemize}
-\end{itemize}
-
-\begin{itemize}
-  \item Deep learning methods, BERT in particular, are capable of actually 
-  learning the intrinsic structures constituting language (grammatical patterns, 
-  inter-term relations), and can draw from this knowledge to perform downstream 
-  tasks such as sentiment analysis.
-  \item By contrast, lexicon-based and machine learning approaches are confined 
-  to learning from features derived from the bag-of-words assumption\footnote{
-  Well, you could probably hand-craft grammatical features, but this would 
-  become incredibly complicated.
-  }. This makes the handling of phenomena like negations much harder.
-  \item Nonetheless, both are widely applied in SA tasks.
-  \item Lexicon-based approaches identify sentiment-bearing words and assign 
-  them polarity scores, an aggregation of which on document level then yields 
-  document polarity. In this, they are able to work fully unsupervised.
-  \item ML approaches make use of a variety of features (e.g., unigrams), and 
-  learn their association to the target from labeled training instances. 
-  Typically, a combination of three types of features is used:
-  \begin{itemize}
-    \item Document-level lexical features (unigrams, number of exclamation 
-    marks, ...)
-    \item Lexicon-based features (number of positive-polarity words, ...)
-    \item Word embeddings (learned from large, possibly corpus-external 
-    feature-co-occurrence matrices)
-  \end{itemize}
-\end{itemize}
+\textbf{Knowledge transfer.}
+Based on the results of this exploratory analysis we propose teaching material 
+devised to support research in similar applications.
+The acquired collection is organized as a coherent and self-contained  tutorial
+composed of slides with basic theory, code demonstrations, and exercises 
+(including solutions).
+While the course materials are primarily aligned to solve the TSSA task, the 
+covered components are certainly also instructive for different types of 
+applications.
+We have made the material available for both live teaching purposes and 
+self-study on a public website (\textcolor{red}{LINK}).
+First experiences from a live workshop held in April/May 2021 for researchers 
+from the Department of Political Science at LMU will be discussed in section 
+\ref{discussion}.

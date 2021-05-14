@@ -47,21 +47,19 @@ answer command the use of specific tools subsumed under the field of
 \textit{natural language processing (NLP)}.
 NLP has gained much traction with the rise of deep learning methods and become
 virtually ubiquitous, techniques ranging from simple approaches to gigantic 
-neural networks powering search engines and the like (see, for example,
-\citet{torfietal2020}).
+neural networks powering search engines and the like \citep{torfietal2020}.
 Statistically speaking, the above problem translates into the classification of 
 texts into instances of certain sentiments (typically, \textit{positive} and
 \textit{negative}).
 Building upon the assumption that sentiment may be expressed differently in 
 varying contexts, such \textit{sentiment analysis} is often combined with some 
-form of \textit{topic modeling}.
+form of \textit{topic modeling} (see, for example, \citet{ficamosliu2016}).
 \\
 
 It is the goal of this project to make analysis of social media texts in a 
 political context more easily accessible to researchers.
 We focus on the analysis of public sentiment in a topic-aware manner for texts 
-collected from Twitter posts by German MPs.
-
+collected from Twitter posts by German Members of Parliament (MPs).
 Our contribution is two-fold:
 
 \begin{tight_enumerate}

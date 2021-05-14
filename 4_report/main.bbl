@@ -13,6 +13,13 @@ Choi, Y., Kim, Y. \harvardand\ Myaeng, S.-H.  \harvardyearleft
   generation, {\em Proceedings of the 1st International CIKM Workshop on
   Topic-Sentiment Analysis for Mass Opinion}.
 
+\harvarditem[Devlin et~al.]{Devlin, Chang, Lee \harvardand\
+  Toutanova}{2019}{devlin2019}
+Devlin, J., Chang, M.-W., Lee, K. \harvardand\ Toutanova, K.  \harvardyearleft
+  2019\harvardyearright .
+\newblock Bert: Pre-training of deep bidirectional transformers for language
+  understanding.
+
 \harvarditem{Ficamos \harvardand\ Liu}{2016}{ficamosliu2016}
 Ficamos, P. \harvardand\ Liu, Y.  \harvardyearleft 2016\harvardyearright .
 \newblock A topic based approach for sentiment analysis on twitter data, {\em
@@ -59,6 +66,26 @@ Qiang, J., Qian, Z., Li, Y., Yuan, Y. \harvardand\ Wu, X.  \harvardyearleft
   2019\harvardyearright .
 \newblock Short text topic modeling techniques, applications, and performance:
   A survey, {\em Journal of Latex Class Files} {\bf 14}(8).
+
+\harvarditem[Roberts et~al.]{Roberts, Stewart, Tingley \harvardand\
+  Airoldi}{2013}{robertsetal2013}
+Roberts, M., Stewart, B., Tingley, D. \harvardand\ Airoldi, E.
+  \harvardyearleft 2013\harvardyearright .
+\newblock The structural topic model and applied social science, {\em Advances
+  in Neural Information Processing Systems Workshop on Topic Models},
+  pp.~1--20.
+
+\harvarditem{Schulze \harvardand\ Wiegrebe}{2020}{schulzewiegrebe2020}
+Schulze, P. \harvardand\ Wiegrebe, S.  \harvardyearleft 2020\harvardyearright .
+\newblock Twitter in the parliament - a text-based analysis of german political
+  entities, {\em Technical report}, Ludwig-Maximilians-Universität, Munich.
+
+\harvarditem[Schulze et~al.]{Schulze, Wiegrebe, Thurner, Heumann, Aßenmacher
+  \harvardand\ Wankmüller}{2021}{schulzeetal2021}
+Schulze, P., Wiegrebe, S., Thurner, P.~W., Heumann, C., Aßenmacher, M.
+  \harvardand\ Wankmüller, S.  \harvardyearleft 2021\harvardyearright .
+\newblock Exploring topic-metadata relationships with the stm: A bayesian
+  approach.
 
 \harvarditem{Sivakumar \harvardand\ Reddy}{2017}{sivakumarreddy2017}
 Sivakumar, M. \harvardand\ Reddy, U.~S.  \harvardyearleft 2017\harvardyearright
