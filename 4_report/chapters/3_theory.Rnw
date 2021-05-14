@@ -5,6 +5,20 @@ General context: topic modeling, sentiment analysis, why both combined
 
 TSSA as classification task that can be solved with ml oder dl
 
+\begin{itemize}
+    \item Sentiment analysis is much stronger if topical context is taken into 
+    account -- while some words, such as "excellent", carry a globally 
+    applicable sentiment, others may convey quite different meanings in varying 
+    context (see, for example, \citet{thelwallbuckley2013}).
+    \item We will assume that one tweet refers to one (principal) topic and 
+    carries a distinct sentiment towards this topic. This is induced by the 
+    observation that politicians will mostly tweet ad-hoc in response to a 
+    certain event, not as an overall statement of their stance toward some 
+    issue.
+    Literature also suggests this is a reasonable assumption 
+    \citep{quiangetal2019}.
+  \end{itemize}
+
 % ------------------------------------------------------------------------------
 
 \subsection{Sentiment Analysis}
@@ -14,3 +28,51 @@ TSSA as classification task that can be solved with ml oder dl
 
 \subsection{Topic-Specific Sentiment Analysis (TSSA)}
 \label{tssa}
+
+\begin{itemize}
+  \item For the incorporation of topical context, we choose to take a sequential 
+  approach, where topics are assigned first, and then SA is performed. 
+  \item While there exist successful implementations of joint topic-sentiment 
+  modeling (and theoretical arguments are strong, particularly so if inference 
+  is relevant), we decide against a simultaneous analysis for the following 
+  reasons:
+  \begin{itemize}
+    \item This first part addresses researchers from other disciplines, so 
+    methods should be fairly easy to implement and explain. 
+    Joint models, however, are usually rather complicated, hierarchical Bayesian 
+    architectures.
+    \item As outlined above, we would like to be able to tackle sub-tasks 
+    individually.
+    \item A likely scenario entails TSSA for topics that are pre-specified based 
+    on a specific research interest (given in form of keywords, for instance). 
+    It is unclear how such a setting would be handled with joint models.
+  \end{itemize}
+  \item However, it is not clear whether we should use a single classifier 
+  after topic labeling or one classifier per topic.
+  \begin{itemize}
+    \item Single classifier
+    \begin{itemize}
+      \item Pro: lean architecture; topic-agnostic features need to be learned 
+      only once; single-best classifier is easily found and tuned
+      \item Con: topic-specific features, such as word embeddings, are hard to 
+      incorporate 
+      \item Examples: single global lexicon with polarity as 
+      topic-prevalence-weighted average across sentiment-bearing words 
+      \citep{naskaretal2016}; aspect as single categorical variable in otherwise 
+      global feature set (baseline of Sem-Eval 2016 ABSA task, 
+      \citet{pontikietal2016})
+    \end {itemize}
+    \item Per-topic classifier
+    \begin{itemize}
+      \item Pro: easy handling of topic-specific features
+      \item Con: many models in parallel; topic-agnostic features are learned 
+      from smaller subsets; unclear which classifier is best 
+      (single best, best for each sub-task?)
+      \item Examples: domain-specific lexica and purely lexicon-based 
+      \citep{thelwallbuckley2013}; domain-specific lexica and per-domain ML 
+      classifiers \citep{choietal2009}; standard features and per-topic ML 
+      classifiers \citep{ficamosliu2016}; per-topic word embeddings and LSTM 
+      \citep{jebbaracimiano2016}
+    \end{itemize}
+  \end{itemize}
+\end{itemize}

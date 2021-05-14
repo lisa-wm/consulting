@@ -1,1 +1,92 @@
-foo
+The advance of social media has sparked a fundamental change to public debate.
+Political coverage and discourse has spilled from traditional outlets to 
+online locations whose accessibility has lowered entrance barriers to welcome a 
+wide audience \citep{bode2017}.
+
+Social media exhibit certain properties that make them attractive to politicians 
+seeking to broadcast their message. 
+From a supply-side perspective it is easy to publish content: posting on social 
+media is cheap, does not require approval of any authority, and allows for 
+full control over the intended presentation. 
+In an environment that spins information at enormous speed the resulting 
+ability to react to events in real-time is crucial and offers a distinct 
+advantage over the inertia of traditional channels \citep{stieretal2018}.
+
+On the receiving end of communication, social media offer unprecedented access 
+to a variety of target audiences.
+The industry's oligopolistic structure sees people from heterogeneous 
+backgrounds convene on large global platforms to exchange their views. 
+While not all of them show political interest, research suggests that the low 
+cost of online engagement (for instance, by commenting or sharing content) 
+prompts a large number of users to participate to some extent 
+\citep{jostetal2018}.
+A contrary but equally important aspect is the evolution of so-called echo 
+chambers.
+Users view content according to their perceived preferences and thus often 
+end up in narrowly defined community niches populated by like-minded people.
+This clustering process creates user groups disproportionately receptive to 
+certain messages and has played an important role in large-scale propaganda for 
+events like the Brexit vote or US presidential elections.
+Echo chambers are also particularly suited for the direct communication 
+among users social media offer: chat and commenting functions enable dialogue 
+between politicians and their electorate that is hard to achieve via 
+traditional channels, and allow to deploy the power of emotion in shaping 
+opinion \citep{hasellweeks2016}.
+\\
+
+These opportunities have propelled internet platforms to a level of significance 
+at least equal to the former hegemons of political debate. 
+Twitter, in particular, has emerged as a medium for political information.
+In what might have been inconceivable a few years ago, politicians now actively 
+convey messages to the public via tweeting. 
+The impact of this profound disruption to the political environment is complex 
+and most certainly has positive as well as worrisome aspects.
+Yet, from a purely scientific point of view, activity on social media  creates 
+on its way a vast amount of publicly accessible data about public 
+opinion that benefits the research community with a constant source of 
+analytical potential.
+
+The unstructured nature of textual data, however, makes their analysis 
+challenging.
+\textit{Natural language processing (NLP)} subsumes a variety of analytical 
+tasks around textual data and has recently gained traction in many fields beyond 
+political analysis, techniques ranging from simple approaches to gigantic neural  
+networks.
+\\
+
+It is the goal of this project to make analysis of social media data in a 
+political context accessible to researchers who are not primarily concerned with 
+data science.
+We focus on data collected from Twitter posts by German MPs and the analysis of 
+public sentiment.
+Building upon the assumption that sentiment may be expressed differently in 
+varying contexts, we specifically study how to perform sentiment analysis in a 
+topic-aware manner.
+
+Our contribution is two-fold:
+
+\begin{tight_enumerate}
+  \item We explore how such topic-specific sentiment analysis can be 
+  implemented, considering (1) standard machine learning techniques and (2) more 
+  complex deep learning models.
+  \item We provide extensive teaching material on both approaches, composed as
+  a coherent online course, to educate researchers on addressing NLP problems in 
+  their own work.
+\end{tight_enumerate}
+
+The remainder of this report is organized as follows.
+First, we state the problem and proposed solution of this project in more 
+detail in section \ref{project}.
+Section \ref{theory} provides some theoretical context for topic modeling and 
+sentiment analysis from which we derive what we call \textit{topic-specific 
+sentiment analysis (TSSA)}. 
+We proceed in section \ref{analysis} by sketching our data collection and 
+cleaning process and then present our proposal for conducting TSSA, laying out 
+for both approaches the underlying methodology and discussing the results of 
+applying them to the data at hand.
+Section \ref{teaching} outlines how the findings from this analysis translate to 
+the proposed teaching material.
+Afterwards, in section \ref{discussion}, we critically assess the findings and limitations of the project, and conclude with a brief summary in section \ref{conclusion}.
+
+
+

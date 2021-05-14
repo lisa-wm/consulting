@@ -1,5 +1,11 @@
 \begin{thebibliography}{xx}
 
+\harvarditem{Bode}{2017}{bode2017}
+Bode, L.  \harvardyearleft 2017\harvardyearright .
+\newblock Gateway political behaviors: The frequency and consequences of
+  low-cost political engagement on social media, {\em Social Media + Society}
+  {\bf 3}.
+
 \harvarditem[Choi et~al.]{Choi, Kim \harvardand\ Myaeng}{2009}{choietal2009}
 Choi, Y., Kim, Y. \harvardand\ Myaeng, S.-H.  \harvardyearleft
   2009\harvardyearright .
@@ -12,11 +18,26 @@ Ficamos, P. \harvardand\ Liu, Y.  \harvardyearleft 2016\harvardyearright .
 \newblock A topic based approach for sentiment analysis on twitter data, {\em
   International Journal of Advanced Computer Science and Applications} {\bf 7}.
 
+\harvarditem{Hasell \harvardand\ Weeks}{2016}{hasellweeks2016}
+Hasell, A. \harvardand\ Weeks, B.~E.  \harvardyearleft 2016\harvardyearright .
+\newblock Partisan provocation: The role of partisan news use and emotional
+  responses in political information sharing in social media, {\em Human
+  Communication Research} {\bf 42}:~641–661.
+
 \harvarditem{Jebbara \harvardand\ Cimiano}{2016}{jebbaracimiano2016}
 Jebbara, S. \harvardand\ Cimiano, P.  \harvardyearleft 2016\harvardyearright .
 \newblock Aspect-based sentiment analysis using a two-step neural network
   architecture, {\em Proceedings of the Third SemWebEval Challenge},
   pp.~153--167.
+
+\harvarditem[Jost et~al.]{Jost, Barbera, Bonneau, Langer, Metzger, Nagler,
+  Sterling \harvardand\ Tucker}{2018}{jostetal2018}
+Jost, J.~T., Barbera, P., Bonneau, R., Langer, M., Metzger, M., Nagler, J.,
+  Sterling, J. \harvardand\ Tucker, J.~A.  \harvardyearleft
+  2018\harvardyearright .
+\newblock How social media facilitates political protest: Information,
+  motivation, and social networks, {\em Advances in Political Psychology} {\bf
+  39}(1).
 
 \harvarditem[Naskar et~al.]{Naskar, Mokaddem, Rebollo \harvardand\
   Onaindia}{2016}{naskaretal2016}
@@ -45,6 +66,14 @@ Sivakumar, M. \harvardand\ Reddy, U.~S.  \harvardyearleft 2017\harvardyearright
 \newblock Aspect based sentiment analysis of students opinion using machine
   learning techniques, {\em Proceedings of the International Conference on
   Inventive Computing and Informatics (ICICI)}.
+
+\harvarditem[Stier et~al.]{Stier, Bleier, Lietz \harvardand\
+  Strohmaier}{2018}{stieretal2018}
+Stier, S., Bleier, A., Lietz, H. \harvardand\ Strohmaier, M.  \harvardyearleft
+  2018\harvardyearright .
+\newblock Election campaigning on social media: Politicians, audiences, and the
+  mediation of political communication on facebook and twitter, {\em Political
+  Communication} {\bf 35}(1):~50--74.
 
 \harvarditem{Thelwall \harvardand\ Buckley}{2013}{thelwallbuckley2013}
 Thelwall, M. \harvardand\ Buckley, K.  \harvardyearleft 2013\harvardyearright .
