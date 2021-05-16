@@ -14,39 +14,38 @@ On the receiving end, social media grant unprecedented access to target
 audiences.
 The industry's oligopolistic structure sees people from heterogeneous 
 backgrounds convene on few global platforms to exchange their views. 
-While not all of them show political interest, research suggests that the low 
-cost of online engagement prompts a large number of users to participate to some 
-extent \citep{jostetal2018}.
+Research suggests that the low cost of online engagement causes political 
+content to also circulate among users with less political affinity 
+\citep{jostetal2018}.
 A contrary but equally important aspect is the evolution of echo chambers.
 Users view content according to their perceived preferences and thus often 
 end up in community niches populated by like-minded people.
 This clustering process creates groups disproportionately receptive to 
-certain messages and has played an important role in large-scale propaganda for 
-events like US presidential elections.
+certain messages and has played an important role in large-scale propaganda.
 Echo chambers are particularly suited for the direct communication 
-among users social media offer: chat and commenting functions enable a dialogue 
-between politicians and their electorate that is hard to achieve via 
-traditional channels, and allow to deploy the power of emotion in shaping 
-opinion \citep{hasellweeks2016}.
-These opportunities have propelled internet platforms to a level at least equal 
-to the former hegemons of political debate. 
+among users social media offer: they enable a dialogue between politicians and 
+their electorate that is hard to achieve via traditional channels, and allow to 
+deploy the power of emotion to shape opinion \citep{hasellweeks2016}.
+
+These opportunities have propelled internet platforms to a position at least 
+level with the former hegemons of political debate. 
 Twitter, in particular, has emerged as a medium for political information.
 In what might have been inconceivable a few years ago politicians actively 
 convey messages to the public via tweets \citep{vanvlietetal2020}. 
-The impact of this disruption to the political environment is complex and most 
+The impact of this change in the political environment is complex and most 
 certainly has positive as well as worrisome aspects.
 Yet, from a purely scientific point of view, activity on social media creates 
 on its way a vast amount of publicly accessible data that benefits the research
-community with a constant source of analytical potential.
+community with a constant source of information.
 \\
 
 A question frequently posed in political analysis is the assessment of 
 public opinion toward a particular matter. 
-However, the textual data, gathered from social media, that might hold the 
+However, the textual data gathered from social media that might hold the 
 answer command the use of specific tools subsumed under the field of 
 \textit{natural language processing (NLP)}.
 NLP has gained much traction with the rise of deep learning methods and become
-virtually ubiquitous, techniques ranging from simple approaches to gigantic 
+virtually ubiquitous, techniques ranging from simple heuristics to gigantic 
 neural networks powering search engines and the like \citep{torfietal2020}.
 Statistically speaking, the above problem translates into the classification of 
 texts into instances of certain sentiments (typically, \textit{positive} and
@@ -54,7 +53,6 @@ texts into instances of certain sentiments (typically, \textit{positive} and
 Building upon the assumption that sentiment may be expressed differently in 
 varying contexts, such \textit{sentiment analysis} is often combined with some 
 form of \textit{topic modeling} (see, for example, \citet{ficamosliu2016}).
-\\
 
 It is the goal of this project to make analysis of social media texts in a 
 political context more easily accessible to researchers.
@@ -62,17 +60,18 @@ We focus on the analysis of public sentiment in a topic-aware manner for texts
 collected from Twitter posts by German Members of Parliament (MPs).
 Our contribution is two-fold:
 
-\begin{tight_enumerate}
+\begin{enumerate}
   \item We explore how topic-specific sentiment analysis can be 
   implemented, considering (1) standard machine learning techniques and (2) more 
   complex deep learning models.
   \item We provide extensive teaching material on both approaches, composed as
   a coherent online course, to educate researchers on addressing NLP problems in 
   their own work.
-\end{tight_enumerate}
+\end{enumerate}
 
+\newpage
 The remainder of this report is organized as follows.
-First, we state the project outline in more detail in section \ref{project}.
+First, we outline the project in more detail in section \ref{project}.
 Section \ref{theory} provides some theoretical context for topic modeling and 
 sentiment analysis from which we derive what we call \textit{topic-specific 
 sentiment analysis (TSSA)}. 

@@ -1,55 +1,63 @@
-Before we outline the scope of our work it should be noted that it partly builds 
-on a predecessor project.
+Before we outline the scope of our work it should be noted that parts of it are
+based on a predecessor project.
 \citet{schulzewiegrebe2020} studied how German MPs' Twitter data can be modeled 
 with a \textit{structural topic model} (\textit{STM}, \citet{robertsetal2013}), 
 and have since engaged in follow-up research on the STM \citep{schulzeetal2021}.
 Much of the data procurement and topic modeling process is adopted from their 
 work.
-The scope of the project at hand encompasses two subsequent steps.
+The project at hand encompasses two subsequent steps.
 In a pioneering mode we first explore the overall feasibility of 
 TSSA with both basic and more advanced statistical techniques from the NLP 
 toolbox, and then, based on our findings, propose a collection of material to 
 support fellow researchers in conducting similar studies.
 \\
 
-\textbf{Topic-specific sentiment analysis.}
+\textbf{Topic-specific sentiment analysis}
+\\
+
 Regardless of how the downstream task is solved, the first challenge to address 
 is data collection.
 The idea here is to retrieve information from the web in an automated and 
 resource-efficient manner that results in a suitable data structure.
 Afterwards, we pursue two fundamentally different approaches toward performing 
 TSSA.
-The first approach applies standard machine learning tools which require the 
-input data to be of tabular form.
-Obviously, texts are complex constructs and not arbitrary sequences of 
-interchangeable characters that can simply be cast into tabled variables:
-analyzing text entails handling the sheer size of languages' vocabularies, 
-grammatical rules and irregularities, individual preferences in expression, and
-delicate phenomena like colloquialisms or irony, to name only a few (section
-\ref{data_preproc} will address the challenges arising from Twitter data in more
-detail).
-It is nonetheless possible, as general research and also or own results suggest, 
-to obtain fairly good performance with this enormous simplification.
-State-of-the-art approaches, by contrast, avoid such blunt methodology and 
-genuinely attempt to teach the entire concept of language to machines
-This comes at the expense of large computational requirements but achieves 
-promising results in a variety of NLP tasks.
-We therefore build a deep bidirectional Transformer architecture (BERT, 
-\citet{devlin2019}) as a second approach and examine whether the additional 
-complexity is justified by better performance.
+
+\begin{enumerate}
+  \item The first approach applies standard machine learning tools which require 
+  the input data to be of tabular form.
+  Obviously, texts are complex constructs and not arbitrary sequences of 
+  interchangeable characters that can simply be cast into tabled variables
+  % analyzing text entails handling the sheer size of languages' vocabularies, 
+  % grammatical rules and irregularities, individual preferences in expression, 
+  % and delicate phenomena like colloquialisms or irony, to name only a few 
+  (section \ref{data_preproc} will address the challenges arising from Twitter 
+  data in more detail).
+  It is nevertheless possible, as general research and also or own results 
+  suggest, to obtain fairly good performance with this reduction of complexity.
+  \item State-of-the-art approaches, by contrast, avoid such blunt 
+  simplification and attempt to teach the entire concept of language 
+  to machines.
+  This comes at the expense of large computational requirements but achieves 
+  promising results in a variety of NLP tasks.
+  We therefore build a deep bidirectional Transformer architecture (BERT, 
+  \citet{devlin2019}) as a second approach and examine whether the additional 
+  complexity is justified by better performance.
+\end{enumerate}
+
+\textbf{Knowledge transfer}
 \\
 
-\textbf{Knowledge transfer.}
 Based on the results of this exploratory analysis we propose teaching material 
 devised to support research in similar applications.
 The acquired collection is organized as a coherent and self-contained  tutorial
-composed of slides with basic theory, code demonstrations, and exercises 
-(including solutions).
+composed of basic theory, code demonstrations, and exercises (including 
+solutions).
 While the course materials are primarily aligned to solve the TSSA task, the 
-covered components are certainly also instructive for different types of 
+covered components are certainly also instructive for other types of 
 applications.
 We have made the material available for both live teaching purposes and 
-self-study on a public website (\textcolor{red}{LINK}).
+self-study on a public \href{https://lisa-wm.github.io/nlp-twitter-r-bert/}
+{website}.
 First experiences from a live workshop held in April/May 2021 for researchers 
 from the Department of Political Science at LMU will be discussed in section 
 \ref{discussion}.

@@ -8,7 +8,7 @@
 \renewcommand{\labelitemii}{$\circ$}
 \renewcommand{\labelitemiii}{$\circ$}
 
-\usepackage[a4paper, width = 170mm, top = 20mm, bottom = 20mm, 
+\usepackage[a4paper, width = 175mm, top = 20mm, bottom = 20mm, 
 bindingoffset = 0mm]{geometry}
 \usepackage[utf8]{inputenc}
 \usepackage[round, comma]{natbib}
