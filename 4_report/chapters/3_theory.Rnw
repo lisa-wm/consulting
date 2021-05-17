@@ -29,7 +29,12 @@ corpus.
 
 % ------------------------------------------------------------------------------
 
-\subsection{Topic Modeling}
+\subsection{Theoretical Concepts}
+\label{concepts}
+
+% ------------------------------------------------------------------------------
+
+\subsubsection{Topic Modeling}
 \label{tm}
 
 \textbf{Idea.}
@@ -88,7 +93,7 @@ documents generation: first, for each document $d$ in a
 corpus we draw a length-$K$ vector of topic proportions from some distribution; 
 then, for each word position in $\{1, 2, \dots, N_d\}$, assign it to a topic 
 with probabilities depending on the sampled topic proportions, and then draw a 
-word from the distribution associated with this topic.
+word from the distribution associated with this topic \citep{vayanskykumar2020}.
 \textit{Latent Dirichlet allocation (LDA)} by \citet{bleietal2003}, employing
 Dirichlet and multinomial distributions, pioneered this approach to topic 
 modeling.
@@ -97,12 +102,46 @@ foundation for the STM.
 
 % ------------------------------------------------------------------------------
 
-\newpage
-\subsection{Sentiment Analysis}
+\subsubsection{Sentiment Analysis}
 \label{sa}
+
+\textbf{Idea.}
+Sentiment analysis is a standard classification problem and as such an 
+inherently supervised learning task.
+Under the assumption that the data can be categorized into $g \in \N$ discrete 
+classes we predict for each document its associated class from a set of 
+features. 
+More formally, we find a model $f: \mathcal{X} \rightarrow \R^g$, 
+$\mathcal{X} \subseteq \R^p$ for $p \in \N$, that maps from the space of input 
+features into $g$-dimensional Euclidean space.
+Each observation is assigned a vector of continuous class scores or 
+probabilities (depending on the classifier).
+This mapping must be learned from a set of labeled training data, which marks a 
+fundamental difference to the topic modeling task.
+The actual class labels $y \in \mathcal{Y}$ are then found by 
+thresholding or an $\mathit{argmax}$ operation on the score/probability vectors
+\citep{bishop2006}.
+
+Our case addresses the binary task of classifying tweets into positive and 
+negative sentiment instances.
+This set of labels, with $g = 2$, is also referred to as sentiment 
+\textit{polarities} and typically encoded as $\mathcal{Y} = \{0, 1\}$ or 
+$\mathcal{Y} = \{-1, 1\}$.
+\\
+
+\textbf{Approaches.}
+As mentioned above, casting textual data into a design matrix of numeric 
+features must be handled with care.
+Once the data are available in tabular form we can, in principle, use any type 
+of learner suited to classification.
+We specifically consider \textit{random forests} and \textit{regularized 
+logistic regression} for the standard machine learning solution and turn BERT 
+into a classifier by fine-tuning it to performing sentiment analysis; details 
+are given in section \ref{analysis}.
 
 % ------------------------------------------------------------------------------
 
-\subsection{Topic-Specific Sentiment Analysis (TSSA)}
+\newpage
+\subsubsection{Topic-Specific Sentiment Analysis (TSSA)}
 \label{tssa}
 
