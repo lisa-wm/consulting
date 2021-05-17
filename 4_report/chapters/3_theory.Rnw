@@ -136,8 +136,21 @@ Once the data are available in tabular form we can, in principle, use any type
 of learner suited to classification.
 We specifically consider \textit{random forests} and \textit{regularized 
 logistic regression} for the standard machine learning solution and turn BERT 
-into a classifier by fine-tuning it to performing sentiment analysis; details 
+into a classifier by fine-tuning it to sentiment analysis; details 
 are given in section \ref{analysis}.
+
+It should be noted that sentiment analysis can also be performed in a rule-based 
+manner.
+Such methods abstain from fitting a statistical model, instead classifying 
+documents by summing the number of terms associated with each sentiment 
+and assigning the class with the highest count.
+Prior polarities are typically taken from large dictionaries 
+\citep{sidarenka2019}.
+In our binary task this corresponds to identifying whether tweets contain more 
+words with positive or negative connotation.
+We do incorporate this type of analysis but use the respective numbers of 
+positive- and negative-polarity terms as an input feature rather than as the 
+sole grounds for sentiment classification.
 
 % ------------------------------------------------------------------------------
 
@@ -145,3 +158,25 @@ are given in section \ref{analysis}.
 \subsubsection{Topic-Specific Sentiment Analysis (TSSA)}
 \label{tssa}
 
+% We will assume that one tweet refers to one (principal) topic and 
+%   carries a distinct sentiment towards this topic. This is induced by the 
+%   observation that politicians will mostly tweet ad-hoc in response to a 
+%   certain event, not as an overall statement of their stance toward some 
+%   issue.
+%   Literature also suggests this is a reasonable assumption 
+%   \citep{quiangetal2019}.
+%   
+%  \item While there exist successful implementations of joint topic-sentiment 
+%   modeling (and theoretical arguments are strong, particularly so if inference 
+%   is relevant), we decide against a simultaneous analysis for the following 
+%   reasons:
+%   \begin{itemize}
+%     \item This first part addresses researchers from other disciplines, so 
+%     methods should be fairly easy to implement and explain. 
+%     Joint models, however, are usually rather complicated, hierarchical Bayesian 
+%     architectures.
+%     \item As outlined above, we would like to be able to tackle sub-tasks 
+%     individually.
+%     \item A likely scenario entails TSSA for topics that are pre-specified based 
+%     on a specific research interest (given in form of keywords, for instance). 
+%     It is unclear how such a setting would be handled with joint models.

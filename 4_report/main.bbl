@@ -62,6 +62,13 @@ Jost, J.~T., Barbera, P., Bonneau, R., Langer, M., Metzger, M., Nagler, J.,
   motivation, and social networks, {\em Advances in Political Psychology} {\bf
   39}(1).
 
+\harvarditem[Qiang et~al.]{Qiang, Qian, Li, Yuan \harvardand\
+  Wu}{2019}{quiangetal2019}
+Qiang, J., Qian, Z., Li, Y., Yuan, Y. \harvardand\ Wu, X.  \harvardyearleft
+  2019\harvardyearright .
+\newblock Short text topic modeling techniques, applications, and performance:
+  A survey, {\em Journal of Latex Class Files} {\bf 14}(8).
+
 \harvarditem{{R Core Team}}{2021}{rsoftware}
 {R Core Team}  \harvardyearleft 2021\harvardyearright .
 \newblock {\em R: A Language and Environment for Statistical Computing}, R
@@ -86,6 +93,11 @@ Schulze, P., Wiegrebe, S., Thurner, P.~W., Heumann, C., Aßenmacher, M.
   \harvardand\ Wankmüller, S.  \harvardyearleft 2021\harvardyearright .
 \newblock Exploring topic-metadata relationships with the stm: A bayesian
   approach.
+
+\harvarditem{Sidarenka}{2019}{sidarenka2019}
+Sidarenka, U.  \harvardyearleft 2019\harvardyearright .
+\newblock {\em Sentiment Analysis of German Twitter}, PhD thesis, University of
+  Potsdam.
 
 \harvarditem[Stier et~al.]{Stier, Bleier, Lietz \harvardand\
   Strohmaier}{2018}{stieretal2018}
