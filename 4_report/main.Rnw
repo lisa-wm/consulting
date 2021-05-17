@@ -8,6 +8,12 @@
 \renewcommand{\labelitemii}{$\circ$}
 \renewcommand{\labelitemiii}{$\circ$}
 
+\newcommand{\N}{\mathbb{N}}
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\setd}{\{1, 2, \dots, D\}}
+\newcommand{\setk}{\{1, 2, \dots, K\}}
+\newcommand{\setv}{\{1, 2, \dots, V\}}
+
 \usepackage[a4paper, width = 175mm, top = 20mm, bottom = 20mm, 
 bindingoffset = 0mm]{geometry}
 \usepackage[utf8]{inputenc}
@@ -140,7 +146,8 @@ Ludwig-Maximilians-Universität München
 \newpage
 
 \listoffigures
-\newpage
+% \newpage
+\vspace{1cm}
 \listoftables
 \newpage
 
@@ -239,7 +246,7 @@ Data, code and figures are provided in electronic form.
 
 \RaggedRight
 \bibliography{bibliography}
-\bibliographystyle{dcu}
+\bibliographystyle{dcu} %dcu
 \newpage
 
 % ------------------------------------------------------------------------------

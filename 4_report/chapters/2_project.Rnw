@@ -12,9 +12,7 @@ toolbox, and then, based on our findings, propose a collection of material to
 support fellow researchers in conducting similar studies.
 \\
 
-\textbf{Topic-specific sentiment analysis}
-\\
-
+\textbf{Topic-specific sentiment analysis.}
 Regardless of how the downstream task is solved, the first challenge to address 
 is data collection.
 The idea here is to retrieve information from the web in an automated and 
@@ -44,9 +42,13 @@ TSSA.
   complexity is justified by better performance.
 \end{enumerate}
 
-\textbf{Knowledge transfer}
+The basic approach is implemented in \texttt{R} \citep{rsoftware} and thus 
+easily integrated with statistical education at LMU.
+For the BERT solution we resort to \texttt{Python} \citep{python} which is all 
+but standard for deep (NLP) modeling.
 \\
 
+\textbf{Knowledge transfer.}
 Based on the results of this exploratory analysis we propose teaching material 
 devised to support research in similar applications.
 The acquired collection is organized as a coherent and self-contained  tutorial

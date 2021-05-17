@@ -6,29 +6,98 @@ analysis; the actual methods we employ are described in chapter \ref{analysis}.
 Throughout the report we will make use of the following terminology:
 \\
 
-\textbf{Document} Foo
+\textbf{Word.} Words $w$ are sequences of characters and represent the smallest 
+unit of text we consider. 
 \\
 
-\textbf{Corpus.} Foo
+\textbf{Vocabulary.} The aggregate of unique terms present in a collection of 
+text constitutes a vocabulary of length $V \in \N$ from which a one-hot encoding 
+for words can be derived: for the $v$-th instance of the vocabulary, 
+$v \in \setv$, this is a length-$V$ vector with all but the $v$-th entry, which 
+is one, equaling zero.
+Note that pre-processing (discussed in chapter \ref{analysis}) might result in a
+vocabulary that is smaller than the total number of distinct words occurring 
+across all texts.
 \\
+
+\textbf{Document.} Documents $d \in \setd$, $D \in \N$, are generally understood 
+to be sequences of $N_d \in \N$ words, and, in our case, tweets.
+\\
+
+\textbf{Corpus.} Lastly, the set of all $D$ documents considered makes up a 
+corpus.
 
 % ------------------------------------------------------------------------------
 
 \subsection{Topic Modeling}
 \label{tm}
 
+\textbf{Idea.}
 Recall that the ultimate goal is the classification of tweets into groups 
 signaling a specific sentiment.
 It is reasonable to assume that sentiment, and the way of expressing it, is 
-susceptible to context (SOURCE), which suggests potential gains from clustering 
-tweets prior to sentiment analysis.
+susceptible to context, which suggests potential gains from clustering 
+tweets prior to sentiment analysis (see, for example, \citet{ficamosliu2016},
+\citet{bhatiap2018}, or \citet{jangetal2021}).
 
-Grouping texts into semantic clusters is generally referred to as \textit{topic 
-modeling} and typically constitutes an unsupervised learning task.
-The idea is to uncover latent structures in a corpus
+Grouping texts into semantic clusters, or topics, is generally referred to as 
+\textit{topic modeling} and typically an unsupervised learning task.
+The idea is to uncover latent structures in a corpus along which documents can 
+be characterized.
+Topic modeling is essentially a means of dimensionality reduction.
+Text analysis requires text to be cast to numerical representation, the 
+simplest form of which is to represent documents by counts of vocabulary 
+instances.
+The dimension of the resulting document-term matrix increases exponentially in 
+the number of documents and words contained in them, making an urgent case for 
+dimensionality reduction \citep{vayanskykumar2020}.
+
+Topic modeling results in two types of output: one that links words with their 
+propensity of occurring within a topic $k \in \setk$, $K \in \N$, and one 
+stating the extent to which documents discuss each topic.
+This projection of texts into a $K$-dimensional latent space ($K \ll V$) 
+is a purely mathematical operation and the assessment of interpretability is up 
+to human judgment.
+Usually the resulting topics are then examined with respect to their most 
+characteristic terms, according to an appropriate measure, in the attempt to 
+find a meaningful description.
+In particular, the number of topics $K$ is a hyperparameter that must be 
+specified a priori \citep{aggarwal2018}.
+\\
+
+\textbf{Approaches.}
+Topic modeling approaches roughly decompose into deterministic and 
+probabilistic, or generative, approaches.
+The former are based on factorizing the document-term matrix 
+$M \in \R^{D \times V}$ (or a weighted version that takes into account prior probabilities of term occurrence) into two low-rank matrices $U, W^T$, 
+$U \in \R^{D \times K}$ and $W^T \in \R^{K \times V}$, whose product 
+approximates $M$ loss-minimally.
+Probably the most prominent methods from this category are \textit{latent 
+semantic analysis (LSA)} (also known as \textit{latent semantic indexing}), 
+which performs singular value decomposition and thus projects the data into a 
+subspace spanned by $M$'s principal eigenvectors, and \textit{non-negative 
+matrix factorization (NMF)}, a constrained version that often yields better 
+interpretability \citep{aggarwal2018}.
+
+Non-probabilistic models suffer from limitations in inference and 
+out-of-sample extension, which is why generative approaches, addressing these 
+issues, have become widely popular.
+Generative models hail from the Bayesian paradigm.
+Loosely speaking, they seek to reverse-engineer the imaginative process of how 
+documents generation: first, for each document $d$ in a 
+corpus we draw a length-$K$ vector of topic proportions from some distribution; 
+then, for each word position in $\{1, 2, \dots, N_d\}$, assign it to a topic 
+with probabilities depending on the sampled topic proportions, and then draw a 
+word from the distribution associated with this topic.
+\textit{Latent Dirichlet allocation (LDA)} by \citet{bleietal2003}, employing
+Dirichlet and multinomial distributions, pioneered this approach to topic 
+modeling.
+We revisit LDA in section \ref{tssa_ml_method} as it also provides the 
+foundation for the STM.
 
 % ------------------------------------------------------------------------------
 
+\newpage
 \subsection{Sentiment Analysis}
 \label{sa}
 
