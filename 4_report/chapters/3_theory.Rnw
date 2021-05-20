@@ -1,8 +1,8 @@
 \subsection{Terminology}
 \label{term}
 
-In this section we briefly review the general theoretical concepts behind our 
-analysis; the actual methods we employ are described in chapter \ref{analysis}.
+In this section we briefly review general theoretical concepts; the actual
+methods we employ are described in chapter \ref{analysis}.
 Throughout the report we will make use of the following terminology:
 \\
 
@@ -49,13 +49,13 @@ Grouping texts into semantic clusters, or topics, is generally referred to as
 \textit{topic modeling} and typically an unsupervised learning task.
 The idea is to uncover latent structures in a corpus along which documents can 
 be characterized.
-Topic modeling is essentially a means of dimensionality reduction.
-Text analysis requires text to be cast to numerical representation, the 
+Topic modeling is essentially a means of dimensionality reduction: text analysis
+requires text to be cast to numerical representation, the 
 simplest form of which is to represent documents by counts of vocabulary 
 instances.
 The dimension of the resulting document-term matrix increases exponentially in 
 the number of documents and words contained in them, making an urgent case for 
-dimensionality reduction \citep{vayanskykumar2020}.
+compressing this dimensionality \citep{vayanskykumar2020}.
 
 Topic modeling results in two types of output: one that links words with their 
 propensity of occurring within a topic $k \in \setk$, $K \in \N$, and one 
@@ -66,33 +66,32 @@ to human judgment.
 Usually the resulting topics are then examined with respect to their most 
 characteristic terms, according to an appropriate measure, in the attempt to 
 find a meaningful description.
-In particular, the number of topics $K$ is a hyperparameter that must be 
-specified a priori \citep{aggarwal2018}.
+In particular, $K$ is a hyperparameter that must be specified a priori
+\citep{aggarwal2018}.
 \\
 
 \textbf{Approaches.}
 Topic modeling approaches roughly decompose into deterministic and 
 probabilistic, or generative, approaches.
 The former are based on factorizing the document-term matrix 
-$M \in \R^{D \times V}$ (or a weighted version that takes into account prior probabilities of term occurrence) into two low-rank matrices $U, W^T$, 
+$M \in \R^{D \times V}$ (or a weighted version that takes into account prior probabilities of term occurrence) into two low-rank matrices, 
 $U \in \R^{D \times K}$ and $W^T \in \R^{K \times V}$, whose product 
 approximates $M$ loss-minimally.
 Probably the most prominent methods from this category are \textit{latent 
-semantic analysis (LSA)} (also known as \textit{latent semantic indexing}), 
-which performs singular value decomposition and thus projects the data into a 
-subspace spanned by $M$'s principal eigenvectors, and \textit{non-negative 
-matrix factorization (NMF)}, a constrained version that often yields better 
-interpretability \citep{aggarwal2018}.
+semantic analysis}, which performs singular value decomposition and thus 
+projects the data into a subspace spanned by $M$'s principal eigenvectors, and
+\textit{non-negative matrix factorization}, a constrained version that often 
+yields better interpretability \citep{aggarwal2018}.
 
 Non-probabilistic models suffer from limitations in inference and 
 out-of-sample extension, which is why generative approaches, addressing these 
 issues, have become widely popular.
 Generative models hail from the Bayesian paradigm.
-Loosely speaking, they seek to reverse-engineer the imaginative process of how 
-documents generation: first, for each document $d$ in a 
+Loosely speaking, they seek to reverse-engineer the imaginative process of 
+document generation: first, for each document $d$ in a 
 corpus we draw a length-$K$ vector of topic proportions from some distribution; 
-then, for each word position in $\{1, 2, \dots, N_d\}$, assign it to a topic 
-with probabilities depending on the sampled topic proportions, and then draw a 
+then assign each word position in $\{1, 2, \dots, N_d\}$ to a topic 
+with probabilities according to the sampled topic proportions, and then draw a 
 word from the distribution associated with this topic \citep{vayanskykumar2020}.
 \textit{Latent Dirichlet allocation (LDA)} by \citet{bleietal2003}, employing
 Dirichlet and multinomial distributions, pioneered this approach to topic 
@@ -106,8 +105,47 @@ foundation for the STM.
 \label{sa}
 
 \textbf{Idea.}
-Sentiment analysis is a standard classification problem and as such an 
-inherently supervised learning task.
+Sentiment analysis refers to the process of establishing the emotive nature 
+of the opinion an author expresses in their text.
+The types of sentiment that are of interest vary across applications and may be 
+arbitrarily fine-grained.
+We focus on the simplest form and attempt to determine 
+whether tweets convey positive or negative sentiment, also called 
+\textit{polarities}.
+In this, sentiment analysis is a standard classification problem
+\citep{medhatetal2014}.
+
+Sentiment analysis occurs at different levels of a document.
+Depending on its scope we can broadly discern document-level, sentence-level and 
+aspect-level sentiment analysis.
+The document and sentence level techniques are not fundamentally distinct; 
+rather, document-level analysis follows after sentence-level analysis (it is also 
+possible to drill down even further) and aggregates the sentiments expressed 
+by sentences for the entire document.
+Aspect-based sentiment analysis (ABSA) has a slightly different angle.
+It studies sentiment regarding aspects of topical entities, meaning sentiment 
+targets are identified with respect to contents and not merely by sentence 
+delimiters \citep{aggarwal2018}.
+ABSA therefore has connections to topic modeling.
+We will discuss our view on the relation of topic modeling, sentiment analysis 
+and ABSA in the subsequent section.
+\\
+
+\textbf{Approaches.}
+There are two principal ways of approaching sentiment analysis.
+The first is rule-based and avoids statistical modeling altogether, instead 
+classifying documents by summing the number of terms associated with each 
+sentiment and assigning the class with the highest count.
+Prior polarities are typically taken from large dictionaries 
+\citep{sidarenka2019}.
+In our binary task this corresponds to identifying whether tweets contain more 
+words with positive or negative connotation.
+We do incorporate this type of analysis but use the respective numbers of 
+positive- and negative-polarity terms as an intermediate input rather than 
+the sole grounds for classification.
+
+Instead, we perceive sentiment analysis as a classic instance of supervised 
+machine learning.
 Under the assumption that the data can be categorized into $g \in \N$ discrete 
 classes we predict for each document its associated class from a set of 
 features. 
@@ -121,42 +159,26 @@ fundamental difference to the topic modeling task.
 The actual class labels $y \in \mathcal{Y}$ are then found by 
 thresholding or an $\mathit{argmax}$ operation on the score/probability vectors
 \citep{bishop2006}.
+In our case the set of labels, with $g = 2$, is typically encoded as 
+$\mathcal{Y} = \{0, 1\}$ or $\mathcal{Y} = \{-1, 1\}$.
 
-Our case addresses the binary task of classifying tweets into positive and 
-negative sentiment instances.
-This set of labels, with $g = 2$, is also referred to as sentiment 
-\textit{polarities} and typically encoded as $\mathcal{Y} = \{0, 1\}$ or 
-$\mathcal{Y} = \{-1, 1\}$.
-\\
-
-\textbf{Approaches.}
 As mentioned above, casting textual data into a design matrix of numeric 
 features must be handled with care.
 Once the data are available in tabular form we can, in principle, use any type 
 of learner suited to classification.
-We specifically consider \textit{random forests} and \textit{regularized 
-logistic regression} for the standard machine learning solution and turn BERT 
-into a classifier by fine-tuning it to sentiment analysis; details 
-are given in section \ref{analysis}.
-
-It should be noted that sentiment analysis can also be performed in a rule-based 
-manner.
-Such methods abstain from fitting a statistical model, instead classifying 
-documents by summing the number of terms associated with each sentiment 
-and assigning the class with the highest count.
-Prior polarities are typically taken from large dictionaries 
-\citep{sidarenka2019}.
-In our binary task this corresponds to identifying whether tweets contain more 
-words with positive or negative connotation.
-We do incorporate this type of analysis but use the respective numbers of 
-positive- and negative-polarity terms as an input feature rather than as the 
-sole grounds for sentiment classification.
+We specifically consider random forests and regularized logistic regression for 
+the standard machine learning solution and turn BERT into a classifier by 
+fine-tuning it to sentiment analysis; details are given in section 
+\ref{analysis}.
 
 % ------------------------------------------------------------------------------
 
-\newpage
 \subsubsection{Topic-Specific Sentiment Analysis (TSSA)}
 \label{tssa}
+
+With the concepts of topic modeling and sentiment analysis we define a combined 
+task we call \textit{topic-specific sentiment analysis}. 
+There are various ways in which such a combination is conceivable
 
 % We will assume that one tweet refers to one (principal) topic and 
 %   carries a distinct sentiment towards this topic. This is induced by the 
