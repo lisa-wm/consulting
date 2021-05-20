@@ -6,8 +6,48 @@
 \subsubsection{Data Collection}
 \label{data_collection}
 
+The subject of our analysis are tweets by members of the German parliament
+(\textit{Bundestag}) issued after the last federal election in September 2017.
+Twitter makes these publicly accessible via its official API and the number of 
+retrievable tweets per user can be exploited generously, so data supply is 
+\textit{de facto} almost unrestricted.
+However, with sentiment classification as ultimate goal of analysis, we face a 
+major bottleneck in the need for labeled data.
+Lacking the resources for large-scale annotation we did the labeling ourselves.
+The resulting data set, from a vast amount of available data, consists of 1,215 
+observations, severely limiting the analytical scope.
+\\
+
+\textbf{Web scraping.}
+For data collection from the Web we rely on the scraping procedure developed by 
+\citet{schulzewiegrebe2020}, with minor modifications.
+The process entails four steps: first, gather MPs' names and basic information 
+(such as party affiliation and electoral district) from the official Bundestag 
+website; second, find Twitter account names (using individual party websites as 
+additional sources as these data are not stored consistently across MPs); 
+third, acquire socioeconomic information for the time of the last 
+federal election on a per-district level (available at the official website of 
+the federal returning officer); and, lastly, scrape actual tweets along with 
+some additional variables such as the number of likes or retweets.
+We use a \texttt{Python} code base and mainly employ selenium webdrivers as well 
+as the \texttt{BeatifulSoup} library for parsing HTML content and the 
+\texttt{tweepy} library for accessing the official Twitter API.
+For more details on the procedure and the large data base assembled in the 
+predecessor project please refer to \citet{schulzewiegrebe2020}; the code is 
+fully submitted in the electronic appendix and a somewhat more compact demo may 
+be found among the teaching material.
+\\
+
+\textbf{Data labeling.}
+For the data annotation phase we extracted a set with some tens of thousands 
+of observations according to the above process and manually selected what we 
+deem informative examples.
+For these we assigned polarities, i.e., predicates \textit{positive} or
+\textit{negative}, and also topic descriptions required for BERT's ABSA task. 
+
 % ------------------------------------------------------------------------------
 
+\newpage
 \subsubsection{Data Pre-Processing}
 \label{data_preproc}
 
