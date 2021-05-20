@@ -69,6 +69,19 @@ Medhat, W., Hassan, A. \harvardand\ Korashy, H.  \harvardyearleft
 \newblock Sentiment analysis algorithms and applications: A survey, {\em Ain
   Shams Engineering Journal} {\bf 5}:~1093--1113.
 
+\harvarditem{Ngyuen \harvardand\ Shirai}{2018}{nguyenetal2018}
+Ngyuen, H. \harvardand\ Shirai, K.  \harvardyearleft 2018\harvardyearright .
+\newblock A joint model of term extraction and polarity classification for
+  aspect-based sentiment analysis, {\em Proceedings of the 10th International
+  Conference on Knowledge and Systems Engineering (KSE)}.
+
+\harvarditem[Qiang et~al.]{Qiang, Qian, Li, Yuan \harvardand\
+  Wu}{2019}{quiangetal2019}
+Qiang, J., Qian, Z., Li, Y., Yuan, Y. \harvardand\ Wu, X.  \harvardyearleft
+  2019\harvardyearright .
+\newblock Short text topic modeling techniques, applications, and performance:
+  A survey, {\em Journal of Latex Class Files} {\bf 14}(8).
+
 \harvarditem{{R Core Team}}{2021}{rsoftware}
 {R Core Team}  \harvardyearleft 2021\harvardyearright .
 \newblock {\em R: A Language and Environment for Statistical Computing}, R
@@ -107,6 +120,12 @@ Stier, S., Bleier, A., Lietz, H. \harvardand\ Strohmaier, M.  \harvardyearleft
   mediation of political communication on facebook and twitter, {\em Political
   Communication} {\bf 35}(1):~50--74.
 
+\harvarditem[Tian et~al.]{Tian, Yang, Sun \harvardand\ Liu}{2021}{tianetal2021}
+Tian, Y., Yang, L., Sun, Y. \harvardand\ Liu, D.  \harvardyearleft
+  2021\harvardyearright .
+\newblock Cross-domain end-to-end aspect-based sentiment analysis with
+  domain-dependent embeddings, {\em Comlexity} .
+
 \harvarditem[Torfi et~al.]{Torfi, Shirvani, Keneshloo, Tavaf \harvardand\
   Fox}{2020}{torfietal2020}
 Torfi, A., Shirvani, R.~A., Keneshloo, Y., Tavaf, N. \harvardand\ Fox, E.~A.
@@ -132,5 +151,19 @@ Vayansky, I. \harvardand\ Kumar, S.~A.  \harvardyearleft 2020\harvardyearright
   .
 \newblock A review of topic modeling methods, {\em Information Systems} {\bf
   94}.
+
+\harvarditem[Wang et~al.]{Wang, Xu, Zhang, Jin \harvardand\
+  Sun}{2021}{wangetal2021}
+Wang, X., Xu, G., Zhang, Z., Jin, L. \harvardand\ Sun, X.  \harvardyearleft
+  2021\harvardyearright .
+\newblock End-to-end aspect-based sentiment analysis with hierarchical
+  multi-task learning, {\em Neurocomputing} .
+
+\harvarditem[Zuo et~al.]{Zuo, Wu, Zhang, Lin, Wang, Xu \harvardand\
+  Xiong}{2016}{zuoetal2016}
+Zuo, Y., Wu, J., Zhang, H., Lin, H., Wang, F., Xu, K. \harvardand\ Xiong, H.
+  \harvardyearleft 2016\harvardyearright .
+\newblock Topic modeling of short texts: A pseudo-document view, {\em
+  Proceedings of KDD ’16}.
 
 \end{thebibliography}

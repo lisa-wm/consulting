@@ -8,7 +8,7 @@ Throughout the report we will make use of the following terminology:
 
 \textbf{Word.} Words $w$ are sequences of characters and represent the smallest 
 unit of text we consider. 
-\\
+% \\
 
 \textbf{Vocabulary.} The aggregate of unique terms present in a collection of 
 text constitutes a vocabulary of length $V \in \N$ from which a one-hot encoding 
@@ -18,11 +18,11 @@ is one, equaling zero.
 Note that pre-processing (discussed in chapter \ref{analysis}) might result in a
 vocabulary that is smaller than the total number of distinct words occurring 
 across all texts.
-\\
+% \\
 
 \textbf{Document.} Documents $d \in \setd$, $D \in \N$, are generally understood 
 to be sequences of $N_d \in \N$ words, and, in our case, tweets.
-\\
+% \\
 
 \textbf{Corpus.} Lastly, the set of all $D$ documents considered makes up a 
 corpus.
@@ -119,13 +119,16 @@ Sentiment analysis occurs at different levels of a document.
 Depending on its scope we can broadly discern document-level, sentence-level and 
 aspect-level sentiment analysis.
 The document and sentence level techniques are not fundamentally distinct; 
-rather, document-level analysis follows after sentence-level analysis (it is also 
-possible to drill down even further) and aggregates the sentiments expressed 
-by sentences for the entire document.
+rather, document-level analysis follows after sentence-level analysis (it is 
+also possible to drill down even further) and aggregates the sentiments 
+expressed by sentences for the entire document.
 Aspect-based sentiment analysis (ABSA) has a slightly different angle.
-It studies sentiment regarding aspects of topical entities, meaning sentiment 
-targets are identified with respect to contents and not merely by sentence 
-delimiters \citep{aggarwal2018}.
+It studies sentiment regarding aspects of topical entities (for instance, 
+\textit{carbon taxes} as an aspect of \textit{environmental policy}), meaning
+sentiment targets are identified with respect to contents and not merely by 
+sentence delimiters.
+This requires solving the sub-tasks of aspect extraction and aspect sentiment 
+classification \citep{aggarwal2018}.
 ABSA therefore has connections to topic modeling.
 We will discuss our view on the relation of topic modeling, sentiment analysis 
 and ABSA in the subsequent section.
@@ -178,27 +181,36 @@ fine-tuning it to sentiment analysis; details are given in section
 
 With the concepts of topic modeling and sentiment analysis we define a combined 
 task we call \textit{topic-specific sentiment analysis}. 
-There are various ways in which such a combination is conceivable
+There are various ways in which such a combination is conceivable and we 
+ourselves pursue different approaches, which is why we use TSSA as an 
+overarching term.
 
-% We will assume that one tweet refers to one (principal) topic and 
-%   carries a distinct sentiment towards this topic. This is induced by the 
-%   observation that politicians will mostly tweet ad-hoc in response to a 
-%   certain event, not as an overall statement of their stance toward some 
-%   issue.
-%   Literature also suggests this is a reasonable assumption 
-%   \citep{quiangetal2019}.
-%   
-%  \item While there exist successful implementations of joint topic-sentiment 
-%   modeling (and theoretical arguments are strong, particularly so if inference 
-%   is relevant), we decide against a simultaneous analysis for the following 
-%   reasons:
-%   \begin{itemize}
-%     \item This first part addresses researchers from other disciplines, so 
-%     methods should be fairly easy to implement and explain. 
-%     Joint models, however, are usually rather complicated, hierarchical Bayesian 
-%     architectures.
-%     \item As outlined above, we would like to be able to tackle sub-tasks 
-%     individually.
-%     \item A likely scenario entails TSSA for topics that are pre-specified based 
-%     on a specific research interest (given in form of keywords, for instance). 
-%     It is unclear how such a setting would be handled with joint models.
+We see two types of solution to the TSSA problem: either perform topic 
+extraction and sentiment analysis jointly, or regard it as a cascading task 
+where sentiment analysis is subsequent to topic modeling.
+Most publications to date share the second view; recent work, however, has
+highlighted the advantages of joint modeling 
+(\citet{nguyenetal2018}, \citet{tianetal2021}, \citet{wangetal2021}).
+While theoretical arguments are strong, we decide against simultaneous 
+methods mostly due to the complexity of such approaches, which is at odds with 
+our goal of making text analysis accessible to a broader audience.
+Also we would like to retain the option of performing both tasks in a 
+stand-alone fashion.
+The latter has become all the more important in the course of our study as we 
+experience some difficulties in modeling topics for tweets.
+
+We make the general assumption of each document pertaining to exactly one topic.
+This seems plausible in the light of tweets' brevity (Twitter currently allows 
+for 280 characters, up from 140 originally) and is supported by other research 
+(\citet{zuoetal2016}, \citet{quiangetal2019}).
+We then explore different options in our proposal.
+For the standard machine learning classification we use topic modeling, 
+somewhat implicitly, as a means of feature generation for sentiment analysis.
+The clusters resulting from grouping tweets by topic serve as environments for 
+computing topic-specific embeddings that are afterwards fed to the classifier.
+In the deep learning solution we experiment with sentiments that directly refer 
+to aspects by fine-tuning BERT to an ABSA task.
+However, we observe in both approaches that the topical component does not aid 
+the sentiment classification task and even tends to worsen results.
+We will discuss this finding in section \ref{discussion} and now proceed with 
+presenting the results of our analysis.
