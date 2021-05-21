@@ -15,6 +15,8 @@ packages_required <-  c(
   "future", # parallelization
   "future.apply", # parallelization
   "glmnet", # penalized regression
+  "ggplot2", # visualization
+  "ggpubr", # visualization
   "here", # path management
   "mlr3", # machine learning basics
   "mlr3learners", # machine learning learners

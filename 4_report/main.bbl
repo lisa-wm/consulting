@@ -87,6 +87,10 @@ Qiang, J., Qian, Z., Li, Y., Yuan, Y. \harvardand\ Wu, X.  \harvardyearleft
 \newblock {\em R: A Language and Environment for Statistical Computing}, R
   Foundation for Statistical Computing, Vienna, Austria.
 
+\harvarditem{Richardson}{2007}{richardson2007}
+Richardson, L.  \harvardyearleft 2007\harvardyearright .
+\newblock {\em Beautiful Soup Documentation}.
+
 \harvarditem[Roberts et~al.]{Roberts, Stewart, Tingley \harvardand\
   Airoldi}{2013}{robertsetal2013}
 Roberts, M., Stewart, B., Tingley, D. \harvardand\ Airoldi, E.
@@ -94,6 +98,10 @@ Roberts, M., Stewart, B., Tingley, D. \harvardand\ Airoldi, E.
 \newblock The structural topic model and applied social science, {\em Advances
   in Neural Information Processing Systems Workshop on Topic Models},
   pp.~1--20.
+
+\harvarditem{Roesslein}{2020}{roesslein2020}
+Roesslein, J.  \harvardyearleft 2020\harvardyearright .
+\newblock {\em Tweepy: Twitter for Python!}
 
 \harvarditem{Schulze \harvardand\ Wiegrebe}{2020}{schulzewiegrebe2020}
 Schulze, P. \harvardand\ Wiegrebe, S.  \harvardyearleft 2020\harvardyearright .

@@ -7,7 +7,13 @@
 \label{data_collection}
 
 The subject of our analysis are tweets by members of the German parliament
-(\textit{Bundestag}) issued after the last federal election in September 2017.
+(\textit{Bundestag}) issued after the last federal election in September 
+2017\footnote{
+The 2017 Bundestag is comprised of 709 seats and seven political parties: the 
+right-wing AfD, the Christian Democrats (CDU/CSU), the Liberals (FDP), the 
+Greens, the Left Party, and the Social Democrats (SPD).
+CDU/CSU and SPD as ruling parties co-exist in a grand coalition.
+}.
 Twitter makes these publicly accessible via its official API and the number of 
 retrievable tweets per user can be exploited generously, so data supply is 
 de facto almost unrestricted.
@@ -29,9 +35,10 @@ third, acquire socioeconomic information for the time of the last
 federal election on a per-district level (available at the official website of 
 the federal returning officer); and, lastly, scrape actual tweets along with 
 some additional variables such as the number of likes or retweets.
-We use a \texttt{Python} code base and mainly employ selenium webdrivers as well 
-as the \texttt{BeatifulSoup} library for parsing HTML content and the 
-\texttt{tweepy} library for accessing the official Twitter API.
+We use a \texttt{Python} code base and mainly employ selenium webdrivers as well
+as the \texttt{BeatifulSoup} library \citep{richardson2007} for parsing HTML
+content and the \texttt{tweepy} library \citep{roesslein2020} for accessing the
+official Twitter API.
 For more details on the procedure and the large data base assembled in the 
 predecessor project please refer to \citet{schulzewiegrebe2020}; the code is 
 fully submitted in the electronic appendix and a somewhat more compact demo may 
@@ -44,19 +51,111 @@ of observations according to the above process and manually selected what we
 deem informative examples.
 For these we assigned polarities, i.e., predicates \textit{positive} or
 \textit{negative}, and also topic descriptions required for BERT's ABSA task.
+We noted in the process that a large number tweets do not appear to carry 
+sentiment at all.
 The resulting 1,125 training observations, originated by a total of 256 MPs, 
-dates from the period between October 2017 and January 2021.
-Below we list some of the main data characteristics.
+date from the period of October 2017 to January 2021.
+In figure \ref{fig_obs_time} we detect both periodical fluctuations in the 
+number of tweets over time and a general upward-sloping trend.
 
-\medskip
+\begin{figure}[H]
+  \includegraphics[width = \textwidth]{figures/obs_over_time}
+\caption[Training data: observations over time]
+{\raggedright Observations over time.}
+\label{fig_obs_time}
+\end{figure}
 
-\includegraphics[width = \textwidth]{figures/obs_per_party}
+An exemplary extract from our training data with some of the most important 
+variables is shown in table \ref{tab_extract}.
+Exactly which features enter sentiment classification is documented in the 
+subsequent chapters.
+
+\begin{table}[H]
+  \scriptsize
+  \begin{tabular}{l|l|l|l|r|r|l}
+  \texttt{username} & \texttt{party} & \texttt{created\_at} & \texttt{text} & 
+  \texttt{followers} & \texttt{unemployment\_rate} & \texttt{label}\\
+  \hline
+  karl\_lauterbach & spd & 2019-12-01 09:44:00 & "Die Wahl ..." & 337001 & 8.5 & 
+  negative\\
+  \hline
+  Martin\_Hess\_AfD & afd & 2018-08-17 07:15:00 & "Vor den ..." & 6574 & 3.5 &
+  negative\\
+  \hline
+  BriHasselmann & gruene & 2019-09-25 15:35:00 & "Ich finde ..." & 20299 & 8.6 
+  & positive\\
+  \hline
+  danielakolbe & spd & 2020-05-12 06:05:00 & "Aber verpflichtend ..." & 8158 & 
+  8.3 & negative\\
+  \hline
+  JuergenBraunAfD & afd & 2020-08-13 22:05:00 & "Panik-Latif + ..." & 3188 & 
+  3.4 & negative\\
+  \end{tabular}
+  \caption[Training data: extract]
+  {\raggedright Training data extract for selected variables.}
+  \label{tab_extract}
+\end{table}
+
+Figure \ref{fig_obs_party} depicts the number of observations per party both 
+for our labeled training data and the larger sample from which the training data 
+have been selected (containing just over 31,000 tweets).
+We notice two things.
+First, in either case, the share of tweets (blue) does 
+not mirror the share of seats in the Bundestag (gray); most notably, the 
+Christian Democrats tweet rather little, whereas the Greens are 
+disproportionately active on Twitter.
+Second, the right-wing AfD and the Greens are over-represented in our training 
+data at the expense of the other groups.
+This is simply because these two parties, in our personal experience from the
+annotation process, more often issue tweets that are strongly opinionated.
+
+\begin{figure}[H]
+  \includegraphics[width = \textwidth]{figures/obs_per_party}
+\caption[Training data: observations per party]
+{Observations per party in labeled training data (\textit{left}) and entire 
+scraped data example (\textit{right}), both depicted against seat distribution 
+in current parliament.}
+\label{fig_obs_party}
+\end{figure}
+
+\begin{minipage}[b]{0.5\textwidth}
+  Lastly, when we inspect the class label distribution in the training data,
+  an imbalance favoring the negative class becomes immediately visible: some 
+  72\% of tweets have been marked as negative.
+  This reflects our general impression that most tweets which do carry sentiment 
+  express negative opinions and might be partly appropriated to the fact that 
+  the majority of authors belong to opposition parties.
+\end{minipage}%
+\begin{minipage}[b]{0.05\textwidth}
+  \phantom{foo}
+\end{minipage}%
+\begin{minipage}[b]{0.45\textwidth}
+  \begin{figure}[H]
+    \includegraphics[width = \textwidth]{figures/class_dist}
+    \caption[Training data: class label distribution]
+    {\raggedright Distribution of class labels.}
+    \label{fig_class_dist}
+  \end{figure}
+\end{minipage}%
 
 % ------------------------------------------------------------------------------
 
-\newpage
 \subsubsection{Data Pre-Processing}
 \label{data_preproc}
+
+The standard machine learning approach requires a lot more feature engineering 
+than BERT does, but some general pre-processing steps are applied for both.
+In an initial step all tweets in non-German language are excluded from the data.
+We proceed with basic text cleaning, namely transcription of 
+German umlauts and ligature s into standard-Latin characters and removal of 
+non-informative symbols (such as those induced by ampersand conversion). 
+The next block of operations is specific to Twitter data and includes the 
+identification, separate storage and subsequent removal of special characters, 
+such as hashtags, emojis and user tags.
+By this we ensure the data are available for explicit analysis but do not 
+introduce noise in the text.
+We finish the pre-processing procedure by assigning a unique identifier to 
+each tweet.
 
 % ------------------------------------------------------------------------------
 

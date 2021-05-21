@@ -145,12 +145,6 @@ Ludwig-Maximilians-Universität München
 \tableofcontents
 \newpage
 
-\listoffigures
-% \newpage
-\vspace{1cm}
-\listoftables
-\newpage
-
 \Large
 \noindent
 \textbf{List of Abbreviations}
@@ -159,13 +153,16 @@ Ludwig-Maximilians-Universität München
 \normalsize
 
 \begin{tabular}{rl}
+  ABSA & aspect-based sentiment analysis \\
+  BERT & Bidirectional Encoder Representations from Transformers \\ 
+  LDA & latent Dirichlet allocation \\
   MP & Member of Parliament \\
   NLP & natural language processing \\
   STM & structural topic model \\
   TSSA & topic-specific sentiment analysis
 \end{tabular}
 
-\vspace{1cm}
+\vfill
 
 \Large
 \noindent
@@ -178,6 +175,14 @@ Ludwig-Maximilians-Universität München
   $A$ & identity matrix with $s^2$ entries  \\
   $0$ & $s$-dimensional zero vector
 \end{tabular}
+
+\vfill
+
+\listoffigures
+
+\vfill
+
+\listoftables
 
 \newpage
 
