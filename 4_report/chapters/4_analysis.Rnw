@@ -10,7 +10,7 @@ The subject of our analysis are tweets by members of the German parliament
 (\textit{Bundestag}) issued after the last federal election in September 2017.
 Twitter makes these publicly accessible via its official API and the number of 
 retrievable tweets per user can be exploited generously, so data supply is 
-\textit{de facto} almost unrestricted.
+de facto almost unrestricted.
 However, with sentiment classification as ultimate goal of analysis, we face a 
 major bottleneck in the need for labeled data.
 Lacking the resources for large-scale annotation we did the labeling ourselves.
@@ -39,11 +39,18 @@ be found among the teaching material.
 \\
 
 \textbf{Data labeling.}
-For the data annotation phase we extracted a set with some tens of thousands 
+In the data annotation phase we extracted a set with some tens of thousands 
 of observations according to the above process and manually selected what we 
 deem informative examples.
 For these we assigned polarities, i.e., predicates \textit{positive} or
-\textit{negative}, and also topic descriptions required for BERT's ABSA task. 
+\textit{negative}, and also topic descriptions required for BERT's ABSA task.
+The resulting 1,125 training observations, originated by a total of 256 MPs, 
+dates from the period between October 2017 and January 2021.
+Below we list some of the main data characteristics.
+
+\medskip
+
+\includegraphics[width = \textwidth]{figures/obs_per_party}
 
 % ------------------------------------------------------------------------------
 

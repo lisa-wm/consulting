@@ -66,7 +66,7 @@ to human judgment.
 Usually the resulting topics are then examined with respect to their most 
 characteristic terms, according to an appropriate measure, in the attempt to 
 find a meaningful description.
-In particular, $K$ is a hyperparameter that must be specified \textit{a priori}
+In particular, $K$ is a hyperparameter that must be specified a priori
 \citep{aggarwal2018}.
 \\
 

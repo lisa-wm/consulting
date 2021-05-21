@@ -2,8 +2,73 @@
 # DESCRIPTIVE ANALYSES
 # ------------------------------------------------------------------------------
 
-# IN: corpus object of cleaned tweets and meta data
-# OUT: -
+# LABELED DATA -----------------------------------------------------------------
+
+# Load data
+
+load_rdata_files(data_clean, folder = "2_code/1_data/2_tmp_data")
+data_training <- data_clean[label != "none"]
+
+cols_relevant <- c(
+  "doc_id",
+  "label",
+  "meta_party",
+  "meta_bundesland",
+  "meta_unemployment_rate",
+  "meta_share_pop_migration",
+  "twitter_username",
+  "twitter_created_at",
+  "twitter_retweet_count")
+
+data_training <- data_training[, ..cols_relevant]
+
+length(unique(data_training$twitter_username))
+summary(data_training$twitter_created_at)
+
+# Plot party distribution
+
+plot_party <- function(data, dataset_name) {
+  
+  data$meta_party <- factor(
+    data$meta_party, 
+    levels = c(
+      "linke", 
+      "gruene", 
+      "spd", 
+      "cdu_csu", 
+      "fdp", 
+      "afd", 
+      "fraktionslos"))
+  
+  ggplot2::ggplot(
+    data[!is.na(meta_party)], 
+    ggplot2::aes(x = meta_party, y = ..prop.., group = 1L)) +
+    ggplot2::geom_bar(fill = "lightgray") +
+    ggplot2::theme_minimal() +
+    ggplot2::scale_x_discrete(labels = c(
+      "Left",
+      "Greens",
+      "SPD",
+      "CDU/CSU",
+      "FDP",
+      "AfD",
+      "none")) +
+    # ggplot2::theme(axis.text.x = element_text(angle = 45L, hjust = 1L)) +
+    ggplot2::ylim(c(0L, 0.25)) +
+    ggplot2::xlab("party") +
+    ggplot2::ylab("number of observations") + 
+    ggplot2::ggtitle(dataset_name)
+  
+}
+
+ggplot2::ggsave(
+  here::here("4_report/figures", "obs_per_party.png"),
+  gridExtra::grid.arrange(
+    plot_party(data_training, "labeled data"),
+    plot_party(data_clean, "all data"),
+    ncol = 2L),
+  height = 2.5,
+  width = 10L)
 
 # EXTRACT SOME DESCRIPTIVE STATISTICS ------------------------------------------
 
