@@ -21,7 +21,7 @@ Afterwards, we pursue two fundamentally different approaches toward performing
 TSSA.
 
 \begin{enumerate}
-  \item The first approach applies standard machine learning tools which require 
+  \item The first approach applies standard ML tools which require 
   the input data to be of tabular form.
   Obviously, texts are complex constructs and not arbitrary sequences of 
   interchangeable characters that can simply be cast into tabled variables

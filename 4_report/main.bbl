@@ -4,6 +4,25 @@
 Aggarwal, C.~C.  \harvardyearleft 2018\harvardyearright .
 \newblock {\em Machine Learning for Text}, Springer.
 
+\harvarditem[Baly et~al.]{Baly, Badaro, Hamdi, Moukalled, Aoun, El-Khoury,
+  El-Sallab, Hajj, Habash, Shaban \harvardand\ El-Hajj}{2017}{balyetal2017}
+Baly, R., Badaro, G., Hamdi, A., Moukalled, R., Aoun, R., El-Khoury, G.,
+  El-Sallab, A., Hajj, H., Habash, N., Shaban, K.~B. \harvardand\ El-Hajj, W.
+  \harvardyearleft 2017\harvardyearright .
+\newblock Omam at semeval-2017 task 4: Evaluation of english state-of-the-art
+  sentiment analysis models for arabic and a new topic-based model, {\em
+  Proceedings of the 11th International Workshop on Semantic Evaluations
+  (SemEval-2017)}, p.~603–610.
+
+\harvarditem[Benoit et~al.]{Benoit, Watanabe, Wang, Nulty, Obeng, Müller,
+  Matsuo, Lowe \harvardand\ Müller}{2021}{pkgquanteda}
+Benoit, K., Watanabe, K., Wang, H., Nulty, P., Obeng, A., Müller, S., Matsuo,
+  A., Lowe, W. \harvardand\ Müller, C.  \harvardyearleft 2021\harvardyearright
+  .
+\newblock {\em quanteda: Quantitative Analysis of Textual Data}.
+\newblock R package version 3.0.0.
+\newline\harvardurl{https://CRAN.R-project.org/package=quanteda}
+
 \harvarditem{Bhatia \harvardand\ Padmanabhan}{2018}{bhatiap2018}
 Bhatia, S. \harvardand\ Padmanabhan, D.  \harvardyearleft 2018\harvardyearright
   .
@@ -27,6 +46,14 @@ Bode, L.  \harvardyearleft 2017\harvardyearright .
   low-cost political engagement on social media, {\em Social Media + Society}
   {\bf 3}.
 
+\harvarditem[Correa et~al.]{Correa, Marinho \harvardand\ dos
+  Santos}{2017}{correaetal2017}
+Correa, E.~A., Marinho, V.~Q. \harvardand\ dos Santos, L.~B.  \harvardyearleft
+  2017\harvardyearright .
+\newblock Nilc-usp at semeval-2017 task 4: A multi-view ensemble for twitter
+  sentiment analysis, {\em Proceedings of the 11th International Workshop on
+  Semantic Evaluations (SemEval-2017)}, p.~611–615.
+
 \harvarditem[Devlin et~al.]{Devlin, Chang, Lee \harvardand\
   Toutanova}{2019}{devlin2019}
 Devlin, J., Chang, M.-W., Lee, K. \harvardand\ Toutanova, K.  \harvardyearleft
@@ -45,6 +72,12 @@ Hasell, A. \harvardand\ Weeks, B.~E.  \harvardyearleft 2016\harvardyearright .
   responses in political information sharing in social media, {\em Human
   Communication Research} {\bf 42}:~641–661.
 
+\harvarditem{Jabreel \harvardand\ Moreno}{2017}{jabreelmoreno2017}
+Jabreel, M. \harvardand\ Moreno, A.  \harvardyearleft 2017\harvardyearright .
+\newblock Sitaka at semeval-2017 task 4: Sentiment analysis in twitter based on
+  a rich set of features, {\em Proceedings of the 11th International Workshop
+  on Semantic Evaluations (SemEval-2017)}, p.~694–699.
+
 \harvarditem[Jang et~al.]{Jang, Rempel, Roth, Carenini \harvardand\
   Janjua}{2021}{jangetal2021}
 Jang, H., Rempel, E., Roth, D., Carenini, G. \harvardand\ Janjua, N.~Z.
@@ -61,6 +94,18 @@ Jost, J.~T., Barbera, P., Bonneau, R., Langer, M., Metzger, M., Nagler, J.,
 \newblock How social media facilitates political protest: Information,
   motivation, and social networks, {\em Advances in Political Psychology} {\bf
   39}(1).
+
+\harvarditem[Kralj~Novak et~al.]{Kralj~Novak, Smailović, Sluban \harvardand\
+  Mozetič}{2015}{kraljetal2015}
+Kralj~Novak, P., Smailović, J., Sluban, B. \harvardand\ Mozetič, I.
+  \harvardyearleft 2015\harvardyearright .
+\newblock Emoji sentiment ranking 1.0,
+  \url{https://www.clarin.si/repository/xmlui/handle/11356/1048}.
+
+\harvarditem{Leipzig}{2021}{sentiws}
+Leipzig, U.  \harvardyearleft 2021\harvardyearright .
+\newblock Leipzig corpora collection download page,
+  \url{https://wortschatz.uni-leipzig.de/en/download}.
 
 \harvarditem[Medhat et~al.]{Medhat, Hassan \harvardand\
   Korashy}{2014}{medhatetal2014}
@@ -86,6 +131,12 @@ Qiang, J., Qian, Z., Li, Y., Yuan, Y. \harvardand\ Wu, X.  \harvardyearleft
 {R Core Team}  \harvardyearleft 2021\harvardyearright .
 \newblock {\em R: A Language and Environment for Statistical Computing}, R
   Foundation for Statistical Computing, Vienna, Austria.
+
+\harvarditem{Rauh}{2018}{rauh2018}
+Rauh, C.  \harvardyearleft 2018\harvardyearright .
+\newblock Replication data for: Validating a sentiment dictionary for german
+  political language,
+  \url{https://dataverse.harvard.edu/dataset.xhtml?persistentId=doi:10.7910/DVN/BKBXWD}.
 
 \harvarditem{Richardson}{2007}{richardson2007}
 Richardson, L.  \harvardyearleft 2007\harvardyearright .
@@ -128,6 +179,10 @@ Stier, S., Bleier, A., Lietz, H. \harvardand\ Strohmaier, M.  \harvardyearleft
   mediation of political communication on facebook and twitter, {\em Political
   Communication} {\bf 35}(1):~50--74.
 
+\harvarditem{{\em stopwords-iso}}{2021}{stopwords_iso}
+{\em stopwords-iso}  \harvardyearleft 2021\harvardyearright .
+\newblock \url{https://github.com/stopwords-iso/stopwords-de}.
+
 \harvarditem[Tian et~al.]{Tian, Yang, Sun \harvardand\ Liu}{2021}{tianetal2021}
 Tian, Y., Yang, L., Sun, Y. \harvardand\ Liu, D.  \harvardyearleft
   2021\harvardyearright .
@@ -159,6 +214,13 @@ Vayansky, I. \harvardand\ Kumar, S.~A.  \harvardyearleft 2020\harvardyearright
   .
 \newblock A review of topic modeling methods, {\em Information Systems} {\bf
   94}.
+
+\harvarditem{Waltinger}{2010}{waltinger2010}
+Waltinger, U.  \harvardyearleft 2010\harvardyearright .
+\newblock Germanpolarityclues: A lexical resource for german sentiment
+  analysis, {\em Proceedings of the Seventh International Conference on
+  Language Resources and Evaluation (LREC)}, electronic proceedings, Valletta,
+  Malta.
 
 \harvarditem[Wang et~al.]{Wang, Xu, Zhang, Jin \harvardand\
   Sun}{2021}{wangetal2021}

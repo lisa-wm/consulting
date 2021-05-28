@@ -74,7 +74,8 @@ In particular, $K$ is a hyperparameter that must be specified a priori
 Topic modeling approaches roughly decompose into deterministic and 
 probabilistic, or generative, approaches.
 The former are based on factorizing the document-term matrix 
-$M \in \R^{D \times V}$ (or a weighted version that takes into account prior probabilities of term occurrence) into two low-rank matrices, 
+$M \in \R^{D \times V}$ (or a weighted version that takes into account prior 
+probabilities of term occurrence) into two low-rank matrices, 
 $U \in \R^{D \times K}$ and $W^T \in \R^{K \times V}$, whose product 
 approximates $M$ loss-minimally.
 Probably the most prominent methods from this category are \textit{latent 
@@ -147,8 +148,7 @@ We do incorporate this type of analysis but use the respective numbers of
 positive- and negative-polarity terms as an intermediate input rather than 
 the sole grounds for classification.
 
-Instead, we perceive sentiment analysis as a classic instance of supervised 
-machine learning.
+Instead, we perceive sentiment analysis as a classic instance of supervised ML.
 Under the assumption that the data can be categorized into $g \in \N$ discrete 
 classes we predict for each document its associated class from a set of 
 features. 
@@ -170,7 +170,7 @@ features must be handled with care.
 Once the data are available in tabular form we can, in principle, use any type 
 of learner suited to classification.
 We specifically consider random forests and regularized logistic regression for 
-the standard machine learning solution and turn BERT into a classifier by 
+the standard ML solution and turn BERT into a classifier by 
 fine-tuning it to sentiment analysis; details are given in section 
 \ref{analysis}.
 
@@ -190,9 +190,9 @@ extraction and sentiment analysis jointly, or regard it as a cascading task
 where sentiment analysis is subsequent to topic modeling.
 Most publications to date share the second view; recent work, however, has
 highlighted the advantages of joint modeling 
-(\citet{nguyenetal2018}, \citet{tianetal2021}, \citet{wangetal2021}).
+(e.g., \citet{nguyenetal2018}, \citet{tianetal2021}, \citet{wangetal2021}).
 While theoretical arguments are strong, we decide against simultaneous 
-methods mostly due to the complexity of such approaches, which is at odds with 
+methods mostly due to their complexity which is at odds with 
 our goal of making text analysis accessible to a broader audience.
 Also we would like to retain the option of performing both tasks in a 
 stand-alone fashion.
@@ -204,13 +204,12 @@ This seems plausible in the light of tweets' brevity (Twitter currently allows
 for 280 characters, up from 140 originally) and is supported by other research 
 (\citet{zuoetal2016}, \citet{quiangetal2019}).
 We then explore different options in our proposal.
-For the standard machine learning classification we use topic modeling, 
+For the standard ML classification we use topic modeling, 
 somewhat implicitly, as a means of feature generation for sentiment analysis.
 The clusters resulting from grouping tweets by topic serve as environments for 
 computing topic-specific embeddings that are afterwards fed to the classifier.
-In the deep learning solution we experiment with sentiments that directly refer 
+In the DL solution we experiment with sentiments that directly refer 
 to aspects by fine-tuning BERT to an ABSA task.
 However, we observe in both approaches that the topical component does not aid 
 the sentiment classification task and even tends to worsen results.
-We will discuss this finding in section \ref{discussion} and now proceed with 
-presenting the results of our analysis.
+We will discuss this finding in section \ref{discussion}.

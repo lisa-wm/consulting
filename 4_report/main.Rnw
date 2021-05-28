@@ -155,7 +155,9 @@ Ludwig-Maximilians-Universität München
 \begin{tabular}{rl}
   ABSA & aspect-based sentiment analysis \\
   BERT & Bidirectional Encoder Representations from Transformers \\ 
+  DL & deep learning \\
   LDA & latent Dirichlet allocation \\
+  ML & machine learning \\
   MP & Member of Parliament \\
   NLP & natural language processing \\
   STM & structural topic model \\

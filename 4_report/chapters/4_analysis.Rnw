@@ -16,32 +16,32 @@ CDU/CSU and SPD as ruling parties co-exist in a grand coalition.
 }.
 Twitter makes these publicly accessible via its official API and the number of 
 retrievable tweets per user can be exploited generously, so data supply is 
-de facto almost unrestricted.
+almost unrestricted.
 However, with sentiment classification as ultimate goal of analysis, we face a 
 major bottleneck in the need for labeled data.
-Lacking the resources for large-scale annotation we did the labeling ourselves.
+Lacking the resources for large-scale annotation we did the labeling by hand.
 The resulting data set, from a vast amount of available data, consists of 1,215 
-observations, severely limiting the analytical scope.
+observations, imposing some practical limits on the analytical scope.
 \\
 
 \textbf{Web scraping.}
-For data collection from the Web we rely on the scraping procedure developed by 
-\citet{schulzewiegrebe2020}, with minor modifications.
+For data collection from the Web we rely on the scraping procedure developed in 
+the predecessor project, with minor modifications.
 The process entails four steps: first, gather MPs' names and basic information 
 (such as party affiliation and electoral district) from the official Bundestag 
 website; second, find Twitter account names (using individual party websites as 
-additional sources as these data are not stored consistently across MPs); 
+additional sources); 
 third, acquire socioeconomic information for the time of the last 
 federal election on a per-district level (available at the official website of 
 the federal returning officer); and, lastly, scrape actual tweets along with 
-some additional variables such as the number of likes or retweets.
+some additional variables like the number of retweets.
 We use a \texttt{Python} code base and mainly employ selenium webdrivers as well
 as the \texttt{BeatifulSoup} library \citep{richardson2007} for parsing HTML
 content and the \texttt{tweepy} library \citep{roesslein2020} for accessing the
 official Twitter API.
 For more details on the procedure and the large data base assembled in the 
 predecessor project please refer to \citet{schulzewiegrebe2020}; the code is 
-fully submitted in the electronic appendix and a somewhat more compact demo may 
+fully submitted in our electronic appendix and a somewhat more compact demo may 
 be found among the teaching material.
 \\
 
@@ -51,9 +51,9 @@ of observations according to the above process and manually selected what we
 deem informative examples.
 For these we assigned polarities, i.e., predicates \textit{positive} or
 \textit{negative}, and also topic descriptions required for BERT's ABSA task.
-We noted in the process that a large number tweets do not appear to carry 
+We noted in the process that a large number of tweets do not appear to carry 
 sentiment at all.
-The resulting 1,125 training observations, originated by a total of 256 MPs, 
+The resulting 1,215 training observations, originated by a total of 256 MPs, 
 date from the period of October 2017 to January 2021.
 In figure \ref{fig_obs_time} we detect both periodical fluctuations in the 
 number of tweets over time and a general upward-sloping trend.
@@ -143,14 +143,14 @@ in current parliament.}
 \subsubsection{Data Pre-Processing}
 \label{data_preproc}
 
-The standard machine learning approach requires a lot more feature engineering 
+The standard ML approach requires a lot more feature engineering 
 than BERT does, but some general pre-processing steps are applied for both.
 In an initial step all tweets in non-German language are excluded from the data.
 We proceed with basic text cleaning, namely transcription of 
 German umlauts and ligature s into standard-Latin characters and removal of 
 non-informative symbols (such as those induced by ampersand conversion). 
 The next block of operations is specific to Twitter data and includes the 
-identification, separate storage and subsequent removal of special characters, 
+identification, separate storage and subsequent removal of special characters 
 such as hashtags, emojis and user tags.
 By this we ensure the data are available for explicit analysis but do not 
 introduce noise in the text.
@@ -167,9 +167,58 @@ each tweet.
 \subsubsection{Methodology}
 \label{tssa_ml_method}
 
+\textbf{Static vs dynamic features} \\
+
+Static feature extraction forms the first block of the standard ML procedure and 
+provides tabular data which then enter an automated ML (AutoML) pipeline. 
+We refer to these features as static because they can be calculated prior to any 
+training process, depending solely on single observations.
+Dynamic features, by contrast, are computed globally across different 
+observations, which requires strict adherence to the untouched-test-set 
+principle.
+For the static part we exploit insights from other studies 
+(e.g., \citet{balyetal2017}, \citet{correaetal2017}, \citet{jabreelmoreno2017}, 
+\citet{sidarenka2019})
+and include the following features: 
+
+\begin{enumerate}
+
+  \item \textbf{Lexicon-based polarity counts.} These comprise two sources of 
+  prior polarity, namely words and emojis. 
+  We use the aggregate of three large German polarity-term dictionaries, 
+  \textit{GlobalPolarityClues} \citep{waltinger2010}, \textit{SentiWS} 
+  \citep{sentiws} and a collection by \citet{rauh2018} for word polarities and 
+  an emoji polarity list accumulated by \citet{kraljetal2015}.
+  In each tweet, if a word or emoji is part of the dictionary and judged to have 
+  either positive or negative connotation, it raises the respective polarity 
+  count by one.
+  
+  \item \textbf{Twitter variables.} We make use of the additional information 
+  provided by the Twitter API and note for each tweet the number of likes and 
+  retweets as well as the number of users tagged.
+  For hashtags we resort to the same naive measure since we found them to be so 
+  heterogeneous across documents that no meaningful information could be 
+  extracted. 
+  This certainly marks an opportunity for future improvement.
+  
+  \item \textbf{Twitter variables.}
+  
+\end{enumerate}
+
+The above feature extraction steps rely heavily on \texttt{R}'s 
+\texttt{quanteda} package \citep{pkgquanteda} for organizing documents in corpus 
+objects, tokenizing texts and performing look-ups with dictionaries.
+We also use lists of stopwords in multiple places to exclude uninformative 
+tokens such as articles or auxiliary verbs.
+These are again compilations from various sources, including \texttt{quanteda}'s 
+built-in list, open-source data from \citet{stopwords_iso} and some manually 
+appended, domain-specific terms. 
+\\
+
 \textbf{Automated machine learning pipeline} \\
 
-foo
+The design of the AutoML pipeline as a graph learner ensures that training and 
+test sets remain completely walled off from one another at each resampling step.
 \\
 
 \textbf{Methodological concepts} \\

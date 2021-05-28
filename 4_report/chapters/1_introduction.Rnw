@@ -62,8 +62,8 @@ Our contribution is two-fold:
 
 \begin{enumerate}
   \item We explore how topic-specific sentiment analysis can be 
-  implemented, considering (1) standard machine learning techniques and (2) more 
-  complex deep learning models.
+  implemented, considering (1) standard machine learning (ML) techniques and (2) 
+  more complex deep learning (DL) models.
   \item We provide extensive teaching material on both approaches, composed as
   a coherent online course, to educate researchers on addressing NLP problems in 
   their own work.
@@ -81,4 +81,6 @@ for both approaches the underlying methodology and discussing the results of
 applying them to the data at hand.
 Section \ref{teaching} outlines how the findings from this analysis translate to 
 the proposed teaching material.
-Afterwards, in section \ref{discussion}, we critically assess the findings and limitations of the project, and conclude with a brief summary in section \ref{conclusion}.
+Afterwards, in section \ref{discussion}, we critically assess the findings and 
+limitations of the project, and conclude with a brief summary in section 
+\ref{conclusion}.
