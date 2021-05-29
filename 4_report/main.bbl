@@ -14,12 +14,6 @@ Baly, R., Badaro, G., Hamdi, A., Moukalled, R., Aoun, R., El-Khoury, G.,
   Proceedings of the 11th International Workshop on Semantic Evaluations
   (SemEval-2017)}, p.~603–610.
 
-\harvarditem{Benoit \harvardand\ Matsuo}{2020}{pkgspacyr}
-Benoit, K. \harvardand\ Matsuo, A.  \harvardyearleft 2020\harvardyearright .
-\newblock {\em spacyr: Wrapper to the 'spaCy' 'NLP' Library}.
-\newblock R package version 1.2.1.
-\newline\harvardurl{https://CRAN.R-project.org/package=spacyr}
-
 \harvarditem[Benoit et~al.]{Benoit, Watanabe, Wang, Nulty, Obeng, Müller,
   Matsuo, Lowe \harvardand\ Müller}{2021}{pkgquanteda}
 Benoit, K., Watanabe, K., Wang, H., Nulty, P., Obeng, A., Müller, S., Matsuo,
@@ -51,6 +45,12 @@ Bode, L.  \harvardyearleft 2017\harvardyearright .
 \newblock Gateway political behaviors: The frequency and consequences of
   low-cost political engagement on social media, {\em Social Media + Society}
   {\bf 3}.
+
+\harvarditem[Breiman et~al.]{Breiman, Friedman, Olshen \harvardand\
+  Stone}{1984}{breimanetal1984}
+Breiman, L., Friedman, J.~H., Olshen, R.~J. \harvardand\ Stone, C.~J.
+  \harvardyearleft 1984\harvardyearright .
+\newblock {\em Classification and Regression Trees}, Chapman \& Hall/CRC.
 
 \harvarditem[Cambria et~al.]{Cambria, Das, Sivaji \harvardand\
   Feraco}{2017}{cambriaetal2017}
@@ -86,6 +86,12 @@ Hasell, A. \harvardand\ Weeks, B.~E.  \harvardyearleft 2016\harvardyearright .
   responses in political information sharing in social media, {\em Human
   Communication Research} {\bf 42}:~641–661.
 
+\harvarditem[Hastie et~al.]{Hastie, Qian \harvardand\
+  Tay}{2021}{hastieetal2021}
+Hastie, T., Qian, J. \harvardand\ Tay, K.  \harvardyearleft
+  2021\harvardyearright .
+\newblock An introduction to glmnet.
+
 \harvarditem{Jabreel \harvardand\ Moreno}{2017}{jabreelmoreno2017}
 Jabreel, M. \harvardand\ Moreno, A.  \harvardyearleft 2017\harvardyearright .
 \newblock Sitaka at semeval-2017 task 4: Sentiment analysis in twitter based on
@@ -116,6 +122,15 @@ Kralj~Novak, P., Smailović, J., Sluban, B. \harvardand\ Mozetič, I.
 \newblock Emoji sentiment ranking 1.0,
   \url{https://www.clarin.si/repository/xmlui/handle/11356/1048}.
 
+\harvarditem{Lindsey}{1997}{lindsey1997}
+Lindsey, J.~K.  \harvardyearleft 1997\harvardyearright .
+\newblock {\em Applying Generalized Linear Models}, Springer.
+
+\harvarditem{Louppe}{2014}{louppe2014}
+Louppe, G.  \harvardyearleft 2014\harvardyearright .
+\newblock {\em Understanding Random Forests. From Theory to Practice}, PhD
+  thesis, University of Liege.
+
 \harvarditem[Medhat et~al.]{Medhat, Hassan \harvardand\
   Korashy}{2014}{medhatetal2014}
 Medhat, W., Hassan, A. \harvardand\ Korashy, H.  \harvardyearleft
@@ -134,6 +149,13 @@ Ngyuen, H. \harvardand\ Shirai, K.  \harvardyearleft 2018\harvardyearright .
 \newblock A joint model of term extraction and polarity classification for
   aspect-based sentiment analysis, {\em Proceedings of the 10th International
   Conference on Knowledge and Systems Engineering (KSE)}.
+
+\harvarditem[Probst et~al.]{Probst, Boulesteix \harvardand\
+  Bischl}{2019}{probstetal2019}
+Probst, P., Boulesteix, A.-L. \harvardand\ Bischl, B.  \harvardyearleft
+  2019\harvardyearright .
+\newblock Tunability: Importance of hyperparameters of machine learning
+  algorithms, {\em Machine Learning Research} {\bf 20}:~1--32.
 
 \harvarditem[Qiang et~al.]{Qiang, Qian, Li, Yuan \harvardand\
   Wu}{2019}{quiangetal2019}
