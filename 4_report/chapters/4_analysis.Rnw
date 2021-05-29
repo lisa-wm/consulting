@@ -284,6 +284,31 @@ and include the following features:
   
   \item \textbf{Syntactic features.} This group attempts to mitigate the 
   simplification introduced by the BOW assumption to some extent.
+  We track the presence of modifiers that indicate sentiment intensification 
+  as well as punctuation via the respective number of quotation and exclamation 
+  mark.
+  Negation is a delicate problem we currently treat with the brute-force 
+  approach of noting whether or not negating tokens are present.
+  German language complicates negation handling by the fact that modifier and 
+  modification target often appear in quite separate sentence positions, making 
+  it hard to identify the actually negated construct in an automated manner.
+  
+  \item \textbf{Character unigrams.} Unigrams refer to single tokens (whereas 
+  $n$-grams mean the concatenation of $n$ tokens) and we consider the special 
+  case of character tokens, meaning we count the occurrence of single letters.
+  While this may not seem too helpful at first glance, character unigrams 
+  lead to a very dense document representation as opposed to the sparsity 
+  induced by word unigrams or even bi- and trigrams.
+  
+  \item \textbf{Part-of-speech (POS) tags.} The last type of features captures 
+  grammatical structure.
+  POS tags are used to categorize sentence parts according to their syntactic 
+  role.
+  Including these stems from the idea that the number of certain tags, for 
+  example adjectives and adverbs, might indicate sentiment.
+  We use the \texttt{spacyR} package \citep{pkgspacyr}, a wrapper around 
+  \texttt{Python}'s \texttt{spaCy} library closely integrated with 
+  \texttt{quanteda}, for POS tagging.
   
 \end{enumerate}
 

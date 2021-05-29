@@ -14,6 +14,12 @@ Baly, R., Badaro, G., Hamdi, A., Moukalled, R., Aoun, R., El-Khoury, G.,
   Proceedings of the 11th International Workshop on Semantic Evaluations
   (SemEval-2017)}, p.~603–610.
 
+\harvarditem{Benoit \harvardand\ Matsuo}{2020}{pkgspacyr}
+Benoit, K. \harvardand\ Matsuo, A.  \harvardyearleft 2020\harvardyearright .
+\newblock {\em spacyr: Wrapper to the 'spaCy' 'NLP' Library}.
+\newblock R package version 1.2.1.
+\newline\harvardurl{https://CRAN.R-project.org/package=spacyr}
+
 \harvarditem[Benoit et~al.]{Benoit, Watanabe, Wang, Nulty, Obeng, Müller,
   Matsuo, Lowe \harvardand\ Müller}{2021}{pkgquanteda}
 Benoit, K., Watanabe, K., Wang, H., Nulty, P., Obeng, A., Müller, S., Matsuo,
@@ -110,11 +116,6 @@ Kralj~Novak, P., Smailović, J., Sluban, B. \harvardand\ Mozetič, I.
 \newblock Emoji sentiment ranking 1.0,
   \url{https://www.clarin.si/repository/xmlui/handle/11356/1048}.
 
-\harvarditem{Leipzig}{2021}{sentiws}
-Leipzig, U.  \harvardyearleft 2021\harvardyearright .
-\newblock Leipzig corpora collection download page,
-  \url{https://wortschatz.uni-leipzig.de/en/download}.
-
 \harvarditem[Medhat et~al.]{Medhat, Hassan \harvardand\
   Korashy}{2014}{medhatetal2014}
 Medhat, W., Hassan, A. \harvardand\ Korashy, H.  \harvardyearleft
@@ -192,10 +193,6 @@ Stier, S., Bleier, A., Lietz, H. \harvardand\ Strohmaier, M.  \harvardyearleft
 \newblock Election campaigning on social media: Politicians, audiences, and the
   mediation of political communication on facebook and twitter, {\em Political
   Communication} {\bf 35}(1):~50--74.
-
-\harvarditem{{\em stopwords-iso}}{2021}{stopwords_iso}
-{\em stopwords-iso}  \harvardyearleft 2021\harvardyearright .
-\newblock \url{https://github.com/stopwords-iso/stopwords-de}.
 
 \harvarditem[Tian et~al.]{Tian, Yang, Sun \harvardand\ Liu}{2021}{tianetal2021}
 Tian, Y., Yang, L., Sun, Y. \harvardand\ Liu, D.  \harvardyearleft

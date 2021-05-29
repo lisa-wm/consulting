@@ -161,6 +161,7 @@ Ludwig-Maximilians-Universität München
   ML & machine learning \\
   MP & Member of Parliament \\
   NLP & natural language processing \\
+  POS & part of speech \\
   STM & structural topic model \\
   TSSA & topic-specific sentiment analysis
 \end{tabular}
