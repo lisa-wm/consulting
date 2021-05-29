@@ -165,10 +165,10 @@ thresholding or an $\mathit{argmax}$ operation on the score/probability vectors
 In our case the set of labels, with $g = 2$, is typically encoded as 
 $\mathcal{Y} = \{0, 1\}$ or $\mathcal{Y} = \{-1, 1\}$.
 
-As mentioned above, casting textual data into a design matrix of numeric 
-features must be handled with care.
-Once the data are available in tabular form we can, in principle, use any type 
-of learner suited to classification.
+% As mentioned above, casting textual data into a design matrix of numeric 
+% features must be handled with care.
+Once the data are available in appropriate form, we can, in principle, use any 
+type of learner suited to classification.
 We specifically consider random forests and regularized logistic regression for 
 the standard ML solution and turn BERT into a classifier by 
 fine-tuning it to sentiment analysis; details are given in section 
@@ -176,7 +176,7 @@ fine-tuning it to sentiment analysis; details are given in section
 
 % ------------------------------------------------------------------------------
 
-\subsubsection{Topic-Specific Sentiment Analysis (TSSA)}
+\subsubsection{Topic-Specific Sentiment Analysis}
 \label{tssa}
 
 With the concepts of topic modeling and sentiment analysis we define a combined 

@@ -155,6 +155,7 @@ Ludwig-Maximilians-Universität München
 \begin{tabular}{rl}
   ABSA & aspect-based sentiment analysis \\
   BERT & Bidirectional Encoder Representations from Transformers \\ 
+  BOW & bag of words \\
   DL & deep learning \\
   LDA & latent Dirichlet allocation \\
   ML & machine learning \\
@@ -164,25 +165,25 @@ Ludwig-Maximilians-Universität München
   TSSA & topic-specific sentiment analysis
 \end{tabular}
 
-\vfill
+% \vfill
+% 
+% \Large
+% \noindent
+% \textbf{List of Symbols}
+% \vspace{0.5cm} \\
+% \noindent
+% \normalsize
+% 
+% \begin{tabular}{rl}
+%   $A$ & identity matrix with $s^2$ entries  \\
+%   $0$ & $s$-dimensional zero vector
+% \end{tabular}
 
-\Large
-\noindent
-\textbf{List of Symbols}
-\vspace{0.5cm} \\
-\noindent
-\normalsize
-
-\begin{tabular}{rl}
-  $A$ & identity matrix with $s^2$ entries  \\
-  $0$ & $s$-dimensional zero vector
-\end{tabular}
-
-\vfill
+\vspace{3cm}
 
 \listoffigures
 
-\vfill
+\vspace{3cm}
 
 \listoftables
 

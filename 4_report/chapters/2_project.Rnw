@@ -28,7 +28,7 @@ TSSA.
   % analyzing text entails handling the sheer size of languages' vocabularies, 
   % grammatical rules and irregularities, individual preferences in expression, 
   % and delicate phenomena like colloquialisms or irony, to name only a few 
-  (section \ref{data_preproc} will address the challenges arising from Twitter 
+  (section \ref{challenges} will address the challenges arising from Twitter 
   data in more detail).
   It is nevertheless possible, as general research and also or own results 
   suggest, to obtain fairly good performance with this reduction of complexity.
