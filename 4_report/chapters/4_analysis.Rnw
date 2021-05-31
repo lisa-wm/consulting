@@ -211,20 +211,50 @@ detect an imbalance toward negative sentiment in those that do convey opinion.
 
 % ------------------------------------------------------------------------------
 
-\subsubsection{Feature Extraction}
-\label{feat_ext}
+\subsubsection{Concept}
+\label{tssa_ml_concept}
+
+\begin{minipage}[b]{0.45\textwidth}
+  A number of components make up a typical workflow in ML 
+  (figure \ref{fig_ml_workflow}).
+  Task, learner, performance measure
+  Makes sense to build this as a modular system (graph leaner) because 1. this 
+  enables us to quickly exchange components and 2. tuning and evaluation require 
+  us to repeat the learning process over and over
+  therefore we design this as a pipeline, propose a certain design but everything 
+  can be easily exchanged
+\end{minipage}%
+\begin{minipage}[b]{0.05\textwidth}
+  \phantom{foo}
+\end{minipage}%
+\begin{minipage}[b]{0.5\textwidth}
+  \begin{figure}[H]
+    \begin{center}
+      \includegraphics[width = \textwidth]{figures/supervised_learning_schema}
+    \end{center}
+  \caption[ML workflow]{Typical ML workflow \citep{mlr3book}}
+  \label{fig_ml_workflow}
+  \end{figure}
+\end{minipage}%
+
+% ------------------------------------------------------------------------------
+
+\subsubsection{Task Creation}
+\label{tssa_ml_task}
 
 Static feature extraction forms the first block of the standard ML procedure and 
-provides tabular data which then enter an automated ML (AutoML) pipeline. 
+provides tabular data which then enter an automated ML (AutoML) pipeline (see 
+section \ref{pipeline}). 
 We refer to these features as static because they can be calculated prior to any 
 training process, depending solely on single observations.
 They mainly capture information related to sentiment analysis.
 Dynamic features, by contrast, are directed at topic modeling and therefore 
 computed globally across several observations.
-As this requires strict separation between train and test sphere in computation, 
-the distinction between static and dynamic variables is mirrored by the analytic 
-process through integrating the extraction of dynamic features into the AutoML 
-pipeline.
+Since unbiased learning requires strict separation between train and test 
+sphere, we must be careful to wall off predictions at test time from any 
+computation during training.
+This is achieved by integrating the extraction of dynamic features into the 
+AutoML pipeline such that they are every
 \\
 
 \textbf{\textit{Static features}} \\
@@ -335,7 +365,7 @@ Foo
 
 % ------------------------------------------------------------------------------
 
-\subsubsection{Sentiment Classifiers}
+\subsubsection{Sentiment Classification}
 \label{classifiers}
 
 \color{red}

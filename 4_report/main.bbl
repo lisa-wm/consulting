@@ -14,6 +14,14 @@ Baly, R., Badaro, G., Hamdi, A., Moukalled, R., Aoun, R., El-Khoury, G.,
   Proceedings of the 11th International Workshop on Semantic Evaluations
   (SemEval-2017)}, p.~603–610.
 
+\harvarditem[Becker et~al.]{Becker, Binder, Bischl, Lang, Pfisterer, Reich,
+  Richter, Schratz \harvardand\ Sonabend}{2021}{mlr3book}
+Becker, M., Binder, M., Bischl, B., Lang, M., Pfisterer, F., Reich, N.~G.,
+  Richter, J., Schratz, P. \harvardand\ Sonabend, R.  \harvardyearleft
+  2021\harvardyearright .
+\newblock mlr3 book.
+\newline\harvardurl{https://mlr3book.mlr-org.com}
+
 \harvarditem[Benoit et~al.]{Benoit, Watanabe, Wang, Nulty, Obeng, Müller,
   Matsuo, Lowe \harvardand\ Müller}{2021}{pkgquanteda}
 Benoit, K., Watanabe, K., Wang, H., Nulty, P., Obeng, A., Müller, S., Matsuo,

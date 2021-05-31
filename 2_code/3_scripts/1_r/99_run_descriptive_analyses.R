@@ -117,6 +117,7 @@ plot_class <- ggplot2::ggplot(
   data_training[, n_label := .N], 
   ggplot2::aes(x = n_label, fill = label)) +
   ggplot2::geom_bar(position = "fill") +
+  ggplot2::theme_minimal() +
   ggplot2::theme(legend.position = "bottom") +
   ggplot2::coord_flip() +
   ggplot2::scale_x_continuous(labels = NULL, breaks = NULL) +
