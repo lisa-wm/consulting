@@ -97,8 +97,7 @@ word from the distribution associated with this topic \citep{vayanskykumar2020}.
 \textit{Latent Dirichlet allocation (LDA)} by \citet{bleietal2003}, employing
 Dirichlet and multinomial distributions, pioneered this approach to topic 
 modeling.
-We revisit LDA in section \ref{tssa_ml_method} as it also provides the 
-foundation for the STM.
+In this, it also provides the foundation for the STM.
 
 % ------------------------------------------------------------------------------
 

@@ -261,8 +261,9 @@ that no information from training leaks into the test predictions
 
 As figure \ref{fig_ml_workflow} suggests, the workflow is of quite modular 
 nature.
-We therefore build a pipeline for sentiment classification that allows to repeat 
-training procedures and exchange components easily.
+We therefore build an automated ML (AutoML) pipeline for sentiment 
+classification that allows to repeat training procedures and exchange components 
+easily.
 Following a pre-training feature extraction phase (referred to as 
 \textit{static features}), the pipeline roughly serves 
 the purpose of computing topic-specific embeddings (\textit{dynamic features}), 
@@ -271,8 +272,8 @@ returning a trained model.
 Designing the process this way is beneficial for several reasons:
 
 \begin{enumerate}
-  \item Topic-specific embeddings are computed globally across several 
-  observations.
+  \item \textbf{Dichotomy between train and test sphere.} Topic-specific 
+  embeddings are computed globally across several observations.
   In order to actually enable predictions for unseen data, these dynamic 
   calculations must be based solely on the training data.
   Since unbiased learning requires strict separation between train and test
@@ -280,9 +281,11 @@ Designing the process this way is beneficial for several reasons:
   computations exacted during training.
   The pipeline approach ensures this for each sequence of training and 
   prediction.
-  \item Automating (parts of) algorithm selection and hyperparameter tuning 
-  helps with crucial design decisions by attaching them to the given data.
-  \item The possibility to plug in alternative components makes the 
+  \item \textbf{Automatization.} Automating (parts of) algorithm selection and 
+  hyperparameter tuning helps with crucial design decisions by attaching them to 
+  the given data.
+  \item \textbf{Transferability.} The possibility to plug in alternative 
+  components makes the 
   approach instructive also for different applications.
 \end{enumerate}
 
@@ -292,27 +295,16 @@ final pipeline is assembled.
 
 % ------------------------------------------------------------------------------
 
-\subsubsection{Task Creation}
-\label{tssa_ml_task}
-
-Static feature extraction forms the first block of the standard ML procedure and 
-provides tabular data which then enter an automated ML (AutoML) pipeline (see 
-section \ref{pipeline}). 
-We refer to these features as static because they can be calculated prior to any 
-training process, depending solely on single observations.
-They mainly capture information related to sentiment analysis.
-Dynamic features, by contrast, are directed at topic modeling and therefore 
-computed globally across several observations.
-Since unbiased learning requires strict separation between train and test 
-sphere, we must be careful to wall off predictions at test time from any 
-computation during training.
-This is achieved by integrating the extraction of dynamic features into the 
-AutoML pipeline such that they are every
-\\
+\subsubsection{Feature Extraction}
+\label{tssa_ml_feat}
 
 \textbf{\textit{Static features}} \\
 
-The static part of features is based on the so-called \textit{bag-of-words 
+Static feature extraction forms the first block of the standard ML procedure and 
+provides tabular data which then enter the AutoML pipeline.
+We refer to these features as static because they can be calculated prior to any 
+training process, depending solely on single observations.
+They are based on the so-called \textit{bag-of-words 
 (BOW)} assumption that leads to texts being treated as arbitrary collections of 
 vocabulary instances.
 In particular, information about grammar and word order is discarded in BOW 
@@ -408,11 +400,22 @@ This entails a two-step procedure: first, we group documents with an STM,
 and then compute word embeddings for each topical cluster. 
 \\
 
-\textbf{STM.}
-Foo
+\textbf{Topic modeling.}
+The STM is a generative topic model and attempts to recreate the very process 
+that generated the observed documents.
+As sketched in section \ref{tm}, this is achieved by sampling topic proportions 
+for each document from some distribution, assigning word positions to topics 
+with the resulting probabilities, and drawing vocabulary instances from the 
+distribution associated with the respective topic.
+As opposed to the original LDA approach, the STM offers the possibility to 
+incorporate document-level meta data. 
+These may affect the sampling process in two places: first, by influencing the 
+topic proportions for a given document (\textit{topical prevalence}), and 
+second, by altering the distribution the vocabulary assumes over each topic 
+(\textit{topical content}).
 \\
 
-\textbf{Word Embeddings.}
+\textbf{Word embeddings.}
 Foo
 \\
 
