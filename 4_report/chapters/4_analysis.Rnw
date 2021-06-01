@@ -214,15 +214,24 @@ detect an imbalance toward negative sentiment in those that do convey opinion.
 \subsubsection{Concept}
 \label{tssa_ml_concept}
 
+A number of components make up a typical workflow in supervised ML that adheres 
+to the principle of \textit{empirical risk minimization}
+(figure \ref{fig_ml_workflow}).
+
+\vspace{0.3cm}
+
 \begin{minipage}[b]{0.45\textwidth}
-  A number of components make up a typical workflow in ML 
-  (figure \ref{fig_ml_workflow}).
-  Task, learner, performance measure
-  Makes sense to build this as a modular system (graph leaner) because 1. this 
-  enables us to quickly exchange components and 2. tuning and evaluation require 
-  us to repeat the learning process over and over
-  therefore we design this as a pipeline, propose a certain design but everything 
-  can be easily exchanged
+  Starting from a \textit{task} which consists of (initial) features and one or 
+  multiple target values, we train a \textit{learner} on parts of the data.
+  The learner encapsulates our beliefs about the feature-target relationship 
+  (\textit{hypothesis}) and uses some \textit{optimization} method to produce a 
+  model that incurs minimum training loss, or \textit{risk}, according to some 
+  metric.
+  Applying this usually parameterized model to the observations set aside for 
+  testing yields predictions we can compare to the ground truth for 
+  \textit{performance evaluation}, again with respect to a given metric. 
+  With this, we estimate the true \textit{generalization ability} of our model 
+toward unseen data from the same data-generating process.
 \end{minipage}%
 \begin{minipage}[b]{0.05\textwidth}
   \phantom{foo}
@@ -232,10 +241,54 @@ detect an imbalance toward negative sentiment in those that do convey opinion.
     \begin{center}
       \includegraphics[width = \textwidth]{figures/supervised_learning_schema}
     \end{center}
-  \caption[ML workflow]{Typical ML workflow \citep{mlr3book}}
+  \caption[Typical ML workflow]{Typical ML workflow \citep{mlr3book}}
   \label{fig_ml_workflow}
   \end{figure}
 \end{minipage}%
+
+\vspace{0.3cm}
+
+As performance might depend rather strongly on the given training data, 
+especially if there are few observations to begin with, we will typically 
+conduct multiple train-test splits (\textit{resampling}).
+Various resampling strategies are available, such as bootstrapping or 
+cross-validation.
+When the training process requires internal validation steps itself, e.g., for 
+hyperparameter tuning, we need a \textit{nested resampling} procedure to ensure 
+that no information from training leaks into the test predictions 
+\citep{japkowiczshah2011}. 
+\\
+
+As figure \ref{fig_ml_workflow} suggests, the workflow is of quite modular 
+nature.
+We therefore build a pipeline for sentiment classification that allows to repeat 
+training procedures and exchange components easily.
+Following a pre-training feature extraction phase (referred to as 
+\textit{static features}), the pipeline roughly serves 
+the purpose of computing topic-specific embeddings (\textit{dynamic features}), 
+selecting an appropriate learning algorithm with included tuning step, and 
+returning a trained model.
+Designing the process this way is beneficial for several reasons:
+
+\begin{enumerate}
+  \item Topic-specific embeddings are computed globally across several 
+  observations.
+  In order to actually enable predictions for unseen data, these dynamic 
+  calculations must be based solely on the training data.
+  Since unbiased learning requires strict separation between train and test
+  sphere, we must be careful to wall off predictions at test time from these 
+  computations exacted during training.
+  The pipeline approach ensures this for each sequence of training and 
+  prediction.
+  \item Automating (parts of) algorithm selection and hyperparameter tuning 
+  helps with crucial design decisions by attaching them to the given data.
+  \item The possibility to plug in alternative components makes the 
+  approach instructive also for different applications.
+\end{enumerate}
+
+In the following, we explain in more detail the two different stages of feature 
+extraction, introduce the learners we propose to include, and show how the 
+final pipeline is assembled.
 
 % ------------------------------------------------------------------------------
 
