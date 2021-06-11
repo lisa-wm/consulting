@@ -1,1 +1,2 @@
-foo
+Possible explanation for topics worsening results: make task more complex 
+rather than aid it
