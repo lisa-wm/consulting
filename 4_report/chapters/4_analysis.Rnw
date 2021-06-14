@@ -462,6 +462,12 @@ We adopt the notation from \citet{schulzewiegrebe2020} for consistency.
   
 \end{enumerate}
 
+For our analysis we include a total of four prevalence covariates, namely the
+MP's party affiliation and federal district (\textit{Bundesland}) as well as 
+the share of migrant population and overall employment rate.
+The latter two are modeled as smooth effects with five degrees of freedom each.
+While we find this formula to work well with our particular training data, the 
+specification can be easily modified.
 \\
 
 \textbf{Word embeddings.}
