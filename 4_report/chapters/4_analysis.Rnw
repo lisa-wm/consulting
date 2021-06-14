@@ -118,25 +118,32 @@ in current parliament.}
 \label{fig_obs_party}
 \end{figure}
 
-\begin{minipage}[b]{0.5\textwidth}
-  Lastly, when we inspect the class label distribution in the training data,
-  an imbalance favoring the negative class becomes immediately visible: some 
-  72\% of tweets have been marked as negative.
-  This reflects our general impression that most tweets which do carry sentiment 
-  express negative opinions and might be partly appropriated to the fact that 
-  the majority of authors belong to opposition parties.
-\end{minipage}%
-\begin{minipage}[b]{0.05\textwidth}
-  \phantom{foo}
-\end{minipage}%
-\begin{minipage}[b]{0.45\textwidth}
-  \begin{figure}[H]
-    \includegraphics[width = \textwidth]{figures/class_dist}
-    \caption[Training data: class label distribution]
-    {\raggedright Distribution of class labels.}
-    \label{fig_class_dist}
-  \end{figure}
-\end{minipage}%
+Lastly, when we inspect the class label distribution in the training data,
+an imbalance favoring the negative class becomes immediately visible: some 
+72\% of tweets have been marked as negative.
+This reflects our general impression that most tweets which do carry sentiment 
+express negative opinions and might be partly appropriated to the fact that 
+the majority of authors belong to opposition parties.
+
+% \begin{minipage}[b]{0.5\textwidth}
+%   Lastly, when we inspect the class label distribution in the training data,
+%   an imbalance favoring the negative class becomes immediately visible: some 
+%   72\% of tweets have been marked as negative.
+%   This reflects our general impression that most tweets which do carry sentiment 
+%   express negative opinions and might be partly appropriated to the fact that 
+%   the majority of authors belong to opposition parties.
+% \end{minipage}%
+% \begin{minipage}[b]{0.05\textwidth}
+%   \phantom{foo}
+% \end{minipage}%
+% \begin{minipage}[b]{0.45\textwidth}
+%   \begin{figure}[H]
+%     \includegraphics[width = \textwidth]{figures/class_dist}
+%     \caption[Training data: class label distribution]
+%     {\raggedright Distribution of class labels.}
+%     \label{fig_class_dist}
+%   \end{figure}
+% \end{minipage}%
 
 % ------------------------------------------------------------------------------
 
@@ -201,6 +208,7 @@ documents are mostly political statements and as such more akin to written
 texts from other sources.
 Still, the political domain introduces new vocabulary yet again and makes the 
 transfer of knowledge from other contexts harder.
+We also note that sarcasm and irony are frequently applied. 
 Lastly, as mentioned before, we find many tweets to be solely informative and 
 detect an imbalance toward negative sentiment in those that do convey opinion.
 
@@ -401,18 +409,59 @@ and then compute word embeddings for each topical cluster.
 \\
 
 \textbf{Topic modeling.}
-The STM is a generative topic model and attempts to recreate the very process 
-that generated the observed documents.
+The STM \citep{robertsetal2016} is a generative topic model and attempts to 
+recreate the very process that generated the observed documents.
 As sketched in section \ref{tm}, this is achieved by sampling topic proportions 
 for each document from some distribution, assigning word positions to topics 
 with the resulting probabilities, and drawing vocabulary instances from the 
 distribution associated with the respective topic.
-As opposed to the original LDA approach, the STM offers the possibility to 
-incorporate document-level meta data. 
+As opposed to the original LDA approach assuming a single global prior 
+distribution, the STM offers the possibility to incorporate document-level meta 
+data. 
 These may affect the sampling process in two places: first, by influencing the 
 topic proportions for a given document (\textit{topical prevalence}), and 
 second, by altering the distribution the vocabulary assumes over each topic 
 (\textit{topical content}).
+Our case lends itself more to using topical prevalence variables, presuming that 
+certain meta features on electoral district level, which can be specified in 
+terms of an additive formula, have an impact on which topics are discussed.
+Defining a topical content variable (a single, categorical one is supported in 
+the STM implementation \citep{pkgstm}) allows for topic-word distributions to 
+vary for its different levels.
+Such an approach is also conceivable but not further pursued here.
+The STM can be expressed by the following generative process\footnote{
+We adopt the notation from \citet{schulzewiegrebe2020} for consistency.
+} for each document $d \in \setd$ \citep{robertsetal2016}:
+
+\begin{enumerate}
+
+  \item Draw non-normalized topic proportions $\bm{\eta_d}$ from a 
+  $(K - 1)$-dimensional Gaussian: 
+  $\bm{\eta_d} \sim \mathcal{N}_{K - 1}(\bm{\Gamma}^T\bm{x}_d^T, \bm{\Sigma})$, 
+  where the $K$-th component is set to zero to keep the model identifiable.
+  $\bm{x}_d$ is the vector of $P \in \N$ prevalence covariates associated with 
+  document $d$, and $\bm{\Gamma} \in \R^{P \times K}$ is a matrix of topic 
+  proportion coefficients obtained by means of Bayesian linear regression with 
+  Gaussian priors and first-order penalty term.
+  The covariance matrix $\bm{\Sigma}$ can have arbitrary structure and thus 
+  incorporate inter-topic correlations.
+  
+  \item Normalize $\bm{\eta_d}$ through a softmax operation, 
+  yielding $\bm{\theta}_d$ with $\theta_{d, k} = \frac{\exp(\eta_{d, k})}{
+  \sum_{j = 1}^K \exp(\eta_{d, j})}$, $k \in \setk$. 
+  The $\bm{\theta}_d$ then effectively follow a logistic normal distribution. 
+  
+  \item For each word position $n \in \{ 1, 2, \dots, N_d \}$:
+  
+  \begin{enumerate}
+    \item Draw $\bm{z}_{d, n} \sim \mathit{Multinomial}(\bm{\theta}_d)$ to 
+    assign the $n$-th position to a topic. 
+    \item Draw a word $w_{d, n}$ from the word distribution corresponding to the 
+    assigned topic: $w_{d, n} \sim \mathit{Multinomial}(\bm{\beta}(d, n))$.
+  \end{enumerate}
+  
+\end{enumerate}
+
 \\
 
 \textbf{Word embeddings.}

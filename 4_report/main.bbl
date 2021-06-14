@@ -192,6 +192,13 @@ Rauh, C.  \harvardyearleft 2018\harvardyearright .
 Richardson, L.  \harvardyearleft 2007\harvardyearright .
 \newblock {\em Beautiful Soup Documentation}.
 
+\harvarditem[Roberts et~al.]{Roberts, Stewart \harvardand\
+  Airoldi}{2016}{robertsetal2016}
+Roberts, M.~E., Stewart, B.~M. \harvardand\ Airoldi, E.~M.  \harvardyearleft
+  2016\harvardyearright .
+\newblock A model of text for experimentation in the social sciences, {\em
+  Journal of the American Statistical Association} {\bf 111}(515):~988--1003.
+
 \harvarditem[Roberts et~al.]{Roberts, Stewart, Tingley \harvardand\
   Airoldi}{2013}{robertsetal2013}
 Roberts, M., Stewart, B., Tingley, D. \harvardand\ Airoldi, E.
@@ -199,6 +206,14 @@ Roberts, M., Stewart, B., Tingley, D. \harvardand\ Airoldi, E.
 \newblock The structural topic model and applied social science, {\em Advances
   in Neural Information Processing Systems Workshop on Topic Models},
   pp.~1--20.
+
+\harvarditem[Roberts et~al.]{Roberts, Stewart, Tingley \harvardand\
+  Benoit}{2020}{pkgstm}
+Roberts, M., Stewart, B., Tingley, D. \harvardand\ Benoit, K.  \harvardyearleft
+  2020\harvardyearright .
+\newblock {\em stm: Estimation of the Structural Topic Model}.
+\newblock R package version 1.3.6.
+\newline\harvardurl{https://CRAN.R-project.org/package=stm}
 
 \harvarditem{Roesslein}{2020}{roesslein2020}
 Roesslein, J.  \harvardyearleft 2020\harvardyearright .

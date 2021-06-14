@@ -49,7 +49,7 @@ but standard for deep (NLP) modeling.
 \\
 
 \textbf{Knowledge transfer.}
-Based on the results of this exploratory analysis we propose teaching material 
+Based on the process of this exploratory analysis we propose teaching material 
 devised to support research in similar applications.
 The acquired collection is organized as a coherent and self-contained  tutorial
 composed of basic theory, code demonstrations, and exercises (including 

@@ -6,8 +6,9 @@ methods we employ are described in chapter \ref{analysis}.
 Throughout the report we will make use of the following terminology:
 \\
 
-\textbf{Word.} Words $w$ are sequences of characters and represent the smallest 
-unit of text we consider. 
+\textbf{Word.} Words $w$ are sequences of characters.
+While they typically represent the smallest unit of text considered, BERT may 
+decompose documents into even smaller parts. 
 % \\
 
 \textbf{Vocabulary.} The aggregate of unique terms present in a collection of 
