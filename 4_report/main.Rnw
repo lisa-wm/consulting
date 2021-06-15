@@ -67,7 +67,7 @@ bindingoffset = 0mm]{geometry}
 
 \pagestyle{fancy}
 \fancyhead{}
-\fancyhead[R]{\changefont{Topic-Specific Sentiment Analysis for Tweets by 
+\fancyhead[R]{\changefont{Topic-specific sentiment analysis for tweets by 
 German MPs}}
 \fancyfoot{}
 \fancyfoot[R]{\thepage}
@@ -94,7 +94,7 @@ Statistical Consulting
       
 \rule{\textwidth}{1.5pt}
 \Huge
-\textbf{Topic-Specific Sentiment Analysis for Tweets by German MPs}
+\textbf{Topic-specific sentiment analysis for tweets by German MPs}
 \rule{\textwidth}{1.5pt}
    
 \vspace{0.5cm}
@@ -117,7 +117,7 @@ Ludwig-Maximilians-Universität München
   Authors & Asmik Nalmpatian \\
   & Lisa Wimmer \\
   & \\
-  Project Partner & Prof. Dr. Paul Thurner \\
+  Project partner & Prof. Dr. Paul Thurner \\
   & \textit{Department of Political Science} \\
   & \\
   Supervisors & Matthias Aßenmacher, Ph.D. \\
@@ -200,19 +200,19 @@ Ludwig-Maximilians-Universität München
 \label{intro}
 \input{chapters/1_introduction.Rnw}
 
-\section{Project Outline}
+\section{Project outline}
 \label{project}
 \input{chapters/2_project.Rnw}
 
-\section{General Theoretical Context}
+\section{General theoretical context}
 \label{theory}
 \input{chapters/3_theory.Rnw}
 
-\section{Analytical Proposal}
+\section{Analytical proposal}
 \label{analysis}
 \input{chapters/4_analysis.Rnw}
 
-\section{Knowledge Transfer}
+\section{Knowledge transfer}
 \label{teaching}
 \input{chapters/5_teaching.Rnw}
 
@@ -244,7 +244,7 @@ Ludwig-Maximilians-Universität München
 % \input{chapters/appendix.Rnw}
 \newpage
 
-\section{Electronic Appendix}
+\section{Electronic appendix}
 \label{el_app}
 
 Data, code and figures are provided in electronic form.
@@ -266,7 +266,7 @@ Data, code and figures are provided in electronic form.
 
 \Large
 \noindent
-\textbf{Declaration of Authorship} 
+\textbf{Declaration of authorship} 
 \vspace{0.5cm}
 \noindent
 \normalsize

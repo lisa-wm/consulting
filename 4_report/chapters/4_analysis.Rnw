@@ -3,7 +3,7 @@
 
 % ------------------------------------------------------------------------------
 
-\subsubsection{Data Collection}
+\subsubsection{Data collection}
 \label{data_collection}
 
 The subject of our analysis are tweets by members of the German parliament
@@ -147,7 +147,7 @@ the majority of authors belong to opposition parties.
 
 % ------------------------------------------------------------------------------
 
-\subsubsection{Data Pre-Processing}
+\subsubsection{Data pre-processing}
 \label{data_preproc}
 
 The standard ML approach requires a lot more feature engineering 
@@ -214,7 +214,7 @@ detect an imbalance toward negative sentiment in those that do convey opinion.
 
 % ------------------------------------------------------------------------------
 
-\subsection{Standard Machine Learning Solution}
+\subsection{Standard machine learning solution}
 \label{tssa_ml}
 
 % ------------------------------------------------------------------------------
@@ -303,10 +303,11 @@ final pipeline is assembled.
 
 % ------------------------------------------------------------------------------
 
-\subsubsection{Feature Extraction}
+\subsubsection{Feature extraction}
 \label{tssa_ml_feat}
 
-\textbf{\textit{Static features}} \\
+\textit{\textbf{Static features}}
+\\
 
 Static feature extraction forms the first block of the standard ML procedure and 
 provides tabular data which then enter the AutoML pipeline.
@@ -399,7 +400,10 @@ and include the following features:
   
 \end{enumerate}
 
-\textbf{\textit{Dynamic features}} \\
+\vspace{0.3cm}
+
+\textit{\textbf{Dynamic features}}
+\\
 
 The static features are not in any sense topic-specific.
 In order to allow for sentiments to vary across topics, we include 
@@ -471,12 +475,78 @@ specification can be easily modified.
 \\
 
 \textbf{Word embeddings.}
-Foo
+We now use the information from topic assignment to compute topic-specific word 
+embeddings.
+Recall that the BOW assumption results in very high-dimensional document 
+representations disregarding inter-term relationships.
+Word embeddings seek to capture semantic structures in these representations: 
+words are characterized by their surrounding context and projected into a latent 
+space in which similar words end up in nearby locations.
+At the same time, embeddings perform dimensionality reduction as the latent 
+space is typically chosen to be of much lower dimension than the 
+observation space.
+
+We use the\textit{Global Vectors (GloVe)} model proposed by 
+\citet{penningtonetal2014} and implemented in \texttt{R} by \citet{pkgtext2vec}.
+Its computation is based on the symmetric \textit{co-occurrence matrix} 
+$C \in \R^{M \times M}$, where $M \in \N$ denotes the number of tokens remaining 
+after such pre-processing steps as stopwords removal.
+Entry $c_{i, j}$ states how often token $j$ occurs in the context of token $i$.
+Context is a local notion controlled via \textit{window size} $\ell \in \N$, 
+where $\ell$ specifies the number of positions to each side of a token
+considered to be in its vicinity, the underlying (simplifying) assumption being 
+that the strength of semantic relation decays with increasing distance.
+The entries of the co-occurrence matrix are weighted by the inverse 
+distance to the target token.
+We can therefore express probabilities of co-occurrence as fractions of row (or 
+column) sums: the probability of the $i$-th word occurring in the context of 
+the $j$-th word is given by $p_{ij} = \tfrac{c_{ij}}{c_{i.}}$ with $c_{i.}$ 
+as the $i$-th row sum.
+The co-occurrence probabilities in turn give rise to odds 
+$\frac{p_{ik}}{p_{jk}}$, for which \citet{penningtonetal2014} posit that they 
+should be reflected by embedding vector distances.
+This is formalized as 
+
+\begin{equation*}
+  \exp((q_i - q_j)^T \tilde q_k) = \exp(q_i^T \tilde q_k - q_j^T \tilde q_k) = 
+  \frac{p_{ik}}{p_{jk}},
+\end{equation*}
+
+with $q_i \in \R^m$, $m \in \N$, as the $m$-dimensional embedding vector 
+representation for word $i$.
+$\tilde q_k$ is structurally equivalent to $q_k$ for symmetric $C$ and 
+differences arise solely from different random initialization of the model.
+The authors do not provide a sound theoretical foundation for this double 
+computation but point out that such stochastic variance has been shown to 
+benefit overparameterized models.
+In the end GloVe actually uses the sum of the vectors as embeddings.
+We arrive at $q_i^T \tilde q_j + b_i + \tilde b_j \approx \log(c_{ij})$,
+with bias $b_i$ approximately equal to $\log(c_i)$, and can now express the 
+embedding error minimization problem with the following weighted least-squares
+objective::
+
+\begin{equation*}
+  \min_{\bm{v}, \bm{b}} \sum_{i = 1}^M \sum_{j = 1}^M g(c_{ij}) \left(
+  q_i^T \tilde q_j + b_i + \tilde b_j - \log(c_{ij}) \right)^2.
+\end{equation*}
+
+$g$ is a weighting function for which the authors propose to use
+
+\begin{equation*}
+  g(x) = \begin{cases} \left( \frac{c_{ij}}{c_{\mathit{max}}} \right)^{\alpha} & 
+  c_{ij} < c_{\mathit{max}} \\
+  1 & \text{otherwise}
+  \end{cases}
+\end{equation*}
+
+$c_{\mathit{max}}$ and $\alpha$ are hyperparameters to the GloVe algorithm, as 
+are the embedding dimensionality $m$ and the size of the context window $\ell$ 
+\citep{penningtonetal2014}.
 \\
 
 % ------------------------------------------------------------------------------
 
-\subsubsection{Sentiment Classification}
+\subsubsection{Sentiment classification}
 \label{classifiers}
 
 \color{red}
@@ -601,7 +671,7 @@ able to handle non-linearity.
 
 % ------------------------------------------------------------------------------
 
-\subsubsection{Automated Machine Learning Pipeline}
+\subsubsection{Automated machine learning pipeline}
 \label{pipeline}
 
 The design of the AutoML pipeline as a graph learner ensures that training and 
@@ -614,12 +684,12 @@ test sets remain completely walled off from one another at each resampling step.
 
 % ------------------------------------------------------------------------------
 
-\subsection{Deep Learning Solution}
+\subsection{Deep learning solution}
 \label{tssa_dl}
 
 % ------------------------------------------------------------------------------
 
-\subsubsection{Deep Transfer Learning with BERT}
+\subsubsection{Deep transfer learning with BERT}
 \label{bert}
 
 \color{red}
@@ -663,7 +733,7 @@ learn a certain task and vocabulary. (Devlin, 2019)
 
 % ------------------------------------------------------------------------------
 
-\subsubsection{Input Pre-Processing}
+\subsubsection{Input pre-processing}
 \label{bert_preproc}
 
 % Die Ausgrenzung von MigrantInnen von der #EssenerTafel ist inakzeptabel und 
@@ -688,7 +758,7 @@ inputs are filled with padding tokens and the longer ones are truncated.
 
 % ------------------------------------------------------------------------------
 
-\subsubsection{Pre-Training}
+\subsubsection{Pre-training}
 \label{bert_pretrain}
 
 Originally, BERT was pretrained on a huge corpus of Wikipedia texts. In order 
@@ -738,7 +808,7 @@ combined loss function.
 
 % ------------------------------------------------------------------------------
 
-\subsubsection{Fine-Tuning}
+\subsubsection{Fine-tuning}
 \label{bert_fine}
 
 BERT can be used for various language tasks, for example Question Answering, 
@@ -757,7 +827,7 @@ of 16 sequences, a global Adam learning rate of 2e-5 and 4 as number of epochs.
 
 % ------------------------------------------------------------------------------
 
-\subsubsection{Aspect-Based Sentiment Analysis}
+\subsubsection{Aspect-based sentiment analysis}
 \label{bert_absa}
 
 The Aspect Based Sentiment Analysis is a more sophisticated approach than a 

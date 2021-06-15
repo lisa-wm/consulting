@@ -163,6 +163,16 @@ Ngyuen, H. \harvardand\ Shirai, K.  \harvardyearleft 2018\harvardyearright .
   aspect-based sentiment analysis, {\em Proceedings of the 10th International
   Conference on Knowledge and Systems Engineering (KSE)}.
 
+\harvarditem[Pennington et~al.]{Pennington, Socher \harvardand\
+  Manning}{2014}{penningtonetal2014}
+Pennington, J., Socher, R. \harvardand\ Manning, C.  \harvardyearleft
+  2014\harvardyearright .
+\newblock {G}lo{V}e: Global vectors for word representation, {\em Proceedings
+  of the 2014 Conference on Empirical Methods in Natural Language Processing
+  ({EMNLP})}, Association for Computational Linguistics, Doha, Qatar,
+  pp.~1532--1543.
+\newline\harvardurl{https://www.aclweb.org/anthology/D14-1162}
+
 \harvarditem[Probst et~al.]{Probst, Boulesteix \harvardand\
   Bischl}{2019}{probstetal2019}
 Probst, P., Boulesteix, A.-L. \harvardand\ Bischl, B.  \harvardyearleft
@@ -230,6 +240,14 @@ Schulze, P., Wiegrebe, S., Thurner, P.~W., Heumann, C., Aßenmacher, M.
   \harvardand\ Wankmüller, S.  \harvardyearleft 2021\harvardyearright .
 \newblock Exploring topic-metadata relationships with the stm: A bayesian
   approach.
+
+\harvarditem[Selivanov et~al.]{Selivanov, Bickel \harvardand\
+  Wang}{2020}{pkgtext2vec}
+Selivanov, D., Bickel, M. \harvardand\ Wang, Q.  \harvardyearleft
+  2020\harvardyearright .
+\newblock {\em text2vec: Modern Text Mining Framework for R}.
+\newblock R package version 0.6.
+\newline\harvardurl{https://CRAN.R-project.org/package=text2vec}
 
 \harvarditem{Sidarenka}{2019}{sidarenka2019}
 Sidarenka, U.  \harvardyearleft 2019\harvardyearright .

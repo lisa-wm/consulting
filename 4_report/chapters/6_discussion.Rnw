@@ -1,2 +1,4 @@
 Possible explanation for topics worsening results: make task more complex 
 rather than aid it
+
+maybe pre-defined word embeddings would have helped

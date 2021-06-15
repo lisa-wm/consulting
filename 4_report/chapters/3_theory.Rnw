@@ -30,12 +30,12 @@ corpus.
 
 % ------------------------------------------------------------------------------
 
-\subsection{Theoretical Concepts}
+\subsection{Theoretical concepts}
 \label{concepts}
 
 % ------------------------------------------------------------------------------
 
-\subsubsection{Topic Modeling}
+\subsubsection{Topic modeling}
 \label{tm}
 
 \textbf{Idea.}
@@ -102,7 +102,7 @@ In this, it also provides the foundation for the STM.
 
 % ------------------------------------------------------------------------------
 
-\subsubsection{Sentiment Analysis}
+\subsubsection{Sentiment analysis}
 \label{sa}
 
 \textbf{Idea.}
@@ -176,7 +176,7 @@ fine-tuning it to sentiment analysis; details are given in section
 
 % ------------------------------------------------------------------------------
 
-\subsubsection{Topic-Specific Sentiment Analysis}
+\subsubsection{Topic-specific sentiment analysis}
 \label{tssa}
 
 With the concepts of topic modeling and sentiment analysis we define a combined 
