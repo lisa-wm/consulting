@@ -534,8 +534,8 @@ $g$ is a weighting function for which the authors propose to use
 
 \begin{equation*}
   g(x) = \begin{cases} \left( \frac{c_{ij}}{c_{\mathit{max}}} \right)^{\alpha} & 
-  c_{ij} < c_{\mathit{max}} \\
-  1 & \text{otherwise}
+  c_{ij} < c_{\mathit{max}}, \\
+  1 & \text{otherwise}.
   \end{cases}
 \end{equation*}
 
@@ -544,18 +544,34 @@ are the embedding dimensionality $m$ and the size of the context window $\ell$
 \citep{penningtonetal2014}.
 \\
 
+GloVe returns an embedding vector for each word.
+Since we are interested in a representation on document level, the word 
+embeddings are aggregated in a final step.
+This leaves us with a block-like structure of embedding vectors: for $K$ topics 
+and $m$ embedding dimensions we obtain $K \cdot m$ features vectors, where each 
+document has non-zero entries only for the columns corresponding to its 
+associated topic.
+At the end of the entire feature-generating process we can thus describe our 
+documents by a number of static covariates plus topic-specific embedding values.
+This tabular representation of our Twitter corpus forms our classification task.
+
 % ------------------------------------------------------------------------------
 
 \subsubsection{Sentiment classification}
 \label{classifiers}
 
-\color{red}
+We propose two different classification algorithms, a \textit{random forest} and 
+a logistic regression learner with elastic net penalty (\textit{glmnet}).
+Both ship with built-in feature selection, which we consider rather helpful in 
+the potentially high-dimensional feature space of text classification, and are 
+fairly easy to tune (\citet{japkowiczshah2011}, \citet{probstetal2019}).
+However, the pipeline design allows to plug in any other suitable learner 
+instead.
+\\
 
 \textbf{Random forests.}
-Lastly, our pipeline includes random forest classifiers for which tuning poses 
-less of a problem.
 A random forest is an ensemble of tree base learners \citep{louppe2014}.
-Startig from a root node containing all observations, classification trees 
+Starting from a root node containing all observations, classification trees 
 perform subsequent binary splits of the feature space, repeatedly dividing it 
 into rectangular partitions along one dimension at a time.
 Observations are passed along the resulting decision tree and end up in a 
@@ -593,81 +609,44 @@ associated with single trees' complexity \citep{probstetal2019}.
 Random forests easily handle all types of features, including arbitrary 
 interactions, and perform natural variable selection.
 They mitigate much of single trees' instability and still achieve good 
-performance in many applications.
-As mentioned above, they are also fairly easy to tune and thus a suitable 
-component for our AutoML pipeline.
-A major drawback of random forests is the loss of interpretatiblity as compared 
-to the constituting base learners.
-Moreover, they have a tendency to favor categorical features with a 
-large number of levels, and training may become rather expensive for larger data 
-sets \citep{louppe2014}.
+performance in many applications \citep{louppe2014}.
 \\
 
 \textbf{Regularized logistic regression.}
-\texttt{glmnet} performs regularized logistic regression.
 Logistic regression is a special case of generalized linear regression where 
 the predictor is linear in the parameters but transformed by a 
 possibly non-linear link function \citep{lindsey1997}.
 
-Consider the matrix of data features $\bm{X} = [\bm{x}_i^T]_{i = 1, 2, \dots, n} 
-\in \mathcal{X} \subset \R^{n \times p}$ for $n$ observations of $p$ 
-features\footnote{
-We assume categorical features to be encoded numerically for $\mathcal{X}$ to be 
-an actual subset of $\R^{n \times p}$.
-} 
-($n, p \in \N$) and let $\bm{y} \in \{0, 1\}^n$ denote the binary target 
-variable.
-Logistic regression models the probability of $y_i = 1$ for a 
-given observation $\bm{x}_i$ as \\$\pi(\bm{x}_i) = \mathbb{P}(y_i = 1 \rvert 
-\bm{x}_i) = \tfrac{\exp(\theta_0 + \bm{\theta}^T\bm{x}_i)}{1 + \exp(\theta_0 +
-\bm{\theta}^T\bm{x}_i)}$, with regression coefficients $\bm{\theta} \in 
-\R^{p + 1}$ \citep{lindsey1997}.
+Consider the feature matrix $\bm{X} = [\bm{x}_d^T]_{d = 1, 2, \dots, D} 
+\in \mathcal{X} \subset \R^{d \times p}$ and let $\bm{y} \in \{0, 1\}^D$ denote 
+the binary sentiment target.
+Logistic regression models the probability of $y_d = 1$ for a 
+given observation $\bm{x}_d$ as \\$\pi(\bm{x}_d) = \mathbb{P}(y_d = 1 \rvert 
+\bm{x}_d) = \tfrac{\exp(\theta_0 + \bm{\theta}^T\bm{x}_d)}{1 + \exp(\theta_0 +
+\bm{\theta}^T\bm{x}_d)}$, with regression coefficients $(\theta_0, \bm{\theta}) 
+\in \R^{p + 1}$ \citep{lindsey1997}.
 Prediction of class labels requires thresholding the posterior probabilities.
-By application of the so-called logit transformation we obtain the linear 
-predictor $\theta_0 + \bm{\theta}^T\bm{x}_i = \log 
-\tfrac{\pi(\bm{x}_i)}{1 - \pi(\bm{x}_i)}$.
+By application of the logit transformation we obtain the linear 
+predictor $\theta_0 + \bm{\theta}^T\bm{x}_d = \log 
+\tfrac{\pi(\bm{x}_d)}{1 - \pi(\bm{x}_d)}$.
 
-In \texttt{glmnet}, $(\theta_0, \bm{\theta})$ is estimated by minimizing a 
-penalized version of the negative log-likelihood.
+Here, $(\theta_0, \bm{\theta})$ is estimated by minimizing a penalized version 
+of the negative log-likelihood.
 The additive elastic net penalty balances absolute and quadratic regularization,
-making \texttt{glmnet} a hybrid of LASSO and Ridge regression. 
+in a hybrid of LASSO and Ridge regression. 
 Regularization causes shrinkage in the coefficients (typically not affecting the 
-intercept) and leads to the following optimization problem 
-\citep{hastieetal2021}:
+intercept) and leads to the following optimization problem , where 
+$\lambda \in \R$ and $\alpha \in [0, 1]$ are hyperparameters that need to be 
+tuned \citep{hastieetal2021}:
 
 \begin{equation}
-    \min_{(\theta_0, \bm{\theta}) \in \R^{p + 1}} - \frac{1}{n} \sum_{i = 1}^n
-    y_i (\theta_0 + \bm{\theta}^T\bm{x}_i) - \log(1 + 
-    \exp(\theta_0 + \bm{\theta}^T\bm{x}_i)) +
+    \min_{(\theta_0, \bm{\theta}) \in \R^{p + 1}} - \frac{1}{n} \sum_{d = 1}^D
+    y_d (\theta_0 + \bm{\theta}^T\bm{x}_d) - \log(1 + 
+    \exp(\theta_0 + \bm{\theta}^T\bm{x}_d)) +
     \lambda \left( (1 - \alpha) \| \bm{\theta} \|_2^2 \cdot \tfrac{1}{2} + 
     \alpha \| \bm{\theta} \|_1 \right ).
     \label{eq_glmnet}
 \end{equation}
-
-In equation \ref{eq_glmnet}, $\theta_0$ and $\bm{\theta}$ are parameters learned 
-during training, whereas $\lambda \in \R$ and $\alpha \in [0, 1]$ are 
-hyperparameters that need to be tuned.
-
-\texttt{glmnet} requires categorical features to be encoded as dummy 
-variables in a pre-processing step.
-On the upside, the underlying generalized linear regression models are simple 
-and easy to interpret \citep{lindsey1997}.
-Training is fast thanks to efficient matrix computations.
-In addition, the elastic net penalty prevents overfitting and encourages 
-sparsity in the coefficients 
-\citep{hastieetal2021}.
-Drawbacks of \texttt{glmnet} mostly stem from its rather restrictive 
-assumptions: independence of observations and linearity of the feature-target 
-relation \citep{lindsey1997}.
-The independence constraint is made by many learning algorithms and certainly 
-disputable in this setting where observations might exhibit temporal 
-correlation.
-If the data are not linearly separable, regularized logistic regression must be 
-expected to yield poor results.
-We therefore offer SVM and random forests as alternative learners that are 
-able to handle non-linearity.
-
-\color{black}
 
 % ------------------------------------------------------------------------------
 
