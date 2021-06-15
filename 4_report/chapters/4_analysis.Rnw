@@ -653,8 +653,92 @@ tuned \citep{hastieetal2021}:
 \subsubsection{Automated machine learning pipeline}
 \label{pipeline}
 
-The design of the AutoML pipeline as a graph learner ensures that training and 
-test sets remain completely walled off from one another at each resampling step.
+We assemble all components presented above in an AutoML pipeline.
+The pipeline takes care of
+
+\begin{tight_enumerate}
+  \item computing the dynamic features, i.e., topic-specific embeddings,
+  \item selecting and training the best learner, including hyperparameter 
+  optimization, and
+  \item predicting sentiment labels for new observations.
+\end{tight_enumerate}
+
+We implement the algorithm as a graph learner in the \texttt{mrl3} ecosystem
+\citep{pkgmlr3}.
+Graph learners are composed of nodes that perform operations on the data.
+Multiple options for creating and re-uniting branches enable arbitrarily 
+complex constructions.
+The design allows to use the entire pipeline just like any other learner object 
+in standard ML procedures such as training, prediction, tuning or benchmarking.
+\texttt{mrl3}'s internal structure ensures the dichotomy between train and test 
+sphere in every step and makes our implementation compatible with other
+routines.
+\\
+
+\textbf{Pipeline components.}
+The proposed pipeline takes a static feature representation of our annotated 
+training data and starts by assigning topic labels, afterwards computing 
+topic-specific embeddings.
+The next block conducts the entire tuning process, where the 
+selection of a learner is directly included, such that the optimal classifier is 
+found in joint optimization of algorithm and associated hyperparameters.
+We rely on existing functionalities for much of the required steps.
+However, we contribute custom implementations for the STM and the subsequent 
+embedding computation with GloVe.
+Embeddings can also be calculated without a preceding topic modeling step.
+Furthermore, an alternative topic modeling approach is available. 
+It is a non-stochastic procedure that accepts manually defined keywords and 
+finds all documents associated with the terms or derivatives thereof.
+If necessary, this can be combined with a stratification step that approximately 
+retains the ratio of documents associated with a keyword in each resampling 
+step.
+All these novel operations are constructed as so-called \textit{pipe operators}
+in \texttt{mlr3}.
+Eventually, the pipeline assumes the following structure: \textcolor{red}{FIG}.
+\\
+
+\textbf{Settings.}
+Our design choices are partly inspired by \citet{probstetal2019} and otherwise 
+reflect what we find to work best.
+The decision to compute topic-specific embeddings and the selection 
+of learners is such a choice already.
+We further fix some hyperparameters in advance to reduce computation time. 
+This includes capping the maximum number of iterations in regularized 
+regression at 1000 and limiting tree growth in the random forest (leaf nodes 
+must contain at least 5\% of observations) as well as allowing for parallel 
+computations. 
+Other hyperparameters, by contrast, are left to tuning.
+The first two are the number of topics with $3\leq K \leq 6$ and the 
+dimensionality of embeddings $10\leq m \leq 50$, 
+where we exploit the fact these inherently unsupervised problems are input to a 
+supervised learning task. 
+We can therefore simply have the algorithm choose the configuration that yields
+the best predictive performance.
+For the actual classification part we allow optimization of the penalty 
+coefficients in logistic regression ($0 \leq \alpha \leq 1$ and $0 \leq \lambda
+\leq 0.2$) and the number of candidate features for split computation in the 
+random forest (limited to 50\% of features at most), as well as the fraction of 
+observations to be sampled for each base learner (between 0.25 and 1).
+Note that the search space remains rather small; more tuning parameters, larger 
+ranges and/or more configurations can be explored with enough computational 
+resources.
+
+We use three-fold cross validation (3-CV) as resampling strategy in both the 
+outer (performance evaluation) and inner (hyperparameter tuning) training loop.
+3-CV divides the training data into three roughly equal-sized partitions, each 
+of which serves as test set once while the other two form the training data 
+\textcolor{red}{SOURCE}.
+Tuning is conducted via random search with a total budget of 50 evaluations 
+(again, this should be extended if affordable).
+Random search is based on the simple idea of drawing from the space of possible 
+configurations uniformly at random.
+While implementation is easy and readily parallelizable, the number of 
+evaluations required to sample the space adequately rises exponentially with the
+number of dimensions, with no possibility to learn from prior draws 
+\citep{feurerhutter2019}.
+Lastly, in the inner tuning loop, we evaluate performance by means of accuracy 
+(i.e., the share of correctly classified instances), as we identify no need to 
+emphasize one side of misclassification or the other in any particular way.
 
 % ------------------------------------------------------------------------------
 

@@ -83,6 +83,12 @@ Devlin, J., Chang, M.-W., Lee, K. \harvardand\ Toutanova, K.  \harvardyearleft
 \newblock Bert: Pre-training of deep bidirectional transformers for language
   understanding.
 
+\harvarditem{Feurer \harvardand\ Hutter}{2019}{feurerhutter2019}
+Feurer, M. \harvardand\ Hutter, F.  \harvardyearleft 2019\harvardyearright .
+\newblock Hyperparameter optimization, {\em in} F.~Hutter, L.~Kotthoff
+  \harvardand\ J.~Vanschoren (eds), {\em Automated Machine Learning. Methods,
+  Systems, Challenges}, Springer, pp.~3--34.
+
 \harvarditem{Ficamos \harvardand\ Liu}{2016}{ficamosliu2016}
 Ficamos, P. \harvardand\ Liu, Y.  \harvardyearleft 2016\harvardyearright .
 \newblock A topic based approach for sentiment analysis on twitter data, {\em
@@ -134,6 +140,15 @@ Kralj~Novak, P., Smailović, J., Sluban, B. \harvardand\ Mozetič, I.
   \harvardyearleft 2015\harvardyearright .
 \newblock Emoji sentiment ranking 1.0,
   \url{https://www.clarin.si/repository/xmlui/handle/11356/1048}.
+
+\harvarditem[Lang et~al.]{Lang, Binder, Richter, Schratz, Pfisterer, Coors, Au,
+  Casalicchio, Kotthoff \harvardand\ Bischl}{2019}{pkgmlr3}
+Lang, M., Binder, M., Richter, J., Schratz, P., Pfisterer, F., Coors, S., Au,
+  Q., Casalicchio, G., Kotthoff, L. \harvardand\ Bischl, B.  \harvardyearleft
+  2019\harvardyearright .
+\newblock {mlr3}: A modern object-oriented machine learning framework in {R},
+  {\em Journal of Open Source Software} .
+\newline\harvardurl{https://joss.theoj.org/papers/10.21105/joss.01903}
 
 \harvarditem{Lindsey}{1997}{lindsey1997}
 Lindsey, J.~K.  \harvardyearleft 1997\harvardyearright .
