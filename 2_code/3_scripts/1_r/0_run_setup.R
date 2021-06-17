@@ -14,9 +14,9 @@ packages_required <-  c(
   "data.table", # data wrangling
   "future", # parallelization
   "future.apply", # parallelization
-  "glmnet", # penalized regression
   "ggplot2", # visualization
   "ggpubr", # visualization
+  "glmnet", # penalized regression
   "here", # path management
   "mlr3", # machine learning basics
   "mlr3learners", # machine learning learners
@@ -30,7 +30,6 @@ packages_required <-  c(
   "stringr", # string manipulation
   "stm", # structural topic modeling
   "svDialogs", # message boxes
-  "testthat", # code testing
   "text2vec", # word embeddings
   "tidyverse", # data wrangling
   "XML" # xml parsing

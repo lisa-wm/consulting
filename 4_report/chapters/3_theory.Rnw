@@ -75,13 +75,13 @@ In particular, $K$ is a hyperparameter that must be specified a priori
 Topic modeling approaches roughly decompose into deterministic and 
 probabilistic, or generative, approaches.
 The former are based on factorizing the document-term matrix 
-$M \in \R^{D \times V}$ (or a weighted version that takes into account prior 
+$F \in \R^{D \times V}$ (or a weighted version that takes into account prior 
 probabilities of term occurrence) into two low-rank matrices, 
 $U \in \R^{D \times K}$ and $W^T \in \R^{K \times V}$, whose product 
-approximates $M$ loss-minimally.
+approximates $F$ loss-minimally.
 Probably the most prominent methods from this category are \textit{latent 
 semantic analysis}, which performs singular value decomposition and thus 
-projects the data into a subspace spanned by $M$'s principal eigenvectors, and
+projects the data into a subspace spanned by $F$'s principal eigenvectors, and
 \textit{non-negative matrix factorization}, a constrained version that often 
 yields better interpretability \citep{aggarwal2018}.
 

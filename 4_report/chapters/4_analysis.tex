@@ -479,15 +479,14 @@ We now use the information from topic assignment to compute topic-specific word
 embeddings.
 Recall that the BOW assumption results in very high-dimensional document 
 representations disregarding inter-term relationships.
-Word embeddings, by contrast, seek to capture semantic structures in these 
-representations: 
+Word embeddings seek to capture semantic structures in these representations: 
 words are characterized by their surrounding context and projected into a latent 
-space in which similar words ought to end up in nearby locations.
+space in which similar words end up in nearby locations.
 At the same time, embeddings perform dimensionality reduction as the latent 
 space is typically chosen to be of much lower dimension than the 
 observation space.
 
-We use the \textit{Global Vectors (GloVe)} model proposed by 
+We use the\textit{Global Vectors (GloVe)} model proposed by 
 \citet{penningtonetal2014} and implemented in \texttt{R} by \citet{pkgtext2vec}.
 Its computation is based on the symmetric \textit{co-occurrence matrix} 
 $C \in \R^{M \times M}$, where $M \in \N$ denotes the number of tokens remaining 
@@ -500,8 +499,8 @@ that the strength of semantic relation decays with increasing distance.
 The entries of the co-occurrence matrix are weighted by the inverse 
 distance to the target token.
 We can therefore express probabilities of co-occurrence as fractions of row (or 
-column) sums: the probability of the $i$-th token occurring in the context of 
-the $j$-th token is given by $p_{ij} = \tfrac{c_{ij}}{c_{i.}}$ with $c_{i.}$ 
+column) sums: the probability of the $i$-th word occurring in the context of 
+the $j$-th word is given by $p_{ij} = \tfrac{c_{ij}}{c_{i.}}$ with $c_{i.}$ 
 as the $i$-th row sum.
 The co-occurrence probabilities in turn give rise to odds 
 $\frac{p_{ik}}{p_{jk}}$, for which \citet{penningtonetal2014} posit that they 
@@ -516,47 +515,45 @@ This is formalized as
 with $q_i \in \R^m$, $m \in \N$, as the $m$-dimensional embedding vector 
 representation for word $i$.
 $\tilde q_k$ is structurally equivalent to $q_k$ for symmetric $C$ and 
-discrepancies arise solely from different random initialization of the model.
+differences arise solely from different random initialization of the model.
 The authors do not provide a sound theoretical foundation for this double 
-computation but point out that such stochastic variation has been shown to 
+computation but point out that such stochastic variance has been shown to 
 benefit overparameterized models.
 In the end GloVe actually uses the sum of the vectors as embeddings.
 We arrive at $q_i^T \tilde q_j + b_i + \tilde b_j \approx \log(c_{ij})$,
 with bias $b_i$ approximately equal to $\log(c_i)$, and can now express the 
-embedding error minimization problem by the following weighted least-squares
-objective:
+embedding error minimization problem with the following weighted least-squares
+objective::
 
 \begin{equation*}
   \min_{\bm{v}, \bm{b}} \sum_{i = 1}^M \sum_{j = 1}^M g(c_{ij}) \left(
   q_i^T \tilde q_j + b_i + \tilde b_j - \log(c_{ij}) \right)^2.
 \end{equation*}
 
-$g: \R \rightarrow \$ is a weighting function for which the authors propose to 
-use
+$g$ is a weighting function for which the authors propose to use
 
 \begin{equation*}
-  g(x) = \begin{cases} \left( \frac{c_{ij}}{c_{\mathit{max}}} \right)^{\delta} & 
+  g(x) = \begin{cases} \left( \frac{c_{ij}}{c_{\mathit{max}}} \right)^{\alpha} & 
   c_{ij} < c_{\mathit{max}}, \\
   1 & \text{otherwise}.
   \end{cases}
 \end{equation*}
 
-$c_{\mathit{max}} > 0$ and $\delta > 0$ are hyperparameters to the GloVe 
-algorithm, as are the embedding dimensionality $m$ and the size $\ell$ of 
-the context window \citep{penningtonetal2014}.
+$c_{\mathit{max}}$ and $\alpha$ are hyperparameters to the GloVe algorithm, as 
+are the embedding dimensionality $m$ and the size of the context window $\ell$ 
+\citep{penningtonetal2014}.
 \\
 
 GloVe returns an embedding vector for each word.
 Since we are interested in a representation on document level, the word 
 embeddings are aggregated in a final step.
 This leaves us with a block-like structure of embedding vectors: for $K$ topics 
-and $m$ embedding dimensions we obtain $K \cdot m$ feature vectors, where each 
+and $m$ embedding dimensions we obtain $K \cdot m$ features vectors, where each 
 document has non-zero entries only for the columns corresponding to its 
 associated topic.
 At the end of the entire feature-generating process we can thus describe our 
 documents by a number of static covariates plus topic-specific embedding values.
-This tabular representation of our Twitter corpus eventually forms our 
-classification task.
+This tabular representation of our Twitter corpus forms our classification task.
 
 % ------------------------------------------------------------------------------
 
@@ -568,7 +565,7 @@ a logistic regression learner with elastic net penalty (\textit{glmnet}).
 Both ship with built-in feature selection, which we consider rather helpful in 
 the potentially high-dimensional feature space of text classification, and are 
 fairly easy to tune (\citet{japkowiczshah2011}, \citet{probstetal2019}).
-However, the pipeline design would allow to plug in any other suitable learner 
+However, the pipeline design allows to plug in any other suitable learner 
 instead.
 \\
 
@@ -624,16 +621,16 @@ Consider the feature matrix $\bm{X} = [\bm{x}_d^T]_{d = 1, 2, \dots, D}
 \in \mathcal{X} \subset \R^{d \times p}$ and let $\bm{y} \in \{0, 1\}^D$ denote 
 the binary sentiment target.
 Logistic regression models the probability of $y_d = 1$ for a 
-given observation $\bm{x}_d$ as $\pi(\bm{x}_d) = \mathbb{P}(y_d = 1 ~ \rvert ~
-\bm{x}_d) = \tfrac{\exp(\gamma_0 + \bm{\gamma}^T\bm{x}_d)}{1 + \exp(\gamma_0 +
-\bm{\gamma}^T\bm{x}_d)}$, with regression coefficients $(\gamma_0, \bm{\gamma}) 
+given observation $\bm{x}_d$ as $\pi(\bm{x}_d) = \mathbb{P}(y_d = 1 ~ \rvert +
+\bm{x}_d) = \tfrac{\exp(\theta_0 + \bm{\theta}^T\bm{x}_d)}{1 + \exp(\theta_0 +
+\bm{\theta}^T\bm{x}_d)}$, with regression coefficients $(\theta_0, \bm{\theta}) 
 \in \R^{p + 1}$ \citep{lindsey1997}.
 Prediction of class labels requires thresholding the posterior probabilities.
 By application of the logit transformation we obtain the linear 
-predictor $\gamma_0 + \bm{\gamma}^T\bm{x}_d = \log 
+predictor $\theta_0 + \bm{\theta}^T\bm{x}_d = \log 
 \tfrac{\pi(\bm{x}_d)}{1 - \pi(\bm{x}_d)}$.
 
-Here, $(\gamma_0, \bm{\gamma})$ is estimated by minimizing a penalized version 
+Here, $(\theta_0, \bm{\theta})$ is estimated by minimizing a penalized version 
 of the negative log-likelihood.
 The additive elastic net penalty balances absolute and quadratic regularization,
 in a hybrid of LASSO and Ridge regression. 
@@ -643,11 +640,11 @@ $\lambda \in \R$ and $\alpha \in [0, 1]$ are hyperparameters that need to be
 tuned \citep{hastieetal2021}:
 
 \begin{equation}
-    \min_{(\gamma_0, \bm{\gamma}) \in \R^{p + 1}} - \frac{1}{n} \sum_{d = 1}^D
-    y_d (\gamma_0 + \bm{\gamma}^T\bm{x}_d) - \log(1 + 
-    \exp(\gamma_0 + \bm{\gamma}^T\bm{x}_d)) +
-    \lambda \left( (1 - \alpha) \| \bm{\gamma} \|_2^2 \cdot \tfrac{1}{2} + 
-    \alpha \| \bm{\gamma} \|_1 \right ).
+    \min_{(\theta_0, \bm{\theta}) \in \R^{p + 1}} - \frac{1}{n} \sum_{d = 1}^D
+    y_d (\theta_0 + \bm{\theta}^T\bm{x}_d) - \log(1 + 
+    \exp(\theta_0 + \bm{\theta}^T\bm{x}_d)) +
+    \lambda \left( (1 - \alpha) \| \bm{\theta} \|_2^2 \cdot \tfrac{1}{2} + 
+    \alpha \| \bm{\theta} \|_1 \right ).
     \label{eq_glmnet}
 \end{equation}
 
