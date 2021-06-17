@@ -1,0 +1,135 @@
+% ------------------------------------------------------------------------------
+% SETUP ------------------------------------------------------------------------
+% ------------------------------------------------------------------------------
+
+\documentclass[10pt, t, aspectratio = 1610]{beamer}
+\usetheme{Consulting}
+\logo{\includegraphics[height = 1cm, width = 1cm]{figures/sigillum.png}
+\vspace{-4em} \hspace{0.2em}}
+\setbeamertemplate{footline}[infoline]
+
+\usepackage[round, comma]{natbib}
+\usepackage{ragged2e}
+\usepackage{hyperref}
+\hypersetup{
+  colorlinks = true,
+  linkcolor = .,
+  urlcolor = .,
+  citecolor = .,
+  bookmarks = true}
+% \usepackage{amsmath}
+% \usepackage{amsthm}
+\usepackage{xcolor}
+
+\newcommand{\prim}[1]{\textcolor{primary}{\textbf{#1}}}  
+\newcommand{\secnd}[1]{\textcolor{secondary}{\textbf{#1}}}  
+\newcommand{\highlight}[1]{\textcolor{highlight}{\textbf{#1}}}
+\newcommand{\maketriangle}{\textcolor{highlight}{$\blacktriangleleft$}}
+
+\newenvironment{tight_itemize}{
+\begin{itemize}
+  \setlength{\itemsep}{0pt}
+  \setlength{\parskip}{0pt}
+}{\end{itemize}}
+
+% ------------------------------------------------------------------------------
+% TITLE PAGE -------------------------------------------------------------------
+% ------------------------------------------------------------------------------
+
+\title[Consulting \LaTeX\ Beamer theme]{Topic-specific sentiment analysis for 
+tweets by German MPs}
+\subtitle{Statistical consulting}
+% \shorttitle{Topic-specific sentiment analysis for 
+% tweets by German MPs}
+
+\author{Asmik Nalmpatian \& Lisa Wimmer}
+\date{July 12\textsuperscript{th}, 2021}
+
+\usepackage{/usr/share/R/share/texmf/tex/latex/Sweave}
+\begin{document}{
+\input{abschlusspräsentation-concordance}
+
+  \usebackgroundtemplate{ 
+  \parbox[t][\paperheight][t]{\paperwidth}{
+  \centering\includegraphics [width = \paperwidth]{background/twitter_2.png}
+  }} 
+  
+  \setbeamercolor{background canvas}{bg = white}
+  
+  \begin{frame}[plain, noframenumbering]
+    \titlepage
+  \end{frame}
+  
+}	
+
+% ------------------------------------------------------------------------------
+% BODY -------------------------------------------------------------------------
+% ------------------------------------------------------------------------------
+
+\begin{frame}[noframenumbering]{}
+
+\vspace{2em}
+\huge{\textbf{OUTLINE}}
+
+\vfill
+
+\tableofcontents
+
+\vfill
+
+\end{frame}
+
+% ------------------------------------------------------------------------------
+
+\section{Hello world}
+\label{hello}
+
+% ------------------------------------------------------------------------------
+
+\begin{frame}{Foo}
+
+\begin{itemize}
+  \item A \citep{abdaretal2021}
+  \item B
+  \item C
+\end{itemize}
+
+\end{frame} 
+
+% ------------------------------------------------------------------------------
+
+\section{Bye world}
+\label{bye}
+
+% ------------------------------------------------------------------------------
+
+\begin{frame}{Foo}
+
+\begin{itemize}
+  \item A
+  \item B
+  \item C
+\end{itemize}
+
+\end{frame} 
+
+% ------------------------------------------------------------------------------
+
+\section{References}
+\label{ref}
+
+% ------------------------------------------------------------------------------
+
+\begin{frame}[plain, allowframebreaks]
+
+\RaggedRight
+\small
+\bibliography{bibliography}
+\bibliographystyle{dcu} %dcu
+
+\end{frame}
+
+% ------------------------------------------------------------------------------
+
+\end{document}
+
