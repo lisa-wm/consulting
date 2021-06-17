@@ -5,7 +5,6 @@
 # LOAD DATA --------------------------------------------------------------------
 
 load_rdata_files(data_clean, folder = "2_code/1_data/2_tmp_data")
-load(here::here("2_code/1_data/2_tmp_data/data_clean.Rmd"))
 
 data_training <- data_clean[label != "none"]
 
@@ -98,7 +97,7 @@ ggplot2::ggsave(
 plot_time <- ggplot2::ggplot(
   data_training,
   ggplot2::aes(x = as.Date(twitter_created_at))) + 
-  ggplot2::geom_histogram(binwidth = 5L, fill = "lightgray") +
+  ggplot2::geom_histogram(binwidth = 5L, fill = "gray") +
   ggplot2::theme_minimal() +
   ggplot2::scale_x_date(
     date_labels = "%m/%Y", 
@@ -125,7 +124,7 @@ plot_class <- ggplot2::ggplot(
   ggplot2::scale_x_continuous(labels = NULL, breaks = NULL) +
   ggplot2::ylab("share") +
   ggplot2::xlab("") + 
-  ggplot2::scale_fill_manual(values = c("deepskyblue2", "lightgray")) +
+  ggplot2::scale_fill_manual(values = c("deepskyblue2", "gray")) +
   ggplot2::guides(fill = ggplot2::guide_legend(reverse = TRUE))
 
 ggplot2::ggsave(
