@@ -531,7 +531,7 @@ objective:
   q_i^T \tilde q_j + b_i + \tilde b_j - \log(c_{ij}) \right)^2.
 \end{equation*}
 
-$g: \R \rightarrow \$ is a weighting function for which the authors propose to 
+$g: \R \rightarrow \R$ is a weighting function for which the authors propose to 
 use
 
 \begin{equation*}
@@ -581,9 +581,9 @@ Observations are passed along the resulting decision tree and end up in a
 particular end node, or leaf, where they are assigned the most frequent 
 class label in this node.
 In the end, this constitutes hypotheses of the form 
-$f(\bm{x}) = \sum_{t = 1}^T c_t \mathbb{I}[\bm{x} \in Q_t]$, where $T$ denotes 
-the number of terminal regions $Q_1, Q_2, \dots, Q_T$ and 
-$c_t \in \{0, 1\}$ is the class label predicted for observations in leaf node 
+$f(\bm{x}) = \sum_{t = 1}^T r_t \mathbb{I}[\bm{x} \in R_t]$, where $T$ denotes 
+the number of terminal regions $R_1, R_2, \dots, R_T$ and 
+$r_t \in \{0, 1\}$ is the class label predicted for observations in leaf node 
 $Q_t$.
 Each split is constructed such that the empirical risk across all child nodes 
 is minimized, which typically corresponds to minimizing class impurity.
@@ -608,7 +608,6 @@ This procedure enables decorrelation and enhances ensemble stability
 Tunable hyperparameters of random forests include ensemble size, the number of 
 candidate features to be considered at each split, and various attributes 
 associated with single trees' complexity \citep{probstetal2019}.
-
 Random forests easily handle all types of features, including arbitrary 
 interactions, and perform natural variable selection.
 They mitigate much of single trees' instability and still achieve good 
@@ -621,35 +620,36 @@ the predictor is linear in the parameters but transformed by a
 possibly non-linear link function \citep{lindsey1997}.
 
 Consider the feature matrix $\bm{X} = [\bm{x}_d^T]_{d = 1, 2, \dots, D} 
-\in \mathcal{X} \subset \R^{d \times p}$ and let $\bm{y} \in \{0, 1\}^D$ denote 
+\in \mathcal{X} \subset \R^{D \times p}$ and let $\bm{y} \in \{0, 1\}^D$ denote 
 the binary sentiment target.
 Logistic regression models the probability of $y_d = 1$ for a 
 given observation $\bm{x}_d$ as $\pi(\bm{x}_d) = \mathbb{P}(y_d = 1 ~ \rvert ~
 \bm{x}_d) = \tfrac{\exp(\gamma_0 + \bm{\gamma}^T\bm{x}_d)}{1 + \exp(\gamma_0 +
 \bm{\gamma}^T\bm{x}_d)}$, with regression coefficients $(\gamma_0, \bm{\gamma}) 
 \in \R^{p + 1}$ \citep{lindsey1997}.
-Prediction of class labels requires thresholding the posterior probabilities.
+Prediction of class labels requires thresholding the posterior probabilities, 
+usually at a cut-off value of 50\%.
 By application of the logit transformation we obtain the linear 
 predictor $\gamma_0 + \bm{\gamma}^T\bm{x}_d = \log 
 \tfrac{\pi(\bm{x}_d)}{1 - \pi(\bm{x}_d)}$.
 
 Here, $(\gamma_0, \bm{\gamma})$ is estimated by minimizing a penalized version 
 of the negative log-likelihood.
-The additive elastic net penalty balances absolute and quadratic regularization,
+The additive elastic net penalty balances absolute and quadratic regularization
 in a hybrid of LASSO and Ridge regression. 
 Regularization causes shrinkage in the coefficients (typically not affecting the 
-intercept) and leads to the following optimization problem , where 
-$\lambda \in \R$ and $\alpha \in [0, 1]$ are hyperparameters that need to be 
+intercept) and leads to the following optimization problem, where 
+$\lambda \geq 0$ and $\alpha \in [0, 1]$ are hyperparameters that need to be 
 tuned \citep{hastieetal2021}:
 
-\begin{equation}
+\begin{equation*}
     \min_{(\gamma_0, \bm{\gamma}) \in \R^{p + 1}} - \frac{1}{n} \sum_{d = 1}^D
     y_d (\gamma_0 + \bm{\gamma}^T\bm{x}_d) - \log(1 + 
     \exp(\gamma_0 + \bm{\gamma}^T\bm{x}_d)) +
     \lambda \left( (1 - \alpha) \| \bm{\gamma} \|_2^2 \cdot \tfrac{1}{2} + 
     \alpha \| \bm{\gamma} \|_1 \right ).
     \label{eq_glmnet}
-\end{equation}
+\end{equation*}
 
 % ------------------------------------------------------------------------------
 
@@ -669,7 +669,7 @@ The pipeline takes care of
 We implement the algorithm as a graph learner in the \texttt{mrl3} ecosystem
 \citep{pkgmlr3}.
 Graph learners are composed of nodes that perform operations on the data.
-Multiple options for creating and re-uniting branches enable arbitrarily 
+Multiple options for branching and re-uniting enable arbitrarily 
 complex constructions.
 The design allows to use the entire pipeline just like any other learner object 
 in standard ML procedures such as training, prediction, tuning or benchmarking.
@@ -704,8 +704,8 @@ Eventually, the pipeline assumes the following structure: \textcolor{red}{FIG}.
 Our design choices are partly inspired by \citet{probstetal2019} and otherwise 
 reflect what we find to work best.
 The decision to compute topic-specific embeddings and the selection 
-of learners is such a choice already.
-We further fix some hyperparameters in advance to reduce computation time. 
+of learners are such choices already.
+We further fix some hyperparameters in advance to save on computation time. 
 This includes capping the maximum number of iterations in regularized 
 regression at 1000 and limiting tree growth in the random forest (leaf nodes 
 must contain at least 5\% of observations) as well as allowing for parallel 
@@ -713,10 +713,9 @@ computations.
 Other hyperparameters, by contrast, are left to tuning.
 The first two are the number of topics with $3\leq K \leq 6$ and the 
 dimensionality of embeddings $10\leq m \leq 50$, 
-where we exploit the fact these inherently unsupervised problems are input to a 
-supervised learning task. 
-We can therefore simply have the algorithm choose the configuration that yields
-the best predictive performance.
+where we exploit the fact that these inherently unsupervised problems are input 
+to a supervised learning task: we can simply have the algorithm choose the 
+configuration that yields the best predictive performance.
 For the actual classification part we allow optimization of the penalty 
 coefficients in logistic regression ($0 \leq \alpha \leq 1$ and $0 \leq \lambda
 \leq 0.2$) and the number of candidate features for split computation in the 
@@ -729,7 +728,7 @@ resources.
 We use three-fold cross validation (3-CV) as resampling strategy in both the 
 outer (performance evaluation) and inner (hyperparameter tuning) training loop.
 3-CV divides the training data into three roughly equal-sized partitions, each 
-of which serves as test set once while the other two form the training data 
+of which serves as test set once while the other two provide the training data 
 \citep{japkowiczshah2011}.
 Tuning is conducted via random search with a total budget of 50 evaluations 
 (again, this should be extended if affordable).
@@ -739,6 +738,7 @@ While implementation is easy and readily parallelizable, the number of
 evaluations required to sample the space adequately rises exponentially with the
 number of dimensions, with no possibility to learn from prior draws 
 \citep{feurerhutter2019}.
+More efficient strategies might improve the tuning process here.
 Lastly, in the inner tuning loop, we evaluate performance by means of accuracy 
 (i.e., the share of correctly classified instances), as we identify no need to 
 emphasize one side of misclassification or the other in any particular way.
@@ -758,140 +758,227 @@ emphasize one side of misclassification or the other in any particular way.
 \subsubsection{Deep transfer learning with BERT}
 \label{bert}
 
-\color{red}
+As an alternative to casting TSSA as a standard ML classification task we now 
+consider a solution rooted in deep learning.
+This second part of our work is based on the Bidirectional Encoder 
+Representations from Transformers (BERT) network \citep{devlinetal2018} and its 
+variations. 
+The name draws from the core architecture as a multi-layer bidirectional 
+Transformer encoder. 
+BERT models are extremely large, their parameters numbering in the millions, and 
+considered state of the art for many NLP tasks today.
 
-The second part of our work is based on the Bidirectional Encoder 
-Representations from Transformers (BERT) and its variations. The name comes from its core architecture as a multi-layer bidirectional Transformer encoder. 
-% (https://arxiv.org/pdf/1810.04805.pdf)
-The Transformer-based models especially in the recent NLP research consist of 
-transfer learning and attention. In standard supervised learning approach, where 
-we ideally have a large number of labelled training instances, we assume the 
-test data to be drawn from the same distribution in order to test the goodness 
-of generalization in a reliable way. Yet, given another domain, for example 
-another set of documents with different thematic context, we cannot expect our 
-model to generalize well. 
-In many situations, as well as in our data situation, one has to (manually) 
-label a large amount of data instances, which is not practicable at all. So, 
-in data situations where the number of annotated training documents is 
-restricted, it becomes hard to deal with the highly resource intensive 
-supervised learning. Therefore, it is appropriate to apply the transfer learning 
-that represents the approach of statistical learning in which we firstly train 
-a model on an original task and domain and then transfer this learned knowledge 
-to the target task and domain. The detailed workflow of Transformer is described 
-in a paper by researchers at Google AI Language. 
-(Pan, S. J. and Yang, Q. (2010). A survey on transfer learning. 
-IEEE Transactions on Knowledge and Data Engineering, 
-% https://ieeexplore.ieee.org/document/5288526 )
+A thorough introduction to deep learning is beyond the scope of this report and 
+the BERT models' architectures are particularly complex at that.
+We will therefore only point out two distinctive properties of Transformer 
+models and refer to, e.g., \citet{goodfellowetal2016} for further reading on 
+deep learning in general and to \citet{vaswanietal2017} for the detailed 
+Transformer workflow.
+Transformer-based models, which have gained much traction in recent NLP 
+research, rely on two key principles, namely \textit{transfer learning} and
+\textit{attention}.
+\\
 
-(Ruder, S. (2019). Neural transfer learning for natural language
-processing. PhD thesis, National University of Ireland.
-% https://ruder.io/thesis/neural transfer learning for nlp.pdf.)
-Moreover, the Transformer based architectures do not process the sequential data 
-(such as texts) in order, by utilizing the mechanism of attention. Due to this 
-property, these architectures allow for much more parallelization than a 
-standard RNN and leads to reduced training times. 
-% (https://arxiv.org/pdf/1706.03762.pdf)
-This is mainly achieved in the pretraining task of a BERT model on a large 
-corpus in a specific language with the help of neural networks. In the 
-fine-tuning step, this knowledge (so the parameter values learned during 
-training the source model) is then applied to a new purpose-specific context to 
-learn a certain task and vocabulary. (Devlin, 2019)
+\textbf{Transfer learning.} In the standard supervised learning approach, where 
+we ideally have a large number of labeled training instances, we assume the 
+test data to follow the same underlying distribution as the training data, a 
+belief we exploit in evaluating the generalization ability of our learner in a 
+reliable way.
+When this can no longer be plausibly claimed and domain shift occurs, for 
+example in applying our model to documents with different topical context, we 
+cannot expect our model to generalize as the test performance suggests.
+Still, the tasks might not be fundamentally different, and some of the gathered 
+information on the feature-target relationship will be of use nonetheless.
+Much like in human learning processes we can presume a certain amount of 
+abstraction.
+It is precisely this migration of previous knowledge that is at the heart of 
+transfer learning \citep{Murphy2021}.
+
+As discussed before, the abundance of data is in stark contrast to the scarcity
+of labels in many applications, such as in ours.
+The large (manual) annotation effort this entails poses severe constraints on 
+the practicability of supervised learning.
+Therefore, it is reasonable to accumulate as much existing knowledge as possible 
+to aid the given task.
+Transfer learning represents the approach of statistical learning in which we 
+first train a model on an original task and domain and then transfer the 
+acquired knowledge to the target task and domain \citep{ruder2019}.
+\\
+
+\color{black}
+
+\textbf{Attention mechanism.} Moreover, Transformer-based architectures avoid 
+processing text data sequentially, as a \textit{recurrent neural network (RNN)}
+would.
+Obviously, text is inherently sequential and RNNs have been designed to handle 
+precisely this property (as opposed to, for example, the BOW approach).
+Disadvantages of recurrent modeling, however, include a lack of parallelization 
+and the tendency to favor recent input.
+The attention mechanism allows the network to access any past modeling state by
+allocating dedicated weights and therefore achieves much better 
+parallelization and reduced training times \citep{vaswanietal2017}.
+
+This is mainly achieved in the pre-training task (see below) of a BERT model on 
+a large corpus in a specific language with the help of neural networks. In the 
+fine-tuning step, this knowledge (i.e., the parameter values learned during 
+training the source model) is then applied to a new, purpose-specific context to 
+learn a certain task and vocabulary \citep{devlin2019}.
 
 % ------------------------------------------------------------------------------
 
 \subsubsection{Input pre-processing}
 \label{bert_preproc}
 
-% Die Ausgrenzung von MigrantInnen von der #EssenerTafel ist inakzeptabel und 
-% rassistisch. Wir dürfen nicht zulassen, dass die Ärmsten gegeneinander 
-% ausgespielt werden.
+Very roughly speaking, a transformer architecture consists of an encoder and a 
+decoder component: the former processes inputs and creates an intermediate 
+representation the latter maps to predictions \citep{zhang2020}.
+In order to apply BERT, the textual input to its encoder must be pre-processed 
+in a specific way.
+To this end, we split word into tokens or word fragments based on a given 
+vocabulary which is determined a priori by the pre-trained language model.
+Each sequence of tokens is then converted into a numerical vector, with some 
+additional tokens: the beginning of the first sequence is signed by a “[CLS]” 
+token, the end by a “[SEP]” token. 
 
-In order to apply BERT, one has to process the textual input to the encoder of 
-BERT. For that, we split the words into tokens or wordpieces based on a given 
-vocabulary, which is determined by the pretrained language model. Then convert 
-each sequence of tokens into numerical vectors, embeddings and process them in 
-the neural network with some additional tokens: The beginning of the first 
-sequence is signed by a “[CLS]” token, the end by a “[SEP]” token. Due to a 
-marker Sentence A or B to each token in a sequence helps to indicate which 
-sentence a token belongs in. Moreover, a positional embedding stands for the 
-position of each token in the sentence. The inputs have to be of same length, 
-whereby the maximum length of an input sequence can be 512 tokens. Shorter 
-inputs are filled with padding tokens and the longer ones are truncated.
+Consider the following example to illustrate this procedure, where the first 
+statement is the original text and the second its pre-processed form:
 
-% [CLS] Die Ausgrenzung von MigrantInnen von der # EssenerTafel ist inakzeptabel 
-% und rassistisch. Wir dürfen nicht zulassen, dass die Ärmsten gegeneinander 
-% ausgespielt werden. [SEP]
+\begin{center}
+\fbox{\begin{minipage}{0.75\textwidth}
+\raggedright
+\textit{Die Ausgrenzung von MigrantInnen von der \#EssenerTafel ist inakzeptabel 
+und rassistisch. Wir dürfen nicht zulassen, dass die Ärmsten gegeneinander
+ausgespielt werden.
+}
+\end{minipage}}
+\end{center}
+
+\begin{center}
+\fbox{\begin{minipage}{0.75\textwidth}
+\raggedright
+\textit{[CLS] Die Ausgrenzung von MigrantInnen von der \#EssenerTafel ist 
+inakzeptabel und rassistisch. Wir dürfen nicht zulassen, dass die Ärmsten 
+gegeneinander ausgespielt werden. [SEP]
+}
+\end{minipage}}
+\end{center}
+
+A marker assigning it to sentence "A" or "B" helps to indicate for each token 
+in a sequence which sentence it belongs to.
+A positional embedding further stands for the position of each token in the 
+sentence.
+In short, the document contents and structure are translated in to a numerical 
+representation.
+The inputs have to be of same length, where the maximum length of an input 
+sequence can be 512 tokens. 
+Shorter inputs are filled with padding tokens and longer ones are truncated 
+\citep{devlin2019}.
 
 % ------------------------------------------------------------------------------
 
 \subsubsection{Pre-training}
 \label{bert_pretrain}
 
-Originally, BERT was pretrained on a huge corpus of Wikipedia texts. In order 
-to cope with the challenges of a directional approach while predicting the next 
-word in a sequence, BERT uses two basic strategies during pretraining: Masked 
-Language Modelling and Next Sentence Prediction.
+In its originally proposed form, BERT was pre-trained on a huge corpus of 
+Wikipedia entries for two types of task: \textit{masked language modeling (MLM)} 
+and \textit{next sentence prediction (NSP)}.
+These basic strategies shall enable the network to learn the fundamental 
+structure of a language from a vast amount of training data, without any need 
+for labels.
 \\
 
 \textbf{Masked language modeling (MLM).}
-By masking a random word, BERT tries to predict this independent from its 
-positioning in the sequence. As BERT is able to work in bidirectional way, that 
-is to condition the predictions for the masked word on the co-occurred words on 
-both sides, it is able to capture different and more flexible information about 
-the context of a certain word. After randomly choosing  15\% of the token 
-embeddings, the 80\% of them will be replaced by the “[MASK]” token, in 10\% of 
-the cases, the masked tokens are replaced by a random token (different) and in 
-the 10\% remaining cases, the masked tokens are left unchanged. Afterwards these 
-sequences are fed into the BERT model. (Devlin, J., Chang, M.-W., Lee, K., and 
-Toutanova, K. (2019). BERT: Pre-training of deep bidirectional Transformers for 
-language understanding.)
-% [CLS] Die Ausgrenzung von [MASK] von der # EssenerTafel ist inakzeptabel und 
-% [MASK]. Wir dürfen nicht zulassen, dass die [MASK] gegeneinander ausgespielt 
-% werden. [SEP]
-\\
+By masking a random word, BERT tries to predict it without considering its 
+positioning in the sequence. 
+As BERT is able to work in a bidirectional way, 
+that is, to condition the predictions for the masked word on the co-occurring 
+words on both sides, it is able to capture varied and flexible 
+information about the context of a certain word. 
+After randomly choosing  15\% of the token embeddings, 80\% of these will be 
+replaced by the “[MASK]” token, whereas a further 10\% are swapped for a random 
+token, and in the 10\% remaining cases, the masked tokens are left unchanged. 
+Afterwards, these sequences are fed into the BERT model \citep{devlin2019}.
+
+Revisiting our example, the masking process could result in something like: 
+
+\begin{center}
+\fbox{\begin{minipage}{0.75\textwidth}
+\raggedright
+\textit{[CLS] Die Ausgrenzung von [MASK] von der \#EssenerTafel ist inakzeptabel 
+und [MASK]. Wir dürfen nicht zulassen, dass die [MASK] gegeneinander ausgespielt
+werden. [SEP]
+}
+\end{minipage}}
+\end{center}
 
 \textbf{Next sentence prediction (NSP).}
-Furthermore, to capture the relationship between two sentences BERT learns to 
-predict whether the second sentence in a pair is the follow-up one in the 
-original document or not. In the training procedure the half of the inputs are 
-originally a pair, while the other half consists of a random sentence from the 
-corpus as second sentence. The goal is to make BERT distinguish between real and 
-fake pairs. 
-These both strategies are applied together in order to minimize the additively 
-combined loss function.
+Furthermore, to capture the relationship between two sentences, BERT learns to 
+predict whether or not the second sentence in a pair is the subsequent one in 
+the original document. 
+During training, half of the inputs is comprised of original pairs, while the 
+other half has of a random sentence from the corpus as second sentence. 
+The goal is to have BERT distinguish between real and fake pairs in a reliable 
+manner.
 
-% Input: 
-% Sentence A: [CLS] Die Ausgrenzung von [MASK] von der # EssenerTafel ist 
-% inakzeptabel und [MASK]. [SEP]
-% Sentence B: Wir dürfen nicht zulassen, dass die [MASK] gegeneinander ausgespielt 
-% werden. [SEP]
-% Label: IsNextSentence
-% 
-% Sentence A: [CLS] Die Ausgrenzung von [MASK] von der # EssenerTafel ist 
-% inakzeptabel und [MASK]. 
-% Sentence B: [SEP] Freue mich sehr für ihn und auf die Zusammenarbeit. [SEP]
-% Label: NotNextSentence
+\begin{center}
+\fbox{\begin{minipage}{0.75\textwidth}
+\raggedright
+\textit{\textbf{Sentence A:} [CLS] Die Ausgrenzung von [MASK] von der 
+\\\#EssenerTafel 
+ist inakzeptabel und [MASK]. [SEP]
+\\
+\textbf{Sentence B:} Wir dürfen nicht zulassen, dass die [MASK] gegeneinander 
+ausgespielt werden. [SEP]
+\\
+\textbf{Label:} IsNextSentence
+}
+\end{minipage}}
+\end{center}
+
+\begin{center}
+\fbox{\begin{minipage}{0.75\textwidth}
+\raggedright
+\textit{\textbf{Sentence A:} [CLS] Die Ausgrenzung von [MASK] von der 
+\\\#EssenerTafel 
+ist inakzeptabel und [MASK]. [SEP]
+\\
+\textbf{Sentence B:} Freue mich sehr für ihn und auf die Zusammenarbeit. [SEP]
+\\
+\textbf{Label:} NotNextSentence
+}
+\end{minipage}}
+\end{center}
+
+These two strategies are applied jointly in order to minimize an additive loss 
+function.
 
 % ------------------------------------------------------------------------------
 
 \subsubsection{Fine-tuning}
 \label{bert_fine}
 
-BERT can be used for various language tasks, for example Question Answering, 
-Named Entity Recognition, Sequence Classification, etc. The latter one was used 
-in this project. To train the pretrained network on a certain task, we need to 
-fine-tune BERT on the target task and use the available (limited) labelled data. 
-This means, we only have to exchange the output layer adapted for the target 
-task. In our case, we used the huggingface pytorch implementation 
-BertForSequenceClassification 
-% (https://huggingface.co/transformers/model_doc/bert.html#tfbertforsequenceclassification)
-, which adds a single linear layer on top for classification.  During the 
-fine-tuning all BERT parameters are updated. (Devlin 2018) We set the following 
-parameters recommended to use for fine-tuning by the authors: a minibatch size 
-of 16 sequences, a global Adam learning rate of 2e-5 and 4 as number of epochs. 
-(Devlin 2019)
+BERT can be applied to various language tasks, e.g., \textit{question 
+answering} or \textit{named entity recognition}, and sentiment classification 
+in particular.
+In order to have the pre-trained network solve a specific problem, we need to 
+fine-tune it on the target task.
+Crucially, at this point, the need for labeled data comes in.
+For fine-tuning we simply need to alter the output layer that adapts to the 
+target task.
+In our analysis, we use the \texttt{huggingface PyTorch} implementation 
+\texttt{BertForSequenceClassification}\footnote{
+\href{https://huggingface.co/transformers/model\_doc/bert.html\#tfbertforsequenceclassification}{https://huggingface.co/transformers/model\_doc/bert.html\#tfbertforsequenceclassification}
+},
+which adds a single linear network layer on top of the existing network for 
+classification.
+During fine-tuning, all BERT parameters are updated, though \citep{devlin2019}.
+We set the following parameters recommended to use for fine-tuning by the 
+authors: a minibatch size of 16 sequences, a global Adam learning rate of 2e-5, 
+and 4 as number of epochs. 
 
 % ------------------------------------------------------------------------------
+
+\color{red}
 
 \subsubsection{Aspect-based sentiment analysis}
 \label{bert_absa}

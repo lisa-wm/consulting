@@ -77,6 +77,14 @@ Correa, E.~A., Marinho, V.~Q. \harvardand\ dos Santos, L.~B.  \harvardyearleft
   Semantic Evaluations (SemEval-2017)}, p.~611–615.
 
 \harvarditem[Devlin et~al.]{Devlin, Chang, Lee \harvardand\
+  Toutanova}{2018}{devlinetal2018}
+Devlin, J., Chang, M., Lee, K. \harvardand\ Toutanova, K.  \harvardyearleft
+  2018\harvardyearright .
+\newblock {BERT:} pre-training of deep bidirectional transformers for language
+  understanding, {\em CoRR} {\bf abs/1810.04805}.
+\newline\harvardurl{http://arxiv.org/abs/1810.04805}
+
+\harvarditem[Devlin et~al.]{Devlin, Chang, Lee \harvardand\
   Toutanova}{2019}{devlin2019}
 Devlin, J., Chang, M.-W., Lee, K. \harvardand\ Toutanova, K.  \harvardyearleft
   2019\harvardyearright .
@@ -93,6 +101,13 @@ Feurer, M. \harvardand\ Hutter, F.  \harvardyearleft 2019\harvardyearright .
 Ficamos, P. \harvardand\ Liu, Y.  \harvardyearleft 2016\harvardyearright .
 \newblock A topic based approach for sentiment analysis on twitter data, {\em
   International Journal of Advanced Computer Science and Applications} {\bf 7}.
+
+\harvarditem[Goodfellow et~al.]{Goodfellow, Bengio \harvardand\
+  Courville}{2016}{goodfellowetal2016}
+Goodfellow, I., Bengio, Y. \harvardand\ Courville, A.  \harvardyearleft
+  2016\harvardyearright .
+\newblock {\em Deep Learning}, MIT Press.
+\newblock \url{http://www.deeplearningbook.org}.
 
 \harvarditem{Hasell \harvardand\ Weeks}{2016}{hasellweeks2016}
 Hasell, A. \harvardand\ Weeks, B.~E.  \harvardyearleft 2016\harvardyearright .
@@ -172,6 +187,10 @@ Mohammad, S.~M.  \harvardyearleft 2017\harvardyearright .
   \harvardand\ B.~A. Feraco (eds), {\em A Practical Guide to Sentiment
   Analysis}, Springer.
 
+\harvarditem{Murphy}{2021}{Murphy2021}
+Murphy, K.~P.  \harvardyearleft 2021\harvardyearright .
+\newblock {\em Probabilistic Machine Learning: An Introduction}, MIT Press.
+
 \harvarditem{Ngyuen \harvardand\ Shirai}{2018}{nguyenetal2018}
 Ngyuen, H. \harvardand\ Shirai, K.  \harvardyearleft 2018\harvardyearright .
 \newblock A joint model of term extraction and polarity classification for
@@ -244,6 +263,11 @@ Roberts, M., Stewart, B., Tingley, D. \harvardand\ Benoit, K.  \harvardyearleft
 Roesslein, J.  \harvardyearleft 2020\harvardyearright .
 \newblock {\em Tweepy: Twitter for Python!}
 
+\harvarditem{Ruder}{2019}{ruder2019}
+Ruder, S.  \harvardyearleft 2019\harvardyearright .
+\newblock {\em Neural Transfer Learning forNatural Language Processing}, PhD
+  thesis, National University of Ireland, Galway.
+
 \harvarditem{Schulze \harvardand\ Wiegrebe}{2020}{schulzewiegrebe2020}
 Schulze, P. \harvardand\ Wiegrebe, S.  \harvardyearleft 2020\harvardyearright .
 \newblock Twitter in the parliament - a text-based analysis of german political
@@ -303,6 +327,14 @@ van Vliet, L., Törnberg, P. \harvardand\ Uitermark, J.  \harvardyearleft
 \newblock The twitter parliamentarian database: Analyzing twitter politics
   across 26 countries, {\em PLoS ONE} {\bf 15}(9).
 
+\harvarditem[Vaswani et~al.]{Vaswani, Shazeer, Parmar, Uszkoreit, Jones, Gomez,
+  Kaiser \harvardand\ Polosukhin}{2017}{vaswanietal2017}
+Vaswani, A., Shazeer, N., Parmar, N., Uszkoreit, J., Jones, L., Gomez, A.~N.,
+  Kaiser, L. \harvardand\ Polosukhin, I.  \harvardyearleft
+  2017\harvardyearright .
+\newblock Attention is all you need, {\em CoRR} {\bf abs/1706.03762}.
+\newline\harvardurl{http://arxiv.org/abs/1706.03762}
+
 \harvarditem{Vayansky \harvardand\ Kumar}{2020}{vayanskykumar2020}
 Vayansky, I. \harvardand\ Kumar, S.~A.  \harvardyearleft 2020\harvardyearright
   .
@@ -322,6 +354,13 @@ Wang, X., Xu, G., Zhang, Z., Jin, L. \harvardand\ Sun, X.  \harvardyearleft
   2021\harvardyearright .
 \newblock End-to-end aspect-based sentiment analysis with hierarchical
   multi-task learning, {\em Neurocomputing} .
+
+\harvarditem[Zhang et~al.]{Zhang, Lipton, Li \harvardand\
+  Smola}{2020}{zhang2020}
+Zhang, A., Lipton, Z.~C., Li, M. \harvardand\ Smola, A.~J.  \harvardyearleft
+  2020\harvardyearright .
+\newblock {\em Dive into Deep Learning}.
+\newblock \url{https://d2l.ai}.
 
 \harvarditem[Zuo et~al.]{Zuo, Wu, Zhang, Lin, Wang, Xu \harvardand\
   Xiong}{2016}{zuoetal2016}

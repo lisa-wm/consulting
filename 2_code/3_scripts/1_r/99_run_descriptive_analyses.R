@@ -5,6 +5,8 @@
 # LOAD DATA --------------------------------------------------------------------
 
 load_rdata_files(data_clean, folder = "2_code/1_data/2_tmp_data")
+load(here::here("2_code/1_data/2_tmp_data/data_clean.Rmd"))
+
 data_training <- data_clean[label != "none"]
 
 cols_relevant <- c(
@@ -72,7 +74,7 @@ plot_party <- function(data, dataset_name) {
       labels = c("AfD", "CDU/CSU", "FDP", "Greens", "Left", "SPD")) +
     ggplot2::scale_fill_manual(
       name = "",
-      values = c("deepskyblue2", "lightgray"),
+      values = c("deepskyblue2", "gray"),
       labels = c("training observations", "seats in 2017 Bundestag")) +
     ggplot2::xlab("party") +
     ggplot2::ylab("relative frequency") + 

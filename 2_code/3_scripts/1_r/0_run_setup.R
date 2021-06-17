@@ -25,6 +25,7 @@ packages_required <-  c(
   "paradox", # handling parameter spaces
   "quanteda", # natural language processing
   "ranger", # random forests
+  "rtweet", # r interface for Twitter
   "spacyr", # pos tagging
   "stringi", # string manipulation
   "stringr", # string manipulation
