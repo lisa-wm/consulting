@@ -170,7 +170,7 @@ tweets_corpus_emojis <- quanteda::corpus(
   docid_field = "doc_id",
   text_field = "twitter_emojis")
 
-tweets_dfm_emojis <- quanteda::dfm(tweets_corpus_emojis)
+tweets_dfm_emojis <- quanteda::dfm(quanteda::tokens(tweets_corpus_emojis))
 
 # Match with dictionary
 
