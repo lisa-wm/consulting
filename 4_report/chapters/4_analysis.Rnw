@@ -883,8 +883,8 @@ In its originally proposed form, BERT was pre-trained on a huge corpus of
 Wikipedia entries for two types of task: \textit{masked language modeling (MLM)} 
 and \textit{next sentence prediction (NSP)}.
 These basic strategies shall enable the network to learn the fundamental 
-structure of a language from a vast amount of training data, without any need 
-for labels.
+structure of a language from a vast amount of training data in a self-supervised 
+manner, without any need for labels.
 \\
 
 \textbf{Masked language modeling (MLM).}
