@@ -697,25 +697,41 @@ retains the ratio of documents associated with a keyword in each resampling
 step.
 All these novel operations are constructed as so-called \textit{pipe operators}
 in \texttt{mlr3}.
-Eventually, the pipeline assumes the following structure: \textcolor{red}{FIG}.
-\\
+Eventually, the pipeline assumes the structure depicted in figure 
+\ref{fig_graph}. 
 
-\textbf{Settings.}
-Our design choices are partly inspired by \citet{probstetal2019} and otherwise 
-reflect what we find to work best.
-The decision to compute topic-specific embeddings and the selection 
-of learners are such choices already.
-We further fix some hyperparameters in advance to save on computation time. 
-This includes capping the maximum number of iterations in regularized 
-regression at 1000 and limiting tree growth in the random forest (leaf nodes 
-must contain at least 5\% of observations) as well as allowing for parallel 
-computations. 
-Other hyperparameters, by contrast, are left to tuning.
-The first two are the number of topics with $3\leq K \leq 6$ and the 
-dimensionality of embeddings $10\leq m \leq 50$, 
-where we exploit the fact that these inherently unsupervised problems are input 
-to a supervised learning task: we can simply have the algorithm choose the 
-configuration that yields the best predictive performance.
+\begin{minipage}[c]{0.5\textwidth}
+  \textbf{Settings.}
+  Our design choices are partly inspired by \citet{probstetal2019} and otherwise 
+  reflect what we find to work best.
+  The decision to compute topic-specific embeddings and the selection 
+  of learners are such choices already.
+  We further fix some hyperparameters in advance to save on computation time. 
+  This includes capping the maximum number of iterations in regularized 
+  regression at 1000 and limiting tree growth in the random forest (leaf nodes 
+  must contain at least 5\% of observations) as well as allowing for parallel 
+  computations. 
+  Other hyperparameters are left to tuning.
+  The first two are the number of topics with $3\leq K \leq 6$ and the
+  dimensionality of embeddings $10\leq m \leq 50$,
+  where we exploit the fact that these inherently unsupervised problems are input
+  to a supervised learning task: we can simply have the algorithm choose the
+  configuration with the best predictive performance.
+\end{minipage}
+\begin{minipage}[c]{0.05\textwidth}
+  \phantom{foo}
+\end{minipage}
+\begin{minipage}[c]{0.45\textwidth}
+  \begin{figure}[H]
+    \includegraphics[width = \textwidth]{figures/graph}
+    \caption[Proposed AutoML pipeline]{Schematic representation of proposed 
+    AutoML pipeline}
+    \label{fig_graph}
+  \end{figure}
+\end{minipage}
+
+\vspace{0.5cm}
+
 For the actual classification part we allow optimization of the penalty 
 coefficients in logistic regression ($0 \leq \alpha \leq 1$ and $0 \leq \lambda
 \leq 0.2$) and the number of candidate features for split computation in the 

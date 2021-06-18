@@ -80,11 +80,11 @@ PipeOpExtractTopicsSTM = R6::R6Class(
       tkns <- private$.tokenize(
         corpus = crp, 
         stopwords = self$param_set$values$stopwords)
-      
+
       stm_obj <- private$.make_stm_obj(
         tokens = tkns, 
-        doc_grouping_var = unlist(self$param_set$values$doc_grouping_var))
-      
+        doc_grouping_var = self$param_set$values$doc_grouping_var)
+
       # Run topic model
       
       warn_default <- getOption("warn") 
@@ -176,7 +176,7 @@ PipeOpExtractTopicsSTM = R6::R6Class(
         
         stm_obj <- private$.make_stm_obj(
           tokens = tkns, 
-          doc_grouping_var = unlist(self$param_set$values$doc_grouping_var))
+          doc_grouping_var = self$param_set$values$doc_grouping_var)
         
         # Adapt structure to training data
         
@@ -242,7 +242,7 @@ PipeOpExtractTopicsSTM = R6::R6Class(
     .make_stm_obj = function(tokens, doc_grouping_var) {
       
       dfm <- quanteda::dfm(tokens)
-      dfm_grp <- quanteda::dfm_group(dfm, doc_grouping_var)
+      dfm_grp <- quanteda::dfm_group(dfm, get(doc_grouping_var))
       quanteda::convert(dfm_grp, to = "stm")
       
     },

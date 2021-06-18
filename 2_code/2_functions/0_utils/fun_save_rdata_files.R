@@ -26,7 +26,7 @@ save_rdata_files <- function(robject, folder, tmp = TRUE) {
       save, 
       list(
         env_vars[which(env_vars == deparse(substitute(robject)))], 
-        file = here(
+        file = here::here(
           folder, 
           sprintf("tmp_rdata_%s.RData", deparse(substitute(robject))))))
     
@@ -36,7 +36,7 @@ save_rdata_files <- function(robject, folder, tmp = TRUE) {
       save, 
       list(
         env_vars[which(env_vars == deparse(substitute(robject)))], 
-        file = here(
+        file = here::here(
           folder, 
           sprintf("rdata_%s.RData", deparse(substitute(robject))))))
     

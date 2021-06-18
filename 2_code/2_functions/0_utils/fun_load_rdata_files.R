@@ -17,7 +17,7 @@ load_rdata_files <- function(robject, folder, tmp = TRUE) {
     do.call(
       load,
       list(
-        file = here(
+        file = here::here(
           folder, 
           sprintf("tmp_rdata_%s.RData", robject_name)),
         envir = .GlobalEnv))
@@ -27,7 +27,7 @@ load_rdata_files <- function(robject, folder, tmp = TRUE) {
     do.call(
       load,
       list(
-        file = here(
+        file = here::here(
           folder, 
           sprintf("rdata_%s.RData", robject_name)),
         envir = .GlobalEnv))

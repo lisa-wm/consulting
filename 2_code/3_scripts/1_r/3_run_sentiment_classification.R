@@ -36,6 +36,13 @@ cols_to_keep <- c(
 char_cols <- sprintf("feat_%s", letters)
 tweets_sa <- tweets_sa[, ..cols_to_keep]
 
+tweets_sa[
+  , doc_group := paste(
+    twitter_username, 
+    twitter_year, 
+    twitter_month, 
+    sep = "_")]
+
 # Make task
 
 data_labeled <- tweets_sa[label != "none"]
@@ -65,7 +72,7 @@ po_tm <- PipeOpExtractTopicsSTM$new()
 po_tm$param_set$values <- list(
   docid_field = "doc_id",
   text_field = "text",
-  doc_grouping_var = c("twitter_username", "twitter_year", "twitter_month"),
+  doc_grouping_var = "doc_group",
   prevalence_vars_cat = list("meta_party", "meta_bundesland"),
   prevalence_vars_smooth = list(
     "meta_unemployment_rate", 
@@ -199,6 +206,8 @@ graph_learners <- lapply(
 })
 
 names(graph_learners) <- c("ppl_with_tm", "ppl_without_tm")
+
+plot_graph <- plot(graph_learners[[1]]$graph)
 
 # DEFINE TUNING SEARCH SPACES --------------------------------------------------
 
@@ -347,7 +356,7 @@ benchmark_design = mlr3::benchmark_grid(
   learners = learners_with_baseline,
   resamplings = resampling_strategy_outer)
 
-set.seed(123L)
+set.seed(1L)
 benchmark_results <- mlr3::benchmark(benchmark_design)
 
 save_rdata_files(
