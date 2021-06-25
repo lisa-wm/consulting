@@ -197,6 +197,15 @@ Ngyuen, H. \harvardand\ Shirai, K.  \harvardyearleft 2018\harvardyearright .
   aspect-based sentiment analysis, {\em Proceedings of the 10th International
   Conference on Knowledge and Systems Engineering (KSE)}.
 
+\harvarditem[Ostendorff et~al.]{Ostendorff, Blume \harvardand\
+  Ostendorff}{2020}{ostendorffetal2020}
+Ostendorff, M., Blume, T. \harvardand\ Ostendorff, S.  \harvardyearleft
+  2020\harvardyearright .
+\newblock Towards an open platform for legal information, {\em Proceedings of
+  the ACM/IEEE Joint Conference on Digital Libraries in 2020}, JCDL '20,
+  Association for Computing Machinery, New York, NY, USA, p.~385–388.
+\newline\harvardurl{https://doi.org/10.1145/3383583.3398616}
+
 \harvarditem[Pennington et~al.]{Pennington, Socher \harvardand\
   Manning}{2014}{penningtonetal2014}
 Pennington, J., Socher, R. \harvardand\ Manning, C.  \harvardyearleft
@@ -354,6 +363,13 @@ Wang, X., Xu, G., Zhang, Z., Jin, L. \harvardand\ Sun, X.  \harvardyearleft
   2021\harvardyearright .
 \newblock End-to-end aspect-based sentiment analysis with hierarchical
   multi-task learning, {\em Neurocomputing} .
+
+\harvarditem[Xu et~al.]{Xu, Liu, Shu \harvardand\ Yu}{2019}{xuetal2019}
+Xu, H., Liu, B., Shu, L. \harvardand\ Yu, P.~S.  \harvardyearleft
+  2019\harvardyearright .
+\newblock Post-training for review reading comprehension and aspect-based
+  sentiment analysis, {\em Proceedings of NAACL-HLT}, Minneapolis, USA,
+  p.~2324–2335.
 
 \harvarditem[Zhang et~al.]{Zhang, Lipton, Li \harvardand\
   Smola}{2020}{zhang2020}

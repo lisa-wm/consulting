@@ -1044,7 +1044,7 @@ For fine-tuning we simply need to alter the output layer that adapts to the
 target task.
 In our analysis, we use the \texttt{huggingface PyTorch} implementation 
 \texttt{BertForSequenceClassification}\footnote{
-\href{https://huggingface.co/transformers/model\_doc/bert.html\#tfbertforsequenceclassification}{https://huggingface.co/transformers/model\_doc/bert.html\#tfbertforsequenceclassification}
+\url{https://huggingface.co/transformers/model\_doc/bert.html\#tfbertforsequenceclassification}
 },
 which adds a single linear network layer on top of the existing network for 
 classification.
@@ -1055,60 +1055,61 @@ and 4 as number of epochs.
 
 % ------------------------------------------------------------------------------
 
-\color{red}
-
 \subsubsection{Aspect-based sentiment analysis}
 \label{bert_absa}
 
-The Aspect Based Sentiment Analysis is a more sophisticated approach than a 
-standard text-level sentiment analysis. Apart from classifying a given text, in 
-this case a tweet, it focuses on extracting aspects mentioned in a given text 
-and base the classification result on it, together with the tokens contained in 
-the text in hope to extract the most relevant information from the textual data. 
+The ABSA approach is a more sophisticated task than standard text-level 
+sentiment analysis. 
+Apart from classifying a given text, in this case a tweet, it focuses on 
+extracting aspects mentioned in a given text together with the tokens contained 
+in the text in the hope of extracting the most relevant information from the 
+data.
 For our data situation, the most appropriate approach is therefore the 
-methodology described by Hu Xu 
-% (https://www.aclweb.org/anthology/N19-1242.pdf)
+methodology described by \citet{xuetal2019} in fine-tuning BERT to ABSA.
+\\
 
 \textbf{Post-training.}
-The basic pretrained BERT model used in our work is the “bert-base-german-cased” 
-model, as we deal with tweets in German language and expecting to have 
-advantaged with the chance that letter casing will be helpful, because all nouns 
-start with the capital letter in German. This model was originally pretrained 
-using the latest German Wikipedia texts, news articles and Open Legal Datasets 
-of German court decisions and citations. The dataset has a size of ca. 12 GB in 
-total. 
-% (https://deepset.ai/german-bert)
-%  (http://openlegaldata.io/research/2019/02/19/court-decision-dataset.html)
+The basic pre-trained BERT model used in our work is the 
+\texttt{bert-base-german-cased} model as we deal with tweets in German language 
+and may expect to have advantages from letter casing (all nouns beginning with 
+capital letters in German). 
+This model was originally pre-trained using the latest German Wikipedia texts, 
+news articles and open legal data sets of German court decisions and citations. 
+This data set has a size of approximately 12 GB in total (
+\url{https://deepset.ai/german-bert}, \citet{ostendorffetal2020}). 
+
 In order to improve both the domain and task knowledge the authors recommend to 
-apply a so-called posttraining task based on contextually related data because 
-fine-tuning BERT directly with a limited amount of labelled data may end up with 
-domain and task challenges. The posttraining on domain knowledge is applied by 
-using the pretrained weights as initialization and leveraging the both 
-pretraining tasks MLM and NLP. The weights will be updated based on the sum of 
-the losses of both tasks. 
+apply a so-called post-training task based on contextually related data because 
+fine-tuning BERT directly with a limited amount of labeled data may end up with 
+domain and task challenges. 
+Post-training on domain knowledge is applied using the pre-trained weights as 
+initialization and leveraging both pre-training tasks (MLM and NSP). 
+The weights are updated based on the sum of the losses of both tasks. 
 \\
 
 \textbf{Aspect extraction.}
-The Aspect Extraction task is supposed to find aspects in a given text that the 
-reviewer or in our case the user of the twitter account has commented on. The 
-idea is to use a supervised technique and label each token from a sequence with 
-one of these three labels: “B” – Beginning of an aspect, “I” – Inside of an 
-aspect term and “O” – Outside of an aspect. Afterwards for each position of the 
-sequence a dense layer and a softmax is applied to predict one of the three 
-labels for all positions of a sequence. As shown in the original paper, the AE 
-task requires exhaustive domain knowledge.
+The aspect extraction task is supposed to find aspects in a given text that the 
+author has commented on. 
+The idea is to use a supervised technique and label each token from a sequence 
+with one of three labels: \textit{B – beginning of an aspect}, 
+\textit{I – inside of an aspect}, or \textit{O – outside of an aspect}. 
+Afterwards, for each position of the sequence, a dense layer with subsequent 
+softmax operation is applied to predict one of the three labels for all 
+positions of a sequence. 
+As shown in the original paper, the aspect extraction task requires, perhaps 
+unsurprisingly, exhaustive domain knowledge \citep{xuetal2019}.
 \\
 
 \textbf{Aspect sentiment classification.}
-The Aspect Sentiment Classification task tries to classify the sentiment 
-polarity of a given text, generally into positive, negative or neutral but in 
-case of our project only in positive or negative categories. The two inputs for 
-this task are an aspect and a review sentence or a tweet containing this aspect, 
-whereas the aspects are either extracted automatically with the above 
-methodology or are made available beforehand by another technique. After of 
-application of the softmax activation and training with cross entropy loss on 
-the polarities we get probabilities predicted for each of the sentiment 
-categories. 
+Lastly, the aspect sentiment classification task attempts to classify the 
+sentiment polarity of a given text, generally into positive, negative or 
+neutral but omitting the neutral category in our case. 
+The two inputs for this task are an aspect and a sentence or tweet containing 
+this aspect, where the aspects are either extracted automatically with the above 
+methodology or are made available beforehand by another technique. 
+After application of the softmax activation and training with cross-entropy loss 
+we obtain probabilities predicted for each of the sentiment categories 
+\citep{xuetal2019}.
 \\
 
 % ------------------------------------------------------------------------------
@@ -1116,46 +1117,56 @@ categories.
 \subsubsection{Implementation}
 \label{bert_implementation}
 
-All of the models and methods were applied in Python, version 3.7.10 
-% (https://www.python.org/downloads/release/python-3710/) 
-using Google Colaboratory 
-% (https://colab.research.google.com/notebooks/intro.ipynb), 
-where GPUs are available for free, which accelerated our training process.
-As mentioned above, we adopted the “bert-base-german-cased” model as the basis 
-for our experiments.
-The overall application can be divided into two general parts: Sentiment 
-Analysis (SA) and Aspect Based Sentiment Analysis (ABSA). 
-For the SA we have 4 variations. Apart from using the basis model by directly 
-fine-tuning that on our train set, 972 tweets, that is using 80 \% of our 
-labelled data, we additionally enrich our training instances with 6444 Germeval 
-data (Customer reviews about “Deutsche Bahn” - he german public train operator 
-with about two billion passengers each year). The other 20\% of the manually 
-labelled data is used to evaluate the goodness of prediction fit. Furthermore, 
-we develop our basic model by posttraining it on domain knowledge, namely on 
-29715 unlabelled and unused tweets scraped for this project (but not used for 
-the training purposes). This model will then be fine-tuned. And finally, the 
-fourth model implemented for SA is another pretrained German-language model 
-named “bert-base-german-dbmdz-cased” and pretrained on a larger data source 
-than the basic model: recent Wikipedia dump, EU Bookshop corpus, Open Subtitles, 
-CommonCrawl, ParaCrawl and News Crawl. The dataset has a size of 16GB and 
-2,350,234,427 tokens, promising to have better provide even better results 
-% (https://huggingface.co/dbmdz/bert-base-german-cased)
-For the ABSA we posttrained the basic model additionally on the Germeval 
-dataset, but did not use Germeval as part of training instances, as the aspects 
-deviate substantially from those detected in our dataset. 
+All of the models and methods are applied in \texttt{Python} (version 3.7.10) 
+using the computational resources of Google Colaboratory\footnote{
+\url{https://colab.research.google}
+}, where free GPU power is available to 
+researchers.
+As mentioned above, we adopt the \texttt{bert-base-german-cased model} as the 
+basis for our experiments.
+
+The overall application can be divided into two general parts: first, 
+document-level sentiment analysis, and second, ABSA.
+For document-level analysis we discern four variations.
+Besides using the basis model by directly fine-tuning it on our train set of 
+972 tweets (that is, using 80\% of our labeled data), we additionally enrich our 
+training instances by 6,444 customer reviews about the German public train 
+operator \textit{Deutsche Bahn}, made available in the course of the GermEval 
+coding challenges.
+The other 20\% of labeled data are used for evaluation. 
+Furthermore, we develop our basic model by post-training it on domain knowledge, 
+namely on 29,715 unlabeled and previously unused tweets collected in the 
+scraping process.
+This model is then fine-tuned. 
+Finally, a fourth model is given by another German-language model 
+named \texttt{bert-base-german-dbmdz-cased}\footnote{
+\url{https://huggingface.co/dbmdz/bert-base-german-cased}
+} and pre-trained on a larger data 
+source than the basic model: recent Wikipedia dump, EU Bookshop corpus, Open 
+Subtitles, CommonCrawl, ParaCrawl and News Crawl. 
+The dataset has a size of 16 GB and over 2 billion tokens, promising even better 
+results.
+
+For ABSA we additionally post-train the basic model on the GermEval 
+data set but do not use these data as part of training instances, as the aspects 
+deviate substantially from those detected in our corpus. 
 The methodology for ABSA is widely used in sentiment analysis of review texts 
-and will be applied on tweets with political context in this project. 
-Unfortunately, the application of AE was not successful for our project, as we 
-could not reach any aspect detection for the tweets. There is a strong 
-presumption that this happens because of the lack of clear contextual and 
-semantic delimitation aspect containing words. We therefore see good 
-opportunities to use this implementation for other use cases and provide code 
-background for further research but this will not be discussed any further as 
-part of this report. (s. el. Anhang) Therefore for the ABSA task we used the 
-manually assigned aspects for both training and evaluation procedures. 
+and is applied on tweets with political context in this project, which is 
+arguably a quite different domain. 
+Perhaps due to this fact, abstract extraction is not successful for our data. 
+Our personal presumption is that this happens because of the lack of clear 
+contextual and semantic delimitation of aspect-containing words we observe in 
+the training data. 
+We see plenty of opportunities for other use cases of this implementation, 
+and therefore include it in our submitted code, but will not discuss it any 
+further as part of this report.
+For the ABSA task we thus resort to the manually assigned aspects for both 
+training and evaluation procedures. 
 
 % ------------------------------------------------------------------------------
 
+
+\color{red}
 \subsubsection{Results}
 \label{tssa_dl_results}
 
