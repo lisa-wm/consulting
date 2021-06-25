@@ -356,7 +356,7 @@ benchmark_design = mlr3::benchmark_grid(
   learners = learners_with_baseline,
   resamplings = resampling_strategy_outer)
 
-set.seed(1L)
+set.seed(123L)
 benchmark_results <- mlr3::benchmark(benchmark_design)
 
 save_rdata_files(
@@ -364,4 +364,20 @@ save_rdata_files(
   folder = "2_code/1_data/2_tmp_data",
   tmp = FALSE)
 
-benchmark_results$aggregate(mlr3::msr("classif.acc"))
+load_rdata_files(
+  benchmark_results,
+  folder = "2_code/1_data/2_tmp_data",
+  tmp = FALSE)
+
+# Evaluate
+
+metrics <- list(
+  acc = mlr3::msr("classif.acc", id = "acc"),
+  f_1 = mlr3::msr("classif.fbeta", id = "f_1"),
+  tn = mlr3::msr("classif.tn", id = "tn"),
+  tp = mlr3::msr("classif.tp", id = "tp"),
+  fn = mlr3::msr("classif.fn", id = "fn"),
+  fp = mlr3::msr("classif.fp", id = "fp"))
+
+evaluation <- benchmark_results$aggregate(metrics)[
+  , .(learner_id, acc, f_1, tn, tp, fn, fp)]

@@ -764,6 +764,67 @@ emphasize one side of misclassification or the other in any particular way.
 \subsubsection{Results}
 \label{tssa_ml_results}
 
+We evaluate performance of two variants of our pipeline, a full version 
+including topic-specific embeddings and a topic-agnostic alternative that 
+omits the STM node.
+Performance metrics include, besides the elements of the confusion matrix, 
+the following quantities (e.g., \citet{japkowiczshah2011}):
+
+\begin{enumerate}
+  \item Accuracy: $\rho_{\text{acc}} =  \frac{\text{TN + TP}}{
+  \text{TN + TP + FN + FP}}$, and
+  \item F1 score: $\rho_{\text{F1}} =  2 \cdot \dfrac{\frac{\text{TP}}{
+  \text{TP + FP}} \cdot 
+  \frac{\text{TP}}{\text{TP + FN}}}{\frac{\text{TP}}{\text{TP + FP}} +
+  \frac{\text{TP}}{\text{TP + FN}}}$,
+\end{enumerate}
+
+where TN = true negatives, TP = true positives, FN = false negatives and 
+FP = false positives.
+
+We see from table \ref{tab_res_ml} that both algorithms achieve rather low 
+cross-validated performance in the realm of 72\% accuracy.
+Considering the fact that these values are remarkably close to the share of 
+negative labels in the data, it becomes clear that neither is able to outperform 
+a random classifier assigning classes according to the empirical relative class 
+frequencies (without regard to any covariates, referred to as \textit{
+featureless learner}).
+The entire feature extraction procedure must thus be regarded obsolete.
+
+\begin{table}[H]
+  \small
+  \begin{tabular}{l|r|r|r}
+    \textbf{metric} & \textbf{learner with topic modeling} & 
+    \textbf{learner without topic modeling} & \textbf{featureless learner} \\
+    \hline
+    accuracy & 0.7235 & 0.7292 & 0.7243 \\
+    \hline
+    F1 score & 0.8393 & 0.8399 & 0.8398 \\
+    \hline
+    TN & 293.0000 & 288.0000 & 293.0000 \\
+    \hline
+    TP & 0.0000 & 7.3333 & 0.0000 \\
+    \hline
+    FN & 111.6667 & 104.3333 & 111.6667 \\
+    \hline
+    FP & 0.3333 & 5.3333 & 0.0000 \\
+  \end{tabular}
+  \caption[Results for standard ML approach]{Results for standard ML approach 
+  (non-integer values in TN, TP, FN and FP are due to aggregation over cross 
+  validation folds).}
+  \label{tab_res_ml}
+\end{table}
+
+It is, moreover, worth noting that the learner without topic clustering performs 
+slightly better (if only by a very small margin) than the one using 
+topic-specific embeddings.
+We will see how the BERT solution exhibits similar behavior, leading to the 
+conclusion that topic modeling for this kind of data seems to complicate the 
+task rather than aiding it.
+
+All in all, it appears that the handcrafted features by which we represent 
+our texts are not helpful in sentiment classification for these data.
+
 % ------------------------------------------------------------------------------
 
 \subsection{Deep learning solution}

@@ -157,6 +157,8 @@ Ludwig-Maximilians-Universität München
   BERT & Bidirectional Encoder Representations from Transformers \\ 
   BOW & bag of words \\
   DL & deep learning \\
+  FN & false negative \\
+  FP & false positive \\
   LDA & latent Dirichlet allocation \\
   ML & machine learning \\
   MLM & masked language modeling \\
@@ -165,6 +167,8 @@ Ludwig-Maximilians-Universität München
   NSP & next sentence prediction \\
   POS & part of speech \\
   STM & structural topic model \\
+  TN & true negative \\
+  TP & true positive \\
   TSSA & topic-specific sentiment analysis
 \end{tabular}
 
