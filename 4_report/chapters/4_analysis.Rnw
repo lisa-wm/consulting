@@ -708,7 +708,7 @@ Eventually, the pipeline assumes the structure depicted in figure
   of learners are such choices already.
   We further fix some hyperparameters in advance to save on computation time. 
   This includes capping the maximum number of iterations in regularized 
-  regression at 1000 and limiting tree growth in the random forest (leaf nodes 
+  regression at 1,000 and limiting tree growth in the random forest (leaf nodes 
   must contain at least 5\% of observations) as well as allowing for parallel 
   computations. 
   Other hyperparameters are left to tuning.
@@ -724,7 +724,7 @@ Eventually, the pipeline assumes the structure depicted in figure
 \begin{minipage}[c]{0.45\textwidth}
   \begin{figure}[H]
     \includegraphics[width = \textwidth]{figures/graph}
-    \caption[Proposed AutoML pipeline]{Schematic representation of proposed 
+    \caption[Proposed AutoML pipeline]{Schematic representation of proposed\\ 
     AutoML pipeline}
     \label{fig_graph}
   \end{figure}
@@ -732,13 +732,13 @@ Eventually, the pipeline assumes the structure depicted in figure
 
 \vspace{0.5cm}
 
-For the actual classification part we allow optimization of the penalty 
+For the actual classification part we allow for optimization of the penalty 
 coefficients in logistic regression ($0 \leq \alpha \leq 1$ and $0 \leq \lambda
 \leq 0.2$) and the number of candidate features for split computation in the 
 random forest (limited to 50\% of features at most), as well as the fraction of 
 observations to be sampled for each base learner (between 0.25 and 1).
 Note that the search space remains rather small; more tuning parameters, larger 
-ranges and/or more configurations can be explored with enough computational 
+ranges and/or more configurations could be explored with enough computational 
 resources.
 
 We use three-fold cross validation (3-CV) as resampling strategy in both the 
@@ -747,7 +747,7 @@ outer (performance evaluation) and inner (hyperparameter tuning) training loop.
 of which serves as test set once while the other two provide the training data 
 \citep{japkowiczshah2011}.
 Tuning is conducted via random search with a total budget of 50 evaluations 
-(again, this should be extended if affordable).
+(again, this could be extended if affordable).
 Random search is based on the simple idea of drawing from the space of possible 
 configurations uniformly at random.
 While implementation is easy and readily parallelizable, the number of 
@@ -756,7 +756,8 @@ number of dimensions, with no possibility to learn from prior draws
 \citep{feurerhutter2019}.
 More efficient strategies might improve the tuning process here.
 Lastly, in the inner tuning loop, we evaluate performance by means of accuracy 
-(i.e., the share of correctly classified instances), as we identify no need to 
+(i.e., the share of correctly classified instances, see section 
+\ref{tssa_ml_results}), as we identify no need to 
 emphasize one side of misclassification or the other in any particular way.
 
 % ------------------------------------------------------------------------------
@@ -764,7 +765,7 @@ emphasize one side of misclassification or the other in any particular way.
 \subsubsection{Results}
 \label{tssa_ml_results}
 
-We evaluate performance of two variants of our pipeline, a full version 
+We evaluate the performance of two variants of our pipeline, a full version 
 including topic-specific embeddings and a topic-agnostic alternative that 
 omits the STM node.
 Performance metrics include, besides the elements of the confusion matrix, 
@@ -784,34 +785,45 @@ FP = false positives.
 
 We see from table \ref{tab_res_ml} that both algorithms achieve rather low 
 cross-validated performance in the realm of 72\% accuracy.
-Considering the fact that these values are remarkably close to the share of 
-negative labels in the data, it becomes clear that neither is able to outperform 
-a random classifier assigning classes according to the empirical relative class 
-frequencies (without regard to any covariates, referred to as \textit{
-featureless learner}).
-The entire feature extraction procedure must thus be regarded obsolete.
+The meaning of this observation becomes clear when considering the fact that 
+these values are remarkably close to the share of negative labels in the data:
+essentially, neither of the learners is able to outperform a random classifier 
+assigning classes according to the empirical relative class frequencies.
+We have included such a featureless learner in our benchmark experiments and the
+results confirm our findings:
 
 \begin{table}[H]
   \small
-  \begin{tabular}{l|r|r|r}
-    \textbf{metric} & \textbf{learner with topic modeling} & 
-    \textbf{learner without topic modeling} & \textbf{featureless learner} \\
+  \begin{tabular}{l|r|r|r|}
+    \cline{2-4}
+    &
+    \multicolumn{1}{l|}{\textbf{learner with topic modeling}} &
+    \multicolumn{1}{l|}{\textbf{learner without topic modeling}} &
+    \multicolumn{1}{l|}{\textbf{featureless learner}} \\ 
     \hline
-    accuracy & 0.7235 & 0.7292 & 0.7243 \\
+    \multicolumn{1}{|l|}{accuracy} & 0.723 & \cellcolor{lightgray} 
+    \textbf{0.729} & 0.724 \\
     \hline
-    F1 score & 0.8393 & 0.8399 & 0.8398 \\
+    \multicolumn{1}{|l|}{F1 score} & 0.839 & \cellcolor{lightgray} 
+    \textbf{0.840} & 0.840 \\
     \hline
-    TN & 293.0000 & 288.0000 & 293.0000 \\
+    \multicolumn{1}{|l|}{TN} & \textbf{293.000} & \cellcolor{lightgray} 
+    288.000 & \textbf{293.000} \\
     \hline
-    TP & 0.0000 & 7.3333 & 0.0000 \\
+    \multicolumn{1}{|l|}{TP} & 0.000 & \cellcolor{lightgray} \textbf{7.333} 
+    & 0.000 \\
     \hline
-    FN & 111.6667 & 104.3333 & 111.6667 \\
+    \multicolumn{1}{|l|}{FN} & 111.667 & \cellcolor{lightgray} 
+    \textbf{104.333} & 111.667 \\
     \hline
-    FP & 0.3333 & 5.3333 & 0.0000 \\
+    \multicolumn{1}{|l|}{FP} & 0.333 & \cellcolor{lightgray} 5.333 & 
+    \textbf{0.000} \\
+    \hline
   \end{tabular}
   \caption[Results for standard ML approach]{Results for standard ML approach 
   (non-integer values in TN, TP, FN and FP are due to aggregation over cross 
-  validation folds).}
+  validation folds). Best performance achievements are marked bold; overall 
+  best learner is marked gray.}
   \label{tab_res_ml}
 \end{table}
 
@@ -821,7 +833,6 @@ topic-specific embeddings.
 We will see how the BERT solution exhibits similar behavior, leading to the 
 conclusion that topic modeling for this kind of data seems to complicate the 
 task rather than aiding it.
-
 All in all, it appears that the handcrafted features by which we represent 
 our texts are not helpful in sentiment classification for these data.
 
@@ -851,7 +862,7 @@ We will therefore only point out two distinctive properties of Transformer
 models and refer to, e.g., \citet{goodfellowetal2016} for further reading on 
 deep learning in general and to \citet{vaswanietal2017} for the detailed 
 Transformer workflow.
-Transformer-based models, which have gained much traction in recent NLP 
+Transformer-based models, which have gained much traction in recent 
 research, rely on two key principles, namely \textit{transfer learning} and
 \textit{attention}.
 \\
@@ -859,13 +870,13 @@ research, rely on two key principles, namely \textit{transfer learning} and
 \textbf{Transfer learning.} In the standard supervised learning approach, where 
 we ideally have a large number of labeled training instances, we assume the 
 test data to follow the same underlying distribution as the training data, a 
-belief we exploit in evaluating the generalization ability of our learner in a 
-reliable way.
+belief we exploit in evaluating the generalization ability of our learner.
 When this can no longer be plausibly claimed and domain shift occurs, for 
 example in applying our model to documents with different topical context, we 
 cannot expect our model to generalize as the test performance suggests.
-Still, the tasks might not be fundamentally different, and some of the gathered 
-information on the feature-target relationship will be of use nonetheless.
+Still, the tasks might not be so fundamentally different, and some of the 
+gathered information on the feature-target relationship will be of use 
+nonetheless.
 Much like in human learning processes we can presume a certain amount of 
 abstraction.
 It is precisely this migration of previous knowledge that is at the heart of 
@@ -880,6 +891,12 @@ to aid the given task.
 Transfer learning represents the approach of statistical learning in which we 
 first train a model on an original task and domain and then transfer the 
 acquired knowledge to the target task and domain \citep{ruder2019}.
+This is mainly achieved in the pre-training task (see below) of a BERT model on 
+a large corpus in the relevant language with the help of neural networks. 
+In the 
+fine-tuning step, this knowledge (i.e., the parameter values learned during 
+training the source model) is then applied to a new, purpose-specific context to 
+learn a certain task and vocabulary \citep{devlin2019}.
 \\
 
 \color{black}
@@ -889,26 +906,20 @@ processing text data sequentially, as a \textit{recurrent neural network (RNN)}
 would.
 Obviously, text is inherently sequential and RNNs have been designed to handle 
 precisely this property (as opposed to, for example, the BOW approach).
-Disadvantages of recurrent modeling, however, include a lack of parallelization 
-and the tendency to favor recent input.
+Disadvantages of recurrent modeling, however, include a lack of 
+parallelizability and the tendency to favor recent input.
 The attention mechanism allows the network to access any past modeling state by
-allocating dedicated weights and therefore achieves much better 
+allocating dedicated attention weights and therefore achieves much better 
 parallelization and reduced training times \citep{vaswanietal2017}.
-
-This is mainly achieved in the pre-training task (see below) of a BERT model on 
-a large corpus in a specific language with the help of neural networks. In the 
-fine-tuning step, this knowledge (i.e., the parameter values learned during 
-training the source model) is then applied to a new, purpose-specific context to 
-learn a certain task and vocabulary \citep{devlin2019}.
 
 % ------------------------------------------------------------------------------
 
 \subsubsection{Input pre-processing}
 \label{bert_preproc}
 
-Very roughly speaking, a transformer architecture consists of an encoder and a 
+Very roughly speaking, a Transformer architecture consists of an encoder and a 
 decoder component: the former processes inputs and creates an intermediate 
-representation the latter maps to predictions \citep{zhang2020}.
+representation the latter then maps to predictions \citep{zhang2020}.
 In order to apply BERT, the textual input to its encoder must be pre-processed 
 in a specific way.
 To this end, we split word into tokens or word fragments based on a given 
@@ -921,7 +932,7 @@ Consider the following example to illustrate this procedure, where the first
 statement is the original text and the second its pre-processed form:
 
 \begin{center}
-\fbox{\begin{minipage}{0.75\textwidth}
+\fbox{\begin{minipage}{0.8\textwidth}
 \raggedright
 \textit{Die Ausgrenzung von MigrantInnen von der \#EssenerTafel ist inakzeptabel 
 und rassistisch. Wir dürfen nicht zulassen, dass die Ärmsten gegeneinander
@@ -931,7 +942,7 @@ ausgespielt werden.
 \end{center}
 
 \begin{center}
-\fbox{\begin{minipage}{0.75\textwidth}
+\fbox{\begin{minipage}{0.8\textwidth}
 \raggedright
 \textit{[CLS] Die Ausgrenzung von MigrantInnen von der \#EssenerTafel ist 
 inakzeptabel und rassistisch. Wir dürfen nicht zulassen, dass die Ärmsten 
@@ -944,9 +955,9 @@ A marker assigning it to sentence "A" or "B" helps to indicate for each token
 in a sequence which sentence it belongs to.
 A positional embedding further stands for the position of each token in the 
 sentence.
-In short, the document contents and structure are translated in to a numerical 
+In short, the document contents and structure are translated into a numerical 
 representation.
-The inputs have to be of same length, where the maximum length of an input 
+The inputs have to be of identical length, where the maximum length of an input 
 sequence can be 512 tokens. 
 Shorter inputs are filled with padding tokens and longer ones are truncated 
 \citep{devlin2019}.
@@ -975,11 +986,10 @@ After randomly choosing  15\% of the token embeddings, 80\% of these will be
 replaced by the “[MASK]” token, whereas a further 10\% are swapped for a random 
 token, and in the 10\% remaining cases, the masked tokens are left unchanged. 
 Afterwards, these sequences are fed into the BERT model \citep{devlin2019}.
-
 Revisiting our example, the masking process could result in something like: 
 
 \begin{center}
-\fbox{\begin{minipage}{0.75\textwidth}
+\fbox{\begin{minipage}{0.8\textwidth}
 \raggedright
 \textit{[CLS] Die Ausgrenzung von [MASK] von der \#EssenerTafel ist inakzeptabel 
 und [MASK]. Wir dürfen nicht zulassen, dass die [MASK] gegeneinander ausgespielt
@@ -992,13 +1002,13 @@ werden. [SEP]
 Furthermore, to capture the relationship between two sentences, BERT learns to 
 predict whether or not the second sentence in a pair is the subsequent one in 
 the original document. 
-During training, half of the inputs is comprised of original pairs, while the 
-other half has of a random sentence from the corpus as second sentence. 
+During training, half of the inputs are comprised of original pairs, while the 
+other half has a random sentence from the corpus as second sentence. 
 The goal is to have BERT distinguish between real and fake pairs in a reliable 
 manner.
 
 \begin{center}
-\fbox{\begin{minipage}{0.75\textwidth}
+\fbox{\begin{minipage}{0.8\textwidth}
 \raggedright
 \textit{\textbf{Sentence A:} [CLS] Die Ausgrenzung von [MASK] von der 
 \\\#EssenerTafel 
@@ -1013,7 +1023,7 @@ ausgespielt werden. [SEP]
 \end{center}
 
 \begin{center}
-\fbox{\begin{minipage}{0.75\textwidth}
+\fbox{\begin{minipage}{0.8\textwidth}
 \raggedright
 \textit{\textbf{Sentence A:} [CLS] Die Ausgrenzung von [MASK] von der 
 \\\#EssenerTafel 
@@ -1048,7 +1058,7 @@ In our analysis, we use the \texttt{huggingface PyTorch} implementation
 },
 which adds a single linear network layer on top of the existing network for 
 classification.
-During fine-tuning, all BERT parameters are updated, though \citep{devlin2019}.
+During fine-tuning, parameters in all layers are updated \citep{devlin2019}.
 We set the following parameters recommended to use for fine-tuning by the 
 authors: a minibatch size of 16 sequences, a global Adam learning rate of 2e-5, 
 and 4 as number of epochs. 
@@ -1075,21 +1085,21 @@ and may expect to have advantages from letter casing (all nouns beginning with
 capital letters in German). 
 This model was originally pre-trained using the latest German Wikipedia texts, 
 news articles and open legal data sets of German court decisions and citations. 
-This data set has a size of approximately 12 GB in total (
-\url{https://deepset.ai/german-bert}, \citet{ostendorffetal2020}). 
+This data set has a size of approximately 12 GB in total 
+(\url{https://deepset.ai/german-bert}, \citet{ostendorffetal2020}). 
 
-In order to improve both the domain and task knowledge the authors recommend to 
+In order to improve both the domain and task knowledge, the authors recommend to 
 apply a so-called post-training task based on contextually related data because 
 fine-tuning BERT directly with a limited amount of labeled data may end up with 
 domain and task challenges. 
 Post-training on domain knowledge is applied using the pre-trained weights as 
 initialization and leveraging both pre-training tasks (MLM and NSP). 
-The weights are updated based on the sum of the losses of both tasks. 
+The weights are updated based on the summed losses from both tasks. 
 \\
 
 \textbf{Aspect extraction.}
-The aspect extraction task is supposed to find aspects in a given text that the 
-author has commented on. 
+The aspect extraction sub-task is supposed to find aspects in a given text that 
+the author has commented on. 
 The idea is to use a supervised technique and label each token from a sequence 
 with one of three labels: \textit{B – beginning of an aspect}, 
 \textit{I – inside of an aspect}, or \textit{O – outside of an aspect}. 
@@ -1101,14 +1111,15 @@ unsurprisingly, exhaustive domain knowledge \citep{xuetal2019}.
 \\
 
 \textbf{Aspect sentiment classification.}
-Lastly, the aspect sentiment classification task attempts to classify the 
+Lastly, the aspect sentiment classification sub-task attempts to classify the 
 sentiment polarity of a given text, generally into positive, negative or 
-neutral but omitting the neutral category in our case. 
+neutral (omitting the neutral category in our case). 
 The two inputs for this task are an aspect and a sentence or tweet containing 
 this aspect, where the aspects are either extracted automatically with the above 
 methodology or are made available beforehand by another technique. 
 After application of the softmax activation and training with cross-entropy loss 
-we obtain probabilities predicted for each of the sentiment categories 
+we obtain probabilities predicted for each of the sentiment categories that are 
+eventually thresholded to yield a unique class label.
 \citep{xuetal2019}.
 \\
 
@@ -1122,7 +1133,7 @@ using the computational resources of Google Colaboratory\footnote{
 \url{https://colab.research.google}
 }, where free GPU power is available to 
 researchers.
-As mentioned above, we adopt the \texttt{bert-base-german-cased model} as the 
+As mentioned above, we adopt the \texttt{bert-base-german-cased} model as the 
 basis for our experiments.
 
 The overall application can be divided into two general parts: first, 
@@ -1138,20 +1149,21 @@ Furthermore, we develop our basic model by post-training it on domain knowledge,
 namely on 29,715 unlabeled and previously unused tweets collected in the 
 scraping process.
 This model is then fine-tuned. 
-Finally, a fourth model is given by another German-language model 
+Finally, a fourth variant is given by another German-language model 
 named \texttt{bert-base-german-dbmdz-cased}\footnote{
 \url{https://huggingface.co/dbmdz/bert-base-german-cased}
 } and pre-trained on a larger data 
-source than the basic model: recent Wikipedia dump, EU Bookshop corpus, Open 
-Subtitles, CommonCrawl, ParaCrawl and News Crawl. 
-The dataset has a size of 16 GB and over 2 billion tokens, promising even better 
-results.
+source than the basic model.
+% : recent Wikipedia dump, EU Bookshop corpus, Open 
+% Subtitles, CommonCrawl, ParaCrawl and News Crawl. 
+The data set has a size of 16 GB and over 2 billion tokens, suggesting the 
+ability to produce better results.
 
 For ABSA we additionally post-train the basic model on the GermEval 
 data set but do not use these data as part of training instances, as the aspects 
 deviate substantially from those detected in our corpus. 
 The methodology for ABSA is widely used in sentiment analysis of review texts 
-and is applied on tweets with political context in this project, which is 
+and is applied to tweets with political context in this project, which is 
 arguably a quite different domain. 
 Perhaps due to this fact, abstract extraction is not successful for our data. 
 Our personal presumption is that this happens because of the lack of clear 
@@ -1165,38 +1177,84 @@ training and evaluation procedures.
 
 % ------------------------------------------------------------------------------
 
-
-\color{red}
 \subsubsection{Results}
 \label{tssa_dl_results}
 
-With the aim of evaluating how good each of the models in both parts predict, 
-we consider the leave out sample of 243 test (manually labelled) instances.
-The following metrics are used: the accuracy score, the F1-Score and the 
-elements of confusion matrix, namely the amount of True Negative, True Positive, 
-False Negative and False Positive predictions. 
-The table below shows the results of in total eight models implemented for both 
-analysis approaches.  The columns marked in grey represent the best result of 
-each approach. 
+We assess each model's performance on the test set we have set aside, 
+containing 243 observations.
+The performance metrics are the same as for evaluating the standard ML solution 
+in chapter \ref{tssa_ml_results}.
+Table \ref{tab_res_bert} shows the results for the total of eight models 
+implemented in both approaches (with SA short for sentiment analysis and overall 
+best learners per task shadowed in gray):
 
-TABLE
- 
-For the SA the best result is reached with the 
-% base_german_cased_dbmdz model 
-with additionally fine-tuning on the 80\% of our scraped tweets and the Germeval 
-dataset with 0.93 accuracy score, 168 True Negative and 57 True Positive 
-predictions.
-If we consider the aspects detected in the tweets on top of that the best result 
-will be achieved with the 
-% base_german_cased model, 
-posttrained with unlabelled 
-scraped tweets. Here we have an accuracy score of 0.92, 166 True Negative and 57 
-True Positive predictions. 
-Noticeable is that the additional consideration of aspect terms leads to only a 
-minimal increase of prediction goodness for almost all of the models (with 
-exception of BGCD). 
-However, we can state that the application of BERT and its variants results in 
-satisfactory outcome in classifying tweets into positive and negative categories 
-for both Sentiment Analysis and Aspect Based Sentiment Analysis tasks. 
+\begin{table}[H]
+  \small
+  \begin{tabular}{l|r|r|r|r|r|r|r|r|}
+    \cline{2-9}
+    & \multicolumn{4}{c|}{\textbf{ABSA}} & \multicolumn{4}{c|}{\textbf{SA}} 
+    \\ \cline{2-9} 
+    &
+    \multicolumn{1}{r|}{\textbf{GC}} &
+    \multicolumn{1}{r|}{\textbf{GC-G}} &
+    \multicolumn{1}{r|}{\textbf{GC-T}} &
+    \multicolumn{1}{r|}{\textbf{GCD}} &
+    \multicolumn{1}{r|}{\textbf{GC}} &
+    \multicolumn{1}{r|}{\textbf{GC-G*}} &
+    \multicolumn{1}{r|}{\textbf{GC-T*}} &
+    \multicolumn{1}{r|}{\textbf{GCD*}} \\ 
+    \hline
+    \multicolumn{1}{|l|}{accuracy} & 0.893 & 0.905 & \cellcolor{lightgray} 
+    \textbf{0.918} & 0.889 
+    & 0.889 & 0.901 & 0.905 & \cellcolor{lightgray} \textbf{0.926} \\ 
+    \hline
+    \multicolumn{1}{|l|}{F1 score} & 0.803 & 0.816 & \cellcolor{lightgray} 
+    \textbf{0.851} & 0.791 
+    & 0.794 & 0.821 & 0.827 & \cellcolor{lightgray} \textbf{0.864} \\ 
+    \hline
+    \multicolumn{1}{|l|}{TN} & 164.000 & \textbf{169.000} & 
+    \cellcolor{lightgray} 166.000 & 165.000 & 
+    164.000 & 164.000 & 165.000 & \cellcolor{lightgray} \textbf{168.000} \\ 
+    \hline
+    \multicolumn{1}{|l|}{TP} & 53.000 & 51.000 & \cellcolor{lightgray} 
+    \textbf{57.000} & 51.000 & 
+    52.000 & 55.000 & 55.000 & \cellcolor{lightgray} \textbf{57.000} \\ 
+    \hline
+    \multicolumn{1}{|l|}{FN} & 14.000 & 16.000 & \cellcolor{lightgray} 
+    \textbf{10.000} & 16.000 & 
+    15.000 & 12.000 & 12.000 & \cellcolor{lightgray} \textbf{10.000} \\ 
+    \hline
+    \multicolumn{1}{|l|}{FP} & 12.000 & \textbf{7.000} & \cellcolor{lightgray} 
+    10.000 & 11.000 & 
+    12.000 & 12.000 & 11.000 & \cellcolor{lightgray} \textbf{8.000} \\ 
+    \hline
+    \end{tabular}
+  \caption[Results for BERT variants]{Results for BERT variants, where \\
+  GC = \texttt{bert-base-german-cased}, \\
+  GC-G = \texttt{bert-base-german-cased} post-trained with GermEval data \\
+  GC-T = \texttt{bert-base-german-cased} post-trained with unlabeled tweets, and 
+  \\
+  GCD = \texttt{bert-base-german-dbmdz-cased}.\\
+  Asterisks indicate additional fine-tuning with GermEval data; best performance 
+  achievements are marked bold; overall best learner per task is marked gray.}
+  \label{tab_res_bert}
+\end{table}
 
-\color{black}
+The BERT-based classifiers clearly outperform the standard ML solutions (and 
+thus the random baseline) and also achieve fairly good results in 
+absolute terms.
+For the document-level sentiment analysis, 
+\texttt{bert-base-german-dbmdz-cased} with additional fine-tuning on the 
+GermEval data emerges as the overall best classifier with top results across 
+all metrics and 92.6\% accuracy.
+Regarding the ABSA task, \texttt{bert-base-german-cased} post-trained on the 
+pool of unlabeled tweets performs best with only slightly lower accuracy of 
+91.8\%.
+
+The experiments confirm what the standard ML results have already suggested: 
+the additional consideration of aspects, or topics, leads to a marginal increase 
+of predictive power at best and does not quite justify the procedural and 
+computational overhead.
+However, we can conclude that the application of BERT and its variants indeed 
+results in satisfactory outcome in classifying tweets into positive and negative 
+categories for both document-level sentiment analysis and ABSA tasks. 

@@ -166,6 +166,7 @@ Ludwig-Maximilians-Universität München
   NLP & natural language processing \\
   NSP & next sentence prediction \\
   POS & part of speech \\
+  RNN & recurrent neural network \\
   STM & structural topic model \\
   TN & true negative \\
   TP & true positive \\
@@ -186,11 +187,11 @@ Ludwig-Maximilians-Universität München
 %   $0$ & $s$-dimensional zero vector
 % \end{tabular}
 
-\vspace{3cm}
+\vfill
 
 \listoffigures
 
-\vspace{3cm}
+\vfill
 
 \listoftables
 

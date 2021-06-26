@@ -381,3 +381,5 @@ metrics <- list(
 
 evaluation <- benchmark_results$aggregate(metrics)[
   , .(learner_id, acc, f_1, tn, tp, fn, fp)]
+
+round(evaluation[, .(acc, f_1, tn, tp, fn, fp)], 3L)
