@@ -173,9 +173,9 @@ Ludwig-Maximilians-Universität München
   TSSA & topic-specific sentiment analysis
 \end{tabular}
 
-\vspace{3cm}
+\vspace{2cm}
 \listoffigures
-\vspace{3cm}
+\vspace{2cm}
 \listoftables
 
 \newpage
@@ -223,14 +223,14 @@ Ludwig-Maximilians-Universität München
 % FIXME make page numbering dynamic (picking up from list of tables page)
 % \getpagerefnumber{listoftables} does not work
 
-\setcounter{page}{5}
+\setcounter{page}{4}
 
 \appendix
 
-\section{Appendix}
-\label{app}
+% \section{Appendix}
+% \label{app}
 % \input{chapters/appendix.Rnw}
-\newpage
+% \newpage
 
 \section{Electronic appendix}
 \label{el_app}

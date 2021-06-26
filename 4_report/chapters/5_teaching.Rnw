@@ -8,7 +8,7 @@ shall help practitioners acquire the basic methodology of text processing.
 Everything is available on a public website\footnote{
 \url{https://lisa-wm.github.io/nlp-twitter-r-bert/}
 }.
-The material is composed as a coherent online course, largely following the 
+The material is composed as an online course, largely following the 
 analytical steps reported above, with some omissions so as not to overload the 
 scope.
 \\

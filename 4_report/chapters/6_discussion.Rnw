@@ -1,4 +1,66 @@
-Possible explanation for topics worsening results: make task more complex 
-rather than aid it
+\textbf{Analytical proposal.}
+Regarding the results from the TSSA experiments, we note that the standard ML 
+solution, with or without topic modeling component, cannot outperform a 
+purely random classifier.
+This might be due to a variety of reasons.
+First and foremost, the Twitter data are not exactly easy to handle: their 
+extreme brevity and particular origin with a mixture of social media 
+idiosyncrasies and political context, as discussed in section \ref{challenges}, 
+make their classification a rather challenging task to begin with.
+The limited amount of training data aggravates the situation further.
+Then, a number of design decisions might be responsible for the poor 
+results.
+These include, among others, using the STM for topic modeling (and a particular 
+topical prevalence formula at that), our choice of learning algorithms, and the 
+entire pipeline structure with tuning procedures and hyperparameter 
+configuration spaces in combination with a rather small tuning budget.
+There is certainly ample room for improvement in these areas.
+The near-randomness of the learners' discriminating ability, however, suggests 
+that the classification features are the most probable culprit.
+It simply appears that they bear no information as to whether a tweet
+has positive or negative sentiment.
+This leads us to the conclusion that, in the particular setting of our analysis 
+and for the given data, standard ML approaches are not well applicable to 
+sentiment classification.
+Nonetheless, the exhaustive feature engineering these methods demand -- as 
+opposed to the BERT variants -- has given rise to plenty of teaching material.
+Therefore, while the explored methods might not have succeeded in the task at 
+hand, they may still be useful in other applications.
 
-maybe pre-defined word embeddings would have helped
+
+For the DL-based solutions the picture is quite different.
+We have achieved satisfactory performance with variants of BERT for both 
+document-level sentiment analysis and ABSA tasks, suggesting that the vastly 
+higher complexity of the Transformer models is actually necessary here.
+Possibly as result of our small training corpus, we note that additional 
+fine-tuning/post-training helps to improve predictive performance.
+Our key finding is that the incorporation of aspects does not help sentiment 
+classification.
+While we still hold on to our initial assumptions that the expression of 
+sentiment may vary substantially across different contexts, and thus sentiment 
+analysis should be able to benefit from topic modeling, this does not seem to be 
+the case for the given task.
+One reason for this behavior might be that the additional information from 
+aspects is set off by the increased complexity of the task.
+Mostly, however, it seems that aspect identification is difficult for our 
+Twitter data.
+During the annotation process we noted how many texts can hardly be allocated to 
+a particular topic even by human judgment, and selecting an actual token from 
+the text to indicate the aspect is downright impossible.
+This phenomenon can be attributed to the dynamics of political discussion on 
+Twitter: tweets are generally issued quite ad-hoc in response to some current 
+event, where the topic is clear to the audience with no need to name it 
+explicitly.
+Sentiment analysis for this kind of data should therefore perhaps resort to 
+alternative methods of incorporating topical context.
+\\
+
+\textbf{Knowledge transfer.}
+Feedback from the live workshop held with the teaching material we have 
+developed suggests that the material is generally helpful for getting started 
+with NLP.
+It also confirmed our own experience that the covered topics might be too much 
+content for two days, especially for less experienced participants.
+We would therefore recommend a more generous time frame for future teaching 
+units, but still prefer to keep the material as exhaustive so they remain 
+accessible without the need for additional instruction.
