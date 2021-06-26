@@ -1,0 +1,12 @@
+\subsection{Data}
+\label{data}
+
+% ------------------------------------------------------------------------------
+
+\subsection{Standard machine learning solution}
+\label{ml}
+
+% ------------------------------------------------------------------------------
+
+\subsection{Deep learning solution}
+\label{dl}

@@ -1,0 +1,31 @@
+\begin{frame}{General theoretical context}
+
+\begin{figure}
+\begin{center}
+    \includegraphics[width = \textwidth]{figures/schema_tssa.jpg}
+\end{center}
+\caption{\raggedright Adopted and modified from \citet{minpark2016}}
+\end{figure}
+
+\vfill 
+\large
+$\rightarrow$ \textbf{Topic-specific sentiment analysis}
+
+\end{frame}
+
+% ------------------------------------------------------------------------------
+
+\begin{frame}{General theoretical context}
+
+\begin{itemize}
+  \item Social media: constant stream of publicly available \textbf{text data}
+  \item \textbf{Twitter} established as a medium for political discourse and 
+  constant source of information  
+  \item Frequently resurfacing \textbf{research questions:}
+  \begin{itemize}
+    \item Which \highlight{topics} are being addressed?
+    \item What kind of \highlight{sentiment} is expressed about these topics? 
+  \end{itemize}  
+\end{itemize}
+
+\end{frame}

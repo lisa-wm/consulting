@@ -9,7 +9,7 @@
 % \usepackage{lmodern}
 % \usefonttheme{structurebold}
 \RequirePackage[T1]{fontenc}
-\RequirePackage[scaled = 0.9]{helvet} 
+\RequirePackage[scaled = 1]{helvet} 
 
 \definecolor{primary}{RGB}{64, 64, 64}
 \definecolor{secondary}{RGB}{128, 128, 128}
@@ -56,26 +56,26 @@
 
 % \setbeamertemplate{sections/subsections in toc}[]
 \setbeamertemplate{section in toc}{
-  \large
-  \hspace{2.5em}
+  \small
+  \hspace{1em}
   \color{black}\textbf{\inserttocsectionnumber}
-  \hspace{1.5em}
+  \hspace{0.5em}
   \color{black}\textbf{\inserttocsection}
 }
 \setbeamertemplate{subsection in toc}{
   \vspace{0.5em}
-  \large
+  \small
   \textbf{
-  \hspace{1.6em} 
-  \color{highlight}\textbf{\inserttocsubsectionnumber}
-  \hspace{1em}
+  \hspace{2.2em} 
+  \color{black}\textbf{\inserttocsubsectionnumber}
+  \hspace{0.5em}
   \color{black}\textbf{\inserttocsubsection} \\}
 }
 
 \makeatletter
 \patchcmd{\beamer@sectionintoc}
   {\vfill}
-  {\vskip 2\itemsep}
+  {\vskip -1\itemsep}
   {}
   {}
 \makeatother
@@ -99,7 +99,7 @@
 	\vspace{2em}
 	{
 	% \hspace{-1em}
-	\textbf{\huge{\thesection \hspace{1em} 
+	\textbf{\Large{\thesection \hspace{1em} 
 	\MakeUppercase{\insertframetitle}}}
 	{\hfill} \rule[
 	-1\baselineskip]{0pt}{\baselineskip}}
@@ -152,7 +152,7 @@
 		\begin{beamercolorbox}[wd = 1.02\paperwidth, sep = 12pt
 		%, center
 		]{titlebox1}	
-		{\Large \bfseries \inserttitle}
+		{\large \bfseries \inserttitle}
 
 		\vspace{12pt}
 		\insertsubtitle
@@ -166,7 +166,7 @@
 	  
 	  \ifx\inserttitlegraphic\empty
 	    \hfill \hfill
-	    \begin{beamercolorbox}[right, wd = 0.6\paperwidth, sep = 6pt
+	    \begin{beamercolorbox}[right, wd = 0.7\paperwidth, sep = 6pt
 		  %, center
 		  ]{titlebox2}	
 		  {\insertauthor ~ $\mid$ ~ \insertdate}
@@ -202,7 +202,7 @@
   
   \color{black}{\fontsize{100}{0}\selectfont \textbf{\thesection}}
   \color{black}
-  \Huge{\textbf{\MakeUppercase{~~~ \secname}}}
+  \large{\textbf{\MakeUppercase{~~~ \secname}}}
   
   % \vfill
   % 
