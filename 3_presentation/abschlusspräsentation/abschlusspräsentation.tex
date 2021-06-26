@@ -29,9 +29,19 @@
 \newcommand{\highlight}[1]{\textcolor{highlight}{\textbf{#1}}}
 \newcommand{\maketriangle}{\textcolor{highlight}{$\blacktriangleleft$}}
 
+\newcommand{\N}{\mathbb{N}}
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\setd}{\{1, 2, \dots, D\}}
+\newcommand{\setk}{\{1, 2, \dots, K\}}
+\newcommand{\setv}{\{1, 2, \dots, V\}}
+
 \let\OLDitemize\itemize
 \renewcommand\itemize{
 \OLDitemize\setlength{\itemsep}{0.5em}\setlength{\parskip}{1em}}
+
+\let\OLDenumerate\enumerate
+\renewcommand\enumerate{
+\OLDenumerate\setlength{\itemsep}{0.5em}\setlength{\parskip}{1em}}
 
 % ------------------------------------------------------------------------------
 % TITLE PAGE -------------------------------------------------------------------
@@ -109,9 +119,10 @@ tweets by German MPs}
 \vfill
 
 \RaggedRight
-\small
+\footnotesize
 \bibliography{bibliography}
 \bibliographystyle{dcu} %dcu
+\nocite{*}
 
 \end{frame}
 

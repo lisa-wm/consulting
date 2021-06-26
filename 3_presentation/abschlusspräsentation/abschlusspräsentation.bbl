@@ -1,8 +1,211 @@
 \begin{thebibliography}{xx}
 
+\harvarditem{Aggarwal}{2018}{aggarwal2018}
+Aggarwal, C.~C.  \harvardyearleft 2018\harvardyearright .
+\newblock {\em Machine Learning for Text}, Springer.
+
+\harvarditem{Benoit \harvardand\ Matsuo}{2020}{pkgspacyr}
+Benoit, K. \harvardand\ Matsuo, A.  \harvardyearleft 2020\harvardyearright .
+\newblock {\em spacyr: Wrapper to the 'spaCy' 'NLP' Library}.
+\newblock R package version 1.2.1.
+\newline\harvardurl{https://CRAN.R-project.org/package=spacyr}
+
+\harvarditem[Benoit et~al.]{Benoit, Watanabe, Wang, Nulty, Obeng, Müller,
+  Matsuo, Lowe \harvardand\ Müller}{2021}{pkgquanteda}
+Benoit, K., Watanabe, K., Wang, H., Nulty, P., Obeng, A., Müller, S., Matsuo,
+  A., Lowe, W. \harvardand\ Müller, C.  \harvardyearleft 2021\harvardyearright
+  .
+\newblock {\em quanteda: Quantitative Analysis of Textual Data}.
+\newblock R package version 3.0.0.
+\newline\harvardurl{https://CRAN.R-project.org/package=quanteda}
+
+\harvarditem{Bishop}{2006}{bishop2006}
+Bishop, C.~M.  \harvardyearleft 2006\harvardyearright .
+\newblock {\em Pattern Recognition and Machine Learning}, Springer.
+
+\harvarditem[Blei et~al.]{Blei, Ng \harvardand\ Jordan}{2003}{bleietal2003}
+Blei, D.~M., Ng, A.~Y. \harvardand\ Jordan, M.~I.  \harvardyearleft
+  2003\harvardyearright .
+\newblock Latent dirichlet allocation, {\em Journal of Machine Learning
+  Research} {\bf 3}:~993--1022.
+
+\harvarditem[Breiman et~al.]{Breiman, Friedman, Olshen \harvardand\
+  Stone}{1984}{breimanetal1984}
+Breiman, L., Friedman, J.~H., Olshen, R.~J. \harvardand\ Stone, C.~J.
+  \harvardyearleft 1984\harvardyearright .
+\newblock {\em Classification and Regression Trees}, Chapman \& Hall/CRC.
+
+\harvarditem[Devlin et~al.]{Devlin, Chang, Lee \harvardand\
+  Toutanova}{2018}{devlinetal2018}
+Devlin, J., Chang, M., Lee, K. \harvardand\ Toutanova, K.  \harvardyearleft
+  2018\harvardyearright .
+\newblock {BERT:} pre-training of deep bidirectional transformers for language
+  understanding, {\em CoRR} {\bf abs/1810.04805}.
+\newline\harvardurl{http://arxiv.org/abs/1810.04805}
+
+\harvarditem[Devlin et~al.]{Devlin, Chang, Lee \harvardand\
+  Toutanova}{2019}{devlin2019}
+Devlin, J., Chang, M.-W., Lee, K. \harvardand\ Toutanova, K.  \harvardyearleft
+  2019\harvardyearright .
+\newblock Bert: Pre-training of deep bidirectional transformers for language
+  understanding.
+
+\harvarditem{Feurer \harvardand\ Hutter}{2019}{feurerhutter2019}
+Feurer, M. \harvardand\ Hutter, F.  \harvardyearleft 2019\harvardyearright .
+\newblock Hyperparameter optimization, {\em in} F.~Hutter, L.~Kotthoff
+  \harvardand\ J.~Vanschoren (eds), {\em Automated Machine Learning. Methods,
+  Systems, Challenges}, Springer, pp.~3--34.
+
+\harvarditem[Goodfellow et~al.]{Goodfellow, Bengio \harvardand\
+  Courville}{2016}{goodfellowetal2016}
+Goodfellow, I., Bengio, Y. \harvardand\ Courville, A.  \harvardyearleft
+  2016\harvardyearright .
+\newblock {\em Deep Learning}, MIT Press.
+\newblock \url{http://www.deeplearningbook.org}.
+
+\harvarditem[Hastie et~al.]{Hastie, Qian \harvardand\
+  Tay}{2021}{hastieetal2021}
+Hastie, T., Qian, J. \harvardand\ Tay, K.  \harvardyearleft
+  2021\harvardyearright .
+\newblock An introduction to glmnet.
+
+\harvarditem{Japkowicz \harvardand\ Shah}{2011}{japkowiczshah2011}
+Japkowicz, N. \harvardand\ Shah, M.  \harvardyearleft 2011\harvardyearright .
+\newblock {\em Evaluating Learning Algorithms. A Classification Perspective},
+  Cambridge University Press.
+
+\harvarditem[Lang et~al.]{Lang, Binder, Richter, Schratz, Pfisterer, Coors, Au,
+  Casalicchio, Kotthoff \harvardand\ Bischl}{2019}{pkgmlr3}
+Lang, M., Binder, M., Richter, J., Schratz, P., Pfisterer, F., Coors, S., Au,
+  Q., Casalicchio, G., Kotthoff, L. \harvardand\ Bischl, B.  \harvardyearleft
+  2019\harvardyearright .
+\newblock {mlr3}: A modern object-oriented machine learning framework in {R},
+  {\em Journal of Open Source Software} .
+\newline\harvardurl{https://joss.theoj.org/papers/10.21105/joss.01903}
+
+\harvarditem{Lindsey}{1997}{lindsey1997}
+Lindsey, J.~K.  \harvardyearleft 1997\harvardyearright .
+\newblock {\em Applying Generalized Linear Models}, Springer.
+
+\harvarditem{Louppe}{2014}{louppe2014}
+Louppe, G.  \harvardyearleft 2014\harvardyearright .
+\newblock {\em Understanding Random Forests. From Theory to Practice}, PhD
+  thesis, University of Liege.
+
 \harvarditem{Min \harvardand\ Park}{2016}{minpark2016}
 Min, S. \harvardand\ Park, J.  \harvardyearleft 2016\harvardyearright .
 \newblock Mapping out narrative structures and dynamics using networks and
   textual information.
+
+\harvarditem{Murphy}{2021}{Murphy2021}
+Murphy, K.~P.  \harvardyearleft 2021\harvardyearright .
+\newblock {\em Probabilistic Machine Learning: An Introduction}, MIT Press.
+
+\harvarditem{Pan \harvardand\ Yang}{2010}{panetal2010}
+Pan, S.~J. \harvardand\ Yang, Q.  \harvardyearleft 2010\harvardyearright .
+\newblock A survey on transfer learning, {\em IEEE Transactions on Knowledge
+  and Data Engineering} {\bf 22}(10):~1345--1359.
+
+\harvarditem{Pavlopoulos}{2014}{pavlopoulos2014}
+Pavlopoulos, I.  \harvardyearleft 2014\harvardyearright .
+\newblock {\em Aspect-Based Sentiment Analysis}, PhD thesis, Athens University
+  of Economics and Business.
+
+\harvarditem[Pennington et~al.]{Pennington, Socher \harvardand\
+  Manning}{2014}{penningtonetal2014}
+Pennington, J., Socher, R. \harvardand\ Manning, C.  \harvardyearleft
+  2014\harvardyearright .
+\newblock {G}lo{V}e: Global vectors for word representation, {\em Proceedings
+  of the 2014 Conference on Empirical Methods in Natural Language Processing
+  ({EMNLP})}, Association for Computational Linguistics, Doha, Qatar,
+  pp.~1532--1543.
+\newline\harvardurl{https://www.aclweb.org/anthology/D14-1162}
+
+\harvarditem{{R Core Team}}{2021}{rsoftware}
+{R Core Team}  \harvardyearleft 2021\harvardyearright .
+\newblock {\em R: A Language and Environment for Statistical Computing}, R
+  Foundation for Statistical Computing, Vienna, Austria.
+
+\harvarditem{Richardson}{2007}{richardson2007}
+Richardson, L.  \harvardyearleft 2007\harvardyearright .
+\newblock {\em Beautiful Soup Documentation}.
+
+\harvarditem[Roberts et~al.]{Roberts, Stewart \harvardand\
+  Airoldi}{2016}{robertsetal2016}
+Roberts, M.~E., Stewart, B.~M. \harvardand\ Airoldi, E.~M.  \harvardyearleft
+  2016\harvardyearright .
+\newblock A model of text for experimentation in the social sciences, {\em
+  Journal of the American Statistical Association} {\bf 111}(515):~988--1003.
+
+\harvarditem[Roberts et~al.]{Roberts, Stewart, Tingley \harvardand\
+  Airoldi}{2013}{robertsetal2013}
+Roberts, M., Stewart, B., Tingley, D. \harvardand\ Airoldi, E.
+  \harvardyearleft 2013\harvardyearright .
+\newblock The structural topic model and applied social science, {\em Advances
+  in Neural Information Processing Systems Workshop on Topic Models},
+  pp.~1--20.
+
+\harvarditem[Roberts et~al.]{Roberts, Stewart, Tingley \harvardand\
+  Benoit}{2020}{pkgstm}
+Roberts, M., Stewart, B., Tingley, D. \harvardand\ Benoit, K.  \harvardyearleft
+  2020\harvardyearright .
+\newblock {\em stm: Estimation of the Structural Topic Model}.
+\newblock R package version 1.3.6.
+\newline\harvardurl{https://CRAN.R-project.org/package=stm}
+
+\harvarditem{Roesslein}{2020}{roesslein2020}
+Roesslein, J.  \harvardyearleft 2020\harvardyearright .
+\newblock {\em Tweepy: Twitter for Python!}
+
+\harvarditem{Ruder}{2019}{ruder2019}
+Ruder, S.  \harvardyearleft 2019\harvardyearright .
+\newblock {\em Neural Transfer Learning for Natural Language Processing}, PhD
+  thesis, National University of Ireland, Galway.
+
+\harvarditem{Schulze \harvardand\ Wiegrebe}{2020}{schulzewiegrebe2020}
+Schulze, P. \harvardand\ Wiegrebe, S.  \harvardyearleft 2020\harvardyearright .
+\newblock Twitter in the parliament - a text-based analysis of german political
+  entities, {\em Technical report}, Ludwig-Maximilians-Universität, Munich.
+
+\harvarditem[Selivanov et~al.]{Selivanov, Bickel \harvardand\
+  Wang}{2020}{pkgtext2vec}
+Selivanov, D., Bickel, M. \harvardand\ Wang, Q.  \harvardyearleft
+  2020\harvardyearright .
+\newblock {\em text2vec: Modern Text Mining Framework for R}.
+\newblock R package version 0.6.
+\newline\harvardurl{https://CRAN.R-project.org/package=text2vec}
+
+\harvarditem{van Rossum \harvardand\ Drake}{2011}{python}
+van Rossum, G. \harvardand\ Drake, F.~L.  \harvardyearleft
+  2011\harvardyearright .
+\newblock {\em The Python Language Reference Manual}, Network Theory Ltd.
+
+\harvarditem[Vaswani et~al.]{Vaswani, Shazeer, Parmar, Uszkoreit, Jones, Gomez,
+  Kaiser \harvardand\ Polosukhin}{2017}{vaswanietal2017}
+Vaswani, A., Shazeer, N., Parmar, N., Uszkoreit, J., Jones, L., Gomez, A.~N.,
+  Kaiser, L. \harvardand\ Polosukhin, I.  \harvardyearleft
+  2017\harvardyearright .
+\newblock Attention is all you need, {\em CoRR} {\bf abs/1706.03762}.
+\newline\harvardurl{http://arxiv.org/abs/1706.03762}
+
+\harvarditem{Vayansky \harvardand\ Kumar}{2020}{vayanskykumar2020}
+Vayansky, I. \harvardand\ Kumar, S.~A.  \harvardyearleft 2020\harvardyearright
+  .
+\newblock A review of topic modeling methods, {\em Information Systems} {\bf
+  94}.
+
+\harvarditem[Xu et~al.]{Xu, Liu, Shu \harvardand\ Yu}{2019}{xuetal2019}
+Xu, H., Liu, B., Shu, L. \harvardand\ Yu, P.~S.  \harvardyearleft
+  2019\harvardyearright .
+\newblock Post-training for review reading comprehension and aspect-based
+  sentiment analysis, {\em Proceedings of NAACL-HLT}, Minneapolis, USA,
+  p.~2324–2335.
+
+\harvarditem[Zhang et~al.]{Zhang, Lipton, Li \harvardand\
+  Smola}{2020}{zhang2020}
+Zhang, A., Lipton, Z.~C., Li, M. \harvardand\ Smola, A.~J.  \harvardyearleft
+  2020\harvardyearright .
+\newblock {\em Dive into Deep Learning}.
+\newblock \url{https://d2l.ai}.
 
 \end{thebibliography}

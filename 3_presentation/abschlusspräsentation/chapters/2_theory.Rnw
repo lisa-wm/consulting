@@ -15,17 +15,70 @@ $\rightarrow$ \textbf{Topic-specific sentiment analysis}
 
 % ------------------------------------------------------------------------------
 
-\begin{frame}{General theoretical context}
+\begin{frame}{Topic modeling: idea}
 
 \begin{itemize}
-  \item Social media: constant stream of publicly available \textbf{text data}
-  \item \textbf{Twitter} established as a medium for political discourse and 
-  constant source of information  
-  \item Frequently resurfacing \textbf{research questions:}
+  \item \textbf{Goal}: discover latent semantic structures in a corpus \& group 
+  documents into topical clusters with characteristic topic-word distributions
   \begin{itemize}
-    \item Which \highlight{topics} are being addressed?
-    \item What kind of \highlight{sentiment} is expressed about these topics? 
+    \item Exploratory tool $\rightarrow$ unsupervised learning task
+    \item Means of dimensionality reduction
+  \end{itemize}
+  \item For each document $d \in \setd$, assign a topic label $k \in \setk$
+  \begin{itemize}
+    \item $K$: key \textbf{hyperparameter}
+    \item Interpretability up to human practitioner
   \end{itemize}  
 \end{itemize}
+
+\end{frame}
+
+% ------------------------------------------------------------------------------
+
+\begin{frame}{Topic modeling: taxonomy}
+
+\begin{figure}
+\begin{center}
+    \includegraphics[width = \textwidth]{figures/tm_taxonomy}
+\end{center}
+\caption{\raggedright Source: own representation, published on
+\url{https://lisa-wm.github.io/nlp-twitter-r-bert/}}
+\end{figure}
+
+\end{frame}
+
+% ------------------------------------------------------------------------------
+
+\begin{frame}{Topic modeling: generative approaches}
+
+\textbf{Idea:} reverse-engineer the imaginative process of document generation
+with hierarchical Bayesian mixture models
+
+\vfill
+
+\begin{enumerate}
+  \item For each document $d \in \setd$, draw a vector of topic proportions 
+  from some assumed distribution
+  \item For each word position $n \in \{1, 2, \dots, N_d\}$, $N_d \in \N$,
+  \begin{itemize}
+    \item[1] draw a topic assignment from the distribution associated with the 
+    document-specific topic proportions
+    \item[2] draw a word from the distribution associated with the topic
+  \end{itemize}  
+\end{enumerate}
+
+\end{frame}
+
+% ------------------------------------------------------------------------------
+
+\begin{frame}{Topic modeling: generative approaches}
+
+\begin{figure}
+\begin{center}
+    \includegraphics[width = \textwidth]{figures/schema_generative_tm}
+\end{center}
+\caption{\raggedright Source: own representation, published on
+\url{https://lisa-wm.github.io/nlp-twitter-r-bert/}}
+\end{figure}
 
 \end{frame}
