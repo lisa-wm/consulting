@@ -217,3 +217,30 @@
 
 \mode
 <all> 
+
+
+\AtBeginSubsection[]{
+
+  % \setbeamercolor{background canvas}{bg = primary}
+  
+  \begin{frame}[plain, noframenumbering]{}
+
+  \vfill \vfill
+  
+  \color{black}{\fontsize{50}{0}\selectfont \textbf{\thesection.\thesubsection}}
+  \color{black}
+  \large{\textbf{\MakeUppercase{~~~ \subsecname}}}
+  
+  % \vfill
+  % 
+  % \logo{\includegraphics[height = 1.5cm]{
+  % figures/sigillum.png}\hspace{-12pt}\vspace{-12pt}
+  % }
+
+  \end{frame}
+
+  % \setbeamercolor{background canvas}{bg = white}
+}
+
+\mode
+<all> 

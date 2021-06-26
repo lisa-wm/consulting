@@ -4,7 +4,7 @@
 \begin{center}
     \includegraphics[width = \textwidth]{figures/schema_tssa.jpg}
 \end{center}
-\caption{\raggedright Adopted and modified from \citet{minpark2016}}
+\caption{\raggedright adopted and modified from \citet{minpark2016}}
 \end{figure}
 
 \vfill 
@@ -41,7 +41,7 @@ $\rightarrow$ \textbf{Topic-specific sentiment analysis}
 \begin{center}
     \includegraphics[width = \textwidth]{figures/tm_taxonomy}
 \end{center}
-\caption{\raggedright Source: own representation, published on
+\caption{\raggedright own representation, published on
 \url{https://lisa-wm.github.io/nlp-twitter-r-bert/}}
 \end{figure}
 
@@ -77,7 +77,7 @@ with hierarchical Bayesian mixture models
 \begin{center}
     \includegraphics[width = \textwidth]{figures/schema_generative_tm}
 \end{center}
-\caption{\raggedright Source: own representation, published on
+\caption{\raggedright own representation, published on
 \url{https://lisa-wm.github.io/nlp-twitter-r-bert/}}
 \end{figure}
 

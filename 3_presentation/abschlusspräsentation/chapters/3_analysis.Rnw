@@ -3,6 +3,163 @@
 
 % ------------------------------------------------------------------------------
 
+\begin{frame}{Data collection: web scraping}
+
+\textbf{Idea:} collect tweets by members of the German parliament 
+(\textit{Bundestag}) issued after the last federal election in September 2017
+
+\vfill
+
+\begin{enumerate}
+  \setlength{\itemsep}{-0.3em}
+  \setlength{\parskip}{0.3em}
+  \item Gather MPs' names and basic information from the official Bundestag 
+  website
+  \item Find Twitter account names
+  \item Acquire socioeconomic information for the time of the last federal 
+  election on a per-district level
+  \item Scrape actual tweets along with some additional variables
+\end{enumerate}
+
+\vfill
+
+$\rightarrow ~ $\textbf{Manual labeling process}
+
+\end{frame}
+
+% ------------------------------------------------------------------------------
+
+\begin{frame}{Data collection: web scraping}
+
+\begin{figure}
+  \raggedright
+  \includegraphics[width = 0.3\textwidth]{figures/screenshot_amthor}
+\caption{\raggedright url{https://www.bundestag.de/abgeordnete/}}
+\end{figure}
+
+\begin{figure}
+  \raggedright
+  \includegraphics[width = 0.6\textwidth]{figures/screenshot_andi}
+\caption{\raggedright \url{https://www.twitter.com/}}
+\end{figure}
+
+\end{frame}
+
+% ------------------------------------------------------------------------------
+
+\begin{frame}{Data labeling}
+
+\begin{itemize}
+  \item For each tweet: assign polarities \highlight{positive} or 
+  \highlight{negative}, and also  \highlight{topic} descriptions required for 
+  BERT's ABSA task
+  \item Note: large number of tweets with no apparent sentiment, aspect 
+  detection often difficult
+  \item Class label distribution: \highlight{72\%} negative labels
+\end{itemize}
+
+\vfill
+
+\tiny
+  \begin{tabular}{l|l|l|l|r|r|l}
+  \texttt{username} & \texttt{party} & \texttt{created\_at} & \texttt{text} & 
+  \texttt{followers} & \texttt{unemployment\_rate} & \texttt{label}\\
+  \hline
+  karl\_lauterbach & spd & 2019-12-01 09:44:00 & "Die Wahl ..." & 337001 & 8.5 & 
+  negative\\
+  \hline
+  Martin\_Hess\_AfD & afd & 2018-08-17 07:15:00 & "Vor den ..." & 6574 & 3.5 &
+  negative\\
+  \hline
+  BriHasselmann & gruene & 2019-09-25 15:35:00 & "Ich finde ..." & 20299 & 8.6 
+  & positive\\
+  \hline
+  danielakolbe & spd & 2020-05-12 06:05:00 & "Aber verpflichtend ..." & 8158 & 
+  8.3 & negative\\
+  \hline
+  JuergenBraunAfD & afd & 2020-08-13 22:05:00 & "Panik-Latif + ..." & 3188 & 
+  3.4 & negative\\
+\end{tabular}
+
+\end{frame}
+
+% ------------------------------------------------------------------------------
+
+\begin{frame}{Data: distribution over time}
+
+\begin{figure}[H]
+  \includegraphics[width = \textwidth]{figures/obs_over_time}
+\end{figure}
+
+\vfill
+
+Periodical fluctuations in the number of tweets over time and a general 
+upward-sloping trend
+
+\end{frame}
+
+% ------------------------------------------------------------------------------
+
+\begin{frame}{Data: distribution across parties}
+
+\begin{figure}[H]
+  \includegraphics[width = \textwidth]{figures/obs_per_party}
+\end{figure}
+
+\vfill
+
+Observations per party in labeled training data (left) and entire scraped data 
+example (right), both depicted against seat distribution in current parliament
+
+\end{frame}
+
+% ------------------------------------------------------------------------------
+
+\begin{frame}{Data pre-processing}
+
+\begin{itemize}
+  \item \textbf{Basic text cleaning:} transcription of German umlauts and 
+  ligature s into standard-Latin characters and removal of non-informative 
+  symbols 
+  \item \textbf{Twitter-specific preparation:} identification, separate storage 
+  and subsequent removal of special characters (i.e., hashtags, emojis and user 
+  tags)
+\end{itemize}
+
+\vfill
+
+\fbox{\begin{minipage}{0.9\textwidth}
+Wir gedenken Willy Brandt, der heute vor 28 Jahren, am 8. Oktober 1992, 
+verstarb. Mit seinen Reformen in der Sozial-, Bildungs- und Rechtspolitik hat 
+er innenpolitisch neue \highlight{Massstaebe} gesetzt. 
+\highlight{Kniefall Friedensnobelpreis 
+mehrdemokratiewagen spd willybrandt}
+\end{minipage}}
+
+\end{frame}
+
+% ------------------------------------------------------------------------------
+
+\begin{frame}{Data challenges}
+
+\begin{itemize}
+  \item \textbf{Language-specific:} many approaches predominantly 
+  tailored to English
+  \begin{itemize}
+    \item[$\rightarrow$] possible complications with regards to German grammar 
+    and syntax
+  \end{itemize}
+  \item \textbf{Twitter-specific:} limit of 280 characters; no explicit 
+  mentioning of the event or topical entity the author is referring to; 
+  informal language style
+  \item \textbf{Context-specific:} requirement of domain knowledge within 
+  political context (specific vocabulary); sarcasm and irony
+\end{itemize}
+
+\end{frame}
+
+% ------------------------------------------------------------------------------
+
 \subsection{Standard machine learning solution}
 \label{ml}
 
