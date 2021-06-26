@@ -60,6 +60,5 @@ applications.
 We have made the material available for both live teaching purposes and 
 self-study on a public \href{https://lisa-wm.github.io/nlp-twitter-r-bert/}
 {website}.
-First experiences from a live workshop held in April/May 2021 for researchers 
-from the Department of Political Science at LMU will be discussed in section 
-\ref{discussion}.
+First experiences from a live workshop held in April/May 2021 will be discussed 
+in section \ref{discussion}.

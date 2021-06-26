@@ -278,6 +278,7 @@ the purpose of computing topic-specific embeddings (\textit{dynamic features}),
 selecting an appropriate learning algorithm with included tuning step, and 
 returning a trained model.
 Designing the process this way is beneficial for several reasons:
+\newpage
 
 \begin{enumerate}
   \item \textbf{Dichotomy between train and test sphere.} Topic-specific 
@@ -361,6 +362,7 @@ and include the following features:
   Emojis are treated analogously, albeit without the discrimination between 
   degrees of sentiment, using an emoji polarity list accumulated by 
   \citet{kraljetal2015}.
+  \newpage
   
   \item \textbf{Twitter variables.} We make use of the additional information 
   provided by the Twitter API and note for each tweet the number of likes and 
@@ -436,6 +438,7 @@ Such an approach is also conceivable but not further pursued here.
 The STM can be expressed by the following generative process\footnote{
 We adopt the notation from \citet{schulzewiegrebe2020} for consistency.
 } for each document $d \in \setd$ \citep{robertsetal2016}:
+\newpage
 
 \begin{enumerate}
 
@@ -618,7 +621,6 @@ performance in many applications \citep{louppe2014}.
 Logistic regression is a special case of generalized linear regression where 
 the predictor is linear in the parameters but transformed by a 
 possibly non-linear link function \citep{lindsey1997}.
-
 Consider the feature matrix $\bm{X} = [\bm{x}_d^T]_{d = 1, 2, \dots, D} 
 \in \mathcal{X} \subset \R^{D \times p}$ and let $\bm{y} \in \{0, 1\}^D$ denote 
 the binary sentiment target.
@@ -632,15 +634,14 @@ usually at a cut-off value of 50\%.
 By application of the logit transformation we obtain the linear 
 predictor $\gamma_0 + \bm{\gamma}^T\bm{x}_d = \log 
 \tfrac{\pi(\bm{x}_d)}{1 - \pi(\bm{x}_d)}$.
-
 Here, $(\gamma_0, \bm{\gamma})$ is estimated by minimizing a penalized version 
 of the negative log-likelihood.
 The additive elastic net penalty balances absolute and quadratic regularization
 in a hybrid of LASSO and Ridge regression. 
 Regularization causes shrinkage in the coefficients (typically not affecting the 
 intercept) and leads to the following optimization problem, where 
-$\lambda \geq 0$ and $\alpha \in [0, 1]$ are hyperparameters that need to be 
-tuned \citep{hastieetal2021}:
+$\lambda \geq 0$ and $\alpha \in [0, 1]$ are hyperparameters 
+\citep{hastieetal2021}:
 
 \begin{equation*}
     \min_{(\gamma_0, \bm{\gamma}) \in \R^{p + 1}} - \frac{1}{n} \sum_{d = 1}^D
@@ -879,7 +880,7 @@ gathered information on the feature-target relationship will be of use
 nonetheless.
 Much like in human learning processes we can presume a certain amount of 
 abstraction.
-It is precisely this migration of previous knowledge that is at the heart of 
+It is precisely this knowledge migration that is at the heart of 
 transfer learning \citep{Murphy2021}.
 
 As discussed before, the abundance of data is in stark contrast to the scarcity
@@ -898,8 +899,6 @@ fine-tuning step, this knowledge (i.e., the parameter values learned during
 training the source model) is then applied to a new, purpose-specific context to 
 learn a certain task and vocabulary \citep{devlin2019}.
 \\
-
-\color{black}
 
 \textbf{Attention mechanism.} Moreover, Transformer-based architectures avoid 
 processing text data sequentially, as a \textit{recurrent neural network (RNN)}
@@ -961,6 +960,7 @@ The inputs have to be of identical length, where the maximum length of an input
 sequence can be 512 tokens. 
 Shorter inputs are filled with padding tokens and longer ones are truncated 
 \citep{devlin2019}.
+\newpage
 
 % ------------------------------------------------------------------------------
 
@@ -1250,11 +1250,12 @@ all metrics and 92.6\% accuracy.
 Regarding the ABSA task, \texttt{bert-base-german-cased} post-trained on the 
 pool of unlabeled tweets performs best with only slightly lower accuracy of 
 91.8\%.
+\newpage
 
 The experiments confirm what the standard ML results have already suggested: 
 the additional consideration of aspects, or topics, leads to a marginal increase 
 of predictive power at best and does not quite justify the procedural and 
 computational overhead.
-However, we can conclude that the application of BERT and its variants indeed 
+However, we can conclude that the application of BERT and its variants 
 results in satisfactory outcome in classifying tweets into positive and negative 
 categories for both document-level sentiment analysis and ABSA tasks. 

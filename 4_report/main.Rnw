@@ -173,26 +173,9 @@ Ludwig-Maximilians-Universität München
   TSSA & topic-specific sentiment analysis
 \end{tabular}
 
-% \vfill
-% 
-% \Large
-% \noindent
-% \textbf{List of Symbols}
-% \vspace{0.5cm} \\
-% \noindent
-% \normalsize
-% 
-% \begin{tabular}{rl}
-%   $A$ & identity matrix with $s^2$ entries  \\
-%   $0$ & $s$-dimensional zero vector
-% \end{tabular}
-
-\vfill
-
+\vspace{3cm}
 \listoffigures
-
-\vfill
-
+\vspace{3cm}
 \listoftables
 
 \newpage
