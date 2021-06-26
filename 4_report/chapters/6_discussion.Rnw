@@ -27,7 +27,6 @@ opposed to the BERT variants -- has given rise to plenty of teaching material.
 Therefore, while the explored methods might not have succeeded in the task at 
 hand, they may still be useful in other applications.
 
-
 For the DL-based solutions the picture is quite different.
 We have achieved satisfactory performance with variants of BERT for both 
 document-level sentiment analysis and ABSA tasks, suggesting that the vastly 
@@ -64,3 +63,4 @@ content for two days, especially for less experienced participants.
 We would therefore recommend a more generous time frame for future teaching 
 units, but still prefer to keep the material as exhaustive so they remain 
 accessible without the need for additional instruction.
+\newpage

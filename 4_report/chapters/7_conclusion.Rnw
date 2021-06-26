@@ -1,1 +1,18 @@
-foo
+We have explored two fundamentally different approaches toward sentiment 
+classification of tweets by German MPs with special regard to topical context.
+First, we cast the problem as tabular classification task, to be solved with 
+standard machine learning algorithms, and modeled the relation between topics 
+and sentiment with topic-specific word embeddings.
+Second, we employed language models from the field of deep Transformers by 
+training several variants of the widely applied BERT architecture.
+Our studies suggest the vastly higher complexity of the BERT-based models is 
+actually necessary to achieve satisfactory results in topic-specific 
+sentiment analysis of the data at hand.
+We collected the broad variety of techniques encountered in the course of these 
+studies to form an extensive pool of teaching material.
+This collection has been prepared as a coherent course and made available 
+online, where it will remain to be used for self-study and instruction purposes.
+With this, we hope to make the analysis of text data in political studies more 
+accessible to fellow practitioners.
+Active research has greatly advanced the NLP field in recent years and will 
+certainly continue to do so, boding well for progress across all disciplines.

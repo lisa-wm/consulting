@@ -105,7 +105,7 @@ Ludwig-Maximilians-Universität München
 
 \vfill
 
-\textcolor{red}{Munich, month day\textsuperscript{th}, 2021}
+Munich, July 12\textsuperscript{th}, 2021
       
 \vfill
 
@@ -133,13 +133,24 @@ Ludwig-Maximilians-Universität München
 \pagenumbering{Roman}
 \newpage
 
-\Large
-\noindent
-\textbf{Abstract}
-\vspace{0.5cm} \\
-\noindent
-\normalsize
-\input{chapters/0_abstract.Rnw}
+\begin{abstract}
+
+New data sources offer vast potential for studying public opinion in the 
+political environment.
+We perform sentiment analysis for tweets by German MPs issued since the last 
+federal election in September 2017 with special regard to topical context.
+The contribution of this work is twofold: first, we explore how such analysis 
+can be conducted with either standard machine learning approaches for tabular 
+data or complex BERT-based deep learning solutions, and second, we provide 
+extensive material for instructing fellow researchers in the applied techniques.
+Our results suggest that casting the problem at hand as a standard machine 
+learning task is not fruitful, whereas BERT-based models yield satisfactory 
+results for sentiment analysis
+We further note that topic modeling does not aid classification in this 
+application but attribute this largely to the difficulty of topic extraction.
+
+\end{abstract}
+
 \newpage
 
 \tableofcontents
