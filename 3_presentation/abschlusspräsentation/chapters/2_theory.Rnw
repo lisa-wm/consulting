@@ -82,3 +82,51 @@ with hierarchical Bayesian mixture models
 \end{figure}
 
 \end{frame}
+
+% ------------------------------------------------------------------------------
+
+\begin{frame}{Sentiment analysis}
+
+\begin{itemize}
+  \item \textbf{Goal}: assign sentiment labels to documents - in our case, out
+  of $\{\text{positive, negative}\}$, formalized as $y \in \mathcal{Y} = 
+  \{0, 1\}$
+  \item Standard \textbf{classification} task 
+  \item Find $f: \mathcal{X} \rightarrow \R^g$, $\mathcal{X} \subseteq \R^p$ 
+  for $p \in \N$
+  \item Methods considered:
+  \begin{itemize}
+    \item Standard ML: random forests \& regularized logistic regression
+    \item BERT: fine-tuning to sentiment analysis
+  \end{itemize}  
+\end{itemize}
+
+\end{frame}
+
+% ------------------------------------------------------------------------------
+
+\begin{frame}{Topic-specific sentiment analysis}
+
+\begin{itemize}
+  \item \textbf{Idea:} combine topic modeling \& sentiment analysis
+  \item Subsequent modeling mostly due to the complexity 
+  of joint models 
+  % $\leftrightarrow$ goal of making text analysis accessible to 
+  % a broader audience
+  \item Standard ML:
+  \begin{itemize}
+    \setlength{\itemsep}{-0.3em}
+    \setlength{\parskip}{0.3em}
+    \item Build clusters of tweets based on topic modeling
+    \item Use clusters to generate topic-specific word embeddings
+  \end{itemize}    
+  \item BERT:
+  \begin{itemize}
+    \setlength{\itemsep}{-0.3em}
+    \setlength{\parskip}{0.3em}
+    \item Aspect-based sentiment analysis (ABSA)
+    \item Aspect extraction \& aspect sentiment classification
+  \end{itemize}  
+\end{itemize}
+
+\end{frame}
