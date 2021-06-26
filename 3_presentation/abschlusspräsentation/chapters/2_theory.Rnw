@@ -85,14 +85,6 @@ with hierarchical Bayesian mixture models
 
 % ------------------------------------------------------------------------------
 
-\begin{frame}{Structural topic model}
-
-wip
-
-\end{frame}
-
-% ------------------------------------------------------------------------------
-
 \begin{frame}{Sentiment analysis}
 
 \begin{itemize}

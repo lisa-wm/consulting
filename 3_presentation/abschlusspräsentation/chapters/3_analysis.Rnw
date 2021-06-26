@@ -89,6 +89,7 @@ $\rightarrow ~ $\textbf{Manual labeling process}
 
 \begin{figure}[H]
   \includegraphics[width = \textwidth]{figures/obs_over_time}
+  \caption{\raggedright tweet issuance over time}
 \end{figure}
 
 \vfill
@@ -104,6 +105,7 @@ upward-sloping trend
 
 \begin{figure}[H]
   \includegraphics[width = \textwidth]{figures/obs_per_party}
+  \caption{\raggedright tweet issuance across parties}
 \end{figure}
 
 \vfill
@@ -162,6 +164,40 @@ mehrdemokratiewagen spd willybrandt}
 
 \subsection{Standard machine learning solution}
 \label{ml}
+
+% ------------------------------------------------------------------------------
+
+\begin{frame}{Analytical concept}
+
+\begin{minipage}[t]{0.5\textwidth}
+  Conceptualization as analytical \textbf{pipeline}
+  \vspace{0.5cm}
+  \begin{itemize}
+    \item[$\rightarrow$] Exchangeability of components 
+    \item[$\rightarrow$] Usability as integrated object
+    \item[$\rightarrow$] Preserving train-test dichotomy
+    \item[$\rightarrow$] Seamlessly integrated in \texttt{mlr3}
+  \end{itemize}
+\end{minipage}%
+\begin{minipage}[t]{0.05\textwidth}
+  \phantom{foo}
+\end{minipage}%
+\begin{minipage}[t]{0.45\textwidth}
+  \begin{figure}[H]
+    \includegraphics[width = \textwidth]{figures/supervised_learning_schema}
+    \caption{\citet{mlr3book}}
+  \end{figure}
+\end{minipage}%
+
+\end{frame}
+
+% ------------------------------------------------------------------------------
+
+\begin{frame}{Structural topic model}
+
+wip
+
+\end{frame}
 
 % ------------------------------------------------------------------------------
 

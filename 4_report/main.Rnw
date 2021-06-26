@@ -43,7 +43,6 @@ bindingoffset = 0mm]{geometry}
     \fontsize{8}{11}\selectfont
 }
 
-\usepackage{refcount}
 \usepackage[hang, flushmargin, bottom]{footmisc} 
 \usepackage{hyperref}
 \hypersetup{

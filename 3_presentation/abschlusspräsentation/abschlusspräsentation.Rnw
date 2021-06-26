@@ -7,6 +7,7 @@
 \logo{\includegraphics[height = 1cm, width = 1cm]{figures/sigillum.png}
 \vspace{-4em} \hspace{0.2em}}
 \setbeamertemplate{footline}[infoline]
+\setbeamertemplate{caption}[numbered]
 
 \usepackage{caption}
 \captionsetup[figure]{font=tiny, labelfont=tiny}
@@ -23,6 +24,7 @@
 % \usepackage{amsmath}
 % \usepackage{amsthm}
 \usepackage{xcolor}
+\usepackage{refcount}
 
 \newcommand{\prim}[1]{\textcolor{primary}{\textbf{#1}}}  
 \newcommand{\secnd}[1]{\textcolor{secondary}{\textbf{#1}}}  
@@ -77,7 +79,7 @@ tweets by German MPs}
 \begin{frame}[noframenumbering]{}
 
 \vspace{1.5em}
-\Large{\textbf{REFERENCES}}
+\Large{\textbf{OUTLINE}}
 
 \vfill
 \vfill
@@ -104,7 +106,7 @@ tweets by German MPs}
 \label{transfer}
 \input{chapters/4_transfer.Rnw}
 
-\section{Discussion}
+\section{Conclusion}
 \label{discussion}
 \input{chapters/5_discussion.Rnw}
 

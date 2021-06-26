@@ -4,6 +4,14 @@
 Aggarwal, C.~C.  \harvardyearleft 2018\harvardyearright .
 \newblock {\em Machine Learning for Text}, Springer.
 
+\harvarditem[Becker et~al.]{Becker, Binder, Bischl, Lang, Pfisterer, Reich,
+  Richter, Schratz \harvardand\ Sonabend}{2021}{mlr3book}
+Becker, M., Binder, M., Bischl, B., Lang, M., Pfisterer, F., Reich, N.~G.,
+  Richter, J., Schratz, P. \harvardand\ Sonabend, R.  \harvardyearleft
+  2021\harvardyearright .
+\newblock mlr3 book.
+\newline\harvardurl{https://mlr3book.mlr-org.com}
+
 \harvarditem{Benoit \harvardand\ Matsuo}{2020}{pkgspacyr}
 Benoit, K. \harvardand\ Matsuo, A.  \harvardyearleft 2020\harvardyearright .
 \newblock {\em spacyr: Wrapper to the 'spaCy' 'NLP' Library}.
