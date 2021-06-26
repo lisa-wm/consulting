@@ -41,8 +41,8 @@ content and the \texttt{tweepy} library \citep{roesslein2020} for accessing the
 official Twitter API.
 For more details on the procedure and the large data base assembled in the 
 predecessor project please refer to \citet{schulzewiegrebe2020}; the code is 
-fully submitted in our electronic appendix and a somewhat more compact demo may 
-be found among the teaching material.
+fully submitted in our electronic appendix and a somewhat more compact 
+demonstration may be found among the teaching material.
 \\
 
 \textbf{Data labeling.}

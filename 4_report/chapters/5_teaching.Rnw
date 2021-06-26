@@ -1,6 +1,60 @@
+In the course of our analysis we have employed a multitude of techniques 
+that find application in NLP tasks. 
+Many of these are universal and not limited to Twitter data or sentiment 
+analysis, making them part of a basic toolkit any NLP researcher might use at 
+some point.
+We have therefore assembled a broad collection of teaching material that 
+shall help practitioners acquire the basic methodology of text processing.
+Everything is available on a public website\footnote{
+\url{https://lisa-wm.github.io/nlp-twitter-r-bert/}
+}.
+The material is composed as a coherent online course, largely following the 
+analytical steps reported above, with some omissions so as not to overload the 
+scope.
+\\
 
+\textbf{Scope.}
+The course is organized in three blocks: an introductory part, NLP with 
+\texttt{R}, and NLP with BERT.
+In the first block we give a general overview on NLP and point out key 
+challenges, present the working data -- the same corpus we have worked on 
+for the above analyses -- and introduce the most important text processing 
+objects in \texttt{quanteda}, which we use heavily for the \texttt{R} part.
 
+The \texttt{R} block comprises three sub-chapters.
+In the first of these, we begin by teaching basic web scraping, as this is 
+often preliminary to the actual analysis, and proceed with fundamental text 
+processing tools, such as handling regular expressions and normalization 
+techniques. 
+Static feature extraction, comprising most of the quantities described in 
+section \ref{tssa_ml_feat}, concludes this first hands-on part.
+Topic modeling is discussed in the subsequent sub-chapter, where the focus is 
+mostly on the STM. 
+The last part is concerned with collecting the previously extracted features 
+into a classification task and performing the actual sentiment analysis.
+We also include some general background on ML and demonstrate visualization 
+options for results.
+Lastly, we show how to use BERT for sentiment analysis.
+This block briefly touches upon theoretical foundations of deep learning and 
+Transformer models, but focuses more on practical implementation.
+\\
 
+\textbf{Media.}
+We use a mixture of different media in the attempt to to strike a balance 
+between theoretical and practical contents.
+All blocks contain, to varying extent, the following materials:
 
+\begin{tight_enumerate}
+  \item slides introducing the topics to be covered in the respective part,
+  \item code demonstrations giving first examples,
+  \item exercises (with solutions) offering the opportunity for practical 
+  application, and
+  \item additional sources for more in-depth study.
+\end{tight_enumerate}
 
-\color{red}
+A first two-day live workshop already took place in April/May 2021.
+We were careful, however, to design the material in a self-contained way, with 
+exhaustive explanations, so it may be used without additional instructions.
+With this, we hope to support researchers that are new to NLP to get familiar 
+with a basic foundation of relevant techniques. 
+\newpage
