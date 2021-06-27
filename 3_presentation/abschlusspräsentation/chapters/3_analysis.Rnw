@@ -417,3 +417,129 @@ wip
 
 \subsection{Deep learning solution}
 \label{dl}
+
+% ------------------------------------------------------------------------------
+
+\begin{frame}{Deep transfer learning with BERT}
+
+\highlight{B}i-directional \highlight{E}ncoder \highlight{R}epresentation 
+from \highlight{T}ransformers \citep{devlinetal2018}
+
+\vfill 
+
+\textbf{Transfer learning}
+
+\begin{itemize}
+  \setlength{\itemsep}{-0.3em}
+  \setlength{\parskip}{0.3em}
+  \item Problem: generalization ability no longer reliable when train \& 
+  prediction data do not follow the same distribution
+  (few labels, domain shift)
+  \item Idea: first train a model on an original task and domain, then 
+  \textbf{transfer} knowledge to target task and domain 
+  \item Allowing for use of \textbf{pre-trained} models, e.g, provided by 
+  \texttt{huggingface} Transformers library, that are then \textbf{fine-tuned} 
+  to a specific task
+\end{itemize}
+
+\vfill 
+
+\textbf{Attention mechanism}
+
+\begin{itemize}
+  \setlength{\itemsep}{-0.3em}
+  \setlength{\parskip}{0.3em}
+  \item Avoid processing textual data sequentially 
+  \item Allow for more parallelization and access to all hidden network states
+\end{itemize}
+
+\end{frame}
+
+% ------------------------------------------------------------------------------
+
+\begin{frame}{Input pre-processing}
+
+\begin{figure}
+  \raggedright
+  \includegraphics[width = 0.7\textwidth, trim = 0 30 30 0, clip]{
+  figures/bert_tokens}
+\end{figure}
+
+\vfill
+
+\begin{itemize}
+  \setlength{\itemsep}{-0.3em}
+  \setlength{\parskip}{0.3em}
+  \item Token embeddings from model-specific tokenization
+  \item Segment embeddings: 0 for A and 1 for B
+  \item Position embeddings indicating the position of each token in the 
+  sentence
+\end{itemize}
+
+\end{frame}
+
+% ------------------------------------------------------------------------------
+
+\begin{frame}{Pre-training}
+
+\textbf{Idea:} self-supervised training on large corpora without need for labels
+
+\vfill
+
+Task 1: \textbf{masked language modeling (MLM)}
+\\
+
+$\rightarrow$ mask words and have BERT predict them without considering 
+positioning
+
+\vfill
+
+\fbox{\begin{minipage}{0.9\textwidth}
+\raggedright
+[CLS] Die Ausgrenzung von \highlight{[MASK]} von der \#EssenerTafel 
+ist inakzeptabel und \highlight{[MASK]}. [SEP]
+Wir dürfen nicht zulassen, dass die \highlight{[MASK]} gegeneinander 
+ausgespielt werden. [SEP]
+\end{minipage}}
+
+\end{frame}
+
+% ------------------------------------------------------------------------------
+
+\begin{frame}{Pre-training}
+
+Task 2: \textbf{next sentence prediction}
+\\
+
+$\rightarrow$ predict if the second sentence in a pair is the 
+subsequent one in the original
+
+\vfill
+
+\fbox{\begin{minipage}{0.9\textwidth}
+\raggedright
+\textbf{Sentence A:} [CLS] Die Ausgrenzung von \highlight{[MASK]} von der 
+\#EssenerTafel 
+ist inakzeptabel und \highlight{[MASK]}. [SEP]
+\\
+\textbf{Sentence B:} Wir dürfen nicht zulassen, dass die \highlight{[MASK]} 
+gegeneinander 
+ausgespielt werden. [SEP]
+\\
+\textbf{Label:} IsNextSentence
+\end{minipage}}
+
+\vfill
+
+\fbox{\begin{minipage}{0.9\textwidth}
+\raggedright
+\textbf{Sentence A:} [CLS] Die Ausgrenzung von \highlight{[MASK]} von der 
+\#EssenerTafel 
+ist inakzeptabel und \highlight{[MASK]}. [SEP]
+\\
+\textbf{Sentence B:} Freue mich sehr für ihn und auf die Zusammenarbeit. [SEP]
+\\
+\textbf{Label:} IsNextSentence
+\end{minipage}}
+
+\end{frame}
