@@ -435,8 +435,7 @@ Defining a topical content variable (a single, categorical one is supported in
 the STM implementation \citep{pkgstm}) allows for topic-word distributions to 
 vary for its different levels.
 Such an approach is also conceivable but not further pursued here.
-The STM can be expressed by the following generative process\footnote{
-We adopt the notation from \citet{schulzewiegrebe2020} for consistency.
+The STM can be expressed by the following generative process.
 } for each document $d \in \setd$ \citep{robertsetal2016}:
 \newpage
 

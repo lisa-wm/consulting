@@ -241,56 +241,137 @@ $\rightarrow$ \textbf{Difference important in resampling processes}
 \begin{frame}{Dynamic features}
 
 \begin{minipage}[c]{0.6\textwidth}
-  % \begin{itemize}
-  %   \item 
-    \textbf{Idea:} capture topical context by topic-specific word embeddings
-  % \end{itemize}
+  \textbf{Idea:} capture topical context by computing a set of word embeddings
+  for each topic cluster
 \end{minipage}%
 \begin{minipage}[c]{0.15\textwidth}
   \phantom{foo}
 \end{minipage}%
 \begin{minipage}[c]{0.25\textwidth}
-  % \begin{figure}[H]
-  %   \raggedright
-    \includegraphics[width = 0.8\textwidth]{figures/blockmatrix_tm}
-  %   \caption{\raggedright own representation, published on
-  %   \url{https://lisa-wm.github.io/nlp-twitter-r-bert/}}
-  % \end{figure}
+  \includegraphics[width = 0.8\textwidth]{figures/blockmatrix_tm}
 \end{minipage}%
 
-\vfill
+\vspace{1cm}
 
 \begin{itemize}
-    % \item \textbf{Idea:} capture topical context by topic-specific word embeddings
-    \item Topic modeling with \highlight{structural topic model (STM)} proposed by 
-    \citet{robertsetal2013}
-    \item Embeddings with \highlight{GloVe} \citep{penningtonetal2014}
-  \end{itemize}
+  \item Topic modeling with \highlight{structural topic model}
+  \citep{robertsetal2013}
+  \begin{itemize}
+    \item[$\rightarrow$] Additional consideration of document-level meta 
+    variables
+  \end{itemize} 
+  \item Embeddings with \highlight{GloVe} \citep{penningtonetal2014}
+\end{itemize}
 
-% \begin{itemize}
-%   \item \textbf{Idea:} capture topical context by topic-specific word embeddings
-%   \item Topic modeling with \highlight{structural topic model (STM)} proposed by 
-%   \citet{robertsetal2013}
-%   \item Embeddings with \highlight{GloVe} \citep{penningtonetal2014}
-% \end{itemize}
-% 
-% \vfill
-% 
-% \begin{figure}[H]
-%   \raggedright
-%   \includegraphics[width = 0.3\textwidth]{figures/blockmatrix_tm}
-%   \caption{\raggedright own representation, published on
-%   \url{https://lisa-wm.github.io/nlp-twitter-r-bert/}}
-% \end{figure}
-% 
 \end{frame}
-
 
 % ------------------------------------------------------------------------------
 
-\begin{frame}{Structural topic model}
+\begin{frame}{Structural topic model (STM)}
 
-wip
+\begin{itemize}
+  \item Generative model based on latent Dirichlet allocation (LDA, 
+  \citet{bleietal2003})
+  \item Recall: characterization of topics by individual topic-word 
+  distributions
+  \item Two key enhancements:
+  \begin{itemize}
+    \item Allowing for inter-topic \textbf{correlations}
+    \item Incorporating document-level \textbf{meta data}, either as 
+    \highlight{topical prevalence} formula or as \textbf{topical content} 
+    variables
+  \end{itemize}  
+\end{itemize}
+
+\vfill
+
+\texttt{. $\sim$ party + bundesland + s(unemployment) + s(pop\_migration)}
+
+\end{frame}
+
+% ------------------------------------------------------------------------------
+
+\begin{frame}{Structural topic model (STM)}
+
+\begin{enumerate}
+
+  \item Draw non-normalized topic proportions 
+  $\bm{\eta_d} \sim$ \highlight{$\mathcal{N}_{K - 1}(
+  \bm{\Gamma}^T\bm{x}_d^T, \bm{\Sigma})$}.
+  
+  \item Normalize $\bm{\eta_d}$ through a softmax operation, 
+  yielding $\bm{\theta}_d$ with $\theta_{d, k} = \frac{\exp(\eta_{d, k})}{
+  \sum_{j = 1}^K \exp(\eta_{d, j})} \in [0, 1]$, $k \in \setk$. 
+  
+  \item For each word position $n \in \{ 1, 2, \dots, N_d \}$:
+  
+  \begin{itemize}
+    \item[1] Draw $\bm{z}_{d, n} \sim \mathit{Multinomial}(\bm{\theta}_d)$ to 
+    assign the $n$-th position to a topic. 
+    \item[2] Draw a word $w_{d, n}$ from the word distribution corresponding to the 
+    assigned topic: $w_{d, n} \sim \mathit{Multinomial}(\bm{\beta}(d, n))$.
+  \end{itemize}
+  
+\end{enumerate}
+
+\end{frame}
+
+% ------------------------------------------------------------------------------
+
+\begin{frame}{Word embeddings}
+
+\begin{itemize}
+  \item \textbf{Goal:} model semantic importance of words in dense numeric 
+  representation
+  \item Also achieved by bag-of-words (BOW) approach, but with high 
+  dimensionality
+  \item Dimensionality reduction by embedding observations into low-dimensional 
+  latent space
+  \begin{itemize}
+    \setlength{\itemsep}{-0.3em}
+    \setlength{\parskip}{0.3em}
+    \item Characterize words by their surrounding context
+    \item Find latent dimensions
+    \item Similar meaning = similar representation in the vector space
+  \end{itemize}  
+\end{itemize}
+
+\end{frame}
+
+% ------------------------------------------------------------------------------
+
+\begin{frame}{Word embeddings}
+
+\textbf{GloVe:} Global Vectors
+
+% \vspace{0.3cm}
+
+\begin{minipage}[t]{0.55\textwidth}
+  \begin{itemize}
+    \setlength{\itemsep}{-0.2em}
+    \item Based on word co-occurrence matrix
+    \item Neighborhood relations between words
+    \item Defined via window size %(symmetric or asymmetric)
+    \item Underlying assumption: stronger relationship between close-lying
+    words
+  \end{itemize}
+\end{minipage}%
+\begin{minipage}[t]{0.1\textwidth}
+  \phantom{foo}
+\end{minipage}%
+\begin{minipage}[t]{0.35\textwidth}
+  \begin{figure}
+    \raggedright
+    \includegraphics[width = 0.9\textwidth]{figures/embedding_example}
+  \caption{\raggedright \url{
+  https://towardsdatascience.com/the-magic-behind-embedding-models-c3af62f71fb}}
+  \end{figure}
+\end{minipage}%
+  
+\vfill
+
+\footnotesize
+The \fbox{quick \textbf{brown} \highlight{fox} \textbf{jumps} over} the lazy dog.
 
 \end{frame}
 
