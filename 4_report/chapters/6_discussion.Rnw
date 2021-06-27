@@ -19,10 +19,15 @@ The near-randomness of the learners' discriminating ability, however, suggests
 that the classification features are the most probable culprit.
 It simply appears that they bear no information as to whether a tweet
 has positive or negative sentiment.
+This insight is not all that surprising when we recall the naive, BOW-induced 
+way of handling, say, negation statements.
+Developing more sophisticated solutions for these problems, however, requires 
+such an effort that it calls the very merit of the simple ML approach into 
+question.
 This leads us to the conclusion that, in the particular setting of our analysis 
-and for the given data, standard ML approaches are not well applicable to 
+and for the given data, standard ML techniques are not well applicable to 
 sentiment classification.
-Nonetheless, the exhaustive feature engineering these methods demand -- as 
+Nonetheless, the exhaustive feature engineering these methods entail -- as 
 opposed to the BERT variants -- has given rise to plenty of teaching material.
 Therefore, while the explored methods might not have succeeded in the task at 
 hand, they may still be useful in other applications.

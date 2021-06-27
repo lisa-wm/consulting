@@ -122,7 +122,7 @@ example (right), both depicted against seat distribution in current parliament
 \begin{itemize}
   \item \textbf{Basic text cleaning:} transcription of German umlauts and 
   ligature s into standard-Latin characters and removal of non-informative 
-  symbols 
+  symbols
   \item \textbf{Twitter-specific preparation:} identification, separate storage 
   and subsequent removal of special characters (i.e., hashtags, emojis and user 
   tags)
@@ -190,6 +190,101 @@ mehrdemokratiewagen spd willybrandt}
 \end{minipage}%
 
 \end{frame}
+
+% ------------------------------------------------------------------------------
+
+\begin{frame}{Feature extraction}
+
+\begin{minipage}[t]{0.55\textwidth}
+  We discern two stages of feature extraction:
+  \vspace{0.5cm}
+  \begin{enumerate}
+    \item \textbf{Static features:} all quantities that may be derived from a 
+    single observation
+    \item \textbf{Dynamic features:} quantities that are computed across a range 
+    of observations
+  \end{enumerate}
+\end{minipage}%
+\begin{minipage}[t]{0.05\textwidth}
+  \phantom{foo}
+\end{minipage}%
+\begin{minipage}[t]{0.4\textwidth}
+  \begin{figure}[H]
+    \includegraphics[width = \textwidth]{figures/schema_feat_extr}
+    \caption{\raggedright own representation, published on
+    \url{https://lisa-wm.github.io/nlp-twitter-r-bert/}}
+  \end{figure}
+\end{minipage}%
+
+\vfill 
+$\rightarrow$ \textbf{Difference important in resampling processes}
+
+\end{frame}
+
+% ------------------------------------------------------------------------------
+
+\begin{frame}{Static features}
+
+\begin{itemize}
+  \item \textbf{Lexicon-based polarity:} counts of positive / negative 
+  terms and emojis
+  \item \textbf{Twitter variables:} hashtags, retweets, \dots
+  \item \textbf{Syntactic features:} intensification, negation
+  \item \textbf{Character unigrams:} number of respective character occurrences
+  \item \textbf{Part-of-speech (POS) tags:} number of adjectives, nouns, \dots
+\end{itemize}
+
+\end{frame}
+
+% ------------------------------------------------------------------------------
+
+\begin{frame}{Dynamic features}
+
+\begin{minipage}[c]{0.6\textwidth}
+  % \begin{itemize}
+  %   \item 
+    \textbf{Idea:} capture topical context by topic-specific word embeddings
+  % \end{itemize}
+\end{minipage}%
+\begin{minipage}[c]{0.15\textwidth}
+  \phantom{foo}
+\end{minipage}%
+\begin{minipage}[c]{0.25\textwidth}
+  % \begin{figure}[H]
+  %   \raggedright
+    \includegraphics[width = 0.8\textwidth]{figures/blockmatrix_tm}
+  %   \caption{\raggedright own representation, published on
+  %   \url{https://lisa-wm.github.io/nlp-twitter-r-bert/}}
+  % \end{figure}
+\end{minipage}%
+
+\vfill
+
+\begin{itemize}
+    % \item \textbf{Idea:} capture topical context by topic-specific word embeddings
+    \item Topic modeling with \highlight{structural topic model (STM)} proposed by 
+    \citet{robertsetal2013}
+    \item Embeddings with \highlight{GloVe} \citep{penningtonetal2014}
+  \end{itemize}
+
+% \begin{itemize}
+%   \item \textbf{Idea:} capture topical context by topic-specific word embeddings
+%   \item Topic modeling with \highlight{structural topic model (STM)} proposed by 
+%   \citet{robertsetal2013}
+%   \item Embeddings with \highlight{GloVe} \citep{penningtonetal2014}
+% \end{itemize}
+% 
+% \vfill
+% 
+% \begin{figure}[H]
+%   \raggedright
+%   \includegraphics[width = 0.3\textwidth]{figures/blockmatrix_tm}
+%   \caption{\raggedright own representation, published on
+%   \url{https://lisa-wm.github.io/nlp-twitter-r-bert/}}
+% \end{figure}
+% 
+\end{frame}
+
 
 % ------------------------------------------------------------------------------
 
