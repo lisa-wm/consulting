@@ -34,7 +34,7 @@ $\rightarrow ~ $\textbf{Manual labeling process}
 \begin{figure}
   \raggedright
   \includegraphics[width = 0.3\textwidth]{figures/screenshot_amthor}
-\caption{\raggedright url{https://www.bundestag.de/abgeordnete/}}
+\caption{\raggedright \url{https://www.bundestag.de/abgeordnete/}}
 \end{figure}
 
 \begin{figure}
@@ -85,7 +85,7 @@ $\rightarrow ~ $\textbf{Manual labeling process}
 
 % ------------------------------------------------------------------------------
 
-\begin{frame}{Data: distribution over time}
+\begin{frame}{Data distribution over time}
 
 \begin{figure}[H]
   \includegraphics[width = \textwidth]{figures/obs_over_time}
@@ -101,7 +101,7 @@ upward-sloping trend
 
 % ------------------------------------------------------------------------------
 
-\begin{frame}{Data: distribution across parties}
+\begin{frame}{Data distribution across parties}
 
 \begin{figure}[H]
   \includegraphics[width = \textwidth]{figures/obs_per_party}
@@ -344,8 +344,6 @@ $\rightarrow$ \textbf{Difference important in resampling processes}
 
 \textbf{GloVe:} Global Vectors
 
-% \vspace{0.3cm}
-
 \begin{minipage}[t]{0.55\textwidth}
   \begin{itemize}
     \setlength{\itemsep}{-0.2em}
@@ -372,6 +370,46 @@ $\rightarrow$ \textbf{Difference important in resampling processes}
 
 \footnotesize
 The \fbox{quick \textbf{brown} \highlight{fox} \textbf{jumps} over} the lazy dog.
+
+\end{frame}
+
+% ------------------------------------------------------------------------------
+
+\begin{frame}{AutoML pipeline}
+
+Implementation as \texttt{mlr3} \textbf{graph learner}
+
+\begin{minipage}[t]{0.65\textwidth}
+  \begin{itemize}
+    \setlength{\itemsep}{-0.2em}
+    \item Input: text + static features
+    \item Computation of topic-specific embeddings 
+    \item Choice between random forest and logistic regression with elastic net 
+    penalty
+    \item Tuning over associated configuration spaces
+  \end{itemize}
+\end{minipage}%
+\begin{minipage}[t]{0.05\textwidth}
+  \phantom{foo}
+\end{minipage}%
+\begin{minipage}[t]{0.3\textwidth}
+  \begin{figure}
+    \raggedright
+    \includegraphics[width = \textwidth]{figures/graph}
+  \end{figure}
+\end{minipage}%
+
+\vfill
+
+$\rightarrow$ \textbf{Train, predict, resample, tune, benchmark}
+
+\end{frame}
+
+% ------------------------------------------------------------------------------
+
+\begin{frame}{Results}
+
+wip
 
 \end{frame}
 
