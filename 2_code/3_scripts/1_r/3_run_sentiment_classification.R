@@ -360,7 +360,7 @@ benchmark_design = mlr3::benchmark_grid(
   learners = learners_with_baseline,
   resamplings = resampling_strategy_outer)
 
-set.seed(1L)
+set.seed(123L)
 benchmark_results <- mlr3::benchmark(benchmark_design, store_models = TRUE)
 
 save_rdata_files(
