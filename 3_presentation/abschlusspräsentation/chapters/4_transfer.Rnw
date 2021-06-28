@@ -56,7 +56,7 @@ Regular expressions & \multicolumn{1}{l|}{Intro deep learning \& BERT}
 \\ \hline
 Basic text cleaning & \multicolumn{1}{l|}{TSSA with BERT} \\ \hline
 Static feature extraction  & \\ \cline{1-1}
-Topic modeling &  \\ \cline{1-1}
+Topic modeling (including guest talk) &  \\ \cline{1-1}
 \end{tabular}
 \end{table}
 
