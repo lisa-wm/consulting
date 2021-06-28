@@ -340,4 +340,7 @@ tweets_corpus_features <- tweets_corpus
 quanteda::docvars(tweets_corpus_features) <- as.data.frame(
   tweets_features_static[data_dt, on = "doc_id"])
 
-save_rdata_files(tweets_corpus_features, folder = "2_code/1_data/2_tmp_data")
+save_rdata_files(
+  tweets_corpus_features, 
+  folder = "2_code/1_data/2_tmp_data",
+  tmp = FALSE)

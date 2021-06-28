@@ -17,7 +17,11 @@ resampling_strategy_outer <- mlr3::rsmp("cv", folds = 3L)
 
 # Load data
 
-load_rdata_files(tweets_corpus_features, folder = "2_code/1_data/2_tmp_data")
+load_rdata_files(
+  tweets_corpus_features, 
+  folder = "2_code/1_data/2_tmp_data",
+  tmp = FALSE)
+
 tweets_sa <- convert_qtda_to_dt(tweets_corpus_features, key = "doc_id")
 
 cols_to_keep <- c(
@@ -383,5 +387,3 @@ evaluation <- benchmark_results$aggregate(metrics)[
   , .(learner_id, acc, f_1, tn, tp, fn, fp)]
 
 round(evaluation[, .(acc, f_1, tn, tp, fn, fp)], 3L)
-
-benchmark_results$learners$learner[[3]]$learner$model
