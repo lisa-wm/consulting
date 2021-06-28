@@ -17,8 +17,8 @@ resampling_strategy_outer <- mlr3::rsmp("cv", folds = 3L)
 
 # Load data
 
-load_rdata_files(tweets_corpus, folder = "2_code/1_data/2_tmp_data")
-tweets_sa <- convert_qtda_to_dt(tweets_corpus, key = "doc_id")
+load_rdata_files(tweets_corpus_features, folder = "2_code/1_data/2_tmp_data")
+tweets_sa <- convert_qtda_to_dt(tweets_corpus_features, key = "doc_id")
 
 cols_to_keep <- c(
   "doc_id",
@@ -356,8 +356,8 @@ benchmark_design = mlr3::benchmark_grid(
   learners = learners_with_baseline,
   resamplings = resampling_strategy_outer)
 
-set.seed(123L)
-benchmark_results <- mlr3::benchmark(benchmark_design)
+set.seed(1L)
+benchmark_results <- mlr3::benchmark(benchmark_design, store_models = TRUE)
 
 save_rdata_files(
   benchmark_results, 
@@ -383,3 +383,5 @@ evaluation <- benchmark_results$aggregate(metrics)[
   , .(learner_id, acc, f_1, tn, tp, fn, fp)]
 
 round(evaluation[, .(acc, f_1, tn, tp, fn, fp)], 3L)
+
+benchmark_results$learners$learner[[3]]$learner$model

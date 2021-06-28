@@ -242,7 +242,7 @@ PipeOpExtractTopicsSTM = R6::R6Class(
     .make_stm_obj = function(tokens, doc_grouping_var) {
       
       dfm <- quanteda::dfm(tokens)
-      dfm_grp <- quanteda::dfm_group(dfm, get(doc_grouping_var))
+      dfm_grp <- quanteda::dfm_group(dfm, doc_grouping_var)
       quanteda::convert(dfm_grp, to = "stm")
       
     },
