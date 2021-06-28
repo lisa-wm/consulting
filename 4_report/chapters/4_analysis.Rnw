@@ -474,6 +474,20 @@ the share of migrant population and overall employment rate.
 The latter two are modeled as smooth effects with five degrees of freedom each.
 While we find this formula to work well with our particular training data, the 
 specification can be easily modified.
+
+However, it must be noted that the STM requires a major simplification of the 
+topic modeling problem.
+Due to the extreme brevity of our texts, tweets must be pooled into larger 
+pseudo-documents to prevent the topic extraction from failing.
+We therefore resort to aggregating tweets on a per-user-per-month level.
+The underlying assumption of authors discussing the same topics over the course 
+of several weeks is problematic; however, other generative models would be 
+similarly affected.
+Topic models specifically designed for short texts (see, for example, 
+\citet{quiangetal2019}) are not yet widely available, but should certainly be 
+considered for future work in this area.
+Alternatively, finding a smarter pooling criterion might help to alleviate 
+the oversimplification.
 \\
 
 \textbf{Word embeddings.}
@@ -601,7 +615,7 @@ The procedure is typically randomized in two aspects: first, each base learner
 receives a bootstrap sample of the data for training, and second, it is allowed
 to use only a random subset of the features for splitting.
 As a result we obtain decorrelated and relatively stable ensembles. 
-\newpage
+% \newpage
 
 A major advantage of random forests is their natural handling of all feature 
 types, including interactions of arbitrary order.
@@ -694,6 +708,7 @@ All these novel operations are constructed as so-called \textit{pipe operators}
 in \texttt{mlr3}.
 Eventually, the pipeline assumes the structure depicted in figure 
 \ref{fig_graph}. 
+\vspace{0.5cm}
 
 \begin{minipage}[c]{0.5\textwidth}
   \textbf{Settings.}
@@ -754,6 +769,7 @@ Lastly, in the inner tuning loop, we evaluate performance by means of accuracy
 (i.e., the share of correctly classified instances, see section 
 \ref{tssa_ml_results}), as we identify no need to 
 emphasize one side of misclassification or the other in any particular way.
+\newpage
 
 % ------------------------------------------------------------------------------
 
@@ -954,7 +970,7 @@ The inputs have to be of identical length, where the maximum length of an input
 sequence can be 512 tokens. 
 Shorter inputs are filled with padding tokens and longer ones are truncated 
 \citep{devlin2019}.
-\newpage
+% \newpage
 
 % ------------------------------------------------------------------------------
 
@@ -1032,6 +1048,7 @@ ist inakzeptabel und [MASK]. [SEP]
 
 These two strategies are applied jointly in order to minimize an additive loss 
 function.
+\newpage
 
 % ------------------------------------------------------------------------------
 
@@ -1226,7 +1243,8 @@ best learners per task shadowed in gray):
   \caption[Results for BERT variants]{Results for BERT variants, where \\
   GC = \texttt{bert-base-german-cased}, \\
   GC-G = \texttt{bert-base-german-cased} post-trained with GermEval data \\
-  GC-T = \texttt{bert-base-german-cased} post-trained with unlabeled tweets, and 
+  GC-T = \texttt{bert-base-german-cased} post-trained with scraped but unlabeled 
+  tweets, and 
   \\
   GCD = \texttt{bert-base-german-dbmdz-cased}.\\
   Asterisks indicate additional fine-tuning with GermEval data; best performance 
@@ -1242,9 +1260,9 @@ For the document-level sentiment analysis,
 GermEval data emerges as the overall best classifier with top results across 
 all metrics and 92.6\% accuracy.
 Regarding the ABSA task, \texttt{bert-base-german-cased} post-trained on the 
-pool of unlabeled tweets performs best with only slightly lower accuracy of 
-91.8\%.
-\newpage
+pool of scraped but unlabeled tweets performs best with only slightly lower 
+accuracy of 91.8\%.
+% \newpage
 
 The experiments confirm what the standard ML results have already suggested: 
 the additional consideration of aspects, or topics, leads to a marginal increase 

@@ -9,7 +9,7 @@
   \begin{itemize}
     \setlength{\itemsep}{-0.3em}
     \setlength{\parskip}{0.3em}  
-    \item Provide learning material on basic NLP techniques
+    \item Provide learning material on basic NLP techniques + training data
     \item Framework: analysis conducted in this project
     \item Composition as coherent course revolving around the task of 
     \highlight{TSSA}

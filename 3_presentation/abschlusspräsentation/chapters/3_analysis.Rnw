@@ -34,13 +34,15 @@ $\rightarrow ~ $\textbf{Manual labeling process}
 \begin{figure}
   \raggedright
   \includegraphics[width = 0.3\textwidth]{figures/screenshot_amthor}
-\caption{\raggedright \url{https://www.bundestag.de/abgeordnete/}}
+\caption{\raggedright Example MP landing page. \textit{Source:} 
+\url{https://www.bundestag.de/abgeordnete/}.}
 \end{figure}
 
 \begin{figure}
   \raggedright
   \includegraphics[width = 0.6\textwidth]{figures/screenshot_andi}
-\caption{\raggedright \url{https://www.twitter.com/}}
+\caption{\raggedright Example tweet. \textit{Source:} 
+\url{https://www.twitter.com/}.}
 \end{figure}
 
 \end{frame}
@@ -89,7 +91,7 @@ $\rightarrow ~ $\textbf{Manual labeling process}
 
 \begin{figure}[H]
   \includegraphics[width = \textwidth]{figures/obs_over_time}
-  \caption{\raggedright tweet issuance over time}
+  \caption{\raggedright Tweet issuance over time.}
 \end{figure}
 
 \vfill
@@ -105,7 +107,7 @@ upward-sloping trend
 
 \begin{figure}[H]
   \includegraphics[width = \textwidth]{figures/obs_per_party}
-  \caption{\raggedright tweet issuance across parties}
+  \caption{\raggedright Tweet issuance across parties.}
 \end{figure}
 
 \vfill
@@ -185,7 +187,8 @@ mehrdemokratiewagen spd willybrandt}
 \begin{minipage}[t]{0.45\textwidth}
   \begin{figure}[H]
     \includegraphics[width = \textwidth]{figures/supervised_learning_schema}
-    \caption{\citet{mlr3book}}
+    \caption{Schematic process of supervised learning. \textit{Source:} 
+    \citet{mlr3book}.}
   \end{figure}
 \end{minipage}%
 
@@ -211,8 +214,8 @@ mehrdemokratiewagen spd willybrandt}
 \begin{minipage}[t]{0.4\textwidth}
   \begin{figure}[H]
     \includegraphics[width = \textwidth]{figures/schema_feat_extr}
-    \caption{\raggedright own representation, published on
-    \url{https://lisa-wm.github.io/nlp-twitter-r-bert/}}
+    \caption{\raggedright Feature extraction process. \textit{Source:} 
+    own representation.}
   \end{figure}
 \end{minipage}%
 
@@ -259,6 +262,7 @@ $\rightarrow$ \textbf{Difference important in resampling processes}
   \begin{itemize}
     \item[$\rightarrow$] Additional consideration of document-level meta 
     variables
+    \item[$\rightarrow$] Drawback: pooling tweets into larger pseudo-documents
   \end{itemize} 
   \item Embeddings with \highlight{GloVe} \citep{penningtonetal2014}
 \end{itemize}
@@ -361,7 +365,8 @@ $\rightarrow$ \textbf{Difference important in resampling processes}
   \begin{figure}
     \raggedright
     \includegraphics[width = 0.9\textwidth]{figures/embedding_example}
-  \caption{\raggedright \url{
+  \caption{\raggedright Exemplary visualization of embedding space. 
+  \textit{Source:} \url{
   https://towardsdatascience.com/the-magic-behind-embedding-models-c3af62f71fb}}
   \end{figure}
 \end{minipage}%
@@ -396,6 +401,7 @@ Implementation as \texttt{mlr3} \textbf{graph learner}
   \begin{figure}
     \raggedright
     \includegraphics[width = \textwidth]{figures/graph}
+    \caption{Graph learner. \textit{Source:} own representation.}
   \end{figure}
 \end{minipage}%
 
@@ -437,7 +443,7 @@ $\rightarrow$ \textbf{Train, predict, resample, tune, benchmark}
     \textbf{0.000} \\
     \hline
   \end{tabular}
-  \caption{Results for standard ML approach}
+  \caption{Results for standard ML approach.}
   \label{tab_res_ml}
 \end{table}
 
@@ -493,6 +499,8 @@ from \highlight{T}ransformers \citep{devlinetal2018}
   \raggedright
   \includegraphics[width = 0.7\textwidth, trim = 0 30 30 0, clip]{
   figures/bert_tokens}
+  \caption{\raggedright BERT pre-processing. \textit{Source:} 
+  \citet{devlinetal2018}.}
 \end{figure}
 
 \vfill
@@ -597,7 +605,10 @@ ist inakzeptabel und \highlight{[MASK]}. [SEP]
 \begin{minipage}[t]{0.4\textwidth}
   \begin{figure}
     \raggedright
-    \includegraphics[width = \textwidth]{figures/bert_finetuning}
+    \includegraphics[width = 0.9\textwidth, trim = 0 30 0 0, clip]{
+    figures/bert_finetuning}
+    \caption{\raggedright Example for BERT fine-tuning process. 
+    \textit{Source:} \citet{devlinetal2018}.}
   \end{figure}
 \end{minipage}%
 
@@ -690,11 +701,12 @@ ist inakzeptabel und \highlight{[MASK]}. [SEP]
     \hline
     \end{tabular}
   \caption{
-  BERT results  (asterisks indicate additional fine-tuning with GermEval data) \\
+  BERT results (asterisks indicate additional fine-tuning with GermEval data) \\
   \scriptsize  
   GC = \texttt{bert-base-german-cased}, \\
   GC-G = \texttt{bert-base-german-cased} post-trained with GermEval data \\
-  GC-T = \texttt{bert-base-german-cased} post-trained with unlabeled tweets, and 
+  GC-T = \texttt{bert-base-german-cased} post-trained with scraped but unlabeled 
+  tweets, and 
   \\
   GCD = \texttt{bert-base-german-dbmdz-cased}.\\
   }

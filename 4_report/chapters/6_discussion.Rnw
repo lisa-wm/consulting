@@ -10,8 +10,9 @@ make their classification a rather challenging task to begin with.
 The limited amount of training data aggravates the situation further.
 Then, a number of design decisions might be responsible for the poor 
 results.
-These include, among others, using the STM for topic modeling (and a particular 
-topical prevalence formula at that), our choice of learning algorithms, and the 
+These include, among others, using the STM for topic modeling (with a particular 
+topical prevalence formula and the simplification of pooling tweets into 
+pseudo-documents), our choice of learning algorithms, and the 
 entire pipeline structure with tuning procedures and hyperparameter 
 configuration spaces in combination with a rather small tuning budget.
 There is certainly ample room for improvement in these areas.
@@ -57,7 +58,7 @@ event, where the topic is clear to the audience with no need to name it
 explicitly.
 Sentiment analysis for this kind of data should therefore perhaps resort to 
 alternative methods of incorporating topical context.
-\\
+\newpage
 
 \textbf{Knowledge transfer.}
 Feedback from the live workshop held with the teaching material we have 
@@ -68,4 +69,3 @@ content for two days, especially for less experienced participants.
 We would therefore recommend a more generous time frame for future teaching 
 units, but still prefer to keep the material as exhaustive so they remain 
 accessible without the need for additional instruction.
-\newpage

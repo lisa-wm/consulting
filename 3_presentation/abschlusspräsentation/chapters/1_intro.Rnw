@@ -3,7 +3,7 @@
 \begin{itemize}
   \item Social media: constant stream of publicly available \textbf{text data}
   \item \textbf{Twitter} established as a medium for political discourse and 
-  constant source of information  
+  constant \\source of information  
   \item Frequently resurfacing \textbf{research questions:}
   \begin{itemize}
     \item Which \highlight{topics} are being addressed?
@@ -22,7 +22,7 @@
   manner for posts scraped from Twitter by German Members of Parliament (MPs)
   \begin{itemize}
     \item[$\rightarrow$] Explore how \highlight{topic-specific sentiment 
-    analysis (TSSA)} can be implemented with (1) standard ML techniques and 
+    analysis (TSSA)} can be implemented with (1) standard ML and 
     (2) more complex DL models
   \end{itemize}
   \item \textbf{Secondary goal:} make analysis of social media texts in a 
