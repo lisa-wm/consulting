@@ -136,17 +136,25 @@ Munich, July 12\textsuperscript{th}, 2021
 
 New data sources offer vast potential for studying public opinion in the 
 political environment.
+Frequently arising research questions concern the nature of topics discussed 
+and the sentiment expressed toward them.
 We perform sentiment analysis for tweets by German MPs issued since the last 
-federal election in September 2017 with special regard to topical context.
-The contribution of this work is twofold: first, we explore how such analysis 
-can be conducted with either standard machine learning approaches for tabular 
-data or complex BERT-based deep learning solutions, and second, we provide 
-extensive material for instructing fellow researchers in the applied techniques.
+federal election in September 2017, scraped from the Web, with special regard to 
+topical context.
+The contribution of this work is twofold.
+First, we explore how such analysis can be conducted with either standard 
+machine learning approaches for tabular data or more complex, BERT-based deep 
+learning solutions.
 Our results suggest that casting the problem at hand as a standard machine 
-learning task is not fruitful, whereas BERT-based models yield satisfactory 
-results for sentiment analysis
+learning task requires extensive feature engineering and achieves only moderate
+predictive performance, whereas BERT-based models yield satisfactory 
+results for sentiment analysis.
 We further note that topic modeling does not aid classification in this 
 application but attribute this largely to the difficulty of topic extraction.
+Second, we provide teaching material for instructing fellow researchers in the 
+applied techniques.
+With this collection, which will remain publicly available, we hope to 
+facilitate the entrance to NLP for practitioners from other disciplines.
 
 \end{abstract}
 

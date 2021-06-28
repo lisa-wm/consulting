@@ -435,8 +435,8 @@ Defining a topical content variable (a single, categorical one is supported in
 the STM implementation \citep{pkgstm}) allows for topic-word distributions to 
 vary for its different levels.
 Such an approach is also conceivable but not further pursued here.
-The STM can be expressed by the following generative process.
-} for each document $d \in \setd$ \citep{robertsetal2016}:
+The STM can be expressed by the following generative process.  
+For each document $d \in \setd$ \citep{robertsetal2016}:
 \newpage
 
 \begin{enumerate}
@@ -474,6 +474,20 @@ the share of migrant population and overall employment rate.
 The latter two are modeled as smooth effects with five degrees of freedom each.
 While we find this formula to work well with our particular training data, the 
 specification can be easily modified.
+
+However, it must be noted that the STM requires a major simplification of the 
+topic modeling problem.
+Due to the extreme brevity of our texts, tweets must be pooled into larger 
+pseudo-documents to prevent the topic extraction from failing.
+We therefore resort to aggregating tweets on a per-user-per-month level.
+The underlying assumption of authors discussing the same topics over the course 
+of several weeks is problematic; however, other generative models would be 
+similarly affected.
+Topic models specifically designed for short texts (see, for example, 
+\citet{quiangetal2019}) are not yet widely available, but should certainly be 
+considered for future work in this area.
+Alternatively, finding a smarter pooling criterion might help to alleviate 
+the oversimplification.
 \\
 
 \textbf{Word embeddings.}
@@ -575,51 +589,45 @@ instead.
 \\
 
 \textbf{Random forests.}
-A random forest is an ensemble of tree base learners \citep{louppe2014}.
-Starting from a root node containing all observations, classification trees 
-perform subsequent binary splits of the feature space, repeatedly dividing it 
-into rectangular partitions along one dimension at a time.
-Observations are passed along the resulting decision tree and end up in a 
-particular end node, or leaf, where they are assigned the most frequent 
-class label in this node.
-In the end, this constitutes hypotheses of the form 
-$f(\bm{x}) = \sum_{t = 1}^T r_t \mathbb{I}[\bm{x} \in R_t]$, where $T$ denotes 
-the number of terminal regions $R_1, R_2, \dots, R_T$ and 
+Random forests are ensembling methods with tree  base learners 
+\citep{louppe2014}.
+Classification trees create subsequent rectangular partitions of the feature 
+space via binary splits along one input dimension at a time.
+During training, observations are passed along the resulting tree structure 
+until they end up in a particular leaf node.
+Predictions are made by assigning the prevailing class label in this node.
+The associated hypotheses can be expressed in the form 
+$f(\bm{x}) = \sum_{t = 1}^T r_t \mathbb{I}[\bm{x} \in R_t]$, where $T \in \N$ 
+denotes the number of terminal regions $R_1, R_2, \dots, R_T$ and 
 $r_t \in \{0, 1\}$ is the class label predicted for observations in leaf node 
 $Q_t$.
-Each split is constructed such that the empirical risk across all child nodes 
-is minimized, which typically corresponds to minimizing class impurity.
-To this end, trees perform a greedy search that requires assessing all 
-possible splitting variables and associated thresholds
-\citep{breimanetal1984}.
+Each split is loss-minimal across all child nodes by design.
+Trees thus perform a greedy search that, unless regularized, requires exhaustive 
+evaluation of all possible split-threshold combinations \citep{breimanetal1984}.
 
-Without regularization, i.e., constraining tree depth, classification trees 
-will perfectly fit the patterns they observe and may thus change strongly with 
-small alterations of the training data.
-Random forests exploit the low bias of trees and assemble $B \in \N$ of them to 
-reduce variability.
-Predictions are obtained by aggregating predicted class labels of all base 
-learners (typically, a majority vote is used).
-Randomness enters in two ways: first, the subset of data used to fit a single 
-tree within the ensemble is chosen at random via bootstrapping, and second, each 
-base learner is allowed to use only a random subset of features as splitting 
-criteria.
-This procedure enables decorrelation and enhances ensemble stability 
+When allowed to full growth, i.e., until each observation has its own leaf node, 
+classification trees will perfectly fit every pattern in the training data, 
+making their structure extremely sensitive to data alterations.
+This low-bias, high-variance character is exploited in random forests, where 
+$B \in \N$ tree base learners are assembled to predict class labels via 
+majority voting.
+The procedure is typically randomized in two aspects: first, each base learner 
+receives a bootstrap sample of the data for training, and second, it is allowed
+to use only a random subset of the features for splitting.
+As a result we obtain decorrelated and relatively stable ensembles. 
+% \newpage
+
+A major advantage of random forests is their natural handling of all feature 
+types, including interactions of arbitrary order.
+This property, along with built-in variable selection, makes them suitable 
+candidates for tasks with many, possibly correlated, features 
 \citep{louppe2014}.
-
-Tunable hyperparameters of random forests include ensemble size, the number of 
-candidate features to be considered at each split, and various attributes 
-associated with single trees' complexity \citep{probstetal2019}.
-Random forests easily handle all types of features, including arbitrary 
-interactions, and perform natural variable selection.
-They mitigate much of single trees' instability and still achieve good 
-performance in many applications \citep{louppe2014}.
 \\
 
 \textbf{Regularized logistic regression.}
-Logistic regression is a special case of generalized linear regression where 
-the predictor is linear in the parameters but transformed by a 
-possibly non-linear link function \citep{lindsey1997}.
+Logistic regression employs a predictor that is linear in its coefficients but 
+subject to a non-linear transformation with a logit link function which enables 
+the prediction of a conditionally Bernoulli-distributed quantity. 
 Consider the feature matrix $\bm{X} = [\bm{x}_d^T]_{d = 1, 2, \dots, D} 
 \in \mathcal{X} \subset \R^{D \times p}$ and let $\bm{y} \in \{0, 1\}^D$ denote 
 the binary sentiment target.
@@ -628,22 +636,23 @@ given observation $\bm{x}_d$ as $\pi(\bm{x}_d) = \mathbb{P}(y_d = 1 ~ \rvert ~
 \bm{x}_d) = \tfrac{\exp(\gamma_0 + \bm{\gamma}^T\bm{x}_d)}{1 + \exp(\gamma_0 +
 \bm{\gamma}^T\bm{x}_d)}$, with regression coefficients $(\gamma_0, \bm{\gamma}) 
 \in \R^{p + 1}$ \citep{lindsey1997}.
-Prediction of class labels requires thresholding the posterior probabilities, 
-usually at a cut-off value of 50\%.
-By application of the logit transformation we obtain the linear 
-predictor $\gamma_0 + \bm{\gamma}^T\bm{x}_d = \log 
-\tfrac{\pi(\bm{x}_d)}{1 - \pi(\bm{x}_d)}$.
-Here, $(\gamma_0, \bm{\gamma})$ is estimated by minimizing a penalized version 
-of the negative log-likelihood.
-The additive elastic net penalty balances absolute and quadratic regularization
-in a hybrid of LASSO and Ridge regression. 
-Regularization causes shrinkage in the coefficients (typically not affecting the 
-intercept) and leads to the following optimization problem, where 
-$\lambda \geq 0$ and $\alpha \in [0, 1]$ are hyperparameters 
+The output is a probabilistic score in the unit interval.
+By thresholding these posterior probabilities, often simply at 50\%, we obtain 
+actual class label predictions.
+As our task entails a large number of possibly correlated features, we opt for 
+regularized logistic regression, where a penalized version of the negative 
+log-likelihood is used to estimate $(\gamma_0, \bm{\gamma})$.
+More specifically, we pose an additive elastic penalty, which yields a hybrid 
+of first-order (LASSO) and second-order (Ridge) regression and thus promotes 
+shrinkage in the regression coefficients (typically only in the non-intercept 
+terms).
+$\lambda \geq 0$ controls overall penalization and the two 
+regularizers are balanced by a parameter $\alpha \in [0, 1]$.
+We then arrive at the following optimization problem
 \citep{hastieetal2021}:
 
 \begin{equation*}
-    \min_{(\gamma_0, \bm{\gamma}) \in \R^{p + 1}} - \frac{1}{n} \sum_{d = 1}^D
+    \min_{(\gamma_0, \bm{\gamma}) \in \R^{p + 1}} - \frac{1}{D} \sum_{d = 1}^D
     y_d (\gamma_0 + \bm{\gamma}^T\bm{x}_d) - \log(1 + 
     \exp(\gamma_0 + \bm{\gamma}^T\bm{x}_d)) +
     \lambda \left( (1 - \alpha) \| \bm{\gamma} \|_2^2 \cdot \tfrac{1}{2} + 
@@ -699,6 +708,7 @@ All these novel operations are constructed as so-called \textit{pipe operators}
 in \texttt{mlr3}.
 Eventually, the pipeline assumes the structure depicted in figure 
 \ref{fig_graph}. 
+\vspace{0.5cm}
 
 \begin{minipage}[c]{0.5\textwidth}
   \textbf{Settings.}
@@ -759,6 +769,7 @@ Lastly, in the inner tuning loop, we evaluate performance by means of accuracy
 (i.e., the share of correctly classified instances, see section 
 \ref{tssa_ml_results}), as we identify no need to 
 emphasize one side of misclassification or the other in any particular way.
+\newpage
 
 % ------------------------------------------------------------------------------
 
@@ -959,7 +970,7 @@ The inputs have to be of identical length, where the maximum length of an input
 sequence can be 512 tokens. 
 Shorter inputs are filled with padding tokens and longer ones are truncated 
 \citep{devlin2019}.
-\newpage
+% \newpage
 
 % ------------------------------------------------------------------------------
 
@@ -1037,6 +1048,7 @@ ist inakzeptabel und [MASK]. [SEP]
 
 These two strategies are applied jointly in order to minimize an additive loss 
 function.
+\newpage
 
 % ------------------------------------------------------------------------------
 
@@ -1231,7 +1243,8 @@ best learners per task shadowed in gray):
   \caption[Results for BERT variants]{Results for BERT variants, where \\
   GC = \texttt{bert-base-german-cased}, \\
   GC-G = \texttt{bert-base-german-cased} post-trained with GermEval data \\
-  GC-T = \texttt{bert-base-german-cased} post-trained with unlabeled tweets, and 
+  GC-T = \texttt{bert-base-german-cased} post-trained with scraped but unlabeled 
+  tweets, and 
   \\
   GCD = \texttt{bert-base-german-dbmdz-cased}.\\
   Asterisks indicate additional fine-tuning with GermEval data; best performance 
@@ -1247,9 +1260,9 @@ For the document-level sentiment analysis,
 GermEval data emerges as the overall best classifier with top results across 
 all metrics and 92.6\% accuracy.
 Regarding the ABSA task, \texttt{bert-base-german-cased} post-trained on the 
-pool of unlabeled tweets performs best with only slightly lower accuracy of 
-91.8\%.
-\newpage
+pool of scraped but unlabeled tweets performs best with only slightly lower 
+accuracy of 91.8\%.
+% \newpage
 
 The experiments confirm what the standard ML results have already suggested: 
 the additional consideration of aspects, or topics, leads to a marginal increase 

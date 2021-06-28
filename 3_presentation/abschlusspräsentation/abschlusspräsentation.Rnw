@@ -2,7 +2,7 @@
 % SETUP ------------------------------------------------------------------------
 % ------------------------------------------------------------------------------
 
-\documentclass[11pt, t, aspectratio = 1610]{beamer}
+\documentclass[11pt, t, aspectratio = 1610, table]{beamer}
 \usetheme{Consulting}
 \logo{\includegraphics[height = 1cm, width = 1cm]{figures/sigillum.png}
 \vspace{-4em} \hspace{0.2em}}
@@ -24,6 +24,7 @@
 % \usepackage{amsmath}
 % \usepackage{amsthm}
 \usepackage{bm}
+\usepackage{tabularx}
 \usepackage{xcolor}
 \usepackage{refcount}
 

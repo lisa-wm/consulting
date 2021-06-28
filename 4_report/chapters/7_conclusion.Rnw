@@ -9,7 +9,8 @@ Our studies suggest the vastly higher complexity of the BERT-based models is
 actually necessary to achieve satisfactory results in topic-specific 
 sentiment analysis of the data at hand.
 We collected the broad variety of techniques encountered in the course of these 
-studies to form an extensive pool of teaching material.
+studies to form an extensive pool of teaching material, including a set of 
+labeled training data.
 This collection has been prepared as a coherent course and made available 
 online, where it will remain to be used for self-study and instruction purposes.
 With this, we hope to make the analysis of text data in political studies more 

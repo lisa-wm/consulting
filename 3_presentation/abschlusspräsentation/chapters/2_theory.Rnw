@@ -4,7 +4,8 @@
 \begin{center}
     \includegraphics[width = \textwidth]{figures/schema_tssa.jpg}
 \end{center}
-\caption{\raggedright adopted and modified from \citet{minpark2016}}
+\caption{\raggedright Topic modeling and sentiment analysis. \textit{Source:} 
+adopted and modified from \citet{minpark2016}.}
 \end{figure}
 
 \vfill 
@@ -41,8 +42,8 @@ $\rightarrow$ \textbf{Topic-specific sentiment analysis}
 \begin{center}
     \includegraphics[width = \textwidth]{figures/tm_taxonomy}
 \end{center}
-\caption{\raggedright own representation, published on
-\url{https://lisa-wm.github.io/nlp-twitter-r-bert/}}
+\caption{\raggedright Taxonomy of topic models. \textit{Source:} own 
+representation.}
 \end{figure}
 
 \end{frame}
@@ -77,8 +78,8 @@ with hierarchical Bayesian mixture models
 \begin{center}
     \includegraphics[width = \textwidth]{figures/schema_generative_tm}
 \end{center}
-\caption{\raggedright own representation, published on
-\url{https://lisa-wm.github.io/nlp-twitter-r-bert/}}
+\caption{\raggedright Schematic process of generative topic modeling. 
+\textit{Source:} own representation.}
 \end{figure}
 
 \end{frame}
@@ -96,8 +97,9 @@ with hierarchical Bayesian mixture models
   for $p \in \N$
   \item Methods considered:
   \begin{itemize}
-    \item Standard ML: random forests \& regularized logistic regression
-    \item BERT: fine-tuning to sentiment analysis
+    \item \textbf{Standard ML:} random forests \& regularized logistic 
+    regression
+    \item \textbf{BERT:} fine-tuning to sentiment analysis
   \end{itemize}  
 \end{itemize}
 
@@ -108,19 +110,20 @@ with hierarchical Bayesian mixture models
 \begin{frame}{Topic-specific sentiment analysis}
 
 \begin{itemize}
-  \item \textbf{Idea:} combine \highlight{topic modeling \& sentiment analysis}
+  \item \textbf{TSSA idea:} combine \highlight{topic modeling \& sentiment 
+  analysis}
   \item Subsequent modeling mostly due to the complexity 
   of joint models 
   % $\leftrightarrow$ goal of making text analysis accessible to 
   % a broader audience
-  \item Standard ML:
+  \item \textbf{Standard ML}
   \begin{itemize}
     \setlength{\itemsep}{-0.3em}
     \setlength{\parskip}{0.3em}
     \item Build clusters of tweets based on topic modeling
     \item Use clusters to generate topic-specific word embeddings
   \end{itemize}    
-  \item BERT:
+  \item \textbf{BERT}
   \begin{itemize}
     \setlength{\itemsep}{-0.3em}
     \setlength{\parskip}{0.3em}

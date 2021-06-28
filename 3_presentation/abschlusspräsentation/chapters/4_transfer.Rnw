@@ -1,0 +1,63 @@
+\begin{frame}{Scope}
+
+\textbf{Course website:} \url{https://lisa-wm.github.io/nlp-twitter-r-bert/}
+
+\vfill
+
+\begin{itemize}
+  \item \textbf{Idea} 
+  \begin{itemize}
+    \setlength{\itemsep}{-0.3em}
+    \setlength{\parskip}{0.3em}  
+    \item Provide learning material on basic NLP techniques + training data
+    \item Framework: analysis conducted in this project
+    \item Composition as coherent course revolving around the task of 
+    \highlight{TSSA}
+  \end{itemize}  
+  \item \textbf{Media mix} 
+  \begin{itemize}
+    \setlength{\itemsep}{-0.3em}
+    \setlength{\parskip}{0.3em}  
+    \item \textbf{Slides:} introductory information, theoretical background
+    \item \textbf{Code demonstrations}: instructive examples
+    \item \textbf{Exercises}: practical application
+  \end{itemize}    
+\end{itemize}
+
+\end{frame}
+
+% ------------------------------------------------------------------------------
+
+\begin{frame}{Live workshop}
+
+\textbf{Challenge:} end-to-end NLP workflow in two days for 
+heterogeneous audience
+
+\vfill
+
+\begin{table}[H]
+\footnotesize
+\begin{tabular}{|p{0.5\textwidth}|p{0.5\textwidth}}
+\hline
+\rowcolor{highlight} 
+\textbf{DAY 1} & \multicolumn{1}{l|}{\cellcolor{highlight}\textbf{DAY 2}} \\ 
+\hline
+\cellcolor[HTML]{C0C0C0}\textbf{Kick-off} & \multicolumn{1}{l|}{Word embeddings}
+\\ \hline
+Intro NLP \& application & \multicolumn{1}{l|}{Preparation for classification} 
+\\ \hline
+Analytical pipeline & \multicolumn{1}{l|}{ML background} \\ \hline
+quanteda universe & \multicolumn{1}{l|}{Analysis} \\ \hline
+\cellcolor[HTML]{C0C0C0}\textbf{Standard ML part} & 
+\multicolumn{1}{l|}{Visualization of results} \\ \hline
+Web scraping & \multicolumn{1}{l|}{\cellcolor[HTML]{C0C0C0}\textbf{BERT part}} 
+\\ \hline
+Regular expressions & \multicolumn{1}{l|}{Intro deep learning \& BERT} 
+\\ \hline
+Basic text cleaning & \multicolumn{1}{l|}{TSSA with BERT} \\ \hline
+Static feature extraction  & \\ \cline{1-1}
+Topic modeling (including guest talk) &  \\ \cline{1-1}
+\end{tabular}
+\end{table}
+
+\end{frame}
