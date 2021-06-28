@@ -22,8 +22,8 @@
   manner for posts scraped from Twitter by German Members of Parliament (MPs)
   \begin{itemize}
     \item[$\rightarrow$] Explore how \highlight{topic-specific sentiment 
-    analysis} can be implemented with (1) standard ML techniques and 
-    (2) more complex DL models.
+    analysis (TSSA)} can be implemented with (1) standard ML techniques and 
+    (2) more complex DL models
   \end{itemize}
   \item \textbf{Secondary goal:} make analysis of social media texts in a 
   political context more easily accessible to researchers

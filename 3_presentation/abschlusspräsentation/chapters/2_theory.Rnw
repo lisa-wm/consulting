@@ -108,7 +108,8 @@ with hierarchical Bayesian mixture models
 \begin{frame}{Topic-specific sentiment analysis}
 
 \begin{itemize}
-  \item \textbf{Idea:} combine \highlight{topic modeling \& sentiment analysis}
+  \item \textbf{TSSA idea:} combine \highlight{topic modeling \& sentiment 
+  analysis}
   \item Subsequent modeling mostly due to the complexity 
   of joint models 
   % $\leftrightarrow$ goal of making text analysis accessible to 
