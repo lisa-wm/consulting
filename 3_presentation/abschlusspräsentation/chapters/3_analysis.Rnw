@@ -415,6 +415,8 @@ $\rightarrow$ \textbf{Train, predict, resample, tune, benchmark}
 
 \begin{frame}{Results}
 
+\color{red}
+
 \begin{table}[H]
   \footnotesize
   \begin{tabular}{l|r|r|r|}
@@ -446,6 +448,8 @@ $\rightarrow$ \textbf{Train, predict, resample, tune, benchmark}
   \caption{Results for standard ML approach.}
   \label{tab_res_ml}
 \end{table}
+
+\color{black}
 
 \end{frame}
 
