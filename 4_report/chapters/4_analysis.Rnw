@@ -794,14 +794,23 @@ the following quantities (e.g., \citet{japkowiczshah2011}):
 where TN = true negatives, TP = true positives, FN = false negatives and 
 FP = false positives.
 
-We see from table \ref{tab_res_ml} that both algorithms achieve rather low 
-cross-validated performance in the realm of 72\% accuracy.
-The meaning of this observation becomes clear when considering the fact that 
-these values are remarkably close to the share of negative labels in the data:
-essentially, neither of the learners is able to outperform a random classifier 
-assigning classes according to the empirical relative class frequencies.
-We have included such a featureless learner in our benchmark experiments and the
-results confirm our findings:
+% We see from table \ref{tab_res_ml} that both algorithms achieve rather low 
+% cross-validated performance in the realm of 72\% accuracy.
+% The meaning of this observation becomes clear when considering the fact that 
+% these values are remarkably close to the share of negative labels in the data:
+% essentially, neither of the learners is able to outperform a random classifier 
+% assigning classes according to the empirical relative class frequencies.
+% We have included such a featureless learner in our benchmark experiments and the
+% results confirm our findings:
+
+The results in table \ref{tab_res_ml} show a striking difference in performance.
+We see that the learner with topic modeling node (first column) performs 
+substantially worse than the topic-free variant (second column) with a gap in 
+accuracy of more than 14 percentage points.
+In fact it is even outperformed by the featureless classifier (third column) 
+that always predicts the most frequent class, in this case the negative one, 
+and thus on average achieves an accuracy in the realm of the share of negative
+observations:
 
 \begin{table}[H]
   \small
@@ -812,22 +821,22 @@ results confirm our findings:
     \multicolumn{1}{l|}{\textbf{learner without topic modeling}} &
     \multicolumn{1}{l|}{\textbf{featureless learner}} \\ 
     \hline
-    \multicolumn{1}{|l|}{accuracy} & 0.723 & \cellcolor{lightgray} 
-    \textbf{0.729} & 0.724 \\
+    \multicolumn{1}{|l|}{accuracy} & 0.715 & \cellcolor{lightgray} 
+    \textbf{0.859} & 0.724 \\
     \hline
-    \multicolumn{1}{|l|}{F1 score} & 0.839 & \cellcolor{lightgray} 
-    \textbf{0.840} & 0.840 \\
+    \multicolumn{1}{|l|}{F1 score} & 0.023 & \cellcolor{lightgray} 
+    \textbf{0.706} & - \\
     \hline
-    \multicolumn{1}{|l|}{TN} & \textbf{293.000} & \cellcolor{lightgray} 
-    288.000 & \textbf{293.000} \\
+    \multicolumn{1}{|l|}{TN} & 288.333 & \cellcolor{lightgray} 
+    279.667 & \textbf{293.333} \\
     \hline
-    \multicolumn{1}{|l|}{TP} & 0.000 & \cellcolor{lightgray} \textbf{7.333} 
+    \multicolumn{1}{|l|}{TP} & 1.333 & \cellcolor{lightgray} \textbf{68.333} 
     & 0.000 \\
     \hline
-    \multicolumn{1}{|l|}{FN} & 111.667 & \cellcolor{lightgray} 
-    \textbf{104.333} & 111.667 \\
+    \multicolumn{1}{|l|}{FN} & 110.333 & \cellcolor{lightgray} 
+    \textbf{43.333} & 111.667 \\
     \hline
-    \multicolumn{1}{|l|}{FP} & 0.333 & \cellcolor{lightgray} 5.333 & 
+    \multicolumn{1}{|l|}{FP} & 5.000 & \cellcolor{lightgray} 13.667 & 
     \textbf{0.000} \\
     \hline
   \end{tabular}
@@ -838,14 +847,35 @@ results confirm our findings:
   \label{tab_res_ml}
 \end{table}
 
-It is, moreover, worth noting that the learner without topic clustering performs 
-slightly better (if only by a very small margin) than the one using 
-topic-specific embeddings.
+Diving deeper into the resampling results, the reason for this behavior becomes 
+evident. 
+When the embeddings are computed in a topic-specific manner, a much larger 
+number of embedding vectors is created (factor 6 for the extreme case of $K$), 
+spanning a quite high-dimensional feature space for relatively few observations.
+In two out of three folds the pipeline selects the logistic regression 
+classifier and both times fits a very sparse model that, in effect, differs not 
+so much from the featureless classifier and thus yields similar performance.
+Interpreting the variable selection process of the random forest classifier is 
+not straightforward due to the heterogeneity of the 500 base learners and
+the randomness induced by sampling features as well as tuning the size of this
+sample via random search.
+In any case, topic-specific embeddings seem to increase the number of features 
+to a level that the classifiers cannot handle well.
+The topic-agnostic learner, by contrast, achieves 85.9\% accuracy and 70.6\% F1 
+score\footnote{
+For all learners, the gap between accuracy and F1 score may be attributed to the 
+class imbalance in the predictions. 
+This effect is particularly strong for the topic-agnostic and the featureless 
+classifier (which are actually quite alike, as discussed above). 
+Both achieve very low recall, i.e., the share of positives that 
+have been detected as such, because the positive class is rarely predicted 
+(indeed not at all in the case of the featureless classifier, which is why its 
+recall is actually zero and no F1 score can be calculated due to TP = 0).
+}, thereby 
+clearly dominating the naive baseline.
 We will see how the BERT solution exhibits similar behavior, leading to the 
 conclusion that topic modeling for this kind of data seems to complicate the 
 task rather than aiding it.
-All in all, it appears that the handcrafted features by which we represent 
-our texts are not helpful in sentiment classification for these data.
 
 % ------------------------------------------------------------------------------
 

@@ -373,17 +373,49 @@ load_rdata_files(
   folder = "2_code/1_data/2_tmp_data",
   tmp = FALSE)
 
-# Evaluate
+# Evaluate (swapping names as so they match the manner of encoding)
 
 metrics <- list(
   acc = mlr3::msr("classif.acc", id = "acc"),
-  f_1 = mlr3::msr("classif.fbeta", id = "f_1"),
-  tn = mlr3::msr("classif.tn", id = "tn"),
-  tp = mlr3::msr("classif.tp", id = "tp"),
-  fn = mlr3::msr("classif.fn", id = "fn"),
-  fp = mlr3::msr("classif.fp", id = "fp"))
+  tn = mlr3::msr("classif.tn", id = "tp"),
+  tp = mlr3::msr("classif.tp", id = "tn"),
+  fn = mlr3::msr("classif.fn", id = "fp"),
+  fp = mlr3::msr("classif.fp", id = "fn"))
 
 evaluation <- benchmark_results$aggregate(metrics)[
-  , .(learner_id, acc, f_1, tn, tp, fn, fp)]
+  , .(learner_id, acc, tn, tp, fn, fp)]
+
+evaluation[, f_1 := 2 * (tp / (tp + fp) * tp / (tp + fn)) / 
+             (tp / (tp + fp) + tp / (tp + fn))]
 
 round(evaluation[, .(acc, f_1, tn, tp, fn, fp)], 3L)
+
+# ANALYZE RESULTS --------------------------------------------------------------
+
+bmr_learner_w_tm <- 
+  benchmark_results$resample_results$resample_result[[1]]$learners
+
+bmr_learner_wo_tm <- 
+  benchmark_results$resample_results$resample_result[[2]]$learners
+
+configs_w_tm <- sapply(
+  bmr_learner_w_tm,
+  function(i) i$tuning_result)
+
+configs_wo_tm <- sapply(
+  bmr_learner_wo_tm,
+  function(i) i$tuning_result)
+
+coefficients_ranger <- lapply(
+  seq_len(bmr_learner_w_tm[[1]]$learner$model$ranger$model$num.trees),
+  function(i) {
+    ranger::treeInfo(
+      bmr_learner_w_tm[[1]]$learner$model$ranger$model, 
+      tree = i)})
+
+coefficients_ranger_all <- do.call(rbind, coefficients_ranger)
+sort(table(coefficients_ranger_all$splitvarName))
+
+coefficients_glmnet <- lapply(
+  unlist(list(bmr_learner_w_tm[2:3], bmr_learner_wo_tm)),
+  function(i) i$learner$model$glmnet$model$beta)
