@@ -288,11 +288,17 @@ if (FALSE) {
       entity = FALSE),
     key = "doc_id")
   
-  save_rdata_files(tweets_corpus_tagged, folder = "2_code/1_data/2_tmp_data")
+  save_rdata_files(
+    tweets_corpus_tagged, 
+    folder = "2_code/1_data/2_tmp_data", 
+    tmp = FALSE)
   
 }
 
-load_rdata_files(tweets_corpus_tagged, folder = "2_code/1_data/2_tmp_data")
+load_rdata_files(
+  tweets_corpus_tagged, 
+  folder = "2_code/1_data/2_tmp_data",
+  tmp = FALSE)
 
 tweets_pos_tags <- tweets_corpus_tagged[
   , .(doc_id, pos)
@@ -329,7 +335,9 @@ tweets_features_static <- tweets_pos_tags[
 
 save_rdata_files(tweets_features_static, folder = "2_code/1_data/2_tmp_data")
 
-quanteda::docvars(tweets_corpus) <- as.data.frame(
+tweets_corpus_features <- tweets_corpus
+
+quanteda::docvars(tweets_corpus_features) <- as.data.frame(
   tweets_features_static[data_dt, on = "doc_id"])
 
-save_rdata_files(tweets_corpus, folder = "2_code/1_data/2_tmp_data")
+save_rdata_files(tweets_corpus_features, folder = "2_code/1_data/2_tmp_data")
