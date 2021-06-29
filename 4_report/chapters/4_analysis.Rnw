@@ -36,7 +36,7 @@ federal election on a per-district level (available at the official website of
 the federal returning officer); and, lastly, scrape actual tweets along with 
 some additional variables like the number of retweets.
 We use a \texttt{Python} code base and mainly employ selenium webdrivers as well
-as the \texttt{BeatifulSoup} library \citep{richardson2007} for parsing HTML
+as the \texttt{BeautifulSoup} library \citep{richardson2007} for parsing HTML
 content and the \texttt{tweepy} library \citep{roesslein2020} for accessing the
 official Twitter API.
 For more details on the procedure and the large data base assembled in the 
@@ -122,28 +122,7 @@ Lastly, when we inspect the class label distribution in the training data,
 an imbalance favoring the negative class becomes immediately visible: some 
 72\% of tweets have been marked as negative.
 This reflects our general impression that most tweets which do carry sentiment 
-express negative opinions and might be partly appropriated to the fact that 
-the majority of authors belong to opposition parties.
-
-% \begin{minipage}[b]{0.5\textwidth}
-%   Lastly, when we inspect the class label distribution in the training data,
-%   an imbalance favoring the negative class becomes immediately visible: some 
-%   72\% of tweets have been marked as negative.
-%   This reflects our general impression that most tweets which do carry sentiment 
-%   express negative opinions and might be partly appropriated to the fact that 
-%   the majority of authors belong to opposition parties.
-% \end{minipage}%
-% \begin{minipage}[b]{0.05\textwidth}
-%   \phantom{foo}
-% \end{minipage}%
-% \begin{minipage}[b]{0.45\textwidth}
-%   \begin{figure}[H]
-%     \includegraphics[width = \textwidth]{figures/class_dist}
-%     \caption[Training data: class label distribution]
-%     {\raggedright Distribution of class labels.}
-%     \label{fig_class_dist}
-%   \end{figure}
-% \end{minipage}%
+express negative opinions.
 
 % ------------------------------------------------------------------------------
 
@@ -195,8 +174,8 @@ It also prompts the use of abbreviations.
 On a similar note, we observe that Twitter posts often refer to certain events 
 or topical entities without explicitly mentioning them, which is probably both 
 due to the character limit and the real-time character of publications.
-The message may be clear for an informed human annotator then but will be hard 
-to grasp for machines.
+The message may be clear for a well-informed human annotator then but will be 
+hard to grasp for machines.
 Furthermore, tweets tend to be of rather informal style and use language that 
 appears almost exclusively in social media, enlarging the vocabulary the 
 classifier must understand.
@@ -359,7 +338,7 @@ and include the following features:
   In each tweet, if a word is part of the dictionary and judged to have 
   either positive or negative connotation (weak or strong), it raises the 
   respective polarity count by one.
-  Emojis are treated analogously, albeit without the discrimination between 
+  Emojis are treated analogously, though without the discrimination between 
   degrees of sentiment, using an emoji polarity list accumulated by 
   \citet{kraljetal2015}.
   \newpage
@@ -376,7 +355,7 @@ and include the following features:
   simplification introduced by the BOW assumption to some extent.
   We track the presence of modifiers that indicate sentiment intensification 
   as well as punctuation via the respective number of quotation and exclamation 
-  mark.
+  marks.
   Negation is a delicate problem we currently treat with the brute-force 
   approach of noting whether or not negating tokens are present.
   German language complicates negation handling by the fact that modifier and 
@@ -415,13 +394,13 @@ and then compute word embeddings for each topical cluster.
 \\
 
 \textbf{Topic modeling.}
-The STM \citep{robertsetal2016} is a generative topic model and attempts to 
+The STM \citep{robertsetal2016} is a probabilistic topic model and attempts to 
 recreate the very process that generated the observed documents.
 As sketched in section \ref{tm}, this is achieved by sampling topic proportions 
 for each document from some distribution, assigning word positions to topics 
 with the resulting probabilities, and drawing vocabulary instances from the 
 distribution associated with the respective topic.
-As opposed to the original LDA approach assuming a single global prior 
+As opposed to the original LDA approach that assumes a single global prior 
 distribution, the STM offers the possibility to incorporate document-level meta 
 data. 
 These may affect the sampling process in two places: first, by influencing the 
@@ -435,14 +414,16 @@ Defining a topical content variable (a single, categorical one is supported in
 the STM implementation \citep{pkgstm}) allows for topic-word distributions to 
 vary for its different levels.
 Such an approach is also conceivable but not further pursued here.
-The STM can be expressed by the following generative process.  
-For each document $d \in \setd$ \citep{robertsetal2016}:
+The STM can be expressed by the following generative process 
+\citep{robertsetal2016}.
+
+For each document $d \in \setd$:
 \newpage
 
 \begin{enumerate}
 
   \item Draw non-normalized topic proportions $\bm{\eta_d}$ from a 
-  $(K - 1)$-dimensional Gaussian: 
+  $(K - 1)$-dimensional Gaussian: \\
   $\bm{\eta_d} \sim \mathcal{N}_{K - 1}(\bm{\Gamma}^T\bm{x}_d^T, \bm{\Sigma})$, 
   where the $K$-th component is set to zero to keep the model identifiable.
   $\bm{x}_d$ is the vector of $P \in \N$ prevalence covariates associated with 
@@ -454,7 +435,7 @@ For each document $d \in \setd$ \citep{robertsetal2016}:
   
   \item Normalize $\bm{\eta_d}$ through a softmax operation, 
   yielding $\bm{\theta}_d$ with $\theta_{d, k} = \frac{\exp(\eta_{d, k})}{
-  \sum_{j = 1}^K \exp(\eta_{d, j})}$, $k \in \setk$. 
+  \sum_{j = 1}^K \exp(\eta_{d, j})}$, \\$k \in \setk$. 
   The $\bm{\theta}_d$ then effectively follow a logistic normal distribution. 
   
   \item For each word position $n \in \{ 1, 2, \dots, N_d \}$:
@@ -481,10 +462,10 @@ Due to the extreme brevity of our texts, tweets must be pooled into larger
 pseudo-documents to prevent the topic extraction from failing.
 We therefore resort to aggregating tweets on a per-user-per-month level.
 The underlying assumption of authors discussing the same topics over the course 
-of several weeks is problematic; however, other generative models would be 
+of several weeks is problematic; yet, other generative models would be 
 similarly affected.
 Topic models specifically designed for short texts (see, for example, 
-\citet{quiangetal2019}) are not yet widely available, but should certainly be 
+\citet{quiangetal2019}) are not yet widely available but should certainly be 
 considered for future work in this area.
 Alternatively, finding a smarter pooling criterion might help to alleviate 
 the oversimplification.
@@ -584,8 +565,7 @@ a logistic regression learner with elastic net penalty (\textit{glmnet}).
 Both ship with built-in feature selection, which we consider rather helpful in 
 the potentially high-dimensional feature space of text classification, and are 
 fairly easy to tune (\citet{japkowiczshah2011}, \citet{probstetal2019}).
-However, the pipeline design would allow to plug in any other suitable learner 
-instead.
+However, the pipeline design would allow to plug in any other suitable learner.
 \\
 
 \textbf{Random forests.}
@@ -605,15 +585,15 @@ Each split is loss-minimal across all child nodes by design.
 Trees thus perform a greedy search that, unless regularized, requires exhaustive 
 evaluation of all possible split-threshold combinations \citep{breimanetal1984}.
 
-When allowed to full growth, i.e., until each observation has its own leaf node, 
+When allowed full growth, i.e., until each observation has its own leaf node, 
 classification trees will perfectly fit every pattern in the training data, 
 making their structure extremely sensitive to data alterations.
 This low-bias, high-variance character is exploited in random forests, where 
 $B \in \N$ tree base learners are assembled to predict class labels via 
 majority voting.
 The procedure is typically randomized in two aspects: first, each base learner 
-receives a bootstrap sample of the data for training, and second, it is allowed
-to use only a random subset of the features for splitting.
+receives a bootstrap sample of the data for training, and second, it may use 
+only a random subset of the features for splitting.
 As a result we obtain decorrelated and relatively stable ensembles. 
 % \newpage
 
@@ -626,13 +606,13 @@ candidates for tasks with many, possibly correlated, features
 
 \textbf{Regularized logistic regression.}
 Logistic regression employs a predictor that is linear in its coefficients but 
-subject to a non-linear transformation with a logit link function which enables 
+subject to a non-linear transformation with a logit link function, which enables 
 the prediction of a conditionally Bernoulli-distributed quantity. 
 Consider the feature matrix $\bm{X} = [\bm{x}_d^T]_{d = 1, 2, \dots, D} 
 \in \mathcal{X} \subset \R^{D \times p}$ and let $\bm{y} \in \{0, 1\}^D$ denote 
 the binary sentiment target.
 Logistic regression models the probability of $y_d = 1$ for a 
-given observation $\bm{x}_d$ as $\pi(\bm{x}_d) = \mathbb{P}(y_d = 1 ~ \rvert ~
+given observation $\bm{x}_d$ as \\$\pi(\bm{x}_d) = \mathbb{P}(y_d = 1 ~ \rvert ~
 \bm{x}_d) = \tfrac{\exp(\gamma_0 + \bm{\gamma}^T\bm{x}_d)}{1 + \exp(\gamma_0 +
 \bm{\gamma}^T\bm{x}_d)}$, with regression coefficients $(\gamma_0, \bm{\gamma}) 
 \in \R^{p + 1}$ \citep{lindsey1997}.
@@ -794,22 +774,13 @@ the following quantities (e.g., \citet{japkowiczshah2011}):
 where TN = true negatives, TP = true positives, FN = false negatives and 
 FP = false positives.
 
-% We see from table \ref{tab_res_ml} that both algorithms achieve rather low 
-% cross-validated performance in the realm of 72\% accuracy.
-% The meaning of this observation becomes clear when considering the fact that 
-% these values are remarkably close to the share of negative labels in the data:
-% essentially, neither of the learners is able to outperform a random classifier 
-% assigning classes according to the empirical relative class frequencies.
-% We have included such a featureless learner in our benchmark experiments and the
-% results confirm our findings:
-
 The results in table \ref{tab_res_ml} show a striking difference in performance.
 We see that the learner with topic modeling node (first column) performs 
 substantially worse than the topic-free variant (second column) with a gap in 
 accuracy of more than 14 percentage points.
 In fact it is even outperformed by the featureless classifier (third column) 
 that always predicts the most frequent class, in this case the negative one, 
-and thus on average achieves an accuracy in the realm of the share of negative
+and thus on average achieves an accuracy equivalent to the share of negative
 observations:
 
 \begin{table}[H]
@@ -850,15 +821,16 @@ observations:
 Diving deeper into the resampling results, the reason for this behavior becomes 
 evident. 
 When the embeddings are computed in a topic-specific manner, a much larger 
-number of embedding vectors is created (factor 6 for the extreme case of $K$), 
-spanning a quite high-dimensional feature space for relatively few observations.
+number of embedding vectors is created (factor 6 for the upper end of the 
+search range for $K$), spanning a quite high-dimensional feature space for 
+relatively few observations.
 In two out of three folds the pipeline selects the logistic regression 
 classifier and both times fits a very sparse model that, in effect, differs not 
-so much from the featureless classifier and thus yields similar performance.
+so much from the featureless classifier, and thus yields similar performance.
 Interpreting the variable selection process of the random forest classifier is 
-not straightforward due to the heterogeneity of the 500 base learners and
-the randomness induced by sampling features as well as tuning the size of this
-sample via random search.
+not as straightforward due to the heterogeneity of the 500 base learners and
+the randomness induced by sampling features as well as tuning the number of 
+split variable candidates via random search.
 In any case, topic-specific embeddings seem to increase the number of features 
 to a level that the classifiers cannot handle well.
 The topic-agnostic learner, by contrast, achieves 85.9\% accuracy and 70.6\% F1 
@@ -866,13 +838,14 @@ score\footnote{
 For all learners, the gap between accuracy and F1 score may be attributed to the 
 class imbalance in the predictions. 
 This effect is particularly strong for the topic-agnostic and the featureless 
-classifier (which are actually quite alike, as discussed above). 
+classifier (which, as discussed above, are quite alike). 
 Both achieve very low recall, i.e., the share of positives that 
 have been detected as such, because the positive class is rarely predicted 
 (indeed not at all in the case of the featureless classifier, which is why its 
 recall is actually zero and no F1 score can be calculated due to TP = 0).
 }, thereby 
 clearly dominating the naive baseline.
+Here, the logistic classifier emerges as the best learner in all three folds.
 We will see how the BERT solution exhibits similar behavior, leading to the 
 conclusion that topic modeling for this kind of data seems to complicate the 
 task rather than aiding it.
@@ -1078,7 +1051,7 @@ ist inakzeptabel und [MASK]. [SEP]
 
 These two strategies are applied jointly in order to minimize an additive loss 
 function.
-\newpage
+% \newpage
 
 % ------------------------------------------------------------------------------
 
@@ -1088,10 +1061,10 @@ function.
 BERT can be applied to various language tasks, e.g., \textit{question 
 answering} or \textit{named entity recognition}, and sentiment classification 
 in particular.
-In order to have the pre-trained network solve a specific problem, we need to 
+In order to have the pre-trained network solve a specific problem, we must 
 fine-tune it on the target task.
 Crucially, at this point, the need for labeled data comes in.
-For fine-tuning we simply need to alter the output layer that adapts to the 
+For fine-tuning we simply alter the output layer that adapts to the 
 target task.
 In our analysis, we use the \texttt{huggingface PyTorch} implementation 
 \texttt{BertForSequenceClassification}\footnote{
@@ -1128,7 +1101,6 @@ This model was originally pre-trained using the latest German Wikipedia texts,
 news articles and open legal data sets of German court decisions and citations. 
 This data set has a size of approximately 12 GB in total 
 (\url{https://deepset.ai/german-bert}, \citet{ostendorffetal2020}). 
-
 In order to improve both the domain and task knowledge, the authors recommend to 
 apply a so-called post-training task based on contextually related data because 
 fine-tuning BERT directly with a limited amount of labeled data may end up with 
@@ -1282,9 +1254,8 @@ best learners per task shadowed in gray):
   \label{tab_res_bert}
 \end{table}
 
-The BERT-based classifiers clearly outperform the standard ML solutions (and 
-thus the random baseline) and also achieve fairly good results in 
-absolute terms.
+The BERT-based classifiers clearly outperform the standard ML solutions and also 
+achieve fairly good results in absolute terms.
 For the document-level sentiment analysis, 
 \texttt{bert-base-german-dbmdz-cased} with additional fine-tuning on the 
 GermEval data emerges as the overall best classifier with top results across 
@@ -1296,8 +1267,7 @@ accuracy of 91.8\%.
 
 The experiments confirm what the standard ML results have already suggested: 
 the additional consideration of aspects, or topics, leads to a marginal increase 
-of predictive power at best and does not quite justify the procedural and 
-computational overhead.
-However, we can conclude that the application of BERT and its variants 
+of predictive power at best and even tends to worsen results.
+Still, we can conclude that the application of BERT and its variants 
 results in satisfactory outcome in classifying tweets into positive and negative 
 categories for both document-level sentiment analysis and ABSA tasks. 

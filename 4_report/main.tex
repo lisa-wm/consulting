@@ -146,12 +146,18 @@ The contribution of this work is twofold.
 First, we explore how such analysis can be conducted with either standard 
 machine learning approaches for tabular data or more complex, BERT-based deep 
 learning solutions.
-Our results suggest that casting the problem at hand as a standard machine 
-learning task requires extensive feature engineering and achieves only moderate
-predictive performance, whereas BERT-based models yield satisfactory 
-results for sentiment analysis.
+Our results suggest that casting the problem as a standard machine 
+learning task achieves acceptable 
+predictive performance and requires extensive feature engineering.
+BERT-based models clearly outperform this simplistic approach while avoiding 
+the need for hand-crafted inputs.
+The ability to draw on knowledge acquired during the pre-training phase possibly 
+supports the Transformers in solving the difficult task of classifying 
+relatively few observations in a sparsely populated feature space.
 We further note that topic modeling does not aid classification in this 
-application but attribute this largely to the difficulty of topic extraction.
+application, in fact complicating it, but attribute this largely to the fact 
+that extracting topics from this kind of data is challenging even for the 
+human annotator.
 Second, we provide teaching material for instructing fellow researchers in the 
 applied techniques.
 With this collection, which will remain publicly available, we hope to 

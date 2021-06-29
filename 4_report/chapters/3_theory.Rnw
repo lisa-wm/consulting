@@ -113,7 +113,7 @@ arbitrarily fine-grained.
 We focus on the simplest form and attempt to determine 
 whether tweets convey positive or negative sentiment, also called 
 \textit{polarities}.
-In this, sentiment analysis is a standard classification problem
+As such, sentiment analysis is a standard classification problem
 \citep{medhatetal2014}.
 
 Sentiment analysis occurs at different levels of a document.
@@ -150,7 +150,7 @@ the sole grounds for classification.
 
 Instead, we perceive sentiment analysis as a classic instance of supervised ML.
 Under the assumption that the data can be categorized into $g \in \N$ discrete 
-classes we predict for each document its associated class from a set of 
+classes, we predict for each document its associated class from a set of 
 features. 
 More formally, we find a model $f: \mathcal{X} \rightarrow \R^g$, 
 $\mathcal{X} \subseteq \R^p$ for $p \in \N$, that maps from the space of input 
@@ -202,7 +202,7 @@ experience some difficulties in modeling topics for tweets.
 We make the general assumption of each document pertaining to exactly one topic.
 This seems plausible in the light of tweets' brevity (Twitter currently allows 
 for 280 characters, up from 140 originally) and is supported by other research 
-(\citet{zuoetal2016}, \citet{quiangetal2019}).
+(e.g., \citet{zuoetal2016}, \citet{quiangetal2019}).
 We then explore different options in our proposal.
 For the standard ML classification we use topic modeling, 
 somewhat implicitly, as a means of feature generation for sentiment analysis.

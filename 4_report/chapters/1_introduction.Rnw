@@ -13,7 +13,7 @@ inertia of traditional channels \citep{stieretal2018}.
 On the receiving end, social media grant unprecedented access to target 
 audiences.
 The industry's oligopolistic structure sees people from heterogeneous 
-backgrounds convene on few global platforms to exchange their views. 
+backgrounds convene on a few global platforms to exchange their views. 
 Research suggests that the low cost of online engagement causes political 
 content to also circulate among users with less political affinity 
 \citep{jostetal2018}.
@@ -22,7 +22,7 @@ Users view content according to their perceived preferences and thus often
 end up in community niches populated by like-minded people.
 This clustering process creates groups disproportionately receptive to 
 certain messages and has played an important role in large-scale propaganda.
-Echo chambers are particularly suited for the direct communication 
+Echo chambers are particularly suited to the direct communication 
 among users social media offer: they enable a dialogue between politicians and 
 their electorate that is hard to achieve via traditional channels, and allow to 
 deploy the power of emotion to shape opinion \citep{hasellweeks2016}.
@@ -58,7 +58,7 @@ It is the goal of this project to make analysis of social media texts in a
 political context more easily accessible to researchers.
 We focus on the analysis of public sentiment in a topic-aware manner for texts 
 collected from Twitter posts by German Members of Parliament (MPs).
-Our contribution is two-fold:
+Our contribution is twofold:
 
 \begin{enumerate}
   \item We explore how topic-specific sentiment analysis can be 
@@ -79,8 +79,8 @@ We proceed in section \ref{analysis} by sketching our data collection and
 cleaning process and then present our proposal for conducting TSSA, laying out 
 for both approaches the underlying methodology and discussing the results of 
 applying them to the data at hand.
-Section \ref{teaching} outlines how the findings from this analysis translate to 
-the proposed teaching material.
+Section \ref{teaching} describes how the findings from this analysis translate 
+to the proposed teaching material.
 Afterwards, in section \ref{discussion}, we critically assess the findings and 
 limitations of the project, and conclude with a brief summary in section 
 \ref{conclusion}.

@@ -1,71 +1,88 @@
 \textbf{Analytical proposal.}
-Regarding the results from the TSSA experiments, we note that the standard ML 
-solution, with or without topic modeling component, cannot outperform a 
-purely random classifier.
-This might be due to a variety of reasons.
-First and foremost, the Twitter data are not exactly easy to handle: their 
-extreme brevity and particular origin with a mixture of social media 
-idiosyncrasies and political context, as discussed in section \ref{challenges}, 
-make their classification a rather challenging task to begin with.
-The limited amount of training data aggravates the situation further.
-Then, a number of design decisions might be responsible for the poor 
-results.
-These include, among others, using the STM for topic modeling (with a particular 
-topical prevalence formula and the simplification of pooling tweets into 
-pseudo-documents), our choice of learning algorithms, and the 
+First and foremost, we note again the data-inherent difficulty of inferring a 
+feature-target relationship from the rather small number of extremely short 
+texts we face.
+This becomes evident in the light of very sparse document-feature matrices on 
+corpus level (even after pre-processing aimed at tokens unification).
+Regarding the results from the TSSA experiments, we observe that the presence of
+topic modeling is a decisive factor for the performance of the standard ML 
+solution.
+When we prefix the embedding computation with an STM to build topic clusters, 
+the resulting feature space dimensionality seems to exceed what the classifiers 
+can adequately handle (at least in relation to the number of observations).
+By consequence, the regularized regression learner basically resorts to 
+mimicking the behavior of a featureless classifier. 
+The impact is not so obvious for the random forest but also leads to a failure 
+to produce meaningful results.
+Performance increases drastically, from around 71.5\% to 85.9\% accuracy, when 
+the topic modeling step is skipped and only corpus-level embeddings are 
+computed.
+With this, the standard ML solution thus still scores well below the BERT-based 
+models, albeit at lower complexity.
+We can certainly identify ample room of improvement.
+Obviously, the topic modeling part requires immediate attention.
+A better alternative to the current implementation should be able to 
+incorporate topical context without inflating the feature space as much.
+While the STM's ability to factor in meta variables is an advantage, the need 
+to pool documents into larger units is definitely also an issue to address.
+Perhaps one might enrich the topic modeling step might by mining hashtags, 
+although the overall low count of hashtags in the data and their 
+heterogeneity have prevented us from doing so.
+There are a lot more design decisions with potential impact on 
+performance, including our choice of learning algorithms and the 
 entire pipeline structure with tuning procedures and hyperparameter 
 configuration spaces in combination with a rather small tuning budget.
-There is certainly ample room for improvement in these areas.
-The near-randomness of the learners' discriminating ability, however, suggests 
-that the classification features are the most probable culprit.
-It simply appears that they bear no information as to whether a tweet
-has positive or negative sentiment.
-This insight is not all that surprising when we recall the naive, BOW-induced 
-way of handling, say, negation statements.
-Developing more sophisticated solutions for these problems, however, requires 
-such an effort that it calls the very merit of the simple ML approach into 
-question.
-This leads us to the conclusion that, in the particular setting of our analysis 
-and for the given data, standard ML techniques are not well applicable to 
-sentiment classification.
-Nonetheless, the exhaustive feature engineering these methods entail -- as 
-opposed to the BERT variants -- has given rise to plenty of teaching material.
-Therefore, while the explored methods might not have succeeded in the task at 
-hand, they may still be useful in other applications.
+The static features are also quite coarse in some places. 
+Negations, for instance, should probably be handled with more care to actually 
+capture their influence on sentiment expression.
 
-For the DL-based solutions the picture is quite different.
-We have achieved satisfactory performance with variants of BERT for both 
-document-level sentiment analysis and ABSA tasks, suggesting that the vastly 
-higher complexity of the Transformer models is actually necessary here.
-Possibly as result of our small training corpus, we note that additional 
-fine-tuning/post-training helps to improve predictive performance.
-Our key finding is that the incorporation of aspects does not help sentiment 
-classification.
-While we still hold on to our initial assumptions that the expression of 
+However, it is unclear whether these decisions have enough leverage on 
+performance to justify yet more exploration and feature engineering.
+If high classification accuracy is needed, it might be more advisable to 
+dedicate the budget to training a BERT-based model in the first place.
+The BERT variants have achieved satisfactory performance 
+for both document-level sentiment analysis and ABSA tasks, suggesting that the 
+vastly higher complexity of the Transformer models is actually necessary to 
+make sense of the data.
+It is plausible, for instance, that the BERT solution is less affected by 
+documents' brevity and feature space sparsity since it may draw on prior 
+knowledge from pre-training.
+Yet, it is apparently equally ill-suited to incorporating topical context.
+While we still hold on to our initial assumption that the expression of 
 sentiment may vary substantially across different contexts, and thus sentiment 
 analysis should be able to benefit from topic modeling, this does not seem to be 
 the case for the given task.
 One reason for this behavior might be that the additional information from 
 aspects is set off by the increased complexity of the task.
-Mostly, however, it seems that aspect identification is difficult for our 
+Mostly, however, it seems that aspect identification is simply difficult for our 
 Twitter data.
 During the annotation process we noted how many texts can hardly be allocated to 
 a particular topic even by human judgment, and selecting an actual token from 
-the text to indicate the aspect is downright impossible.
-This phenomenon can be attributed to the dynamics of political discussion on 
+the text to indicate the aspect is often downright impossible.
+This phenomenon may be attributed to the dynamics of political discussion on 
 Twitter: tweets are generally issued quite ad-hoc in response to some current 
 event, where the topic is clear to the audience with no need to name it 
 explicitly.
-Sentiment analysis for this kind of data should therefore perhaps resort to 
-alternative methods of incorporating topical context.
-\newpage
+The approach to extract topics from such data should therefore be generally 
+reassessed. 
+
+A last and very general amendment, which might perhaps also alleviate the 
+topic modeling problem, would be the collection of more data.
+As discussed before, unlabeled data can be acquired in large amounts and at 
+very little cost, but the annotation of these samples poses a bottleneck
+that is not at all unique to the task at hand.
+Hopefully, future work within weakly supervised learning will help to overcome
+this most fundamental of issues.
+\\
 
 \textbf{Knowledge transfer.}
+Despite mixed results in our experiments, the techniques explored are all 
+valuable tools in text analysis.
 Feedback from the live workshop held with the teaching material we have 
-developed suggests that the material is generally helpful for getting started 
-with NLP.
-It also confirmed our own experience that the covered topics might be too much 
+developed according to our findings suggests that the material is indeed helpful 
+for getting started with NLP.
+It also confirmed our own observation that the covered topics might be too much 
 content for two days, especially for less experienced participants.
 We would therefore recommend a more generous time frame for future teaching 
-units, but still prefer to keep the material as exhaustive so they remain 
+units, but still prefer to keep the material as exhaustive so it remains 
 accessible without the need for additional instruction.

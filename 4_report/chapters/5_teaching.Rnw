@@ -53,8 +53,6 @@ All blocks contain, to varying extent, the following materials:
   \item additional sources for more in-depth study.
 \end{tight_enumerate}
 
-\newpage
-
 A first two-day live workshop already took place in April/May 2021.
 We were careful, however, to design the material in a self-contained way, with 
 exhaustive explanations, so it may be used without additional instructions.
