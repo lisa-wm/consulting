@@ -1,0 +1,130 @@
+% ------------------------------------------------------------------------------
+% SETUP ------------------------------------------------------------------------
+% ------------------------------------------------------------------------------
+
+\documentclass[12pt]{article}
+\usepackage[a4paper, width = 175mm, top = 20mm, bottom = 20mm, 
+bindingoffset = 0mm]{geometry}
+\usepackage[utf8]{inputenc}
+\usepackage{url}
+\usepackage{ragged2e}
+\usepackage{array}
+\usepackage{tabularx}
+\usepackage{float}
+\usepackage{xcolor, listings}
+\usepackage{textcomp}
+\usepackage{fancyhdr}
+\newcommand{\changefont}{%
+    \fontsize{8}{11}\selectfont
+}
+
+\usepackage[hang, flushmargin, bottom]{footmisc} 
+\usepackage{hyperref}
+\hypersetup{
+  colorlinks = true,
+  linkcolor = .,
+  urlcolor = .,
+  citecolor = .,
+  bookmarks = true}
+
+\pagestyle{fancy}
+\fancyhead{}
+\fancyhead[R]{\changefont{Topic-specific sentiment analysis for tweets by 
+German MPs}}
+\fancyfoot{}
+\fancyfoot[R]{\thepage}
+\setlength{\headheight}{14.5pt}
+\setlength{\parindent}{0pt}
+\interfootnotelinepenalty = 10000
+
+% ------------------------------------------------------------------------------
+% MAIN -------------------------------------------------------------------------
+% ------------------------------------------------------------------------------
+
+\begin{document}
+\SweaveOpts{concordance=TRUE}
+
+% FRONT PAGE -------------------------------------------------------------------
+ 
+\begin{titlepage}
+\begin{center}
+    
+\large
+Statistical Consulting
+    
+\vspace{0.5cm}
+      
+\rule{\textwidth}{1pt}
+% \large
+\textbf{Topic-specific sentiment analysis for tweets by German MPs}
+\rule{\textwidth}{1pt}
+   
+\vspace{0.5cm}
+      
+\normalsize
+Department of Statistics \\
+Ludwig-Maximilians-Universität München 
+
+\vspace{0.5cm}
+
+\includegraphics[width = 0.2\textwidth]{figures/sigillum.png}
+
+\vspace{0.5cm}
+
+\rule{\textwidth}{1pt}
+\small
+% \raggedright
+New data sources offer vast potential for studying public opinion in the 
+political environment.
+Frequently arising research questions concern the nature of topics discussed 
+and the sentiment expressed toward them.
+We perform sentiment analysis for tweets by German MPs issued since the last 
+federal election in September 2017, scraped from the Web, with special regard to 
+topical context.
+The contribution of this work is twofold.
+First, we explore how such analysis can be conducted with either standard 
+machine learning approaches for tabular data or more complex, BERT-based deep 
+learning solutions.
+Our results suggest that casting the problem at hand as a standard machine 
+learning task requires extensive feature engineering and achieves only moderate
+predictive performance, whereas BERT-based models yield satisfactory 
+results for sentiment analysis.
+We further note that topic modeling does not aid classification in this 
+application but attribute this largely to the difficulty of topic extraction.
+Second, we provide teaching material for instructing fellow researchers in the 
+applied techniques.
+With this collection, which will remain publicly available, we hope to 
+facilitate the entrance to NLP for practitioners from other disciplines.
+\rule{\textwidth}{1pt}
+
+% \center
+
+\vspace{0.3cm}
+
+\begin{tabular}{rl}
+  Speakers & Asmik Nalmpatian \& Lisa Wimmer \\
+  & \\
+  Project partner & Prof. Dr. Paul Thurner \\
+  & \textit{Department of Political Science} \\
+  & \\
+  Supervisors & Matthias Aßenmacher, Ph.D. \\
+  & Prof. Dr. Christian Heumann \\
+  & \textit{Department of Statistics} \\
+  & \\
+  Date & Monday, July 12\textsuperscript{th}, 2021, 16:00 s.t. \\
+  & \\
+  Meeting & ID 918 5472 5495, passcode 413775
+\end{tabular}
+
+\vspace{0.5cm}
+
+\rule{\textwidth}{1pt}
+
+\vspace{0.5cm}
+
+\url{https://lmu-munich.zoom.us/j/91854725495?pwd=NHVLemt4ZzZHNk8vSUpHWHBZamZjUT09}
+
+\end{center}
+\end{titlepage}
+
+\end{document}
