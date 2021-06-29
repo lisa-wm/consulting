@@ -415,8 +415,6 @@ $\rightarrow$ \textbf{Train, predict, resample, tune, benchmark}
 
 \begin{frame}{Results}
 
-\color{red}
-
 \begin{table}[H]
   \footnotesize
   \begin{tabular}{l|r|r|r|}
@@ -426,30 +424,28 @@ $\rightarrow$ \textbf{Train, predict, resample, tune, benchmark}
     \multicolumn{1}{l|}{\textbf{learner without topic modeling}} &
     \multicolumn{1}{l|}{\textbf{featureless learner}} \\ 
     \hline
-    \multicolumn{1}{|l|}{accuracy} & 0.723 & \cellcolor{lightgray} 
-    \textbf{0.729} & 0.724 \\
+    \multicolumn{1}{|l|}{accuracy} & 0.715 & \cellcolor{lightgray} 
+    \textbf{0.859} & 0.724 \\
     \hline
-    \multicolumn{1}{|l|}{F1 score} & 0.839 & \cellcolor{lightgray} 
-    \textbf{0.840} & 0.840 \\
+    \multicolumn{1}{|l|}{F1 score} & 0.023 & \cellcolor{lightgray} 
+    \textbf{0.706} & - \\
     \hline
-    \multicolumn{1}{|l|}{TN} & \textbf{293.000} & \cellcolor{lightgray} 
-    288.000 & \textbf{293.000} \\
+    \multicolumn{1}{|l|}{TN} & 288.333 & \cellcolor{lightgray} 
+    279.667 & \textbf{293.333} \\
     \hline
-    \multicolumn{1}{|l|}{TP} & 0.000 & \cellcolor{lightgray} \textbf{7.333} 
+    \multicolumn{1}{|l|}{TP} & 1.333 & \cellcolor{lightgray} \textbf{68.333} 
     & 0.000 \\
     \hline
-    \multicolumn{1}{|l|}{FN} & 111.667 & \cellcolor{lightgray} 
-    \textbf{104.333} & 111.667 \\
+    \multicolumn{1}{|l|}{FN} & 110.333 & \cellcolor{lightgray} 
+    \textbf{43.333} & 111.667 \\
     \hline
-    \multicolumn{1}{|l|}{FP} & 0.333 & \cellcolor{lightgray} 5.333 & 
+    \multicolumn{1}{|l|}{FP} & 5.000 & \cellcolor{lightgray} 13.667 & 
     \textbf{0.000} \\
     \hline
   \end{tabular}
-  \caption{Results for standard ML approach.}
+  \caption{\raggedright Results for standard ML approach.}
   \label{tab_res_ml}
 \end{table}
-
-\color{black}
 
 \end{frame}
 

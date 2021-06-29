@@ -9,10 +9,12 @@
   \begin{itemize}
     \setlength{\itemsep}{-0.3em}
     \setlength{\parskip}{0.3em}  
-    \item Topic modeling requires explicit handling of short documents.
     \item Feature extraction is time-consuming and requires many design 
     choices.
-    \item \textcolor{red}{tbd}
+    \item Topic modeling requires explicit handling of short documents.
+    \item Topic-specific embeddings inflate the feature space too much, causing 
+    performance to deteriorate.
+    \item Topic-agnostic sentiment analysis works fairly well.
   \end{itemize}  
 \end{itemize}
 
