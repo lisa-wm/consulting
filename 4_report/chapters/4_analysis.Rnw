@@ -763,12 +763,16 @@ Performance metrics include, besides the elements of the confusion matrix,
 the following quantities (e.g., \citet{japkowiczshah2011}):
 
 \begin{enumerate}
-  \item Accuracy: $\rho_{\text{acc}} =  \frac{\text{TN + TP}}{
+  \item Accuracy: $\rho_{\text{accuracy}} =  \frac{\text{TN + TP}}{
   \text{TN + TP + FN + FP}}$, and
-  \item F1 score: $\rho_{\text{F1}} =  2 \cdot \dfrac{\frac{\text{TP}}{
-  \text{TP + FP}} \cdot 
-  \frac{\text{TP}}{\text{TP + FN}}}{\frac{\text{TP}}{\text{TP + FP}} +
-  \frac{\text{TP}}{\text{TP + FN}}}$,
+  \item F1 score: $\rho_{\text{F1}} =  2 \cdot
+  \dfrac{\rho_{\text{precision}} \cdot \rho_{\text{recall}}}{
+  \rho_{\text{precision}} +
+  \rho_{\text{recall}}}$, composed of
+  \begin{itemize}
+    \item[a)] $\rho_{\text{precision}} = \frac{\text{TP}}{\text{TP + FP}}$ and
+    \item[b)] $\rho_{\text{recall}} = \frac{\text{TP}}{\text{TP + FN}}$, 
+  \end{itemize}
 \end{enumerate}
 
 where TN = true negatives, TP = true positives, FN = false negatives and 
@@ -1172,7 +1176,11 @@ source than the basic model.
 The data set has a size of 16 GB and over 2 billion tokens, suggesting the 
 ability to produce better results.
 
-For ABSA we additionally post-train the basic model on the GermEval 
+For ABSA\footnote{
+The ABSA implementation draws on code from
+\url{https://github.com/howardhsu/ABSA_preprocessing} for pre-processing and 
+from \url{https://github.com/howardhsu/BERT-for-RRC-ABSA} for post-training.
+} we additionally post-train the basic model on the GermEval 
 data set but do not use these data as part of training instances, as the aspects 
 deviate substantially from those detected in our corpus. 
 The methodology for ABSA is widely used in sentiment analysis of review texts 

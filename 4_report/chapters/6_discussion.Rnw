@@ -25,7 +25,7 @@ A better alternative to the current implementation should be able to
 incorporate topical context without inflating the feature space as much.
 While the STM's ability to factor in meta variables is an advantage, the need 
 to pool documents into larger units is definitely also an issue to address.
-Perhaps one might enrich the topic modeling step might by mining hashtags, 
+Perhaps one might enrich the topic modeling step by mining hashtags, 
 although the overall low count of hashtags in the data and their 
 heterogeneity have prevented us from doing so.
 There are a lot more design decisions with potential impact on 
@@ -47,7 +47,12 @@ make sense of the data.
 It is plausible, for instance, that the BERT solution is less affected by 
 documents' brevity and feature space sparsity since it may draw on prior 
 knowledge from pre-training.
-Yet, it is apparently equally ill-suited to incorporating topical context.
+The option of post-training on the pool of unlabeled data, which are often 
+abundant but not admissible in the purely supervised training process of 
+standard ML techniques, is another advantage of Transformer models and helps to 
+improve performance.
+Yet, our BERT implementation is apparently equally ill-suited to incorporating 
+topical context.
 While we still hold on to our initial assumption that the expression of 
 sentiment may vary substantially across different contexts, and thus sentiment 
 analysis should be able to benefit from topic modeling, this does not seem to be 
