@@ -295,7 +295,7 @@ $\rightarrow$ \textbf{Difference important in resampling processes}
 
 % ------------------------------------------------------------------------------
 
-\begin{frame}{Structural topic model (STM)}
+\begin{frame}<0>[noframenumbering]{Structural topic model (STM)}
 
 \begin{enumerate}
 
