@@ -530,6 +530,13 @@ Task 1: \textbf{masked language modeling (MLM)}
 $\rightarrow$ mask words and have BERT predict them without considering 
 positioning
 
+% \vfill
+% 
+% \textit{Die Ausgrenzung von MigrantInnen von der \#EssenerTafel 
+% ist inakzeptabel und \\rassistisch.
+% Wir dürfen nicht zulassen, dass die Ärmsten gegeneinander 
+% \\ausgespielt werden.}
+
 \vfill
 
 \fbox{\begin{minipage}{0.9\textwidth}
@@ -537,7 +544,8 @@ positioning
 [CLS] Die Ausgrenzung von \highlight{[MASK]} von der \#EssenerTafel 
 ist inakzeptabel und \highlight{[MASK]}. [SEP]
 Wir dürfen nicht zulassen, dass die \highlight{[MASK]} gegeneinander 
-ausgespielt werden. [SEP]
+ausgespielt werden. [SEP] \\
+\textbf{Labels:} \textit{MigrantInnen, rassistisch, Ärmsten}
 \end{minipage}}
 
 \end{frame}
@@ -564,7 +572,7 @@ ist inakzeptabel und \highlight{[MASK]}. [SEP]
 gegeneinander 
 ausgespielt werden. [SEP]
 \\
-\textbf{Label:} IsNextSentence
+\textbf{Label:} \textit{IsNextSentence}
 \end{minipage}}
 
 \vfill
@@ -577,7 +585,7 @@ ist inakzeptabel und \highlight{[MASK]}. [SEP]
 \\
 \textbf{Sentence B:} Freue mich sehr für ihn und auf die Zusammenarbeit. [SEP]
 \\
-\textbf{Label:} IsNextSentence
+\textbf{Label:} \textit{IsNotNextSentence}
 \end{minipage}}
 
 \end{frame}
