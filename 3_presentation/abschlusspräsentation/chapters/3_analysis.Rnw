@@ -530,13 +530,6 @@ Task 1: \textbf{masked language modeling (MLM)}
 $\rightarrow$ mask words and have BERT predict them without considering 
 positioning
 
-% \vfill
-% 
-% \textit{Die Ausgrenzung von MigrantInnen von der \#EssenerTafel 
-% ist inakzeptabel und \\rassistisch.
-% Wir dürfen nicht zulassen, dass die Ärmsten gegeneinander 
-% \\ausgespielt werden.}
-
 \vfill
 
 \fbox{\begin{minipage}{0.9\textwidth}
