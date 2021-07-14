@@ -1,0 +1,301 @@
+% ------------------------------------------------------------------------------
+% SETUP ------------------------------------------------------------------------
+% ------------------------------------------------------------------------------
+
+\documentclass[12pt]{article}
+
+\renewcommand{\labelitemi}{$\circ$}
+\renewcommand{\labelitemii}{$\circ$}
+\renewcommand{\labelitemiii}{$\circ$}
+
+\newcommand{\N}{\mathbb{N}}
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\setd}{\{1, 2, \dots, D\}}
+\newcommand{\setk}{\{1, 2, \dots, K\}}
+\newcommand{\setv}{\{1, 2, \dots, V\}}
+
+\usepackage[a4paper, width = 175mm, top = 20mm, bottom = 20mm, 
+bindingoffset = 0mm]{geometry}
+\usepackage[utf8]{inputenc}
+\usepackage[round, comma]{natbib}
+\usepackage{url}
+\usepackage[font = footnotesize]{caption}
+\usepackage{subcaption}
+\captionsetup[subfigure]{justification=justified,singlelinecheck=false}
+\usepackage{csquotes} \MakeOuterQuote{"}
+\usepackage{ragged2e}
+\usepackage{array}
+\usepackage{tabularx}
+\usepackage[fleqn]{amsmath}
+\usepackage{bm}
+\usepackage{amssymb}
+\usepackage{amsthm}
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage[export]{adjustbox}
+\usepackage[table]{xcolor}
+\usepackage{algorithm}
+\usepackage{algorithmic}
+\usepackage{xcolor, listings}
+\usepackage{textcomp}
+\usepackage{fancyhdr}
+\newcommand{\changefont}{%
+    \fontsize{8}{11}\selectfont
+}
+
+\usepackage[hang, flushmargin, bottom]{footmisc} 
+\usepackage{hyperref}
+\hypersetup{
+  colorlinks = true,
+  linkcolor = .,
+  urlcolor = .,
+  citecolor = .,
+  bookmarks = true}
+
+\newenvironment{tight_enumerate}{
+\begin{enumerate}
+  \setlength{\itemsep}{0pt}
+  \setlength{\parskip}{0pt}
+}{\end{enumerate}}
+
+\newenvironment{tight_itemize}{
+\begin{itemize}
+  \setlength{\itemsep}{0pt}
+  \setlength{\parskip}{0pt}
+}{\end{itemize}}
+
+\pagestyle{fancy}
+\fancyhead{}
+\fancyhead[R]{\changefont{Topic-specific sentiment analysis for tweets by 
+German MPs}}
+\fancyfoot{}
+\fancyfoot[R]{\thepage}
+\setlength{\headheight}{14.5pt}
+\setlength{\parindent}{0pt}
+\interfootnotelinepenalty = 10000
+
+% ------------------------------------------------------------------------------
+% MAIN -------------------------------------------------------------------------
+% ------------------------------------------------------------------------------
+
+\usepackage{/usr/share/R/share/texmf/tex/latex/Sweave}
+\begin{document}
+\input{report-concordance}
+
+% FRONT PAGE -------------------------------------------------------------------
+ 
+\begin{titlepage}
+\begin{center}
+    
+\LARGE
+Statistical Consulting
+    
+\vspace{0.5cm}
+      
+\rule{\textwidth}{1.5pt}
+\Huge
+\textbf{Topic-specific sentiment analysis for tweets by German MPs}
+\rule{\textwidth}{1.5pt}
+   
+\vspace{0.5cm}
+      
+\large
+Department of Statistics \\
+Ludwig-Maximilians-Universität München 
+
+\vfill
+
+Munich, July 12\textsuperscript{th}, 2021
+      
+\vfill
+
+\includegraphics[width = 0.4\textwidth]{figures/sigillum.png}
+
+\vfill
+
+\begin{tabular}{rl}
+  Authors & Asmik Nalmpatian \\
+  & Lisa Wimmer \\
+  & \\
+  Project partner & Prof. Dr. Paul Thurner \\
+  & \textit{Department of Political Science} \\
+  & \\
+  Supervisors & Matthias Aßenmacher, Ph.D. \\
+  & Prof. Dr. Christian Heumann \\
+  & \textit{Department of Statistics}
+\end{tabular}
+
+\end{center}
+\end{titlepage}
+
+% CONTENTS ---------------------------------------------------------------------
+
+\pagenumbering{Roman}
+\newpage
+
+\begin{abstract}
+
+New data sources offer vast potential for studying public opinion in the 
+political environment.
+Frequently arising research questions concern the nature of topics discussed 
+and the sentiment expressed toward them.
+We perform sentiment analysis for tweets by German MPs issued since the last 
+federal election in September 2017, scraped from the Web, with special regard to 
+topical context.
+The contribution of this work is twofold.
+First, we explore how such analysis can be conducted with either standard 
+machine learning approaches for tabular data or more complex, BERT-based deep 
+learning solutions.
+Our results suggest that casting the problem as a standard machine 
+learning task achieves acceptable 
+predictive performance and requires extensive feature engineering.
+BERT-based models clearly outperform this simplistic approach while avoiding 
+the need for hand-crafted inputs.
+The ability to draw on knowledge acquired during the pre-training phase possibly 
+supports the Transformers in solving the difficult task of classifying 
+relatively few observations in a sparsely populated feature space.
+Post-training on the large pool of unlabeled data typically available in such 
+settings is also helpful.
+We further note that topic modeling does not aid classification in this 
+application, in fact complicating it, but attribute this largely to the fact 
+that extracting topics from this kind of data is challenging even for the 
+human annotator.
+Second, we provide teaching material for instructing fellow researchers in the 
+applied techniques.
+With this collection, which will remain publicly available, we hope to 
+facilitate the entrance to NLP for practitioners from other disciplines.
+
+\end{abstract}
+
+\newpage
+
+\tableofcontents
+\newpage
+
+\Large
+\noindent
+\textbf{List of Abbreviations}
+\vspace{0.5cm} \\
+\noindent
+\normalsize
+
+\begin{tabular}{rl}
+  ABSA & aspect-based sentiment analysis \\
+  BERT & Bidirectional Encoder Representations from Transformers \\ 
+  BOW & bag of words \\
+  DL & deep learning \\
+  FN & false negative \\
+  FP & false positive \\
+  LDA & latent Dirichlet allocation \\
+  ML & machine learning \\
+  MLM & masked language modeling \\
+  MP & Member of Parliament \\
+  NLP & natural language processing \\
+  NSP & next sentence prediction \\
+  POS & part of speech \\
+  RNN & recurrent neural network \\
+  STM & structural topic model \\
+  TN & true negative \\
+  TP & true positive \\
+  TSSA & topic-specific sentiment analysis
+\end{tabular}
+
+\vspace{2cm}
+\listoffigures
+\vspace{2cm}
+\listoftables
+
+\newpage
+
+% CHAPTERS ---------------------------------------------------------------------
+
+\pagenumbering{arabic}
+    
+\section{Introduction}
+\label{intro}
+\input{chapters/1_introduction.Rnw}
+
+\section{Project outline}
+\label{project}
+\input{chapters/2_project.Rnw}
+
+\section{General theoretical context}
+\label{theory}
+\input{chapters/3_theory.Rnw}
+
+\section{Analytical proposal}
+\label{analysis}
+\input{chapters/4_analysis.Rnw}
+
+\section{Knowledge transfer}
+\label{teaching}
+\input{chapters/5_teaching.Rnw}
+
+\section{Discussion}
+\label{discussion}
+\input{chapters/6_discussion.Rnw}
+
+\section{Conclusion}
+\label{conclusion}
+\input{chapters/7_conclusion.Rnw}
+
+\newpage
+
+% ------------------------------------------------------------------------------
+% APPENDIX ---------------------------------------------------------------------
+% ------------------------------------------------------------------------------
+    
+\pagenumbering{Roman}
+
+% FIXME make page numbering dynamic (picking up from list of tables page)
+% \getpagerefnumber{listoftables} does not work
+
+\setcounter{page}{4}
+
+\appendix
+
+% \section{Appendix}
+% \label{app}
+% \input{chapters/appendix.Rnw}
+% \newpage
+
+\section{Electronic appendix}
+\label{el_app}
+
+Data, code and figures are provided in electronic form.
+
+\newpage
+    
+% ------------------------------------------------------------------------------
+% BIBLIOGRAPHY -----------------------------------------------------------------
+% ------------------------------------------------------------------------------
+
+\RaggedRight
+\bibliography{bibliography}
+\bibliographystyle{dcu} %dcu
+% \newpage
+
+% ------------------------------------------------------------------------------
+% DECLARATION OF AUTHORSHIP-----------------------------------------------------
+% ------------------------------------------------------------------------------
+
+% \Large
+% \noindent
+% \textbf{Declaration of authorship} 
+% \vspace{0.5cm}
+% \noindent
+% \normalsize
+% 
+% We hereby declare that the report submitted is our own unaided work. All direct 
+% or indirect sources used are acknowledged as references. We are aware that the 
+% report in digital form can be examined for the use of unauthorized aid and in 
+% order to determine whether the report as a whole or parts incorporated in it may 
+% be deemed as plagiarism. For the comparison of our work with existing sources we 
+% agree that it shall be entered in a database where it shall also remain after 
+% examination, to enable comparison with future reports submitted. Further rights 
+% of reproduction and usage, however, are not granted here. This paper was not 
+% previously presented to another examination board and has not been published. 
+
+% ------------------------------------------------------------------------------
+
+\end{document}
