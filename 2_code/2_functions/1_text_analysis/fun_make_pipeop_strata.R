@@ -2,7 +2,7 @@
 # STRATIFICATION PIPEOP
 # ------------------------------------------------------------------------------
 
-# PURPOSE: create pipe operator for stratification so data can be resampled
+# Purpose: create pipe operator for stratification so data can be resampled
 # along strata containing keywords
 
 # MAKE PIPEOP ------------------------------------------------------------------

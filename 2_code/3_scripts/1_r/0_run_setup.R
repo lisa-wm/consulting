@@ -2,9 +2,7 @@
 # SET-UP
 # ------------------------------------------------------------------------------
 
-# Purpose: load required packages
-
-# Install, if necessary, and load required packages
+# Purpose: install, if necessary, and load required packages
 
 packages_required <-  c(
   

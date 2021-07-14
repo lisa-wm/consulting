@@ -2,14 +2,13 @@
 # PRE-PROCESSING TWEETS
 # ------------------------------------------------------------------------------
 
-# IN: raw twitter data + meta data
-# OUT: corpus object of cleaned tweets and meta data + temporary data sets
+# Purpose: read and pre-process data
 
 # READ AND CLEAN DATA ----------------------------------------------------------
 
 # Read tweets
 # Attention, these are stored in time-stamped folder to keep downloads from 
-# different time points apart --> adjust
+# different time points apart
 
 tweets_raw_new <- data.table::fread(
   here::here(
@@ -248,7 +247,7 @@ data_clean[
 
 # CREATE UNIQUE DOC ID ---------------------------------------------------------
 
-# Add unique doc_id (only now, since in the beginning, documents may be 
+# Add unique doc_id (only now, since in the beginning documents may be 
 # discarded during language detection etc.)
 
 data_clean[

@@ -2,7 +2,7 @@
 # UMLAUTS REMOVAL
 # ------------------------------------------------------------------------------
 
-# PURPOSE: transform German umlauts and ligature s
+# Purpose: transform German umlauts and ligature s
 
 remove_umlauts <- function(text) {
   

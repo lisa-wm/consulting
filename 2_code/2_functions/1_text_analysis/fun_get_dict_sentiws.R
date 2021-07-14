@@ -2,7 +2,7 @@
 # CREATION OF SENTIWS DICTIONARY
 # ------------------------------------------------------------------------------
 
-# PURPOSE: read SentiWS dictionaries, tidy up, and combine polarities
+# Purpose: read SentiWS dictionaries, tidy up, and combine polarities
 
 get_dict_sentiws <- function() {
   

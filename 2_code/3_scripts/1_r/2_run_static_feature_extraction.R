@@ -2,8 +2,7 @@
 # STATIC FEATURE EXTRACTION
 # ------------------------------------------------------------------------------
 
-# IN: corpus object of cleaned tweets and meta data
-# OUT: corpus object of cleaned tweets, meta data and static features
+# Purpose: create features that can be computed prior to training
 
 # EXTRACT TWITTER-SPECIFIC FEATURES --------------------------------------------
 
@@ -300,6 +299,8 @@ load_rdata_files(
   folder = "2_code/1_data/2_tmp_data",
   tmp = FALSE)
 
+# Convert to wide format and keep only tags of interest
+
 tweets_pos_tags <- tweets_corpus_tagged[
   , .(doc_id, pos)
   ][, aux := 1L
@@ -344,3 +345,4 @@ save_rdata_files(
   tweets_corpus_features, 
   folder = "2_code/1_data/2_tmp_data",
   tmp = FALSE)
+

@@ -40,6 +40,8 @@ cols_to_keep <- c(
 char_cols <- sprintf("feat_%s", letters)
 tweets_sa <- tweets_sa[, ..cols_to_keep]
 
+# Create pooling variable for topic modeling
+
 tweets_sa[
   , doc_group := paste(
     twitter_username, 
@@ -127,16 +129,6 @@ preproc_pipelines <- lapply(
       
 })
 
-if (FALSE) {
-  
-  foo <- preproc_pipelines[[1]]
-  foofoo <- foo$train(task$clone())[[1]]
-  head(foofoo$data())
-  phew <- foo$predict(task$clone())[[1]]
-  head(phew$data())
-  
-}
-
 # CREATE GRAPH LEARNERS --------------------------------------------------------
 
 # Create AutoML pipeline that allows to choose between a penalized logistic
@@ -211,8 +203,6 @@ graph_learners <- lapply(
 
 names(graph_learners) <- c("ppl_with_tm", "ppl_without_tm")
 
-plot_graph <- plot(graph_learners[[1]]$graph)
-
 # DEFINE TUNING SEARCH SPACES --------------------------------------------------
 
 # Instantiate tuning search space
@@ -277,13 +267,9 @@ invisible(sapply(
     
 }))
 
-hyperparameters
-
 # CONDUCT TUNING ---------------------------------------------------------------
 
 # Set up autotuners for each pipeline
-
-# future::plan("multisession")
 
 auto_tuners <- lapply(
   
@@ -309,37 +295,6 @@ auto_tuners <- lapply(
     
 })
 
-# Tune
-
-# set.seed(123L)
-# invisible(lapply(auto_tuners, function(i) i$train(task)))
-# 
-# save_rdata_files(auto_tuners, folder = "2_code/1_data/2_tmp_data", tmp = FALSE)
-
-# TRAIN FINAL MODELS -----------------------------------------------------------
-
-# invisible(lapply(
-#   seq_along(graph_learners),
-#   function(i) {
-#     graph_learners[[i]]$param_set$values <- 
-#       auto_tuners[[i]]$tuning_instance$result_learner_param_vals
-#     graph_learners[[i]]$train(task)}))
-# 
-# save_rdata_files(
-#   graph_learners, 
-#   folder = "2_code/1_data/2_tmp_data", 
-#   tmp = FALSE)
-# 
-# graph_learners$ppl_with_tm$param_set$values
-# graph_learners$ppl_without_tm$param_set$values
-
-# predictions <- lapply(
-#   graph_learners,
-#   function(i) i$predict_newdata(data_unlabeled[complete.cases(data_unlabeled)]))
-# 
-# table(pred$response)
-# pred$predict_types
-
 # EVALUATE PERFORMANCE ---------------------------------------------------------
 
 # Set up baseline: classifier that ignores features
@@ -360,13 +315,19 @@ benchmark_design = mlr3::benchmark_grid(
   learners = learners_with_baseline,
   resamplings = resampling_strategy_outer)
 
-set.seed(123L)
-benchmark_results <- mlr3::benchmark(benchmark_design, store_models = TRUE)
+# Takes several hours
 
-save_rdata_files(
-  benchmark_results, 
-  folder = "2_code/1_data/2_tmp_data",
-  tmp = FALSE)
+if (FALSE) {
+  
+  set.seed(123L)
+  benchmark_results <- mlr3::benchmark(benchmark_design, store_models = TRUE)
+  
+  save_rdata_files(
+    benchmark_results, 
+    folder = "2_code/1_data/2_tmp_data",
+    tmp = FALSE) 
+  
+}
 
 load_rdata_files(
   benchmark_results,

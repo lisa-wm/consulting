@@ -2,7 +2,7 @@
 # TOPIC MODELING PIPEOP (KEYWORD-BASED)
 # ------------------------------------------------------------------------------
 
-# PURPOSE: create mlr3pipelines pipe operator for topic modeling based on 
+# Purpose: create mlr3pipelines pipe operator for topic modeling based on 
 # keywords
 
 # MAKE PIPEOP ------------------------------------------------------------------

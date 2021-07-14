@@ -2,7 +2,7 @@
 # SAVING RDATA FILES
 # ------------------------------------------------------------------------------
 
-# PURPOSE: save files created to rdata with automatic file name creation
+# Purpose: save files created to rdata with automatic file name creation
 
 save_rdata_files <- function(robject, folder, tmp = TRUE) {
 

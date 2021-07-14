@@ -1,8 +1,8 @@
 # ------------------------------------------------------------------------------
-# SAVING RDATA FILES
+# LOADING RDATA FILES
 # ------------------------------------------------------------------------------
 
-# PURPOSE: save files created to rdata with automatic file name creation
+# Purpose: save files created to rdata with automatic file name creation
 
 load_rdata_files <- function(robject, folder, tmp = TRUE) {
   

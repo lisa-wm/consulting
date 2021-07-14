@@ -2,7 +2,7 @@
 # STOPWORD CREATION
 # ------------------------------------------------------------------------------
 
-# PURPOSE: create basic list of stopwords to be used in topic modeling (coarser
+# Purpose: create basic list of stopwords to be used in topic modeling (coarser
 # than for sentiment analysis)
 
 make_stopwords <- function() {

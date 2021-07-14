@@ -2,10 +2,8 @@
 # SYMBOLS REMOVAL
 # ------------------------------------------------------------------------------
 
-# PURPOSE: remove symbols that carry no information for topic modeling and/or 
+# Purpose: remove symbols that carry no information for topic modeling and/or 
 # sentiment analysis
-
-# TODO Check if everything is covered, then cut redundancies
 
 remove_noisy_symbols <- function(text) {
   

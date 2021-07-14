@@ -2,7 +2,7 @@
 # CREATION OF GERMAN POLARITY CLUES DICTIONARY
 # ------------------------------------------------------------------------------
 
-# PURPOSE: read German polarity clues dictionaries, tidy up, and combine 
+# Purpose: read German polarity clues dictionaries, tidy up, and combine 
 # polarities
 
 get_dict_gpc <- function() {

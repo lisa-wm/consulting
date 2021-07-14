@@ -2,7 +2,7 @@
 # WORD EMBEDDINGS PIPEOP
 # ------------------------------------------------------------------------------
 
-# PURPOSE: create mlr3pipelines pipe operator for word embeddings
+# Purpose: create mlr3pipelines pipe operator for word embeddings
 
 # MAKE PIPEOP ------------------------------------------------------------------
 

@@ -2,7 +2,7 @@
 # CREATION OF SENTIMENT DICTIONARY BY RAUH
 # ------------------------------------------------------------------------------
 
-# PURPOSE: read dictionary proposed by Rauh, tidy up
+# Purpose: read dictionary proposed by Rauh, tidy up
 
 get_dict_rauh <- function() {
   

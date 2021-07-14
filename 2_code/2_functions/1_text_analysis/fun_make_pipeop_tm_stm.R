@@ -2,7 +2,7 @@
 # TOPIC MODELING PIPEOP (STM)
 # ------------------------------------------------------------------------------
 
-# PURPOSE: create mlr3pipelines pipe operator for topic modeling with STM
+# Purpose: create mlr3pipelines pipe operator for topic modeling with STM
 
 # MAKE PIPEOP ------------------------------------------------------------------
 
