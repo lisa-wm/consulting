@@ -1,1 +1,0 @@
-https://developer.twitter.com/en/docs/twitter-api/v1/data-dictionary/overview/tweet-object

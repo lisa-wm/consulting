@@ -1,0 +1,135 @@
+\begin{frame}{General theoretical context}
+
+\begin{figure}
+\begin{center}
+    \includegraphics[width = \textwidth]{figures/schema_tssa.jpg}
+\end{center}
+\caption{\raggedright Topic modeling and sentiment analysis. \textit{Source:} 
+adopted and modified from \citet{minpark2016}.}
+\end{figure}
+
+\vfill 
+\large
+$\rightarrow$ \textbf{Topic-specific sentiment analysis}
+
+\end{frame}
+
+% ------------------------------------------------------------------------------
+
+\begin{frame}{Topic modeling: idea}
+
+\begin{itemize}
+  \item \textbf{Goal}: discover latent semantic structures in a corpus \& group 
+  documents into topical clusters with characteristic topic-word distributions
+  \begin{itemize}
+    \item Exploratory tool $\rightarrow$ unsupervised learning task
+    \item Means of dimensionality reduction
+  \end{itemize}
+  \item For each document $d \in \setd$, assign a topic label $k \in \setk$
+  \begin{itemize}
+    \item $K$: key \textbf{hyperparameter}
+    \item Interpretability up to human practitioner
+  \end{itemize}  
+\end{itemize}
+
+\end{frame}
+
+% ------------------------------------------------------------------------------
+
+\begin{frame}{Topic modeling: taxonomy}
+
+\begin{figure}
+\begin{center}
+    \includegraphics[width = \textwidth]{figures/tm_taxonomy}
+\end{center}
+\caption{\raggedright Taxonomy of topic models. \textit{Source:} own 
+representation.}
+\end{figure}
+
+\end{frame}
+
+% ------------------------------------------------------------------------------
+
+\begin{frame}{Topic modeling: generative approaches}
+
+\textbf{Idea:} reverse-engineer the imaginative process of document generation
+with hierarchical Bayesian mixture models
+
+\vfill
+
+\begin{enumerate}
+  \item For each document $d \in \setd$, draw a vector of topic proportions 
+  from some assumed distribution
+  \item For each word position $n \in \{1, 2, \dots, N_d\}$, $N_d \in \N$,
+  \begin{itemize}
+    \item[1] draw a topic assignment from the distribution associated with the 
+    document-specific topic proportions
+    \item[2] draw a word from the distribution associated with the topic
+  \end{itemize}  
+\end{enumerate}
+
+\end{frame}
+
+% ------------------------------------------------------------------------------
+
+\begin{frame}{Topic modeling: generative approaches}
+
+\begin{figure}
+\begin{center}
+    \includegraphics[width = \textwidth]{figures/schema_generative_tm}
+\end{center}
+\caption{\raggedright Schematic process of generative topic modeling. 
+\textit{Source:} own representation.}
+\end{figure}
+
+\end{frame}
+
+% ------------------------------------------------------------------------------
+
+\begin{frame}{Sentiment analysis}
+
+\begin{itemize}
+  \item \textbf{Goal}: assign sentiment labels to documents - in our case, out
+  of $\{\text{positive, negative}\}$, formalized as $y \in \mathcal{Y} = 
+  \{0, 1\}$
+  \item Standard \textbf{classification} task 
+  \item Find $f: \mathcal{X} \rightarrow \R^g$, $\mathcal{X} \subseteq \R^p$ 
+  for $p \in \N$
+  \item Methods considered:
+  \begin{itemize}
+    \item \textbf{Standard ML:} random forests \& regularized logistic 
+    regression
+    \item \textbf{BERT:} fine-tuning to sentiment analysis
+  \end{itemize}  
+\end{itemize}
+
+\end{frame}
+
+% ------------------------------------------------------------------------------
+
+\begin{frame}{Topic-specific sentiment analysis}
+
+\begin{itemize}
+  \item \textbf{TSSA idea:} combine \highlight{topic modeling \& sentiment 
+  analysis}
+  \item Subsequent modeling mostly due to the complexity 
+  of joint models 
+  % $\leftrightarrow$ goal of making text analysis accessible to 
+  % a broader audience
+  \item \textbf{Standard ML}
+  \begin{itemize}
+    \setlength{\itemsep}{-0.3em}
+    \setlength{\parskip}{0.3em}
+    \item Build clusters of tweets based on topic modeling
+    \item Use clusters to generate topic-specific word embeddings
+  \end{itemize}    
+  \item \textbf{BERT}
+  \begin{itemize}
+    \setlength{\itemsep}{-0.3em}
+    \setlength{\parskip}{0.3em}
+    \item Aspect-based sentiment analysis (ABSA)
+    \item Aspect extraction \& aspect sentiment classification
+  \end{itemize}  
+\end{itemize}
+
+\end{frame}

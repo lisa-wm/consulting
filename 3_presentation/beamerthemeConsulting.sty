@@ -1,0 +1,254 @@
+% ------------------------------------------------------------------------------
+% BEAMER THEME -----------------------------------------------------------------
+% ------------------------------------------------------------------------------
+
+\mode<presentation>
+
+% COLORS & FONTS ---------------------------------------------------------------
+
+% \usepackage{lmodern}
+% \usefonttheme{structurebold}
+\RequirePackage[T1]{fontenc}
+\RequirePackage[scaled = 1]{helvet} 
+
+\definecolor{primary}{RGB}{64, 64, 64}
+\definecolor{secondary}{RGB}{128, 128, 128}
+\definecolor{tertiary}{RGB}{160, 160, 160}
+\definecolor{highlight}{RGB}{29, 161, 242}
+\definecolor{lowlight}{RGB}{204, 240, 255}
+
+\hypersetup{colorlinks, linkcolor = primary, urlcolor = primary} 
+\urlstyle{sf}
+
+\setbeamercolor{normaltext}{fg = black}
+\setbeamercolor{frametitle}{fg = black, bg = tertiary}
+\setbeamercolor{section in toc}{fg = black}
+\setbeamercolor{section in toc shaded}{fg = black}
+\setbeamercolor{item}{fg = black}
+\setbeamercolor{subitem}{fg = black}
+\setbeamercolor{subsubitem}{fg = black}
+\setbeamercolor{text}{fg = white, bg = primary}
+\setbeamercolor{caption name}{fg = black}
+\setbeamercolor{abstract title}{fg = black}
+
+
+\setbeamerfont{block title}{size = \normalsize}
+\setbeamercolor{block title}{bg = tertiary, fg = black}
+\setbeamercolor{block body}{bg = tertiary, fg = black}
+\setbeamertemplate{qed symbol}{\color{primary} $\square$}
+
+% \setbeamercolor{block title alerted}{bg = white!95!red}
+% \setbeamercolor{block body alerted}{bg = white!95!red}
+
+\setbeamercolor{block title example}{bg = white!95!primary, fg = black} 
+\setbeamercolor{block body example}{bg = white!95!primary, fg = black}	
+\setbeamercolor{button}{bg = tertiary, fg = black}
+
+\setbeamercolor{navigation symbols}{fg = secondary, bg = tertiary}
+\setbeamercolor{navigation symbols dimmed}{fg = secondary, bg = tertiary}
+\setbeamercolor*{structure}{fg = gray, bg = tertiary} 
+
+\setbeamerfont*{itemize/enumerate body}{size = \normalsize}
+\setbeamerfont*{itemize/enumerate subbody}{parent = itemize/enumerate body}
+\setbeamerfont*{itemize/enumerate subsubbody}{parent = itemize/enumerate body}
+
+% INNER THEME ------------------------------------------------------------------
+
+% \setbeamertemplate{sections/subsections in toc}[]
+\setbeamertemplate{section in toc}{
+  \small
+  \hspace{1em}
+  \color{black}\textbf{\inserttocsectionnumber}
+  \hspace{0.5em}
+  \color{black}\textbf{\inserttocsection}
+}
+\setbeamertemplate{subsection in toc}{
+  \vspace{0.5em}
+  \small
+  \textbf{
+  \hspace{2.2em} 
+  \color{black}\textbf{\inserttocsubsectionnumber}
+  \hspace{0.5em}
+  \color{black}\textbf{\inserttocsubsection} \\}
+}
+
+\makeatletter
+\patchcmd{\beamer@sectionintoc}
+  {\vfill}
+  {\vskip -0.3\itemsep}
+  {}
+  {}
+\makeatother
+
+\setbeamersize{text margin left = 2.5em, text margin right = 4em}
+
+\setbeamertemplate{itemize item}{-}
+\setbeamertemplate{itemize subitem}{-}
+\setbeamertemplate{itemize subsubitem}{-}
+
+\setbeamertemplate{enumerate item}{\insertenumlabel \enspace}
+\setbeamertemplate{enumerate subitem}{\insertenumlabel \enspace}
+
+% OUTER THEME ------------------------------------------------------------------
+
+\setbeamertemplate{navigation symbols}{}
+
+% Frame titles
+
+\setbeamertemplate{frametitle}{
+	\vspace{2em}
+	{
+	% \hspace{-1em}
+	\textbf{\Large{\thesection \hspace{1em} 
+	\MakeUppercase{\insertframetitle}}}
+	{\hfill} \rule[
+	-1\baselineskip]{0pt}{\baselineskip}}
+	}
+
+% Foot line
+	
+\defbeamertemplate{footline}{none}{
+	\vspace{2em}}	
+	
+\defbeamertemplate{footline}{infoline}{
+	\hypersetup{hidelinks} %disable link colors
+	\hspace{2.5em} \textcolor{secondary}{
+	\inserttitle ~ $\mid$ ~ \insertshortauthor ~ $\mid$ ~ \insertframenumber} 
+	\hspace{2.5em}
+	\vspace{2em}
+	}
+
+\defbeamertemplate{footline}{navigation}{
+	\hypersetup{hidelinks} %disable link colors
+	\resizebox{\textwidth}{!}{\insertnavigation{\textwidth}{}{}}
+	\vspace{2pt}
+	}
+
+\defbeamertemplate{footline}{navsym}{
+  \hypersetup{hidelinks} %disable link colors
+	\hfill \color{gray}\insertslidenavigationsymbol%
+  \insertframenavigationsymbol%
+  \insertsubsectionnavigationsymbol%
+  \insertsectionnavigationsymbol%
+  \insertdocnavigationsymbol%
+  \insertbackfindforwardnavigationsymbol%
+  \hspace{2.5em}
+	\vspace{2pt}
+	}
+
+% TITLE PAGE -------------------------------------------------------------------
+
+\setbeamertemplate{title page}
+{
+	\setbeamercolor{titlebox1}{fg = black, bg = white}
+	\setbeamercolor{titlebox2}{fg = white, bg = secondary}
+
+	\null\vfill\null
+	\begin{center}~
+		
+		\vspace{25pt}
+		\setlength\lineskip{60pt}
+		\hspace{-0.01\paperwidth}%
+		\begin{beamercolorbox}[wd = 1.02\paperwidth, sep = 12pt
+		%, center
+		]{titlebox1}	
+		{\Large \bfseries \inserttitle}
+
+		\vspace{12pt}
+		\insertsubtitle
+		\end{beamercolorbox}
+		
+		\noindent\makebox[\linewidth]{\rule{1.1\paperwidth}{1pt}} 
+
+  \end{center}
+
+    \vspace{-20pt}
+	  
+	  \ifx\inserttitlegraphic\empty
+	    \hfill \hfill
+	    \begin{beamercolorbox}[right, wd = 0.6\paperwidth, sep = 6pt
+		  %, center
+		  ]{titlebox2}	
+		  {\insertauthor ~ $\mid$ ~ \insertdate}
+		\end{beamercolorbox}
+		
+		\vspace{10pt}
+		\hspace{-0.041\paperwidth}
+		\scriptsize
+		Project partner: Prof. Dr. Paul Thurner, Department of Political Science, 
+		LMU \\
+		\hspace{-0.04\paperwidth}
+		Supervisors: Prof. Dr. Christian Heumann, Matthias Aßenmacher 
+
+		\else
+		\begin{columns}[c]
+			\column{0.3\textwidth}
+				\centering
+				\insertauthor FOO
+				\vspace{2pt}
+				\insertinstitute
+				\vspace{2pt}
+				\insertdate
+		   \column{0.3\textwidth}
+		    \centering
+	      \inserttitlegraphic
+	     \end{columns}
+	\fi			
+	\vspace{12pt}
+	% \end{center}
+	}
+
+% TABLE OF CONTENTS ------------------------------------------------------------
+
+\AtBeginSection[]{
+
+  % \setbeamercolor{background canvas}{bg = primary}
+  
+  \begin{frame}[plain, noframenumbering]{}
+
+  \vfill \vfill
+  
+  \color{black}{\fontsize{100}{0}\selectfont \textbf{\thesection}}
+  \color{black}
+  \large{\textbf{\MakeUppercase{~~~ \secname}}}
+  
+  % \vfill
+  % 
+  % \logo{\includegraphics[height = 1.5cm]{
+  % figures/sigillum.png}\hspace{-12pt}\vspace{-12pt}
+  % }
+
+  \end{frame}
+
+  % \setbeamercolor{background canvas}{bg = white}
+}
+
+\mode
+<all> 
+
+
+\AtBeginSubsection[]{
+
+  % \setbeamercolor{background canvas}{bg = primary}
+  
+  \begin{frame}[plain, noframenumbering]{}
+
+  \vfill \vfill
+  
+  \color{black}{\fontsize{50}{0}\selectfont \textbf{\thesection.\thesubsection}}
+  \color{black}
+  \large{\textbf{\MakeUppercase{~~~ \subsecname}}}
+  
+  % \vfill
+  % 
+  % \logo{\includegraphics[height = 1.5cm]{
+  % figures/sigillum.png}\hspace{-12pt}\vspace{-12pt}
+  % }
+
+  \end{frame}
+
+  % \setbeamercolor{background canvas}{bg = white}
+}
+
+\mode
+<all> 

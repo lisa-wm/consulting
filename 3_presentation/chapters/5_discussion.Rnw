@@ -1,0 +1,72 @@
+\begin{frame}{Conclusion}
+
+\begin{itemize}
+  \item \textbf{BERT vs standard ML:} the higher complexity of BERT models is 
+  justified by better performance.
+  \item \textbf{TSSA:} considering topics / aspects 
+  complicates rather than aids the classification task.
+  \item \textbf{Standard ML} 
+  \begin{itemize}
+    \setlength{\itemsep}{-0.3em}
+    \setlength{\parskip}{0.3em}  
+    \item Feature extraction is time-consuming and requires many design 
+    choices.
+    \item Topic modeling requires explicit handling of short documents.
+    \item Topic-specific embeddings inflate the feature space too much, causing 
+    performance to deteriorate.
+    \item Topic-agnostic sentiment analysis works fairly well.
+  \end{itemize}  
+\end{itemize}
+
+\end{frame}
+
+% ------------------------------------------------------------------------------
+
+\begin{frame}{Conclusion}
+
+\begin{itemize}
+  \item \textbf{BERT} 
+  \begin{itemize}
+    % \setlength{\itemsep}{-0.3em}
+    % \setlength{\parskip}{0.3em}
+    \item Expressiveness and pre-training on a huge corpus, as well as 
+    additional fine-tuning on data from a related domain, improves performance:
+    \texttt{base-german-dbmdz-cased} fine-tuned on GermEval data scores best 
+    in document-level task.
+    \item Likewise, post-training leads to better predictions: for ABSA, 
+    \texttt{base-german-cased} with post-training on the pool 
+    of scraped but unlabeled tweets works best.
+  \end{itemize}    
+\item \textbf{Knowledge transfer:} Material is helpful, but the time frame for 
+live teaching should be extended.
+\end{itemize}
+
+\end{frame}
+
+% ------------------------------------------------------------------------------
+
+\begin{frame}{Discussion \& outlook}
+
+\fcolorbox{lowlight}{lowlight}{\begin{minipage}{0.9\textwidth}
+  \large
+  How can topics be effectively incorporated into the 
+  sentiment \\classification task?
+\end{minipage}}
+
+\vspace{1cm}
+
+\fcolorbox{lowlight}{lowlight}{\begin{minipage}{0.9\textwidth}
+  \large
+  Could the standard ML solution be improved by optimizing feature 
+  \\extraction and/or classification algorithms?
+\end{minipage}}
+
+\vspace{1cm}
+
+\fcolorbox{lowlight}{lowlight}{\begin{minipage}{0.9\textwidth}
+  \large
+  Would fine-tuning / post-training BERT on a more domain-specific 
+  \\corpus boost performance?
+\end{minipage}}
+
+\end{frame}
