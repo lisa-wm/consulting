@@ -1,37 +1,25 @@
-## Welcome to GitHub Pages
+## Topic-specific sentiment analysis for tweets by German MPs
+### Statistical consulting
+##### Asmik Nalmpatian & Lisa Wimmer
 
-You can use the [editor on GitHub](https://github.com/lisa-wm/consulting/edit/main/README.md) to maintain and preview the content for your website in Markdown files.
+***
 
-Whenever you commit to this repository, GitHub Pages will run [Jekyll](https://jekyllrb.com/) to rebuild the pages in your site, from the content in your Markdown files.
+This repository is structured as follows:
 
-### Markdown
-
-Markdown is a lightweight and easy-to-use syntax for styling your writing. It includes conventions for
-
-```markdown
-Syntax highlighted code block
-
-# Header 1
-## Header 2
-### Header 3
-
-- Bulleted
-- List
-
-1. Numbered
-2. List
-
-**Bold** and _Italic_ and `Code` text
-
-[Link](url) and ![Image](src)
-```
-
-For more details see [GitHub Flavored Markdown](https://guides.github.com/features/mastering-markdown/).
-
-### Jekyll Themes
-
-Your Pages site will use the layout and styles from the Jekyll theme you have selected in your [repository settings](https://github.com/lisa-wm/consulting/settings). The name of this theme is saved in the Jekyll `_config.yml` configuration file.
-
-### Support or Contact
-
-Having trouble with Pages? Check out our [documentation](https://docs.github.com/categories/github-pages-basics/) or [contact support](https://support.github.com/contact) and we’ll help you sort it out.
+* `1_scraping` contains all Jupyter scripts for **scraping** the data.
+  * Twitter credentials are stored in `0_metadata`.
+  * `1_input` contains a manually created list of Twitter accounts owned by AfD 
+  members as well as the `chromedriver` application needed for scraping. 
+  The one stored works for Windows OS and a particular Chrome version; please 
+  make sure to keep the appropriate one there.
+  * All scripts that must be executed to obtain the data are in 
+  `2_scripts_python` 
+and prefixed by the order of execution.
+  * Results are stored in `3_output`.
+* `2_code` contains all R and Python files for the actual **analysis**. A 
+separate readme file there gives details on how to run the code.
+* `3_presentation` contains the **presentation** and associated files.
+* `4_report` contains the **report** and associated files.
+* `5_seminar` contains all files created for the **teaching material** and 
+seminar. The website, however, is linked to another, public repo 
+(https://github.com/lisa-wm/nlp-twitter-r-bert).
