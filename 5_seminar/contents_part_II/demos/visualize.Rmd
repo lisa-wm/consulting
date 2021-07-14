@@ -30,7 +30,7 @@ library(wordcloud)
 
 ```{r path, include = FALSE}
 
-path <- "5_seminar"
+path <- "../.."
 
 ```
 
@@ -160,16 +160,17 @@ With the additional sentiment information we can also color them accordingly.
 
 # Create dfm
 
-dfm <- quanteda::dfm(
-  quanteda::corpus(data_labeled, text_field = "twitter_full_text"),
-  remove = quanteda::stopwords("de"),
-  remove_punct = TRUE,
-  groups = "label") %>%
+tkns <- quanteda::tokens(quanteda::corpus(
+  data_labeled, text_field = "twitter_full_text"), remove_punct = TRUE) %>% 
+  quanteda::tokens_remove(quanteda::stopwords("de"))
+
+dfm <- quanteda::dfm(tkns) %>% 
+  quanteda::dfm_group(label) %>% 
   quanteda::dfm_trim(min_termfreq = 5)
 
 # Plot word cloud
 
-quanteda::textplot_wordcloud(
+quanteda.textplots::textplot_wordcloud(
   dfm,
   comparison = TRUE,
   max_words = 300,

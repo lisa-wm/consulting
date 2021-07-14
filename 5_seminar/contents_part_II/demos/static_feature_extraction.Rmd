@@ -40,7 +40,7 @@ The following analyses all revolve around the presence/absence or number of spec
 Therefore, we convert our `corpus` object from before to a `tokens`, where documents are represented by single tokens rather than a fluent text, and along the way omit casing.
 
 ```{r path, include = FALSE}
-path <- "5_seminar"
+path <- "../.."
 ```
 
 
@@ -214,7 +214,9 @@ dict_list <- lapply(
   seq_along(data_german_polarity_clues),
   function(i) {
     dt <- data.table::fread(
-      sprintf("2_code/1_data/0_external_data/%s", data_german_polarity_clues[i]),
+      sprintf(
+        "../../../2_code/1_data/0_external_data/%s", 
+        data_german_polarity_clues[i]),
       encoding = "UTF-8",
       drop = c(2:6),
       header = FALSE,
@@ -224,7 +226,7 @@ dict_list <- lapply(
 
 names(dict_list) <- c("positive", "negative")
 
-saveRDS(dict_list, "5_seminar/global_polarity_clues.RDS")
+saveRDS(dict_list, sprintf("%s/global_polarity_clues.RDS", path))
 
 ```
 
@@ -446,7 +448,7 @@ twitter_pos_tags <- data.table::as.data.table(
 
 ```{r pos_2, include=FALSE}
 
-load("2_code/1_data/2_tmp_data/tmp_rdata_tweets_corpus_tagged.RData")
+load("../../../2_code/1_data/2_tmp_data/rdata_tweets_corpus_tagged.RData")
 
 twitter_pos_tags <- tweets_corpus_tagged[doc_id %in% twitter_docvars[, doc_id]]
 
@@ -512,4 +514,4 @@ twitter_features_static[sample(twitter_features_static[, .I], 10)]
 
 **This provides us with a solid foundation for sentiment analysis! We now represent each document by a total of `r toString(ncol(twitter_features_static) - 1)` variables. Of course we can think of many more features to include here -- we will see some more in the exercise; in general, be creative and see how classification can be improved by adding different explanatory variables.**
 
-![](screenshot_creative.svg.jpg)
+![](figures/screenshot_creative.svg.jpg)

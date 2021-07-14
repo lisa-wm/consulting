@@ -39,7 +39,7 @@ library(mlr3verse)
 
 ```{r path, include = FALSE}
 
-path <- "5_seminar"
+path <- "../.."
 
 ```
 

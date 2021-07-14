@@ -43,7 +43,7 @@ Assuming we have concluded the initial step of scraping the data and stored them
 
 ```{r path, include = FALSE}
 
-path <- "5_seminar"
+path <- "../.."
 
 ```
 

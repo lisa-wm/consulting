@@ -30,7 +30,7 @@ library(text2vec)
 
 ```{r path, include = FALSE}
 
-path <- "5_seminar"
+path <- "../../"
 
 ```
 

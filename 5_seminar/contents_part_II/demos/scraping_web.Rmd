@@ -49,20 +49,20 @@ Let's see what our IMDb website looks like using the developer tab.
 Chrome offers a feature that lets us hover over the website and display the corresponding source code section.
 We inspect the title element "Top Rated Movies":
 
-![](screenshot_devtool_1.PNG)
+![](figures/screenshot_devtool_1.png)
 
 ***
 
 The title element is apparently of class `header`.
 We obtain the same result using SelectorGadget (see pane in bottom-right corner):
 
-![](screenshot_selectorgadget_2.PNG)
+![](figures/screenshot_selectorgadget_2.png)
 
 ### Get movie titles
 
 Using SelectorGadget once more, we find the movie titles to be stored in an element called `.titleColumn a` (note that SelectorGadget separates selectors by comma):
 
-![](screenshot_selectorgadget_3.PNG)
+![](figures/screenshot_selectorgadget_3.png)
 
 ***
 
@@ -81,7 +81,7 @@ head(title_data)
 
 In order to scrape the movies' year of release, we check again for the corresponding selector, this time using the developer pane:
 
-![](screenshot_devtool_2.PNG)
+![](figures/screenshot_devtool_2.png)
 
 ```{r year}
 year_data <- rvest::html_nodes(url, ".secondaryInfo") %>% 
@@ -176,4 +176,4 @@ head(imdb_scraped_data)
 ```
 
 **Nice, now we can use the movie data just like any other R object.**
-![](screenshot_v.JPG)
+![](figures/screenshot_v.jpg)

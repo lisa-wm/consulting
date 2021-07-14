@@ -32,7 +32,7 @@ However, we focus on slightly different tokens this time as we are now intereste
 First, we get the **data** (the `path` variable again requiring individual adaptation):
 
 ```{r path, include = FALSE}
-path <- "5_seminar"
+path <- "../.."
 ```
 
 
