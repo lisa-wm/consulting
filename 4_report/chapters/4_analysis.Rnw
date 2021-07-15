@@ -118,7 +118,7 @@ in current parliament.}
 \label{fig_obs_party}
 \end{figure}
 
-Lastly, when we inspect the class label distribution in the training data,
+Inspecting the class label distribution in the training data,
 an imbalance favoring the negative class becomes immediately visible: some 
 72\% of tweets have been marked as negative.
 This reflects our general impression that most tweets which do carry sentiment 
@@ -236,7 +236,7 @@ toward unseen data from the same data-generating process.
 \vspace{0.3cm}
 
 As performance might depend rather strongly on the given training data, 
-especially if there are few observations to begin with, we will typically 
+especially if the number of observations is small, we will typically 
 conduct multiple train-test splits (\textit{resampling}).
 Various resampling strategies are available, such as bootstrapping or 
 cross-validation.
@@ -354,7 +354,7 @@ and include the following features:
   \item \textbf{Syntactic features.} This group attempts to mitigate the 
   simplification introduced by the BOW assumption to some extent.
   We track the presence of modifiers that indicate sentiment intensification 
-  as well as punctuation via the respective number of quotation and exclamation 
+  as well as punctuation via the respective number of question and exclamation 
   marks.
   Negation is a delicate problem we currently treat with the brute-force 
   approach of noting whether or not negating tokens are present.

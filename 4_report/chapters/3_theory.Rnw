@@ -159,7 +159,7 @@ Each observation is assigned a vector of continuous class scores or
 probabilities (depending on the classifier).
 This mapping must be learned from a set of labeled training data, which marks a 
 fundamental difference to the topic modeling task.
-The actual class labels $y \in \mathcal{Y}$ are then found by 
+The actual class label predictions $\hat y \in \mathcal{Y}$ are then found by 
 thresholding or an $\mathit{argmax}$ operation on the score/probability vectors
 \citep{bishop2006}.
 In our case the set of labels, with $g = 2$, is typically encoded as 

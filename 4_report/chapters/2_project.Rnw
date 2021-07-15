@@ -3,8 +3,8 @@ based on a predecessor project.
 \citet{schulzewiegrebe2020} studied how German MPs' Twitter data can be modeled 
 with a \textit{structural topic model} (\textit{STM}, \citet{robertsetal2013}), 
 and have since engaged in follow-up research on the STM \citep{schulzeetal2021}.
-Much of the data procurement and topic modeling process is adopted from their 
-work.
+Much of the data procurement is adopted from their work and we also employ the 
+STM.
 The project at hand encompasses two subsequent steps.
 In a pioneering mode we first explore the overall feasibility of 
 TSSA with both basic and more advanced statistical techniques from the NLP 

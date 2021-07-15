@@ -1,5 +1,5 @@
 The advance of social media has sparked a fundamental change to public debate.
-Political coverage and discourse has spilled from traditional outlets over to 
+Political coverage and discourse have spilled from traditional outlets over to 
 online locations whose accessibility has lowered entrance barriers to welcome a 
 wide audience \citep{bode2017}.
 Social media exhibit certain properties that make them attractive to politicians 
@@ -7,7 +7,7 @@ seeking to broadcast their message.
 From a supply-side perspective it is easy to publish content: posting on social 
 media is cheap, does not require approval of any authority, and allows for 
 full control over the intended presentation. 
-In an environment that spins information at enormous speed the resulting 
+In an environment that spins information at enormous speed, the resulting 
 ability to react to events in real-time offers a distinct advantage over the 
 inertia of traditional channels \citep{stieretal2018}.
 On the receiving end, social media grant unprecedented access to target 
