@@ -20,5 +20,5 @@ separate readme file there gives details on how to run the code.
 * `3_presentation` contains the **presentation** and associated files.
 * `4_report` contains the **report** and associated files.
 * `5_seminar` contains all files created for the **teaching material** and 
-seminar. The website, however, is linked to another, public repo 
+seminar. The website, however, is linked to another repo 
 (https://github.com/lisa-wm/nlp-twitter-r-bert).
