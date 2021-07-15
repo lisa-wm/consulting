@@ -104,7 +104,7 @@ Ludwig-Maximilians-Universität München
 
 \vfill
 
-Munich, July 12\textsuperscript{th}, 2021
+Munich, July 15\textsuperscript{th}, 2021
       
 \vfill
 
@@ -119,8 +119,8 @@ Munich, July 12\textsuperscript{th}, 2021
   Project partner & Prof. Dr. Paul Thurner \\
   & \textit{Department of Political Science} \\
   & \\
-  Supervisors & Matthias Aßenmacher, Ph.D. \\
-  & Prof. Dr. Christian Heumann \\
+  Supervisors & Prof. Dr. Christian Heumann \\
+  & Matthias Aßenmacher \\
   & \textit{Department of Statistics}
 \end{tabular}
 
@@ -245,23 +245,15 @@ facilitate the entrance to NLP for practitioners from other disciplines.
 % ------------------------------------------------------------------------------
     
 \pagenumbering{Roman}
-
-% FIXME make page numbering dynamic (picking up from list of tables page)
-% \getpagerefnumber{listoftables} does not work
-
 \setcounter{page}{4}
 
 \appendix
 
-% \section{Appendix}
-% \label{app}
-% \input{chapters/appendix.Rnw}
-% \newpage
-
 \section{Electronic appendix}
 \label{el_app}
 
-Data, code and figures are provided in electronic form.
+Data, code and figures are provided in electronic form via our GitHub repository 
+at \\ \url{https://github.com/lisa-wm/consulting}.
 
 \newpage
     
@@ -272,28 +264,6 @@ Data, code and figures are provided in electronic form.
 \RaggedRight
 \bibliography{bibliography}
 \bibliographystyle{dcu} %dcu
-% \newpage
-
-% ------------------------------------------------------------------------------
-% DECLARATION OF AUTHORSHIP-----------------------------------------------------
-% ------------------------------------------------------------------------------
-
-% \Large
-% \noindent
-% \textbf{Declaration of authorship} 
-% \vspace{0.5cm}
-% \noindent
-% \normalsize
-% 
-% We hereby declare that the report submitted is our own unaided work. All direct 
-% or indirect sources used are acknowledged as references. We are aware that the 
-% report in digital form can be examined for the use of unauthorized aid and in 
-% order to determine whether the report as a whole or parts incorporated in it may 
-% be deemed as plagiarism. For the comparison of our work with existing sources we 
-% agree that it shall be entered in a database where it shall also remain after 
-% examination, to enable comparison with future reports submitted. Further rights 
-% of reproduction and usage, however, are not granted here. This paper was not 
-% previously presented to another examination board and has not been published. 
 
 % ------------------------------------------------------------------------------
 
