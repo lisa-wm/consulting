@@ -7,7 +7,6 @@
 This repository is structured as follows:
 
 * `1_scraping` contains all Jupyter scripts for **scraping** the data.
-  * Twitter credentials are stored in `0_metadata`.
   * `1_input` contains a manually created list of Twitter accounts owned by AfD 
   members as well as the `chromedriver` application needed for scraping. 
   The one stored works for Windows OS and a particular Chrome version; please 
