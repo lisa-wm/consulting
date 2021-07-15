@@ -17,9 +17,9 @@ to produce meaningful results.
 Performance increases drastically, from around 71.5\% to 85.9\% accuracy, when 
 the topic modeling step is skipped and only corpus-level embeddings are 
 computed.
-With this, the standard ML solution thus still scores well below the BERT-based 
+With this, the standard ML solution still scores well below the BERT-based 
 models, albeit at lower complexity.
-We can certainly identify ample room of improvement.
+We can certainly identify room of improvement.
 Obviously, the topic modeling part requires immediate attention.
 A better alternative to the current implementation should be able to 
 incorporate topical context without inflating the feature space as much.

@@ -416,9 +416,10 @@ vary for its different levels.
 Such an approach is also conceivable but not further pursued here.
 The STM can be expressed by the following generative process 
 \citep{robertsetal2016}.
+\newpage
 
 For each document $d \in \setd$:
-\newpage
+% \newpage
 
 \begin{enumerate}
 
@@ -609,13 +610,16 @@ Logistic regression employs a predictor that is linear in its coefficients but
 subject to a non-linear transformation with a logit link function, which enables 
 the prediction of a conditionally Bernoulli-distributed quantity. 
 Consider the feature matrix $\bm{X} = [\bm{x}_d^T]_{d = 1, 2, \dots, D} 
-\in \mathcal{X} \subset \R^{D \times p}$ and let $\bm{y} \in \{0, 1\}^D$ denote 
+\in \R^{D \times p}$ and let $\bm{y} \in \{0, 1\}^D$ denote 
 the binary sentiment target.
 Logistic regression models the probability of $y_d = 1$ for a 
 given observation $\bm{x}_d$ as \\$\pi(\bm{x}_d) = \mathbb{P}(y_d = 1 ~ \rvert ~
 \bm{x}_d) = \tfrac{\exp(\gamma_0 + \bm{\gamma}^T\bm{x}_d)}{1 + \exp(\gamma_0 +
 \bm{\gamma}^T\bm{x}_d)}$, with regression coefficients $(\gamma_0, \bm{\gamma}) 
-\in \R^{p + 1}$ \citep{lindsey1997}.
+\in \R^{h + 1}$, $h \in \N$\footnote{
+It might be that $h = p$, but this is not necessarily the case (e.g., in 
+presence of interaction terms).
+} \citep{lindsey1997}.
 The output is a probabilistic score in the unit interval.
 By thresholding these posterior probabilities, often simply at 50\%, we obtain 
 actual class label predictions.
@@ -627,12 +631,13 @@ of first-order (LASSO) and second-order (Ridge) regression and thus promotes
 shrinkage in the regression coefficients (typically only in the non-intercept 
 terms).
 $\lambda \geq 0$ controls overall penalization and the two 
-regularizers are balanced by a parameter $\alpha \in [0, 1]$.
+regularizers are balanced by a convex combination with parameter $\alpha \in 
+[0, 1]$.
 We then arrive at the following optimization problem
 \citep{hastieetal2021}:
 
 \begin{equation*}
-    \min_{(\gamma_0, \bm{\gamma}) \in \R^{p + 1}} - \frac{1}{D} \sum_{d = 1}^D
+    \min_{(\gamma_0, \bm{\gamma}) \in \R^{h + 1}} - \frac{1}{D} \sum_{d = 1}^D
     y_d (\gamma_0 + \bm{\gamma}^T\bm{x}_d) - \log(1 + 
     \exp(\gamma_0 + \bm{\gamma}^T\bm{x}_d)) +
     \lambda \left( (1 - \alpha) \| \bm{\gamma} \|_2^2 \cdot \tfrac{1}{2} + 
@@ -732,7 +737,8 @@ ranges and/or more configurations could be explored with enough computational
 resources.
 
 We use three-fold cross validation (3-CV) as resampling strategy in both the 
-outer (performance evaluation) and inner (hyperparameter tuning) training loop.
+outer (performance evaluation) and inner (hyperparameter tuning) optimization 
+loop.
 3-CV divides the training data into three roughly equal-sized partitions, each 
 of which serves as test set once while the other two provide the training data 
 \citep{japkowiczshah2011}.
@@ -744,7 +750,8 @@ While implementation is easy and readily parallelizable, the number of
 evaluations required to sample the space adequately rises exponentially with the
 number of dimensions, with no possibility to learn from prior draws 
 \citep{feurerhutter2019}.
-More efficient strategies might improve the tuning process here.
+More efficient strategies might improve the tuning process here but their use is 
+not straightforward.
 Lastly, in the inner tuning loop, we evaluate performance by means of accuracy 
 (i.e., the share of correctly classified instances, see section 
 \ref{tssa_ml_results}), as we identify no need to 
@@ -830,11 +837,11 @@ search range for $K$), spanning a quite high-dimensional feature space for
 relatively few observations.
 In two out of three folds the pipeline selects the logistic regression 
 classifier and both times fits a very sparse model that, in effect, differs not 
-so much from the featureless classifier, and thus yields similar performance.
-Interpreting the variable selection process of the random forest classifier is 
-not as straightforward due to the heterogeneity of the 500 base learners and
+so much from the featureless classifier, and thus yields similar performance 
+(interpreting the variable selection process of the random forest classifier is 
+not as simple due to the heterogeneity of the 500 base learners and
 the randomness induced by sampling features as well as tuning the number of 
-split variable candidates via random search.
+split variable candidates via random search).
 In any case, topic-specific embeddings seem to increase the number of features 
 to a level that the classifiers cannot handle well.
 The topic-agnostic learner, by contrast, achieves 85.9\% accuracy and 70.6\% F1 
@@ -938,7 +945,7 @@ decoder component: the former processes inputs and creates an intermediate
 representation the latter then maps to predictions \citep{zhang2020}.
 In order to apply BERT, the textual input to its encoder must be pre-processed 
 in a specific way.
-To this end, we split word into tokens or word fragments based on a given 
+To this end, we split words into tokens or word fragments based on a given 
 vocabulary which is determined a priori by the pre-trained language model.
 Each sequence of tokens is then converted into a numerical vector, with some 
 additional tokens: the beginning of the first sequence is signed by a “[CLS]” 
@@ -1048,7 +1055,7 @@ ist inakzeptabel und [MASK]. [SEP]
 \\
 \textbf{Sentence B:} Freue mich sehr für ihn und auf die Zusammenarbeit. [SEP]
 \\
-\textbf{Label:} NotNextSentence
+\textbf{Label:} IsNotNextSentence
 }
 \end{minipage}}
 \end{center}
@@ -1136,8 +1143,7 @@ this aspect, where the aspects are either extracted automatically with the above
 methodology or are made available beforehand by another technique. 
 After application of the softmax activation and training with cross-entropy loss 
 we obtain probabilities predicted for each of the sentiment categories that are 
-eventually thresholded to yield a unique class label.
-\citep{xuetal2019}.
+eventually thresholded to yield a class label \citep{xuetal2019}.
 \\
 
 % ------------------------------------------------------------------------------
@@ -1162,7 +1168,7 @@ training instances by 6,444 customer reviews about the German public train
 operator \textit{Deutsche Bahn}, made available in the course of the GermEval 
 coding challenges.
 The other 20\% of labeled data are used for evaluation. 
-Furthermore, we develop our basic model by post-training it on domain knowledge, 
+Furthermore, we enhance our basic model by post-training it on domain knowledge, 
 namely on 29,715 unlabeled and previously unused tweets collected in the 
 scraping process.
 This model is then fine-tuned. 

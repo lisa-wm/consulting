@@ -22,7 +22,7 @@ challenges, present the working data -- the same corpus we have worked on
 for the above analyses -- and introduce the most important text processing 
 objects in \texttt{quanteda}, which we use heavily for the \texttt{R} part.
 
-The \texttt{R} block comprises three sub-chapters.
+The \texttt{R} block contains three sub-chapters.
 In the first of these, we begin by teaching basic web scraping, as this is 
 often preliminary to the actual analysis, and proceed with fundamental text 
 processing tools, such as handling regular expressions and normalization 
